@@ -136,8 +136,8 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
     <div class="sidebar p-3">
         <h4 class="text-center mb-4 border-bottom pb-3">ADMIN RISENGLISH</h4>
         <a href="dashboard.php"><i class="fas fa-home me-2"></i> Home</a>
-        <a href="gerenciar_turmas.php"><i class="fas fa-users-class me-2"></i> Turmas</a>
-        <a href="gerenciar_usuarios.php" style="background-color: #92171B;"><i class="fas fa-user-friends me-2"></i> Usuários (Prof/Alunos)</a>
+        <a href="gerenciar_turmas.php"><i class="fas fa-user-friends me-2"></i> Turmas</a>
+        <a href="gerenciar_usuarios.php" style="background-color: #92171B;"><i class="fas fa-user me-2"></i> Usuários (Prof/Alunos)</a>
         <a href="../logout.php" style="position: absolute; bottom: 20px; width: calc(100% - 30px);"><i class="fas fa-sign-out-alt me-2"></i> Sair</a>
     </div>
 
