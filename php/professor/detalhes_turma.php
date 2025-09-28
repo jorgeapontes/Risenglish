@@ -125,6 +125,7 @@ while ($aula = $stmt_aulas->fetch(PDO::FETCH_ASSOC)) {
             padding: 5px;
             overflow: auto;
             font-size: 0.85rem;
+            
         }
         .dia-num {
             font-weight: bold;
