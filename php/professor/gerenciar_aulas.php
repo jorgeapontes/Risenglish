@@ -276,7 +276,7 @@ if ($abrir_modal) {
 
         <div class="card shadow-sm">
             <div class="card-header card-header-custom">
-                Lista de Aulas Agendadas
+                Próximas Aulas Agendadas
             </div>
             <div class="card-body p-0">
                 <?php if (empty($lista_aulas)): ?>

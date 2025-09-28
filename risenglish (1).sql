@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 28/09/2025 às 19:39
+-- Tempo de geração: 29/09/2025 às 00:52
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -38,9 +38,11 @@ CREATE TABLE `alunos_turmas` (
 --
 
 INSERT INTO `alunos_turmas` (`id`, `aluno_id`, `turma_id`) VALUES
-(3, 4, 1),
+(7, 4, 1),
 (5, 4, 2),
-(4, 5, 1);
+(8, 5, 1),
+(9, 6, 1),
+(6, 7, 1);
 
 -- --------------------------------------------------------
 
@@ -63,7 +65,9 @@ CREATE TABLE `aulas` (
 --
 
 INSERT INTO `aulas` (`id`, `titulo_aula`, `descricao`, `data_aula`, `horario`, `turma_id`, `professor_id`) VALUES
-(3, 'myself', '', '2025-09-30', '11:00:00', 2, 2);
+(3, 'myself', '', '2025-09-30', '11:00:00', 2, 2),
+(4, 'sla', '', '2025-09-30', '10:00:00', 1, 2),
+(5, 'testando', 'aulinha', '2025-09-19', '18:00:00', 2, 2);
 
 -- --------------------------------------------------------
 
@@ -74,7 +78,8 @@ INSERT INTO `aulas` (`id`, `titulo_aula`, `descricao`, `data_aula`, `horario`, `
 CREATE TABLE `aulas_conteudos` (
   `id` int(11) NOT NULL,
   `aula_id` int(11) NOT NULL,
-  `conteudo_id` int(11) NOT NULL
+  `conteudo_id` int(11) NOT NULL,
+  `planejado` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -143,7 +148,9 @@ INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`) VALUES
 (1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'admin'),
 (2, 'Laura Professor', 'laura@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'professor'),
 (4, 'Jorge Augusto Possani Pontes', 'jorgeappontes13@gmail.com', '$2y$10$pU0aqm5w/k.WZOVdU324F.4acQnOKbSJsotAH3eIaJ4U3uJd4Ftne', 'aluno'),
-(5, 'Rafael Tonetti Cardoso', 'rafaeltonetti.cardoso@gmail.com', '$2y$10$ABEbkqnbGsw.a6nFivA6quafuPOwnLwBEJzrpGzjHS7kyo4GTxDT6', 'aluno');
+(5, 'Rafael Tonetti Cardoso', 'rafaeltonetti.cardoso@gmail.com', '$2y$10$ABEbkqnbGsw.a6nFivA6quafuPOwnLwBEJzrpGzjHS7kyo4GTxDT6', 'aluno'),
+(6, 'Silene Cristina Possani', 'silene@gmail.com', '$2y$10$LZcwgOFnEzR6HUbm.R2QJugM1R5y5N.3mVm78DF46VfEPe1KXNf9K', 'aluno'),
+(7, 'João Victor', 'jv@gmail.com', '$2y$10$Ui89Uk.FUac.U0unv4OsvOBW/bugPb5BRrjHmzibFp7bmtQbdd1OC', 'aluno');
 
 --
 -- Índices para tabelas despejadas
@@ -202,13 +209,13 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `alunos_turmas`
 --
 ALTER TABLE `alunos_turmas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de tabela `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de tabela `aulas_conteudos`
@@ -232,7 +239,7 @@ ALTER TABLE `turmas`
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Restrições para tabelas despejadas

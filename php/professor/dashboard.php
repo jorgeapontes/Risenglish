@@ -33,8 +33,9 @@ $sql = "
     SELECT 
         a.id AS aula_id,
         a.data_aula, 
-        a.horario, /* NOVO CAMPO: HORÁRIO */
+        a.horario, 
         a.titulo_aula, 
+        t.id AS turma_id, /* Adiciona o ID da Turma aqui */
         t.nome_turma,
         u.nome AS nome_aluno
     FROM 
@@ -46,7 +47,7 @@ $sql = "
     LEFT JOIN 
         usuarios u ON at.aluno_id = u.id AND u.tipo_usuario = 'aluno'
     WHERE 
-        a.professor_id = :professor_id /* AGORA COM professor_id GARANTIDO */
+        a.professor_id = :professor_id 
         AND YEAR(a.data_aula) = :ano 
         AND MONTH(a.data_aula) = :mes
     ORDER BY 
@@ -71,9 +72,11 @@ foreach ($aulas_db as $aula) {
     
     if (!isset($aulas_por_dia[$dia][$chave_aula])) {
         $aulas_por_dia[$dia][$chave_aula] = [
+            'aula_id' => $aula['aula_id'],
             'hora' => $hora_formatada,
             'topico' => $aula['titulo_aula'],
-            'turma' => $aula['nome_turma'],
+            'turma' => $aula['nome_turma'], 
+            'turma_id' => $aula['turma_id'], // Novo dado crucial
             'alunos' => []
         ];
     }
@@ -162,7 +165,7 @@ $nomes_meses = [
             padding: 4px;
             margin-bottom: 3px;
             font-size: 0.8em;
-            cursor: pointer;
+            cursor: pointer; /* Indica que é clicável */
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -227,20 +230,24 @@ $nomes_meses = [
                         });
                         
                         foreach ($aulas_por_dia[$dia] as $aula): 
-                            $alunos_str = implode(', ', $aula['alunos']);
-                            // Se não houver aluno associado (turma vazia), exibe o nome da turma
-                            if (empty($alunos_str)) {
-                                $alunos_str = $aula['turma'];
-                            }
-
-                            // Define a cor de fundo com base no dia da semana (simulando a referência)
+                            $texto_exibido = $aula['turma']; 
+                            
+                            // ----------------------------------------------------------------------------------
+                            // CORREÇÃO APLICADA AQUI: MUDAR O ONCLICK PARA REDIRECIONAR PARA DETALHES_TURMA.PHP
+                            // ----------------------------------------------------------------------------------
+                            $url_redirecionamento = "detalhes_aula.php?aula_id=" . $aula['aula_id'];
+                            
+                            // Define a cor de fundo com base no dia da semana 
                             $dia_da_semana = (new DateTime($data_completa))->format('w');
                             $cor_fundo_aula = $dia_da_semana == 0 || $dia_da_semana == 6 ? '#A0A0A0' : 'var(--cor-secundaria)'; // Cinza no Fim de Semana
                         ?>
-                            <div class="bloco-aula" title="<?= htmlspecialchars($aula['topico']) ?> em <?= $aula['turma'] ?>" style="background-color: <?= $cor_fundo_aula ?>;"
-                                onclick="alert('Aula: <?= htmlspecialchars($aula['topico']) ?>\nHorário: <?= $aula['hora'] ?>\nAlunos: <?= htmlspecialchars($alunos_str) ?>')">
+                            <div class="bloco-aula" 
+                                title="Clique para ver detalhes da Turma <?= htmlspecialchars($aula['turma']) ?>" 
+                                style="background-color: <?= $cor_fundo_aula ?>;"
+                                onclick="window.location.href='<?= $url_redirecionamento ?>';">
                                 <strong><?= $aula['hora'] ?></strong>
-                                <span><?= htmlspecialchars($alunos_str) ?></span>
+                                <span><?= htmlspecialchars($texto_exibido) ?></span>
+                                <span style="opacity: 0.8; font-size: 0.9em;"><?= htmlspecialchars($aula['topico']) ?></span> 
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
