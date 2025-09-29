@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 29/09/2025 às 00:52
+-- Tempo de geração: 29/09/2025 às 17:05
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -67,7 +67,9 @@ CREATE TABLE `aulas` (
 INSERT INTO `aulas` (`id`, `titulo_aula`, `descricao`, `data_aula`, `horario`, `turma_id`, `professor_id`) VALUES
 (3, 'myself', '', '2025-09-30', '11:00:00', 2, 2),
 (4, 'sla', '', '2025-09-30', '10:00:00', 1, 2),
-(5, 'testando', 'aulinha', '2025-09-19', '18:00:00', 2, 2);
+(5, 'testando', 'aulinha', '2025-09-19', '18:00:00', 2, 2),
+(6, 'adwd', '', '2025-09-30', '00:00:00', 2, 2),
+(7, 'adad', '', '2025-09-30', '23:00:00', 1, 2);
 
 -- --------------------------------------------------------
 
@@ -215,7 +217,7 @@ ALTER TABLE `alunos_turmas`
 -- AUTO_INCREMENT de tabela `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de tabela `aulas_conteudos`
