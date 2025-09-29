@@ -58,44 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Risenglish</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --cor-primaria: #0A1931; 
-            --cor-secundaria: #B91D23; 
-            --cor-fundo: #F5F5DC; 
-            --cor-ouro: #C5A358;
-        }
-        body {
-            background-color: var(--cor-fundo);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .login-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 40px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .login-container h2 {
-            color: var(--cor-primaria);
-            margin-bottom: 25px;
-            font-weight: bold;
-        }
-        .btn-login {
-            background-color: var(--cor-secundaria);
-            border-color: var(--cor-secundaria);
-            color: white;
-        }
-        .btn-login:hover {
-            background-color: #92171B;
-            border-color: #92171B;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="/Risenglish/css/login.css">
 </head>
 <body>
 

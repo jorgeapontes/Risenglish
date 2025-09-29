@@ -106,78 +106,7 @@ $nomes_meses = [
     <title>Dashboard - Agenda de Aulas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* Paleta de Cores: Creme, Vermelho Escuro, Marinho Escuro */
-        :root {
-            --cor-primaria: #0A1931; /* Marinho Escuro */
-            --cor-secundaria: #B91D23; /* Vermelho Escuro */
-            --cor-fundo: #F5F5DC; /* Creme/Bege */
-        }
-        body { background-color: var(--cor-fundo); }
-        .sidebar { background-color: var(--cor-primaria); color: white; min-height: 100vh; }
-        .sidebar a { color: white; padding: 15px; text-decoration: none; display: block; }
-        .sidebar a:hover { background-color: var(--cor-secundaria); }
-        .main-content { padding: 30px; }
-        
-        /* Estilo do Calendário */
-        .calendario {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            border: 1px solid #ccc;
-            background-color: white;
-        }
-        .dia-semana {
-            background-color: var(--cor-primaria);
-            color: white;
-            padding: 10px 5px;
-            font-weight: bold;
-            text-align: center;
-            border-right: 1px solid #ccc;
-        }
-        .celula-dia {
-            border-top: 1px solid #ccc;
-            border-right: 1px solid #eee;
-            min-height: 120px;
-            padding: 5px;
-            position: relative;
-            background-color: #f8f8f8; /* Fundo levemente mais escuro */
-        }
-        .celula-dia:nth-child(7n) { border-right: none; }
-        
-        .numero-dia {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: var(--cor-secundaria);
-            position: absolute;
-            top: 5px;
-            right: 5px;
-        }
-        .outros-meses {
-            background-color: #ddd;
-            opacity: 0.5;
-        }
-
-        /* Estilo da Aula (Bloco no Calendário) */
-        .bloco-aula {
-            background-color: var(--cor-secundaria);
-            color: white;
-            border-radius: 4px;
-            padding: 4px;
-            margin-bottom: 3px;
-            font-size: 0.8em;
-            cursor: pointer; /* Indica que é clicável */
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .bloco-aula strong {
-            display: block;
-            font-size: 1.1em;
-        }
-        .bloco-aula:hover {
-            background-color: #92171B;
-        }
-    </style>
+    <link rel="stylesheet" href="../../css/professor/dashboard.css">
 </head>
 <body>
 

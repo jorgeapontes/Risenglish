@@ -218,35 +218,7 @@ if ($abrir_modal) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <style>
-        /* Paleta de Cores: Creme, Vermelho Escuro, Marinho Escuro */
-        :root {
-            --cor-primaria: #0A1931; /* Marinho Escuro */
-            --cor-secundaria: #B91D23; /* Vermelho Escuro */
-            --cor-fundo: #F5F5DC; /* Creme/Bege */
-        }
-        body { background-color: var(--cor-fundo); }
-        .sidebar { background-color: var(--cor-primaria); color: white; min-height: 100vh; }
-        .sidebar a { color: white; padding: 15px; text-decoration: none; display: block; }
-        .sidebar a:hover { background-color: var(--cor-secundaria); }
-        .main-content { padding: 30px; }
-        .card-header-custom {
-            background-color: var(--cor-primaria);
-            color: white;
-            font-weight: bold;
-        }
-        /* Estilo para integrar Select2 ao Bootstrap 5 */
-        .select2-container .select2-selection--multiple {
-            min-height: 38px;
-            border: 1px solid #ced4da;
-            padding: 2px 5px;
-        }
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            background-color: var(--cor-secundaria);
-            border: 1px solid #a0191d;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="../../css/professor/gerenciar_aulas.css">
 </head>
 <body>
 
