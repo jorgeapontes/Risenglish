@@ -1,0 +1,51 @@
+ /* Paleta de Cores: Creme, Vermelho Escuro, Marinho Escuro */
+        :root {
+            --cor-primaria: #0A1931; /* Marinho Escuro */
+            --cor-secundaria: #B91D23; /* Vermelho Escuro */
+            --cor-fundo: #F5F5DC; /* Creme/Bege */
+        }
+        body { background-color: var(--cor-fundo); }
+        .sidebar { background-color: var(--cor-primaria); color: white; min-height: 100vh; }
+        .sidebar a { color: white; padding: 15px; text-decoration: none; display: block; }
+        .sidebar a:hover { background-color: var(--cor-secundaria); }
+        .main-content { padding: 30px; }
+        
+        /* Estilo do Acordeão */
+        .accordion-item {
+            border: 1px solid var(--cor-primaria);
+            margin-bottom: 10px;
+        }
+        /* O cabeçalho agora tem um padding maior para acomodar o botão flutuante */
+        .accordion-header-custom {
+            display: flex;
+            align-items: center;
+            background-color: var(--cor-primaria);
+            color: white;
+            padding: 0; /* Remove padding default do header */
+        }
+        .accordion-button {
+            background-color: transparent; /* Cor transparente para o botão do acordeão */
+            color: white;
+            font-weight: bold;
+            flex-grow: 1; /* Faz o botão ocupar a maior parte do espaço */
+            text-align: left;
+            padding: 1rem 1.25rem; /* Ajusta o padding interno do botão */
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: var(--cor-secundaria);
+            color: white;
+        }
+        .accordion-button:focus {
+            box-shadow: none;
+        }
+        .aluno-item {
+            padding: 8px 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+        .aluno-item:last-child {
+            border-bottom: none;
+        }
+        .btn-gerenciar {
+            margin-right: 1.25rem;
+            flex-shrink: 0; /* Evita que o botão encolha */
+        }

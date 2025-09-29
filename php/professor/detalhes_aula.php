@@ -98,35 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
     <title>Detalhes da Aula - <?= htmlspecialchars($detalhes_aula['titulo_aula']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* Paleta de Cores */
-        :root {
-            --cor-primaria: #0A1931; /* Marinho Escuro */
-            --cor-secundaria: #B91D23; /* Vermelho Escuro */
-            --cor-fundo: #F5F5DC; /* Creme/Bege */
-        }
-        body { background-color: var(--cor-fundo); }
-        .sidebar { background-color: var(--cor-primaria); color: white; min-height: 100vh; }
-        .sidebar a { color: white; padding: 15px; text-decoration: none; display: block; }
-        .sidebar a:hover { background-color: var(--cor-secundaria); }
-        .main-content { padding: 30px; }
-        .card-header-custom {
-            background-color: var(--cor-primaria);
-            color: white;
-            font-weight: bold;
-        }
-        .conteudo-item {
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            padding: 15px;
-            background-color: #fff;
-        }
-        .conteudo-item.planejado {
-            border-left: 5px solid #28a745; /* Borda verde para planejado */
-            background-color: #f6fff8;
-        }
-    </style>
+    <link rel="stylesheet" href="../../css/professor/detalhes_aula.css">
 </head>
 <body>
 

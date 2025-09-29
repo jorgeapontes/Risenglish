@@ -1,0 +1,13 @@
+ /* Estilos CSS (mantidos) */
+        :root {
+            --cor-primaria: #0A1931; /* Marinho Escuro */
+            --cor-secundaria: #B91D23; /* Vermelho */
+            --cor-fundo: #F5F5DC; /* Creme/Bege */
+        }
+        body { background-color: var(--cor-fundo); }
+        .sidebar { background-color: var(--cor-primaria); color: white; min-height: 100vh; }
+        .sidebar a { color: white; padding: 15px; text-decoration: none; display: block; }
+        .sidebar a:hover { background-color: var(--cor-secundaria); }
+        .main-content { padding: 30px; }
+        .btn-acao { background-color: var(--cor-secundaria); border-color: var(--cor-secundaria); color: white; }
+        .btn-acao:hover { background-color: #92171B; border-color: #92171B; color: white; }
