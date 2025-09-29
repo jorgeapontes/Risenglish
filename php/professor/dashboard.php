@@ -113,11 +113,11 @@ $nomes_meses = [
 <div class="d-flex">
     <div class="sidebar p-3">
         <h4 class="text-center mb-4 border-bottom pb-3">RISENGLISH PROFESSOR</h4>
-        <a href="dashboard.php" style="background-color: #92171B;"><i class="fas fa-home me-2"></i> **Dashboard (Agenda)**</a>
-        <a href="gerenciar_aulas.php"><i class="fas fa-calendar-alt me-2"></i> Agendar/Gerenciar Aulas</a>
-        <a href="gerenciar_conteudos.php"><i class="fas fa-book-open me-2"></i> Conteúdos (Biblioteca)</a>
+        <a href="dashboard.php" style="background-color: #92171B;"><i class="fas fa-home me-2"></i> Dashboard </a>
+        <a href="gerenciar_aulas.php"><i class="fas fa-calendar-alt me-2"></i> Aulas</a>
+        <a href="gerenciar_conteudos.php"><i class="fas fa-book-open me-2"></i> Conteúdos</a>
         <a href="gerenciar_alunos.php"><i class="fas fa-users me-2"></i> Alunos/Turmas</a>
-        <a href="../logout.php" style="position: absolute; bottom: 20px; width: calc(100% - 30px);"><i class="fas fa-sign-out-alt me-2"></i> Sair</a>
+        <a href="../logout.php" class="link-sair"><i class="fas fa-sign-out-alt me-2"></i> Sair</a>
     </div>
 
     <div class="main-content flex-grow-1">
@@ -168,7 +168,7 @@ $nomes_meses = [
                             
                             // Define a cor de fundo com base no dia da semana 
                             $dia_da_semana = (new DateTime($data_completa))->format('w');
-                            $cor_fundo_aula = $dia_da_semana == 0 || $dia_da_semana == 6 ? '#A0A0A0' : 'var(--cor-secundaria)'; // Cinza no Fim de Semana
+                            $cor_fundo_aula = $dia_da_semana == 0 || $dia_da_semana == 6 ? '#A0A0A0' : 'var(--cor-primaria)'; // Cinza no Fim de Semana
                         ?>
                             <div class="bloco-aula" 
                                 title="Clique para ver detalhes da Turma <?= htmlspecialchars($aula['turma']) ?>" 

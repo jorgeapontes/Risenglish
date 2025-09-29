@@ -25,3 +25,38 @@
             border: 1px solid #a0191d;
             color: white;
         }
+
+        /* Certifica que a sidebar tem 'relative' para o link-sair funcionar */
+.sidebar { 
+    position: relative;
+    /* ... outros estilos ... */ 
+}
+
+/* Estilo do Botão Sair */
+.link-sair {
+    position: absolute;
+    bottom: 20px; 
+    
+    /* left e right ajustam a largura baseados no padding da .sidebar (p-3 = 15px) */
+    left: 15px; 
+    right: 15px; 
+    
+    /* Mantém o padding do <a> interno de 15px, mas agora é posicionado */
+    padding: 15px;
+    text-align: left; 
+
+    /* Estilos visuais que eram do :last-child */
+    background-color: transparent;
+    color: #B91D23;
+    border: 1px solid #B91D23;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    
+    /* Garante que o link-sair tenha a mesma altura que os outros links */
+    display: flex;
+}
+
+.link-sair:hover {
+    background-color: #B91D23; /* Cor de hover clara */
+    color: #fff; /* Cor do texto no hover */
+}

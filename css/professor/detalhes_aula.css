@@ -25,3 +25,28 @@
             border-left: 5px solid #28a745; /* Borda verde para planejado */
             background-color: #f6fff8;
         }
+
+        /* Certifica que a sidebar tem 'relative' para o link-sair funcionar */
+.sidebar { 
+    position: relative;
+    /* ... outros estilos ... */ 
+}
+
+/* Estilo do Botão Sair */
+.link-sair {
+    position: absolute;
+    bottom: 20px; 
+    
+    /* Compensamos o padding p-3 (15px) da sidebar para ele alinhar */
+    left: 15px; 
+    right: 15px; 
+    
+    /* Mantém o padding do <a> interno de 15px */
+    padding: 15px;
+    text-align: left; /* Ou 'center', se preferir */
+}
+
+/* Estilo de hover para manter a consistência com os outros links */
+.link-sair:hover {
+    background-color: var(--cor-secundaria);
+}

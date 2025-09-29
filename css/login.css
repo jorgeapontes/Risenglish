@@ -5,11 +5,20 @@
             --cor-ouro: #C5A358;
         }
         body {
-            background-color: var(--cor-fundo);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+
+  /* Degradê minimalista e elegante */
+  background: linear-gradient(to right, 
+    #8A1C27,   /* vermelho profundo */
+    #4A6FB3    /* azul claro */
+  );
+
         }
         .login-container {
             width: 100%;
