@@ -63,7 +63,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 
     <div class="login-container">
-        <h2 class="text-center">LOGIN - Risenglish</h2>
+        
+        <h2 class="text-center">Risenglish</h2>
+        <h2 class="text-center">LOGIN</h2>
+        
         
         <?php if (isset($erro)): ?>
             <div class="alert alert-danger" role="alert">
