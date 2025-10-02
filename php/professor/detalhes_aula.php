@@ -43,7 +43,7 @@ if (!$detalhes_aula) {
 // --- 2. BUSCAR CONTEÚDOS VINCULADOS A ESTA AULA ---
 $sql_conteudos = "
     SELECT 
-        c.id, c.titulo, c.descricao, c.caminho_arquivo, 
+        c.id AS conteudo_id, c.titulo, c.descricao, c.caminho_arquivo, 
         ac.planejado 
     FROM 
         conteudos c
@@ -58,36 +58,8 @@ $stmt_conteudos = $pdo->prepare($sql_conteudos);
 $stmt_conteudos->execute([':aula_id' => $aula_id]);
 $conteudos_vinculados = $stmt_conteudos->fetchAll(PDO::FETCH_ASSOC);
 
-// --- 3. LÓGICA DE ATUALIZAÇÃO DO CHECKBOX 'PLANEJADO' ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'atualizar_planejado') {
-    $conteudo_id_post = $_POST['conteudo_id'];
-    // O valor 'planejado' é 1 se o checkbox estava marcado, 0 caso contrário.
-    $planejado_status = isset($_POST['planejado']) ? 1 : 0; 
-    
-    try {
-        $sql_update = "
-            UPDATE 
-                aulas_conteudos 
-            SET 
-                planejado = :planejado 
-            WHERE 
-                aula_id = :aula_id AND conteudo_id = :conteudo_id
-        ";
-        $stmt_update = $pdo->prepare($sql_update);
-        $stmt_update->execute([
-            ':planejado' => $planejado_status, 
-            ':aula_id' => $aula_id, 
-            ':conteudo_id' => $conteudo_id_post
-        ]);
-
-        // Redireciona para atualizar a página e evitar reenvio do POST
-        header("Location: detalhes_aula.php?aula_id=" . $aula_id . "&msg=sucesso");
-        exit;
-        
-    } catch (PDOException $e) {
-        $mensagem_erro = "Erro ao atualizar status: " . $e->getMessage();
-    }
-}
+// Mensagens de sucesso ou erro
+// (O AJAX fará a própria notificação para o switch de planejado).
 ?>
 
 <!DOCTYPE html>
@@ -120,18 +92,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
             </a>
         </div>
         
-        <?php if (isset($_GET['msg']) && $_GET['msg'] === 'sucesso'): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                Status do conteúdo atualizado com sucesso!
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <?php elseif (isset($mensagem_erro)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?= $mensagem_erro ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <?php endif; ?>
-
+        <div id="ajax-message-container"></div>
+        
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="row">
@@ -160,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                 <?php else: ?>
                     <div class="row mb-3 align-items-center border-bottom pb-2">
                         <div class="col-1 text-center">
-                            <strong>Status</strong>
+                            <strong>Planejado</strong>
                         </div>
                         <div class="col-10">
                             <strong>Título do Conteúdo</strong>
@@ -173,26 +135,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                     <?php foreach ($conteudos_vinculados as $c): ?>
                         <?php $planejado_class = $c['planejado'] == 1 ? 'planejado' : ''; ?>
                         
-                        <div class="conteudo-item d-flex align-items-center <?= $planejado_class ?>">
+                        <div class="conteudo-item d-flex align-items-center <?= $planejado_class ?>" data-conteudo-id="<?= $c['conteudo_id'] ?>">
                             
                             <div class="col-1 text-center">
-                                <form method="POST" action="detalhes_aula.php?aula_id=<?= $aula_id ?>" class="m-0">
-                                    <input type="hidden" name="acao" value="atualizar_planejado">
-                                    <input type="hidden" name="conteudo_id" value="<?= $c['id'] ?>">
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" 
-                                               type="checkbox" 
-                                               role="switch" 
-                                               name="planejado" 
-                                               id="planejado_<?= $c['id'] ?>" 
-                                               value="1"
-                                               onchange="this.form.submit()"
-                                               <?= $c['planejado'] == 1 ? 'checked' : '' ?>>
-                                        <label class="form-check-label small" for="planejado_<?= $c['id'] ?>">
-                                            <?= $c['planejado'] == 1 ? 'Planejado' : 'Não Usado' ?>
-                                        </label>
-                                    </div>
-                                </form>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input planejado-switch" 
+                                        type="checkbox" 
+                                        role="switch" 
+                                        id="switch_<?= $c['conteudo_id'] ?>" 
+                                        data-aula-id="<?= $detalhes_aula['aula_id'] ?>"
+                                        data-conteudo-id="<?= $c['conteudo_id'] ?>"
+                                        <?= $c['planejado'] == 1 ? 'checked' : '' ?>>
+                                    <label class="form-check-label small status-label" for="switch_<?= $c['conteudo_id'] ?>">
+                                        <?= $c['planejado'] == 1 ? 'Planejado' : 'Não Usado' ?>
+                                    </label>
+                                </div>
                             </div>
                             
                             <div class="col-10">
@@ -220,5 +177,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+<script>
+/**
+ * Função para exibir mensagens de notificação (sucesso ou erro)
+ * @param {string} message - A mensagem a ser exibida.
+ * @param {string} type - O tipo de alerta ('success' ou 'danger').
+ */
+function displayAlert(message, type) {
+    const container = document.getElementById('ajax-message-container');
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    container.innerHTML = alertHtml;
+    
+    // Opcional: Remover o alerta automaticamente após X segundos
+    setTimeout(() => {
+        const alertElement = container.querySelector('.alert');
+        if (alertElement) {
+            new bootstrap.Alert(alertElement).close();
+        }
+    }, 5000); // 5 segundos
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Captura todos os switches com a classe 'planejado-switch'
+    const switches = document.querySelectorAll('.planejado-switch');
+
+    switches.forEach(function(switchElement) {
+        switchElement.addEventListener('change', function() {
+            const aulaId = this.dataset.aulaId;
+            const conteudoId = this.dataset.conteudoId;
+            const novoStatus = this.checked ? 1 : 0; // Se marcado = 1, se desmarcado = 0
+            
+            // Elementos visuais para atualização
+            const statusLabel = this.closest('.form-switch').querySelector('.status-label');
+            const conteudoItem = this.closest('.conteudo-item');
+            
+            // 2. Cria o objeto FormData com os dados a serem enviados
+            const formData = new FormData();
+            formData.append('aula_id', aulaId);
+            formData.append('conteudo_id', conteudoId);
+            formData.append('status', novoStatus);
+            
+            // 3. Executa a Requisição AJAX usando Fetch API
+            fetch('ajax_update_planejado.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                // Checa se o status HTTP é de sucesso (200-299)
+                if (!response.ok) {
+                    throw new Error('Erro na requisição: Status ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    displayAlert('Status do conteúdo atualizado para: ' + (novoStatus === 1 ? 'Planejado' : 'Não Usado'), 'success');
+                    
+                    // Atualiza o texto e a classe visual
+                    statusLabel.textContent = novoStatus === 1 ? 'Planejado' : 'Não Usado';
+                    if (novoStatus === 1) {
+                        conteudoItem.classList.add('planejado');
+                    } else {
+                        conteudoItem.classList.remove('planejado');
+                    }
+                    
+                } else {
+                    console.error('Erro:', data.message);
+                    displayAlert('Erro ao atualizar status: ' + data.message, 'danger');
+                    
+                    // Reverte o estado do switch em caso de falha
+                    this.checked = !this.checked; 
+                }
+            })
+            .catch(error => {
+                console.error('Erro de conexão ou servidor:', error);
+                displayAlert('Erro de conexão ao servidor ou erro interno.', 'danger');
+                
+                // Reverte o estado do switch em caso de falha
+                this.checked = !this.checked; 
+            });
+        });
+    });
+});
+</script>
 </body>
 </html>

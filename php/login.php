@@ -74,7 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       </div>
     <?php endif; ?>
 
-    <form>
+    <form method="POST" action="login.php">
       <div class="mb-3 text-start">
         <label for="email" class="form-label">E-MAIL</label>
         <input type="email" class="form-control" id="email" name="email" placeholder="Digite seu e-mail">
