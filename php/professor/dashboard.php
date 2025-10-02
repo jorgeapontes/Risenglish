@@ -134,7 +134,7 @@ $nomes_meses = [
         }
 
         .sidebar a:hover {
-            background-color: #32475b;
+            background-color: #a93226;
         }
 
         .sidebar .active {
@@ -173,10 +173,6 @@ $nomes_meses = [
             color: white;
         }
 
-        #botao-sair:hover {
-            background-color: #c0392b;
-        }
-
         /* Estilos do calendário */
         .calendario {
             display: grid;
@@ -201,6 +197,15 @@ $nomes_meses = [
             min-height: 120px;
             padding: 8px;
             position: relative;
+        }
+
+        #botao-sair {
+            border: none;
+        }
+
+        #botao-sair:hover {
+            background-color: #c0392b;
+            color: white;
         }
 
         .celula-dia.outros-meses {
@@ -277,8 +282,7 @@ $nomes_meses = [
 
                 <!-- Botão sair no rodapé -->
                 <div class="mt-auto">
-                    <!-- Usando a classe 'link-sair' do dashboard.css -->
-                    <a href="../logout.php" id="botao-sair" class="link-sair w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
                 </div>
             </div>
 
