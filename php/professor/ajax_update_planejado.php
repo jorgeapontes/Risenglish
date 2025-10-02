@@ -2,56 +2,65 @@
 session_start();
 require_once '../includes/conexao.php';
 
-// 1. Verificação de Segurança
+header('Content-Type: application/json');
+
+// 1. Verificar autenticação e permissão
 if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
-    http_response_code(403); // Acesso negado
-    echo json_encode(['success' => false, 'message' => 'Acesso não autorizado.']);
+    echo json_encode(['success' => false, 'message' => 'Acesso negado.']);
     exit;
 }
 
-// 2. Verifica se a requisição é POST e se os dados estão presentes
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['aula_id'], $_POST['conteudo_id'], $_POST['status'])) {
-    http_response_code(400); // Requisição inválida
-    echo json_encode(['success' => false, 'message' => 'Dados de requisição incompletos ou inválidos.']);
-    exit;
-}
-
-// 3. Recebe e Sanitiza os dados
-$aula_id = (int)$_POST['aula_id'];
-$conteudo_id = (int)$_POST['conteudo_id'];
-$status = (int)$_POST['status']; // 1 para Planejado, 0 para Não Planejado
 $professor_id = $_SESSION['user_id'];
+$aula_id = $_POST['aula_id'] ?? null;
+$conteudo_id = $_POST['conteudo_id'] ?? null;
+$status = $_POST['status'] ?? null; // 0 ou 1
 
-// 4. Executa o UPDATE no Banco de Dados
+// 2. Validar dados de entrada
+if (!$aula_id || !is_numeric($aula_id) || !$conteudo_id || !is_numeric($conteudo_id) || !in_array($status, ['0', '1'])) {
+    echo json_encode(['success' => false, 'message' => 'Dados de status inválidos fornecidos.']);
+    exit;
+}
+
 try {
-    // A consulta garante que a atualização seja feita APENAS se a aula pertencer ao professor logado, 
-    // prevenindo manipulação de dados de outras contas.
-    $sql_update = "
-        UPDATE aulas_conteudos ac
-        JOIN aulas a ON ac.aula_id = a.id
-        SET ac.planejado = :status
-        WHERE ac.aula_id = :aula_id 
-          AND ac.conteudo_id = :conteudo_id 
-          AND a.professor_id = :professor_id
-    ";
-    $stmt = $pdo->prepare($sql_update);
+    // 3. Verificar se a aula e o conteúdo pertencem ao professor (Segurança)
+    // A segurança é crucial aqui: o professor só pode manipular vinculações de suas próprias aulas e conteúdos.
+    
+    // Verifica a aula (confirma que o professor é dono da aula)
+    $stmt_check_aula = $pdo->prepare("SELECT COUNT(*) FROM aulas WHERE id = :aula_id AND professor_id = :professor_id");
+    $stmt_check_aula->execute([':aula_id' => $aula_id, ':professor_id' => $professor_id]);
+    if ($stmt_check_aula->fetchColumn() == 0) {
+        echo json_encode(['success' => false, 'message' => 'Permissão negada: Aula não pertence a este professor.']);
+        exit;
+    }
+    
+    // Verifica o conteúdo (confirma que o professor é dono do conteúdo)
+    $stmt_check_conteudo = $pdo->prepare("SELECT COUNT(*) FROM conteudos WHERE id = :conteudo_id AND professor_id = :professor_id");
+    $stmt_check_conteudo->execute([':conteudo_id' => $conteudo_id, ':professor_id' => $professor_id]);
+    if ($stmt_check_conteudo->fetchColumn() == 0) {
+        echo json_encode(['success' => false, 'message' => 'Permissão negada: Conteúdo não pertence a este professor.']);
+        exit;
+    }
+
+
+    // 4. Atualizar o campo 'planejado' na tabela aulas_conteudos
+    $sql = "UPDATE aulas_conteudos SET planejado = :status WHERE aula_id = :aula_id AND conteudo_id = :conteudo_id";
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([
         ':status' => $status,
         ':aula_id' => $aula_id,
-        ':conteudo_id' => $conteudo_id,
-        ':professor_id' => $professor_id
+        ':conteudo_id' => $conteudo_id
     ]);
 
+    // Verificar se a atualização afetou alguma linha (se o vínculo existe)
     if ($stmt->rowCount() > 0) {
-        echo json_encode(['success' => true, 'message' => 'Status atualizado com sucesso!', 'novo_status' => $status]);
+        $message = ($status == 1) ? 'Conteúdo liberado para o aluno (Planejado).': 'Conteúdo escondido do aluno (Não Planejado).';
+        echo json_encode(['success' => true, 'message' => $message, 'new_status' => (int)$status]);
     } else {
-        // Isso pode ocorrer se o conteúdo já estiver no status desejado ou se o professor não for o dono da aula.
-        http_response_code(404);
-        echo json_encode(['success' => false, 'message' => 'Registro não encontrado ou não autorizado.']);
+        echo json_encode(['success' => false, 'message' => 'Vínculo de conteúdo/aula não encontrado.']);
     }
 
 } catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Erro interno do servidor: ' . $e->getMessage()]);
+    error_log("Erro no AJAX de planejamento: " . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Erro interno ao processar a solicitação de planejamento.']);
 }
 ?>
