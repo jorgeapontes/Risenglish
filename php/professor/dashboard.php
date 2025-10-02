@@ -134,7 +134,7 @@ $nomes_meses = [
         }
 
         .sidebar a:hover {
-            background-color: #32475b;
+            background-color: #a93226;
         }
 
         .sidebar .active {
@@ -173,8 +173,13 @@ $nomes_meses = [
             color: white;
         }
 
+        #botao-sair {
+            border: none;
+        }
+
         #botao-sair:hover {
             background-color: #c0392b;
+            color: white;
         }
 
         /* Estilos do calendário */

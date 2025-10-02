@@ -127,132 +127,251 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
     <title>Gerenciar Temas e Conteúdos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="../../css/professor/gerenciar_conteudos.css">
     <style>
-        /* CSS Adicional para os novos botões */
-        :root {
-              --cor-primaria: #0A1931; /* Marinho Escuro */
-              --cor-secundaria: #B91D23; /* Vermelho Escuro */
-              --cor-fundo: #F5F5DC; /* Creme/Bege */
+        body {
+            background-color: #FAF9F6;
+            overflow-x: hidden;
         }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 16.666667%; /* Equivale a col-md-2 */
+            background-color: #081d40;
+            color: #fff;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+
+        .sidebar a:hover {
+            background-color: #a93226;
+        }
+
+        .sidebar .active {
+            background-color: #c0392b;
+        }
+
+        .main-content {
+            margin-left: 16.666667%; /* Compensa a largura da sidebar fixa */
+            width: 83.333333%; /* Equivale a col-md-10 */
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .card-header {
+            background-color: #081d40;
+            color: white;
+        }
+        
+        .btn-primary {
+            background-color: #081d40;
+            border-color: #081d40;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0a2a5c;
+            border-color: #0a2a5c;
+        }
+        
+        .btn-danger {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-danger:hover {
+            background-color: #a93226;
+            border-color: #a93226;
+        }
+        
+        .btn-outline-danger {
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-outline-danger:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+        /* CSS Adicional para os novos botões */
         .btn-gerenciar-arquivos {
-            background-color: var(--cor-secundaria);
+            background-color: #081d40;
             color: white;
             border: none;
         }
+        
         .btn-gerenciar-arquivos:hover {
-            background-color: #92171B;
+            background-color: #a93226;
             color: white;
+        }
+
+        #botao-sair {
+            border: none;
+        }
+
+        #botao-sair:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+        /* Estilos para a lista de temas */
+        .list-group-item {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-
-<div class="d-flex">
-    <div class="sidebar p-3">
-        <h4 class="text-center mb-4 border-bottom pb-3">RISENGLISH PROFESSOR</h4>
-        <a href="dashboard.php"><i class="fas fa-home me-2"></i> Dashboard</a>
-        <a href="gerenciar_aulas.php"><i class="fas fa-calendar-alt me-2"></i>Aulas</a>
-        <a href="gerenciar_conteudos.php" style="background-color: #92171B;"><i class="fas fa-book-open me-2"></i>Conteúdos</a>
-        <a href="gerenciar_alunos.php"><i class="fas fa-users me-2"></i> Alunos/Turmas</a>
-        <a href="../logout.php" class="link-sair"><i class="fas fa-sign-out-alt me-2"></i> Sair</a>
-    </div>
-
-    <div class="main-content flex-grow-1">
-        <h1 class="mb-4" style="color: var(--cor-primaria);">Gerenciamento de Temas</h1>
-        <p class="lead">Crie temas principais e organize seus materiais (arquivos) dentro deles.</p>
-        
-        <?php if (!empty($mensagem)): ?>
-            <div class="alert alert-<?= $sucesso ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
-                <?= $mensagem ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <?php endif; ?>
-
+    <div class="container-fluid">
         <div class="row">
-            
-            <div class="col-lg-12">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header card-header-custom">
-                        Adicionar Novo Tema
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="gerenciar_conteudos.php">
-                            <input type="hidden" name="acao" value="cadastrar">
+            <!-- Sidebar -->
+            <div class="col-md-2 d-flex flex-column sidebar p-3">
+                <!-- Nome do professor -->
+                <div class="mb-4 text-center">
+                    <h5 class="mt-4">Prof. <?php echo $_SESSION['user_nome'] ?? 'Professor'; ?></h5>
+                </div>
 
-                            <div class="mb-3">
-                                <label for="titulo" class="form-label">Título do Tema</label>
-                                <input type="text" class="form-control" id="titulo" name="titulo" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="descricao" class="form-label">Descrição do Tema (Opcional)</label>
-                                <textarea class="form-control" id="descricao" name="descricao" rows="2"></textarea>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-plus-circle me-2"></i> Criar Novo Tema
-                            </button>
-                        </form>
-                    </div>
+                <!-- Menu centralizado verticalmente -->
+                <div class="d-flex flex-column flex-grow-1 mb-5">
+                    <a href="dashboard.php" class="p-2 mb-2 rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
+                    <a href="gerenciar_aulas.php" class="p-2 mb-2 rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
+                    <a href="gerenciar_conteudos.php" class="p-2 mb-2 rounded active"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
+                    <a href="gerenciar_alunos.php" class="p-2 mb-2 rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
+                </div>
+
+                <!-- Botão sair no rodapé -->
+                <div class="mt-auto">
+                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
                 </div>
             </div>
 
-            <div class="col-lg-12">
-                <div class="card shadow-sm">
-                    <div class="card-header card-header-custom">
-                        Biblioteca de Temas (Total: <?= count($temas) ?>)
+            <!-- Conteúdo principal -->
+            <div class="col-md-10 main-content p-4">
+                <h2 class="mb-1 mt-3">Gerenciamento de Temas</h2>
+                <p class="lead mb-4">Crie temas principais e organize seus materiais (arquivos) dentro deles.</p>
+                
+                <?php if (!empty($mensagem)): ?>
+                    <div class="alert alert-<?= $sucesso ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
+                        <?= $mensagem ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-                    <div class="card-body">
-                        <?php if (empty($temas)): ?>
-                            <p class="text-center text-muted">Nenhum tema cadastrado ainda.</p>
-                        <?php else: ?>
-                            <ul class="list-group list-group-flush">
-                                <?php foreach ($temas as $tema): ?>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <strong><i class="fas fa-folder me-2"></i> <?= htmlspecialchars($tema['titulo']) ?></strong>
-                                            <p class="text-muted mb-0" style="font-size: 0.9em;">
-                                                <?= htmlspecialchars($tema['descricao'] ?? 'Sem descrição.') ?>
-                                            </p>
-                                            <span class="badge bg-secondary"><?= $tema['total_recursos'] ?> Arquivo(s)</span>
-                                        </div>
-                                        <div class="btn-group" role="group">
-                                            <a href="gerenciar_arquivos_tema.php?tema_id=<?= $tema['id'] ?>" class="btn btn-sm btn-gerenciar-arquivos" title="Gerenciar Arquivos do Tema">
-                                                <i class="fas fa-file-upload me-1"></i> Gerenciar Arquivos
-                                            </a>
-                                            
-                                            <button class="btn btn-sm btn-outline-primary" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#modalEditarTema" 
-                                                data-id="<?= $tema['id'] ?>" 
-                                                data-titulo="<?= htmlspecialchars($tema['titulo']) ?>" 
-                                                data-descricao="<?= htmlspecialchars($tema['descricao']) ?>"
-                                                title="Editar Tema">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            
-                                            <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalExcluirConteudo" data-conteudo-titulo="<?= htmlspecialchars($tema['titulo']) ?>" data-conteudo-id="<?= $tema['id'] ?>" title="Excluir Tema (e seus arquivos)">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </div>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        <?php endif; ?>
+                <?php endif; ?>
+
+                <div class="row">
+                    
+                    <div class="col-lg-12">
+                        <div class="card rounded mb-4">
+                            <div class="card-header text-white">
+                                Adicionar Novo Tema
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="gerenciar_conteudos.php">
+                                    <input type="hidden" name="acao" value="cadastrar">
+
+                                    <div class="mb-3">
+                                        <label for="titulo" class="form-label">Título do Tema</label>
+                                        <input type="text" class="form-control" id="titulo" name="titulo" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="descricao" class="form-label">Descrição do Tema (Opcional)</label>
+                                        <textarea class="form-control" id="descricao" name="descricao" rows="2"></textarea>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-plus-circle me-2"></i> Criar Novo Tema
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
+
+                    <div class="col-lg-12">
+                        <div class="card rounded">
+                            <div class="card-header text-white">
+                                Biblioteca de Temas (Total: <?= count($temas) ?>)
+                            </div>
+                            <div class="card-body">
+                                <?php if (empty($temas)): ?>
+                                    <p class="text-center text-muted">Nenhum tema cadastrado ainda.</p>
+                                <?php else: ?>
+                                    <ul class="list-group list-group-flush">
+                                        <?php foreach ($temas as $tema): ?>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong><i class="fas fa-folder me-2"></i> <?= htmlspecialchars($tema['titulo']) ?></strong>
+                                                    <p class="text-muted mb-0" style="font-size: 0.9em;">
+                                                        <?= htmlspecialchars($tema['descricao'] ?? 'Sem descrição.') ?>
+                                                    </p>
+                                                    <span class="badge bg-secondary"><?= $tema['total_recursos'] ?> Arquivo(s)</span>
+                                                </div>
+                                                <div class="" role="group">
+                                                    <a href="gerenciar_arquivos_tema.php?tema_id=<?= $tema['id'] ?>" class="btn btn-sm btn-gerenciar-arquivos" title="Gerenciar Arquivos do Tema">
+                                                        <i class="fas fa-file-upload me-1"></i> Gerenciar Arquivos
+                                                    </a>
+                                                    
+                                                    <button class="btn btn-sm btn-outline-primary" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#modalEditarTema" 
+                                                        data-id="<?= $tema['id'] ?>" 
+                                                        data-titulo="<?= htmlspecialchars($tema['titulo']) ?>" 
+                                                        data-descricao="<?= htmlspecialchars($tema['descricao']) ?>"
+                                                        title="Editar Tema">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    
+                                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalExcluirConteudo" data-conteudo-titulo="<?= htmlspecialchars($tema['titulo']) ?>" data-conteudo-id="<?= $tema['id'] ?>" title="Excluir Tema (e seus arquivos)">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </div>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-
         </div>
     </div>
-</div>
 
 <div class="modal fade" id="modalEditarTema" tabindex="-1" aria-labelledby="modalEditarTemaLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="POST" action="gerenciar_conteudos.php">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header text-white" style="background-color: #081d40;">
                     <h5 class="modal-title" id="modalEditarTemaLabel">Editar Tema</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
