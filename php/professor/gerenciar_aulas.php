@@ -243,13 +243,20 @@ if ($abrir_modal) {
             padding: 10px 15px;
             margin-bottom: 5px;
             border-radius: 5px;
+            transition: 0.3s;
         }
 
         .sidebar a:hover {
-            background-color: #a93226;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+            transition: 0.3s;
         }
 
         .sidebar .active {
+            background-color: #c0392b;
+        }
+
+        .sidebar .active:hover{
             background-color: #c0392b;
         }
 
@@ -292,6 +299,7 @@ if ($abrir_modal) {
         #botao-sair:hover {
             background-color: #c0392b;
             color: white;
+            transform: none;
         }
 
         /* Estilos para a tabela */
@@ -331,10 +339,10 @@ if ($abrir_modal) {
 
                 <!-- Menu centralizado verticalmente -->
                 <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="dashboard.php" class="p-2 mb-2 rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="gerenciar_aulas.php" class="p-2 mb-2 rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
-                    <a href="gerenciar_conteudos.php" class="p-2 mb-2 rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
-                    <a href="gerenciar_alunos.php" class="p-2 mb-2 rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
+                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
+                    <a href="gerenciar_aulas.php" class="rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
+                    <a href="gerenciar_conteudos.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
+                    <a href="gerenciar_alunos.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
                 </div>
 
                 <!-- Botão sair no rodapé -->

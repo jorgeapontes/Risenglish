@@ -131,13 +131,20 @@ $nomes_meses = [
             padding: 10px 15px;
             margin-bottom: 5px;
             border-radius: 5px;
+            transition: 0.3s;
         }
 
         .sidebar a:hover {
-            background-color: #a93226;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+            transition: 0.3s;
         }
 
         .sidebar .active {
+            background-color: #c0392b;
+        }
+
+        .sidebar .active:hover{
             background-color: #c0392b;
         }
 
@@ -206,6 +213,7 @@ $nomes_meses = [
         #botao-sair:hover {
             background-color: #c0392b;
             color: white;
+            transform: none;
         }
 
         .celula-dia.outros-meses {
@@ -274,10 +282,10 @@ $nomes_meses = [
 
                 <!-- Menu centralizado verticalmente -->
                 <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="dashboard.php" class="p-2 mb-2 rounded active"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="gerenciar_aulas.php" class="p-2 mb-2 rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
-                    <a href="gerenciar_conteudos.php" class="p-2 mb-2 rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
-                    <a href="gerenciar_alunos.php" class="p-2 mb-2 rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
+                    <a href="dashboard.php" class="rounded active"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
+                    <a href="gerenciar_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
+                    <a href="gerenciar_conteudos.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
+                    <a href="gerenciar_alunos.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
                 </div>
 
                 <!-- Botão sair no rodapé -->
@@ -288,11 +296,12 @@ $nomes_meses = [
 
             <!-- Conteúdo principal -->
             <div class="col-md-10 main-content p-4">
+                <h2 class="mb-3 mt-3">Agenda de Aulas</h2>
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <a href="dashboard.php?mes=<?= $data_ant->format('m') ?>&ano=<?= $data_ant->format('Y') ?>" class="btn btn-outline-secondary">
                         <i class="fas fa-chevron-left"></i> <?= $nomes_meses[$data_ant->format('m')] ?>
                     </a>
-                    <h3>Agenda de Aulas - <?= $nomes_meses[$primeiro_dia_mes->format('m')] ?> de <?= $primeiro_dia_mes->format('Y') ?></h3>
+                    <h3><?= $nomes_meses[$primeiro_dia_mes->format('m')] ?> de <?= $primeiro_dia_mes->format('Y') ?></h3>
                     <a href="dashboard.php?mes=<?= $data_prox->format('m') ?>&ano=<?= $data_prox->format('Y') ?>" class="btn btn-outline-secondary">
                         <?= $nomes_meses[$data_prox->format('m')] ?> <i class="fas fa-chevron-right"></i>
                     </a>
