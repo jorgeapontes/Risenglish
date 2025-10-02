@@ -221,12 +221,19 @@ if ($abrir_modal) {
     <style>
         body {
             background-color: #FAF9F6;
+            overflow-x: hidden;
         }
 
         .sidebar {
-            min-height: 100vh;
-            background-color: #1a2a3a;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 16.666667%;
+            background-color: #081d40;
             color: #fff;
+            z-index: 1000;
+            overflow-y: auto;
         }
 
         .sidebar a {
@@ -246,8 +253,15 @@ if ($abrir_modal) {
             background-color: #c0392b;
         }
 
+        .main-content {
+            margin-left: 16.666667%; /* Compensa a largura da sidebar fixa */
+            width: 83.333333%; /* Equivale a col-md-10 */
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
         .card-header {
-            background-color: #1a2a3a;
+            background-color: #081d40;
             color: white;
         }
         
@@ -269,6 +283,34 @@ if ($abrir_modal) {
         .btn-outline-danger:hover {
             background-color: #c0392b;
             color: white;
+        }
+
+        #botao-sair:hover {
+            background-color: #c0392b;
+        }
+
+        /* Estilos para a tabela */
+        .table-responsive {
+            border-radius: 0 0 5px 5px;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -292,13 +334,22 @@ if ($abrir_modal) {
 
                 <!-- Botão sair no rodapé -->
                 <div class="mt-auto">
-                    <a href="../logout.php" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
                 </div>
             </div>
 
             <!-- Conteúdo principal -->
-            <div class="col-md-10 p-4">
-                <h2 class="mb-5 mt-4">Agendamento e Gerenciamento de Aulas</h2>
+            <div class="col-md-10 main-content p-4">
+                <div class="d-flex justify-content-between">
+                    <h2 class="mb-4 mt-3">Agendamento e Gerenciamento de Aulas</h2>
+                    <div class="mt-4">
+                        <center>
+                            <button class="btn btn-danger mb-3" data-bs-toggle="modal" data-bs-target="#modalAdicionarEditar">
+                                <i class="fas fa-plus me-2"></i> Agendar Nova Aula
+                            </button>
+                        </center>
+                    </div>
+                </div>
                 
                 <?php if (!empty($mensagem)): ?>
                     <div class="alert alert-<?= $sucesso ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
@@ -362,13 +413,6 @@ if ($abrir_modal) {
                             </div>
                         <?php endif; ?>
                     </div>
-                </div>
-                <div class="mt-4">
-                    <center>
-                        <button class="btn btn-danger mb-3" data-bs-toggle="modal" data-bs-target="#modalAdicionarEditar">
-                            <i class="fas fa-plus me-2"></i> Agendar Nova Aula
-                        </button>
-                    </center>
                 </div>
             </div>
         </div>
