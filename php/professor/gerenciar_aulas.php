@@ -17,8 +17,8 @@ $sucesso = false;
 // Função para buscar os conteúdos associados a uma aula
 function getConteudoAssociado($pdo, $aula_id) {
     $sql = "SELECT ac.conteudo_id, c.titulo FROM aulas_conteudos ac 
-            JOIN conteudos c ON ac.conteudo_id = c.id
-            WHERE ac.aula_id = :aula_id";
+             JOIN conteudos c ON ac.conteudo_id = c.id
+             WHERE ac.aula_id = :aula_id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':aula_id' => $aula_id]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['acao']) && ($_POST['
             if ($acao === 'adicionar') {
                 // Insere a nova aula
                 $sql = "INSERT INTO aulas (professor_id, titulo_aula, descricao, data_aula, horario, turma_id) 
-                        VALUES (:professor_id, :titulo_aula, :descricao, :data_aula, :horario, :turma_id)";
+                         VALUES (:professor_id, :titulo_aula, :descricao, :data_aula, :horario, :turma_id)";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
                     ':professor_id' => $professor_id,
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['acao']) && ($_POST['
             } else { // Editar
                 // Atualiza a aula existente
                 $sql = "UPDATE aulas SET titulo_aula = :titulo_aula, descricao = :descricao, data_aula = :data_aula, horario = :horario, turma_id = :turma_id 
-                        WHERE id = :id AND professor_id = :professor_id";
+                         WHERE id = :id AND professor_id = :professor_id";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
                     ':id' => $aula_id,
@@ -135,6 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
 // --- 3. CONSULTAS DE LEITURA (READ) ---
 
 // A. Lista de Aulas
+// MODIFICAÇÃO: Aulas futuras, ordenadas da mais próxima para a mais distante.
 $sql_aulas = "
     SELECT 
         a.id, a.titulo_aula, a.data_aula, a.horario, a.descricao, t.nome_turma 
@@ -144,8 +145,11 @@ $sql_aulas = "
         turmas t ON a.turma_id = t.id
     WHERE 
         a.professor_id = :professor_id
+        -- NOVO FILTRO: Garante que apenas aulas futuras sejam exibidas
+        AND CONCAT(a.data_aula, ' ', a.horario) >= NOW() 
     ORDER BY 
-        a.data_aula DESC, a.horario DESC
+        -- NOVA ORDENAÇÃO: Data e Horário Crescentes (ASC) para as aulas mais próximas ficarem no topo
+        a.data_aula ASC, a.horario ASC
 ";
 $stmt_aulas = $pdo->prepare($sql_aulas);
 $stmt_aulas->bindParam(':professor_id', $professor_id);
@@ -252,7 +256,7 @@ if ($abrir_modal) {
             </div>
             <div class="card-body p-0">
                 <?php if (empty($lista_aulas)): ?>
-                    <p class="p-4 text-center text-muted">Nenhuma aula agendada ainda.</p>
+                    <p class="p-4 text-center text-muted">Nenhuma aula agendada ainda ou todas as aulas agendadas já ocorreram.</p>
                 <?php else: ?>
                     <div class="table-responsive">
                         <table class="table table-striped table-hover mb-0">
@@ -333,19 +337,19 @@ if ($abrir_modal) {
                     <div class="mb-3">
                         <label for="titulo_aula" class="form-label">Título da Aula</label>
                         <input type="text" class="form-control" id="titulo_aula" name="titulo_aula" required 
-                               value="<?= htmlspecialchars($aula_para_editar['titulo_aula'] ?? '') ?>">
+                                 value="<?= htmlspecialchars($aula_para_editar['titulo_aula'] ?? '') ?>">
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="data_aula" class="form-label">Data</label>
                             <input type="date" class="form-control" id="data_aula" name="data_aula" required 
-                                   value="<?= htmlspecialchars($aula_para_editar['data_aula'] ?? date('Y-m-d')) ?>">
+                                    value="<?= htmlspecialchars($aula_para_editar['data_aula'] ?? date('Y-m-d')) ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="horario" class="form-label">Horário</label>
                             <input type="time" class="form-control" id="horario" name="horario" required 
-                                   value="<?= htmlspecialchars(substr($aula_para_editar['horario'] ?? '00:00:00', 0, 5)) ?>">
+                                    value="<?= htmlspecialchars(substr($aula_para_editar['horario'] ?? '00:00:00', 0, 5)) ?>">
                         </div>
                     </div>
 
