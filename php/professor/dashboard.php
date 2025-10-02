@@ -35,7 +35,7 @@ $sql = "
         a.data_aula, 
         a.horario, 
         a.titulo_aula, 
-        t.id AS turma_id, /* Adiciona o ID da Turma aqui */
+        t.id AS turma_id,
         t.nome_turma,
         u.nome AS nome_aluno
     FROM 
@@ -76,7 +76,7 @@ foreach ($aulas_db as $aula) {
             'hora' => $hora_formatada,
             'topico' => $aula['titulo_aula'],
             'turma' => $aula['nome_turma'], 
-            'turma_id' => $aula['turma_id'], // Novo dado crucial
+            'turma_id' => $aula['turma_id'],
             'alunos' => []
         ];
     }
@@ -134,7 +134,7 @@ $nomes_meses = [
         }
 
         .sidebar a:hover {
-            background-color: #a93226;
+            background-color: #32475b;
         }
 
         .sidebar .active {
@@ -173,13 +173,8 @@ $nomes_meses = [
             color: white;
         }
 
-        #botao-sair {
-            border: none;
-        }
-
         #botao-sair:hover {
             background-color: #c0392b;
-            color: white;
         }
 
         /* Estilos do calendário */
@@ -282,13 +277,13 @@ $nomes_meses = [
 
                 <!-- Botão sair no rodapé -->
                 <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+                    <!-- Usando a classe 'link-sair' do dashboard.css -->
+                    <a href="../logout.php" id="botao-sair" class="link-sair w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
                 </div>
             </div>
 
             <!-- Conteúdo principal -->
             <div class="col-md-10 main-content p-4">
-                
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <a href="dashboard.php?mes=<?= $data_ant->format('m') ?>&ano=<?= $data_ant->format('Y') ?>" class="btn btn-outline-secondary">
                         <i class="fas fa-chevron-left"></i> <?= $nomes_meses[$data_ant->format('m')] ?>
@@ -306,7 +301,6 @@ $nomes_meses = [
 
                     <?php 
                     $offset = ($primeiro_dia_mes->format('w')); // 'w' retorna 0 (Dom) a 6 (Sáb)
-                    
                     for ($i = 0; $i < $offset; $i++): ?>
                         <div class="celula-dia outros-meses"></div>
                     <?php endfor; ?>
@@ -317,44 +311,39 @@ $nomes_meses = [
                     ?>
                         <div class="celula-dia" style="<?= $is_hoje ? 'border: 2px solid #c0392b; background-color: #f0f0f0;' : '' ?>">
                             <span class="numero-dia"><?= $dia ?></span>
-                            
-                            <?php if (isset($aulas_por_dia[$dia])): ?>
-                                <?php 
-                                uasort($aulas_por_dia[$dia], function($a, $b) {
-                                    return strcmp($a['hora'], $b['hora']);
-                                });
-                                
-                                foreach ($aulas_por_dia[$dia] as $aula): 
-                                    $texto_exibido = $aula['turma']; 
-                                    
-                                    $url_redirecionamento = "detalhes_aula.php?aula_id=" . $aula['aula_id'];
-                                    
-                                    // Define a cor de fundo com base no dia da semana 
-                                    $dia_da_semana = (new DateTime($data_completa))->format('w');
-                                    $cor_fundo_aula = $dia_da_semana == 0 || $dia_da_semana == 6 ? '#A0A0A0' : '#1a2a3a'; // Cinza no Fim de Semana
-                                ?>
-                                    <div class="bloco-aula" 
-                                        title="Clique para ver detalhes da Turma <?= htmlspecialchars($aula['turma']) ?>" 
-                                        style="background-color: <?= $cor_fundo_aula ?>;"
-                                        onclick="window.location.href='<?= $url_redirecionamento ?>';">
-                                        <strong><?= $aula['hora'] ?></strong>
-                                        <span><?= htmlspecialchars($texto_exibido) ?></span>
-                                        <span style="opacity: 0.8; font-size: 0.9em;"><?= htmlspecialchars($aula['topico']) ?></span> 
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                            <div class="conteudo-aulas">
+                                <?php if (isset($aulas_por_dia[$dia])): ?>
+                                    <?php 
+                                    uasort($aulas_por_dia[$dia], function($a, $b) {
+                                        return strcmp($a['hora'], $b['hora']);
+                                    });
+                                    foreach ($aulas_por_dia[$dia] as $aula): 
+                                        $texto_exibido = $aula['turma']; 
+                                        $url_redirecionamento = "detalhes_aula.php?aula_id=" . $aula['aula_id'];
+                                        $dia_da_semana = (new DateTime($data_completa))->format('w');
+                                        $cor_fundo_aula = $dia_da_semana == 0 || $dia_da_semana == 6 ? '#A0A0A0' : '#1a2a3a';
+                                    ?>
+                                        <div class="bloco-aula" 
+                                            title="Clique para ver detalhes da Turma <?= htmlspecialchars($aula['turma']) ?>" 
+                                            style="background-color: <?= $cor_fundo_aula ?>;"
+                                            onclick="window.location.href='<?= $url_redirecionamento ?>';">
+                                            <strong><?= $aula['hora'] ?></strong>
+                                            <span><?= htmlspecialchars($texto_exibido) ?></span>
+                                            <span style="opacity: 0.8; font-size: 0.9em;"><?= htmlspecialchars($aula['topico']) ?></span> 
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     <?php endfor; ?>
                     
                     <?php 
                     $total_celulas = $offset + $num_dias;
                     $celulas_faltantes = (7 - ($total_celulas % 7)) % 7;
-                    
                     for ($i = 0; $i < $celulas_faltantes; $i++): ?>
                         <div class="celula-dia outros-meses"></div>
                     <?php endfor; ?>
                 </div>
-                
             </div>
         </div>
     </div>
