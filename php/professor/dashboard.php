@@ -35,7 +35,7 @@ $sql = "
         a.data_aula, 
         a.horario, 
         a.titulo_aula, 
-        t.id AS turma_id, /* Adiciona o ID da Turma aqui */
+        t.id AS turma_id,
         t.nome_turma,
         u.nome AS nome_aluno
     FROM 
@@ -76,7 +76,7 @@ foreach ($aulas_db as $aula) {
             'hora' => $hora_formatada,
             'topico' => $aula['titulo_aula'],
             'turma' => $aula['nome_turma'], 
-            'turma_id' => $aula['turma_id'], // Novo dado crucial
+            'turma_id' => $aula['turma_id'],
             'alunos' => []
         ];
     }
@@ -106,156 +106,8 @@ $nomes_meses = [
     <title>Dashboard - Agenda de Aulas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            background-color: #FAF9F6;
-            overflow-x: hidden;
-        }
-
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            height: 100vh;
-            width: 16.666667%; /* Equivale a col-md-2 */
-            background-color: #081d40;
-            color: #fff;
-            z-index: 1000;
-            overflow-y: auto;
-        }
-
-        .sidebar a {
-            color: #fff;
-            text-decoration: none;
-            display: block;
-            padding: 10px 15px;
-            margin-bottom: 5px;
-            border-radius: 5px;
-        }
-
-        .sidebar a:hover {
-            background-color: #32475b;
-        }
-
-        .sidebar .active {
-            background-color: #c0392b;
-        }
-
-        .main-content {
-            margin-left: 16.666667%; /* Compensa a largura da sidebar fixa */
-            width: 83.333333%; /* Equivale a col-md-10 */
-            min-height: 100vh;
-            overflow-y: auto;
-        }
-
-        .card-header {
-            background-color: #081d40;
-            color: white;
-        }
-        
-        .btn-danger {
-            background-color: #c0392b;
-            border-color: #c0392b;
-        }
-        
-        .btn-danger:hover {
-            background-color: #a93226;
-            border-color: #a93226;
-        }
-        
-        .btn-outline-danger {
-            color: #c0392b;
-            border-color: #c0392b;
-        }
-        
-        .btn-outline-danger:hover {
-            background-color: #c0392b;
-            color: white;
-        }
-
-        #botao-sair:hover {
-            background-color: #c0392b;
-        }
-
-        /* Estilos do calendário */
-        .calendario {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 1px;
-            margin-top: 20px;
-        }
-
-        .dia-semana {
-            background-color: #081d40;
-            color: white;
-            text-align: center;
-            padding: 10px;
-            font-weight: bold;
-            border-radius: 3px;
-        }
-
-        .celula-dia {
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            min-height: 120px;
-            padding: 8px;
-            position: relative;
-        }
-
-        .celula-dia.outros-meses {
-            background-color: #f8f9fa;
-            color: #6c757d;
-        }
-
-        .numero-dia {
-            font-weight: bold;
-            font-size: 1.1em;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .bloco-aula {
-            background-color: #081d40;
-            color: white;
-            padding: 5px;
-            margin-bottom: 5px;
-            border-radius: 3px;
-            font-size: 0.85em;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .bloco-aula:hover {
-            background-color: #32475b;
-        }
-
-        .bloco-aula strong {
-            display: block;
-            font-size: 0.8em;
-        }
-
-        .bloco-aula span {
-            display: block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
-            }
-            
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
-        }
-    </style>
+    <!-- LINK PARA O ARQUIVO CSS EXTERNO -->
+    <link rel="stylesheet" href="../../css/professor/dashboard.css">
 </head>
 <body>
     <div class="container-fluid">
@@ -277,13 +129,13 @@ $nomes_meses = [
 
                 <!-- Botão sair no rodapé -->
                 <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+                    <!-- Usando a classe 'link-sair' do dashboard.css -->
+                    <a href="../logout.php" id="botao-sair" class="link-sair w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
                 </div>
             </div>
 
             <!-- Conteúdo principal -->
             <div class="col-md-10 main-content p-4">
-                
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <a href="dashboard.php?mes=<?= $data_ant->format('m') ?>&ano=<?= $data_ant->format('Y') ?>" class="btn btn-outline-secondary">
                         <i class="fas fa-chevron-left"></i> <?= $nomes_meses[$data_ant->format('m')] ?>
@@ -301,7 +153,6 @@ $nomes_meses = [
 
                     <?php 
                     $offset = ($primeiro_dia_mes->format('w')); // 'w' retorna 0 (Dom) a 6 (Sáb)
-                    
                     for ($i = 0; $i < $offset; $i++): ?>
                         <div class="celula-dia outros-meses"></div>
                     <?php endfor; ?>
@@ -312,44 +163,39 @@ $nomes_meses = [
                     ?>
                         <div class="celula-dia" style="<?= $is_hoje ? 'border: 2px solid #c0392b; background-color: #f0f0f0;' : '' ?>">
                             <span class="numero-dia"><?= $dia ?></span>
-                            
-                            <?php if (isset($aulas_por_dia[$dia])): ?>
-                                <?php 
-                                uasort($aulas_por_dia[$dia], function($a, $b) {
-                                    return strcmp($a['hora'], $b['hora']);
-                                });
-                                
-                                foreach ($aulas_por_dia[$dia] as $aula): 
-                                    $texto_exibido = $aula['turma']; 
-                                    
-                                    $url_redirecionamento = "detalhes_aula.php?aula_id=" . $aula['aula_id'];
-                                    
-                                    // Define a cor de fundo com base no dia da semana 
-                                    $dia_da_semana = (new DateTime($data_completa))->format('w');
-                                    $cor_fundo_aula = $dia_da_semana == 0 || $dia_da_semana == 6 ? '#A0A0A0' : '#1a2a3a'; // Cinza no Fim de Semana
-                                ?>
-                                    <div class="bloco-aula" 
-                                        title="Clique para ver detalhes da Turma <?= htmlspecialchars($aula['turma']) ?>" 
-                                        style="background-color: <?= $cor_fundo_aula ?>;"
-                                        onclick="window.location.href='<?= $url_redirecionamento ?>';">
-                                        <strong><?= $aula['hora'] ?></strong>
-                                        <span><?= htmlspecialchars($texto_exibido) ?></span>
-                                        <span style="opacity: 0.8; font-size: 0.9em;"><?= htmlspecialchars($aula['topico']) ?></span> 
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                            <div class="conteudo-aulas">
+                                <?php if (isset($aulas_por_dia[$dia])): ?>
+                                    <?php 
+                                    uasort($aulas_por_dia[$dia], function($a, $b) {
+                                        return strcmp($a['hora'], $b['hora']);
+                                    });
+                                    foreach ($aulas_por_dia[$dia] as $aula): 
+                                        $texto_exibido = $aula['turma']; 
+                                        $url_redirecionamento = "detalhes_aula.php?aula_id=" . $aula['aula_id'];
+                                        $dia_da_semana = (new DateTime($data_completa))->format('w');
+                                        $cor_fundo_aula = $dia_da_semana == 0 || $dia_da_semana == 6 ? '#A0A0A0' : '#1a2a3a';
+                                    ?>
+                                        <div class="bloco-aula" 
+                                            title="Clique para ver detalhes da Turma <?= htmlspecialchars($aula['turma']) ?>" 
+                                            style="background-color: <?= $cor_fundo_aula ?>;"
+                                            onclick="window.location.href='<?= $url_redirecionamento ?>';">
+                                            <strong><?= $aula['hora'] ?></strong>
+                                            <span><?= htmlspecialchars($texto_exibido) ?></span>
+                                            <span style="opacity: 0.8; font-size: 0.9em;"><?= htmlspecialchars($aula['topico']) ?></span> 
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     <?php endfor; ?>
                     
                     <?php 
                     $total_celulas = $offset + $num_dias;
                     $celulas_faltantes = (7 - ($total_celulas % 7)) % 7;
-                    
                     for ($i = 0; $i < $celulas_faltantes; $i++): ?>
                         <div class="celula-dia outros-meses"></div>
                     <?php endfor; ?>
                 </div>
-                
             </div>
         </div>
     </div>
