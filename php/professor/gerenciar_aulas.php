@@ -246,7 +246,7 @@ if ($abrir_modal) {
         }
 
         .sidebar a:hover {
-            background-color: #32475b;
+            background-color: #a93226;
         }
 
         .sidebar .active {
@@ -285,8 +285,13 @@ if ($abrir_modal) {
             color: white;
         }
 
+        #botao-sair {
+            border: none;
+        }
+
         #botao-sair:hover {
             background-color: #c0392b;
+            color: white;
         }
 
         /* Estilos para a tabela */
