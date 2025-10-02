@@ -17,8 +17,8 @@ $sucesso = false;
 // Função para buscar os conteúdos associados a uma aula
 function getConteudoAssociado($pdo, $aula_id) {
     $sql = "SELECT ac.conteudo_id, c.titulo FROM aulas_conteudos ac 
-             JOIN conteudos c ON ac.conteudo_id = c.id
-             WHERE ac.aula_id = :aula_id";
+            JOIN conteudos c ON ac.conteudo_id = c.id
+            WHERE ac.aula_id = :aula_id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':aula_id' => $aula_id]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['acao']) && ($_POST['
             if ($acao === 'adicionar') {
                 // Insere a nova aula
                 $sql = "INSERT INTO aulas (professor_id, titulo_aula, descricao, data_aula, horario, turma_id) 
-                         VALUES (:professor_id, :titulo_aula, :descricao, :data_aula, :horario, :turma_id)";
+                        VALUES (:professor_id, :titulo_aula, :descricao, :data_aula, :horario, :turma_id)";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
                     ':professor_id' => $professor_id,
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['acao']) && ($_POST['
             } else { // Editar
                 // Atualiza a aula existente
                 $sql = "UPDATE aulas SET titulo_aula = :titulo_aula, descricao = :descricao, data_aula = :data_aula, horario = :horario, turma_id = :turma_id 
-                         WHERE id = :id AND professor_id = :professor_id";
+                        WHERE id = :id AND professor_id = :professor_id";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
                     ':id' => $aula_id,
@@ -135,7 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
 // --- 3. CONSULTAS DE LEITURA (READ) ---
 
 // A. Lista de Aulas
-// MODIFICAÇÃO: Aulas futuras, ordenadas da mais próxima para a mais distante.
 $sql_aulas = "
     SELECT 
         a.id, a.titulo_aula, a.data_aula, a.horario, a.descricao, t.nome_turma 
@@ -145,11 +144,8 @@ $sql_aulas = "
         turmas t ON a.turma_id = t.id
     WHERE 
         a.professor_id = :professor_id
-        -- NOVO FILTRO: Garante que apenas aulas futuras sejam exibidas
-        AND CONCAT(a.data_aula, ' ', a.horario) >= NOW() 
     ORDER BY 
-        -- NOVA ORDENAÇÃO: Data e Horário Crescentes (ASC) para as aulas mais próximas ficarem no topo
-        a.data_aula ASC, a.horario ASC
+        a.data_aula DESC, a.horario DESC
 ";
 $stmt_aulas = $pdo->prepare($sql_aulas);
 $stmt_aulas->bindParam(':professor_id', $professor_id);
@@ -222,96 +218,166 @@ if ($abrir_modal) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="../../css/professor/gerenciar_aulas.css">
+    <style>
+        body {
+            background-color: #FAF9F6;
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            background-color: #1a2a3a;
+            color: #fff;
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+
+        .sidebar a:hover {
+            background-color: #32475b;
+        }
+
+        .sidebar .active {
+            background-color: #c0392b;
+        }
+
+        .card-header {
+            background-color: #1a2a3a;
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-danger:hover {
+            background-color: #a93226;
+            border-color: #a93226;
+        }
+        
+        .btn-outline-danger {
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-outline-danger:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+    </style>
 </head>
 <body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 d-flex flex-column sidebar p-3">
+                <!-- Nome do professor -->
+                <div class="mb-4 text-center">
+                    <h5 class="mt-4">Prof. <?php echo $_SESSION['user_nome'] ?? 'Professor'; ?></h5>
+                </div>
 
-<div class="d-flex">
-    <div class="sidebar p-3">
-        <h4 class="text-center mb-4 border-bottom pb-3">RISENGLISH PROFESSOR</h4>
-        <a href="dashboard.php"><i class="fas fa-home me-2"></i>Dashboard</a>
-        <a href="gerenciar_aulas.php" style="background-color: #92171B;"><i class="fas fa-calendar-alt me-2"></i>Aulas</a>
-        <a href="gerenciar_conteudos.php"><i class="fas fa-book-open me-2"></i> Conteúdos</a>
-        <a href="gerenciar_alunos.php"><i class="fas fa-users me-2"></i>Alunos/Turmas</a>
-        <a href="../logout.php" class="link-sair"><i class="fas fa-sign-out-alt me-2"></i> Sair</a>
-    </div>
+                <!-- Menu centralizado verticalmente -->
+                <div class="d-flex flex-column flex-grow-1 mb-5">
+                    <a href="dashboard.php" class="p-2 mb-2 rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
+                    <a href="gerenciar_aulas.php" class="p-2 mb-2 rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
+                    <a href="gerenciar_conteudos.php" class="p-2 mb-2 rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
+                    <a href="gerenciar_alunos.php" class="p-2 mb-2 rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
+                </div>
 
-    <div class="main-content flex-grow-1">
-        <h1 class="mb-4" style="color: var(--cor-primaria);">Agendamento e Gerenciamento de Aulas</h1>
-        
-        <?php if (!empty($mensagem)): ?>
-            <div class="alert alert-<?= $sucesso ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
-                <?= $mensagem ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <!-- Botão sair no rodapé -->
+                <div class="mt-auto">
+                    <a href="../logout.php" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+                </div>
             </div>
-        <?php endif; ?>
 
-        <button class="btn text-white mb-3" data-bs-toggle="modal" data-bs-target="#modalAdicionarEditar" style="background-color: var(--cor-secundaria);">
-            <i class="fas fa-plus me-2"></i> Agendar Nova Aula
-        </button>
-
-        <div class="card shadow-sm">
-            <div class="card-header card-header-custom">
-                Próximas Aulas Agendadas
-            </div>
-            <div class="card-body p-0">
-                <?php if (empty($lista_aulas)): ?>
-                    <p class="p-4 text-center text-muted">Nenhuma aula agendada ainda ou todas as aulas agendadas já ocorreram.</p>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Data / Horário</th>
-                                    <th>Título da Aula</th>
-                                    <th>Turma</th>
-                                    <th>Conteúdos Associados</th>
-                                    <th style="width: 150px;">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($lista_aulas as $aula): 
-                                    // Puxa os conteúdos associados para exibição na tabela
-                                    $conteudos_aula = getConteudoAssociado($pdo, $aula['id']);
-                                ?>
-                                    <tr>
-                                        <td>
-                                            <?= date('d/m/Y', strtotime($aula['data_aula'])) ?> às <?= substr($aula['horario'], 0, 5) ?>
-                                        </td>
-                                        <td><?= htmlspecialchars($aula['titulo_aula']) ?></td>
-                                        <td><?= htmlspecialchars($aula['nome_turma']) ?></td>
-                                        <td>
-                                            <?php if (!empty($conteudos_aula)): ?>
-                                                <?php foreach ($conteudos_aula as $cont): ?>
-                                                    <span class="badge rounded-pill bg-info text-dark me-1"><?= htmlspecialchars($cont['titulo']) ?></span>
-                                                <?php endforeach; ?>
-                                            <?php else: ?>
-                                                <small class="text-muted">Nenhum</small>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <a href="?editar=<?= $aula['id'] ?>" class="btn btn-sm btn-outline-primary" title="Editar Aula">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalExcluir" data-aula-id="<?= $aula['id'] ?>" title="Excluir Aula">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+            <!-- Conteúdo principal -->
+            <div class="col-md-10 p-4">
+                <h2 class="mb-5 mt-4">Agendamento e Gerenciamento de Aulas</h2>
+                
+                <?php if (!empty($mensagem)): ?>
+                    <div class="alert alert-<?= $sucesso ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
+                        <?= $mensagem ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 <?php endif; ?>
+
+                <!-- Tabela -->
+                <div class="card rounded">
+                    <div class="card-header text-white">
+                        Próximas Aulas Agendadas
+                    </div>
+                    <div class="card-body p-0 rounded">
+                        <?php if (empty($lista_aulas)): ?>
+                            <p class="p-4 text-center text-muted">Nenhuma aula agendada ainda.</p>
+                        <?php else: ?>
+                            <div class="table-responsive">
+                                <table class="table table-striped mb-0 rounded">
+                                    <thead>
+                                        <tr>
+                                            <th>Data / Horário</th>
+                                            <th>Título da Aula</th>
+                                            <th>Turma</th>
+                                            <th>Conteúdos Associados</th>
+                                            <th style="width: 150px;">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($lista_aulas as $aula): 
+                                            // Puxa os conteúdos associados para exibição na tabela
+                                            $conteudos_aula = getConteudoAssociado($pdo, $aula['id']);
+                                        ?>
+                                            <tr>
+                                                <td>
+                                                    <?= date('d/m/Y', strtotime($aula['data_aula'])) ?> às <?= substr($aula['horario'], 0, 5) ?>
+                                                </td>
+                                                <td><?= htmlspecialchars($aula['titulo_aula']) ?></td>
+                                                <td><?= htmlspecialchars($aula['nome_turma']) ?></td>
+                                                <td>
+                                                    <?php if (!empty($conteudos_aula)): ?>
+                                                        <?php foreach ($conteudos_aula as $cont): ?>
+                                                            <span class="badge rounded-pill bg-info text-dark me-1"><?= htmlspecialchars($cont['titulo']) ?></span>
+                                                        <?php endforeach; ?>
+                                                    <?php else: ?>
+                                                        <small class="text-muted">Nenhum</small>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <a href="?editar=<?= $aula['id'] ?>" class="btn btn-sm btn-primary" title="Editar Aula">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalExcluir" data-aula-id="<?= $aula['id'] ?>" title="Excluir Aula">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <center>
+                        <button class="btn btn-danger mb-3" data-bs-toggle="modal" data-bs-target="#modalAdicionarEditar">
+                            <i class="fas fa-plus me-2"></i> Agendar Nova Aula
+                        </button>
+                    </center>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 <div class="modal fade" id="modalAdicionarEditar" tabindex="-1" aria-labelledby="modalAdicionarEditarLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header" style="background-color: var(--cor-primaria); color: white;">
+            <div class="modal-header" style="background-color: #1a2a3a; color: white;">
                 <h5 class="modal-title" id="modalAdicionarEditarLabel"><?= $aula_para_editar ? 'Editar' : 'Agendar Nova' ?> Aula</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -337,19 +403,19 @@ if ($abrir_modal) {
                     <div class="mb-3">
                         <label for="titulo_aula" class="form-label">Título da Aula</label>
                         <input type="text" class="form-control" id="titulo_aula" name="titulo_aula" required 
-                                 value="<?= htmlspecialchars($aula_para_editar['titulo_aula'] ?? '') ?>">
+                               value="<?= htmlspecialchars($aula_para_editar['titulo_aula'] ?? '') ?>">
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="data_aula" class="form-label">Data</label>
                             <input type="date" class="form-control" id="data_aula" name="data_aula" required 
-                                    value="<?= htmlspecialchars($aula_para_editar['data_aula'] ?? date('Y-m-d')) ?>">
+                                   value="<?= htmlspecialchars($aula_para_editar['data_aula'] ?? date('Y-m-d')) ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="horario" class="form-label">Horário</label>
                             <input type="time" class="form-control" id="horario" name="horario" required 
-                                    value="<?= htmlspecialchars(substr($aula_para_editar['horario'] ?? '00:00:00', 0, 5)) ?>">
+                                   value="<?= htmlspecialchars(substr($aula_para_editar['horario'] ?? '00:00:00', 0, 5)) ?>">
                         </div>
                     </div>
 
@@ -374,7 +440,7 @@ if ($abrir_modal) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn text-white" style="background-color: var(--cor-secundaria);">
+                    <button type="submit" class="btn btn-danger">
                         <i class="fas fa-save me-1"></i> Salvar Aula
                     </button>
                 </div>
