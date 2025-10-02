@@ -1,45 +1,49 @@
- :root {
-            --cor-primaria: #0A1931; 
-            --cor-secundaria: #B91D23; 
-            --cor-fundo: #F5F5DC; 
-            --cor-ouro: #C5A358;
-        }
-        body {
-            
-  margin: 0;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: Arial, sans-serif;
+body {
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(to bottom right, #8B0000, #0B2C59);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-  /* Degradê minimalista e elegante */
-  background: linear-gradient(to right, 
-    #8A1C27,   /* vermelho profundo */
-    #4A6FB3    /* azul claro */
-  );
+    .login-card {
+      background-color: #fdfbf5;
+      border-radius: 15px;
+      padding: 40px 30px;
+      width: 350px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
 
-        }
-        .login-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 40px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .login-container h2 {
-            color: var(--cor-primaria);
-            margin-bottom: 25px;
-            font-weight: bold;
-        }
-        .btn-login {
-            background-color: var(--cor-secundaria);
-            border-color: var(--cor-secundaria);
-            color: white;
-        }
-        .btn-login:hover {
-            background-color: #92171B;
-            border-color: #92171B;
-            color: white;
-        }
+    .login-card h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #0B2C59;
+      font-weight: bold;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #0B2C59;
+      text-align: left;
+      display: block;
+    }
+
+    .btn-login {
+      background-color: #0B2C59;
+      color: #fff;
+      font-weight: bold;
+      width: 100%;
+    }
+
+    .btn-login:hover {
+      background-color: #173b6d;
+    }
+
+    .footer-text {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #0B2C59;
+      font-style: italic;
+    }
