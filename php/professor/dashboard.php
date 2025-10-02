@@ -118,7 +118,7 @@ $nomes_meses = [
             top: 0;
             height: 100vh;
             width: 16.666667%; /* Equivale a col-md-2 */
-            background-color: #1a2a3a;
+            background-color: #081d40;
             color: #fff;
             z-index: 1000;
             overflow-y: auto;
@@ -149,7 +149,7 @@ $nomes_meses = [
         }
 
         .card-header {
-            background-color: #1a2a3a;
+            background-color: #081d40;
             color: white;
         }
         
@@ -173,6 +173,10 @@ $nomes_meses = [
             color: white;
         }
 
+        #botao-sair:hover {
+            background-color: #c0392b;
+        }
+
         /* Estilos do calendário */
         .calendario {
             display: grid;
@@ -182,7 +186,7 @@ $nomes_meses = [
         }
 
         .dia-semana {
-            background-color: #1a2a3a;
+            background-color: #081d40;
             color: white;
             text-align: center;
             padding: 10px;
@@ -212,7 +216,7 @@ $nomes_meses = [
         }
 
         .bloco-aula {
-            background-color: #1a2a3a;
+            background-color: #081d40;
             color: white;
             padding: 5px;
             margin-bottom: 5px;
@@ -273,19 +277,18 @@ $nomes_meses = [
 
                 <!-- Botão sair no rodapé -->
                 <div class="mt-auto">
-                    <a href="../logout.php" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
                 </div>
             </div>
 
             <!-- Conteúdo principal -->
             <div class="col-md-10 main-content p-4">
-                <h2 class="mb-3 mt-2">Agenda de Aulas</h2>
                 
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <a href="dashboard.php?mes=<?= $data_ant->format('m') ?>&ano=<?= $data_ant->format('Y') ?>" class="btn btn-outline-secondary">
                         <i class="fas fa-chevron-left"></i> <?= $nomes_meses[$data_ant->format('m')] ?>
                     </a>
-                    <h3><?= $nomes_meses[$primeiro_dia_mes->format('m')] ?> de <?= $primeiro_dia_mes->format('Y') ?></h3>
+                    <h3>Agenda de Aulas - <?= $nomes_meses[$primeiro_dia_mes->format('m')] ?> de <?= $primeiro_dia_mes->format('Y') ?></h3>
                     <a href="dashboard.php?mes=<?= $data_prox->format('m') ?>&ano=<?= $data_prox->format('Y') ?>" class="btn btn-outline-secondary">
                         <?= $nomes_meses[$data_prox->format('m')] ?> <i class="fas fa-chevron-right"></i>
                     </a>
