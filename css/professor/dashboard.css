@@ -22,7 +22,6 @@ body {
 
 /* =======================
     📌 Sidebar (Menu Lateral)
-    CORRIGIDO: Inclui position: relative para ancorar o botão Sair
 ======================= */
 .sidebar {
     background: linear-gradient(180deg, #0A1931, #12264d);
@@ -30,7 +29,7 @@ body {
     min-height: 100vh;
     width: 250px;
     border-right: 1px solid #e0e0e0;
-    position: relative; /* CRUCIAL para o link-sair funcionar */
+    position: relative;
 }
 
 .sidebar h4 {
@@ -63,37 +62,26 @@ body {
     margin-right: 8px;
 }
 
-/* ---------------------------------------------------- */
-/* ESTILO DO BOTÃO SAIR (Substituindo :last-child) */
-/* ---------------------------------------------------- */
+/* Estilo do botão Sair fixo na sidebar */
 .link-sair {
     position: absolute;
     bottom: 20px; 
-    
-    /* left e right ajustam a largura baseados no padding da .sidebar (p-3 = 15px) */
     left: 15px; 
     right: 15px; 
-    
-    /* Mantém o padding do <a> interno de 15px, mas agora é posicionado */
     padding: 15px;
     text-align: left; 
-
-    /* Estilos visuais que eram do :last-child */
     background-color: transparent;
     color: #B91D23;
     border: 1px solid #B91D23;
     border-radius: 6px;
     transition: all 0.3s ease;
-    
-    /* Garante que o link-sair tenha a mesma altura que os outros links */
     display: flex;
 }
 
 .link-sair:hover {
-    background-color: #B91D23; /* Cor de hover clara */
-    color: #fff; /* Cor do texto no hover */
+    background-color: #B91D23; 
+    color: #fff; 
 }
-/* ---------------------------------------------------- */
 
 
 /* =======================
@@ -115,7 +103,7 @@ body {
 }
 
 /* =======================
-    📅 Calendário
+    📅 Calendário - IMPLEMENTAÇÃO DO SCROLL
 ======================= */
 .calendario {
     display: grid;
@@ -138,26 +126,32 @@ body {
 .celula-dia {
     border-top: 1px solid #eee;
     border-right: 1px solid #f2f2f2;
-    min-height: 120px;
+    /* *** ALTERAÇÃO PRINCIPAL: ALTURA FIXA PARA TODAS AS CÉLULAS DO DIA *** */
+    height: 150px; /* Aumentado para 200px para melhor visualização do scroll */
     padding: 8px;
     position: relative;
     background-color: #fff;
     transition: background-color 0.3s ease;
-    
-    /* NOVO: Controla a altura e adiciona scroll */
-    max-height: 160px; /* Altura máxima da célula */
-    overflow-y: auto; /* Adiciona barra de rolagem se o conteúdo exceder */
+
+    /* Garante que o conteúdo seja organizado em coluna para que o .conteudo-aulas ocupe o espaço restante */
+    display: flex;
+    flex-direction: column; 
 }
 
-/* Opcional: Estilo da barra de rolagem (Webkit - Chrome/Safari) */
-.celula-dia::-webkit-scrollbar {
-    width: 4px;
+.numero-dia {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--cor-primaria);
+    margin-bottom: 4px;
+    flex-shrink: 0; /* Impede que o número do dia seja afetado pelo encolhimento do flex */
 }
-.celula-dia::-webkit-scrollbar-thumb {
-    background-color: #ccc;
-    border-radius: 2px;
+
+.conteudo-aulas {
+    /* *** ALTERAÇÃO PRINCIPAL: HABILITA O SCROLL *** */
+    flex: 1; /* Faz com que ocupe todo o espaço vertical disponível na .celula-dia */
+    overflow-y: auto; /* Adiciona scroll vertical se o conteúdo exceder o espaço */
+    padding-right: 3px; /* Espaço para a scrollbar não grudar no canto */
 }
-/* Fim - NOVO */
 
 
 .celula-dia:hover {
@@ -168,14 +162,6 @@ body {
     border-right: none;
 }
 
-.numero-dia {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--cor-primaria);
-    position: absolute;
-    top: 6px;
-    right: 8px;
-}
 
 .outros-meses {
     background-color: #f1f1f1;
@@ -184,7 +170,6 @@ body {
 
 /* =======================
     📌 Blocos de Aulas
-    NOVO: Compactado para caber mais aulas
 ======================= */
 .bloco-aula {
     background-color: var(--cor-primaria);
@@ -197,10 +182,9 @@ body {
     box-shadow: 0 1px 2px rgba(0,0,0,0.15);
     transition: all 0.3s ease;
     word-wrap: break-word;
-    /* Adiciona limitação visual */
-    max-height: 45px; 
+    max-height: 45px; /* Mantendo um tamanho razoável por bloco */
     max-width: 180px;
-    overflow: hidden;
+    overflow: hidden; /* Garante que o texto de uma única aula não expanda o bloco */
 }
 
 .bloco-aula strong {
