@@ -11,10 +11,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
 $professor_id = $_SESSION['user_id'];
 $mensagem = '';
 $sucesso = false;
+$acao_executada = false; // Flag para saber se tentamos cadastrar/editar
 
 // --- LÓGICA DE CADASTRO/EDIÇÃO DE TEMA ---
 // Esta lógica trata o envio do formulário, seja o de "Criar Novo Tema" ou o do Modal de "Editar Tema".
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
+    $acao_executada = true;
     $titulo = trim($_POST['titulo']);
     $descricao = trim($_POST['descricao']);
     $acao = $_POST['acao'];
@@ -26,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
         // CORRIGIDO NOVAMENTE: tipo_arquivo foi definido como 'TEMA'.
         // CORRIGIDO NOVAMENTE: caminho_arquivo não pode ser NULL, foi definido como string vazia ''.
         $sql = "INSERT INTO conteudos (professor_id, parent_id, titulo, descricao, tipo_arquivo, caminho_arquivo, data_upload) 
-                 VALUES (:professor_id, NULL, :titulo, :descricao, 'TEMA', '', NOW())";
+                VALUES (:professor_id, NULL, :titulo, :descricao, 'TEMA', '', NOW())";
         $stmt = $pdo->prepare($sql);
         
         if ($stmt->execute([
@@ -36,6 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
         ])) {
             $mensagem = "Tema **" . htmlspecialchars($titulo) . "** cadastrado com sucesso! Agora adicione arquivos a ele.";
             $sucesso = true;
+            // Limpa os dados do POST para não reabrir o form se for sucesso
+            unset($_POST['titulo']);
+            unset($_POST['descricao']);
         } else {
             $mensagem = "Erro ao cadastrar tema.";
         }
@@ -294,32 +299,42 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
 
                 <div class="row">
                     
-                    <div class="col-lg-12">
-                        <div class="card rounded mb-4">
-                            <div class="card-header text-white">
-                                Adicionar Novo Tema
-                            </div>
-                            <div class="card-body">
+                    <!-- NOVO: Botão de Alternância e Formulário Colapsável -->
+                    <div class="col-lg-12 mb-4">
+                        <button class="btn btn-primary w-100 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNovoTema" aria-expanded="<?= ($acao_executada && !$sucesso) ? 'true' : 'false' ?>" aria-controls="collapseNovoTema">
+                            <i class="fas fa-folder-plus me-2"></i> Adicionar Novo Tema
+                        </button>
+                        
+                        <?php 
+                            // O formulário deve estar expandido (show) se uma submissão de cadastro falhou ($acao_executada e !$sucesso)
+                            $collapse_class = ($acao_executada && !$sucesso && $_POST['acao'] === 'cadastrar') ? 'collapse mt-3 show' : 'collapse mt-3'; 
+                        ?>
+                        <!-- Formulário de Novo Tema (Colapsável) -->
+                        <div class="<?= $collapse_class ?>" id="collapseNovoTema">
+                            <div class="card card-body rounded">
+                                <h5 class="card-title text-dark">Preencha os dados do novo tema</h5>
                                 <form method="POST" action="gerenciar_conteudos.php">
                                     <input type="hidden" name="acao" value="cadastrar">
 
                                     <div class="mb-3">
                                         <label for="titulo" class="form-label">Título do Tema</label>
-                                        <input type="text" class="form-control" id="titulo" name="titulo" required>
+                                        <input type="text" class="form-control" id="titulo" name="titulo" required value="<?= htmlspecialchars($_POST['titulo'] ?? '') ?>">
                                     </div>
                                     
                                     <div class="mb-3">
                                         <label for="descricao" class="form-label">Descrição do Tema (Opcional)</label>
-                                        <textarea class="form-control" id="descricao" name="descricao" rows="2"></textarea>
+                                        <textarea class="form-control" id="descricao" name="descricao" rows="2"><?= htmlspecialchars($_POST['descricao'] ?? '') ?></textarea>
                                     </div>
                                     
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-plus-circle me-2"></i> Criar Novo Tema
+                                        <i class="fas fa-plus-circle me-2"></i> Criar Tema
                                     </button>
                                 </form>
                             </div>
                         </div>
                     </div>
+                    <!-- FIM NOVO -->
+
 
                     <div class="col-lg-12">
                         <div class="card rounded">
