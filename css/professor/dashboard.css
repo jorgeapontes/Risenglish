@@ -18,192 +18,205 @@ body {
     font-family: "Inter", "Poppins", "Roboto", sans-serif;
     color: var(--cor-texto);
     margin: 0;
+    overflow-x: hidden;
 }
 
 /* =======================
     📌 Sidebar (Menu Lateral)
 ======================= */
 .sidebar {
-    background: linear-gradient(180deg, #0A1931, #12264d);
-    color: var(--cor-clara);
-    min-height: 100vh;
-    width: 250px;
-    border-right: 1px solid #e0e0e0;
-    position: relative;
-}
-
-.sidebar h4 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--cor-clara);
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 16.666667%; /* Equivale a col-md-2 */
+    background-color: #081d40;
+    color: #fff;
+    z-index: 1000;
+    overflow-y: auto;
 }
 
 .sidebar a {
-    color: var(--cor-clara);
-    padding: 12px 15px;
+    color: #fff;
     text-decoration: none;
-    display: flex;
-    align-items: center;
-    border-radius: 6px;
+    display: block;
+    padding: 10px 15px;
     margin-bottom: 5px;
-    transition: all 0.3s ease;
+    border-radius: 5px;
 }
 
 .sidebar a:hover {
-    background-color: var(--cor-secundaria);
+    background-color: #32475b;
 }
 
-.sidebar a.active {
-    background-color: var(--cor-secundaria);
-    font-weight: bold;
+.sidebar .active {
+    background-color: #c0392b;
 }
 
-.sidebar a i {
-    margin-right: 8px;
-}
-
-/* Estilo do botão Sair fixo na sidebar */
-.link-sair {
-    position: absolute;
-    bottom: 20px; 
-    left: 15px; 
-    right: 15px; 
-    padding: 15px;
-    text-align: left; 
-    background-color: transparent;
-    color: #B91D23;
-    border: 1px solid #B91D23;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    display: flex;
-}
-
-.link-sair:hover {
-    background-color: #B91D23; 
-    color: #fff; 
-}
-
-
-/* =======================
-    📖 Conteúdo Principal
-======================= */
 .main-content {
-    padding: 30px;
-    flex-grow: 1;
+    margin-left: 16.666667%; /* Compensa a largura da sidebar fixa */
+    width: 83.333333%; /* Equivale a col-md-10 */
+    min-height: 100vh;
+    overflow-y: auto;
 }
 
-.main-content h1 {
-    color: var(--cor-primaria);
-    font-weight: 600;
+.card-header {
+    background-color: #081d40;
+    color: white;
 }
 
-.main-content h2 {
-    font-weight: 500;
-    color: var(--cor-texto);
+.btn-danger {
+    background-color: #c0392b;
+    border-color: #c0392b;
+}
+
+.btn-danger:hover {
+    background-color: #a93226;
+    border-color: #a93226;
+}
+
+.btn-outline-danger {
+    color: #c0392b;
+    border-color: #c0392b;
+}
+
+.btn-outline-danger:hover {
+    background-color: #c0392b;
+    color: white;
+}
+
+#botao-sair:hover {
+    background-color: #c0392b;
 }
 
 /* =======================
-    📅 Calendário - IMPLEMENTAÇÃO DO SCROLL
+    📅 Calendário
 ======================= */
 .calendario {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    background-color: var(--cor-clara);
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    gap: 1px;
+    margin-top: 20px;
 }
 
 .dia-semana {
-    background-color: var(--cor-primaria);
-    color: var(--cor-clara);
-    padding: 10px 5px;
-    font-weight: 600;
+    background-color: #081d40;
+    color: white;
     text-align: center;
-    border-right: 1px solid rgba(255,255,255,0.1);
+    padding: 10px;
+    font-weight: bold;
+    border-radius: 3px;
 }
 
 .celula-dia {
-    border-top: 1px solid #eee;
-    border-right: 1px solid #f2f2f2;
-    /* *** ALTERAÇÃO PRINCIPAL: ALTURA FIXA PARA TODAS AS CÉLULAS DO DIA *** */
-    height: 150px; /* Aumentado para 200px para melhor visualização do scroll */
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    height: 140px; /* ALTURA FIXA */
     padding: 8px;
     position: relative;
-    background-color: #fff;
-    transition: background-color 0.3s ease;
-
-    /* Garante que o conteúdo seja organizado em coluna para que o .conteudo-aulas ocupe o espaço restante */
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
+    overflow: hidden; /* Impede que o conteúdo transborde */
+}
+
+.celula-dia.outros-meses {
+    background-color: #f8f9fa;
+    color: #6c757d;
 }
 
 .numero-dia {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--cor-primaria);
-    margin-bottom: 4px;
-    flex-shrink: 0; /* Impede que o número do dia seja afetado pelo encolhimento do flex */
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+    display: block;
+    flex-shrink: 0; /* Não reduz tamanho */
 }
 
-.conteudo-aulas {
-    /* *** ALTERAÇÃO PRINCIPAL: HABILITA O SCROLL *** */
-    flex: 1; /* Faz com que ocupe todo o espaço vertical disponível na .celula-dia */
-    overflow-y: auto; /* Adiciona scroll vertical se o conteúdo exceder o espaço */
-    padding-right: 3px; /* Espaço para a scrollbar não grudar no canto */
+/* CONTAINER DE AULAS COM SCROLL */
+.aulas-container {
+    flex: 1;
+    overflow-y: auto; /* Scroll vertical */
+    padding-right: 2px;
 }
 
-
-.celula-dia:hover {
-    background-color: #fafafa;
+/* Custom scrollbar para o container de aulas */
+.aulas-container::-webkit-scrollbar {
+    width: 6px;
 }
 
-.celula-dia:nth-child(7n) {
-    border-right: none;
+.aulas-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
 }
 
-
-.outros-meses {
-    background-color: #f1f1f1;
-    color: #999;
+.aulas-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
 }
 
-/* =======================
-    📌 Blocos de Aulas
-======================= */
+.aulas-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
 .bloco-aula {
-    background-color: var(--cor-primaria);
-    color: var(--cor-clara);
-    border-radius: 5px; 
-    padding: 3px 5px; 
-    margin-bottom: 4px; 
-    font-size: 0.75em; 
+    background-color: #081d40;
+    color: white;
+    padding: 5px;
+    margin-bottom: 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
     cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-    transition: all 0.3s ease;
-    word-wrap: break-word;
-    max-height: 45px; /* Mantendo um tamanho razoável por bloco */
-    max-width: 180px;
-    overflow: hidden; /* Garante que o texto de uma única aula não expanda o bloco */
-}
-
-.bloco-aula strong {
-    font-size: 0.9em; 
-    font-weight: 600;
-    line-height: 1.1; 
-    display: block;
-}
-
-.bloco-aula span {
-    font-size: 1em; 
-    line-height: 1.1; 
-    display: block;
-    white-space: nowrap; 
-    overflow: hidden;
-    text-overflow: ellipsis; 
+    transition: background-color 0.2s;
+    flex-shrink: 0; /* Não reduz tamanho */
 }
 
 .bloco-aula:hover {
-    background-color: #92171B;
-    transform: translateY(-1px);
+    background-color: #32475b;
+}
+
+.bloco-aula strong {
+    display: block;
+    font-size: 0.8em;
+}
+
+.bloco-aula span {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Indicador visual de scroll quando há muitas aulas */
+.celula-dia.muitas-aulas::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(transparent, rgba(255,255,255,0.8));
+    pointer-events: none;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .calendario {
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    .celula-dia {
+        height: 150px; /* Menor altura em mobile */
+    }
 }
