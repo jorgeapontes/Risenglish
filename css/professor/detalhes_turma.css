@@ -1,77 +1,284 @@
-/* Paleta de Cores: Creme, Vermelho Escuro, Marinho Escuro */
-        :root {
-            --cor-primaria: #0A1931; /* Marinho Escuro */
-            --cor-secundaria: #B91D23; /* Vermelho Escuro */
-            --cor-fundo: #F5F5DC; /* Creme/Bege */
-        }
-        body { background-color: var(--cor-fundo); }
-        .sidebar { background-color: var(--cor-primaria); color: white; min-height: 100vh; }
-        .sidebar a { color: white; padding: 15px; text-decoration: none; display: block; }
-        .sidebar a:hover { background-color: var(--cor-secundaria); }
-        .main-content { padding: 30px; }
-        
-        .card-header-turma {
-            background-color: var(--cor-secundaria);
-            color: white;
-            font-weight: bold;
+
+        body {
+            background-color: #FAF9F6;
+            overflow-x: hidden;
         }
 
-        /* Estilo do Calendário (igual ao do Dashboard) */
-        .calendario-container {
-            border: 1px solid #ccc;
-            background-color: white;
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 16.666667%;
+            background-color: #081d40;
+            color: #fff;
+            z-index: 1000;
+            overflow-y: auto;
         }
-        .semana-header {
-            background-color: var(--cor-primaria);
-            color: white;
-            font-weight: bold;
-        }
-        .dia-celula {
-            min-height: 120px;
-            border: 1px solid #eee;
-            padding: 5px;
-            overflow: auto;
-            font-size: 0.85rem;
-            
-        }
-        .dia-num {
-            font-weight: bold;
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
             display: block;
+            padding: 10px 15px;
             margin-bottom: 5px;
-            color: var(--cor-primaria);
+            border-radius: 5px;
+            transition: 0.3s;
         }
-        .aula-item {
-            background-color: #f1f1f1;
-            border-left: 3px solid var(--cor-secundaria);
-            padding: 3px 5px;
-            margin-bottom: 3px;
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+            transition: 0.3s;
+        }
+
+        .sidebar .active {
+            background-color: #c0392b;
+        }
+
+        .sidebar .active:hover{
+            background-color: #c0392b;
+        }
+
+        .main-content {
+            margin-left: 16.666667%;
+            width: 83.333333%;
+            min-height: 100vh;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .card-header {
+            background-color: #081d40;
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-danger:hover {
+            background-color: #a93226;
+            border-color: #a93226;
+        }
+        
+        .btn-outline-danger {
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-outline-danger:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+        /* Estilos do calendário */
+        .calendario {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            margin-top: 20px;
+        }
+
+        .dia-semana {
+            background-color: #081d40;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            border-radius: 3px;
+        }
+
+        .celula-dia {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            height: 140px;
+            padding: 8px;
+            position: relative;
+        }
+
+        #botao-sair {
+            border: none;
+        }
+
+        #botao-sair:hover {
+            background-color: #c0392b;
+            color: white;
+            transform: none;
+        }
+
+        .celula-dia.outros-meses {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .numero-dia {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .bloco-aula {
+            background-color: #081d40;
+            color: white;
+            padding: 5px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            font-size: 0.85em;
             cursor: pointer;
         }
-        .aula-item:hover {
-            background-color: #ddd;
+
+
+        .bloco-aula strong {
+            display: block;
+            font-size: 0.8em;
         }
 
-        /* Certifica que a sidebar tem 'relative' para o link-sair funcionar */
-.sidebar { 
-    position: relative;
-    /* ... outros estilos ... */ 
+        .bloco-aula span {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Estilos específicos para detalhes_turma */
+        .info-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .btn-agendar {
+            background-color: #c0392b;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .btn-agendar:hover {
+            background-color: #a93226;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .aulas-lista {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
-/* Estilo do Botão Sair */
-.link-sair {
-    position: absolute;
-    bottom: 20px; 
-    
-    /* Compensamos o padding p-3 (15px) da sidebar para ele alinhar */
-    left: 15px; 
-    right: 15px; 
-    
-    /* Mantém o padding do <a> interno de 15px */
-    padding: 15px;
-    text-align: left; /* Ou 'center', se preferir */
+.aula-item {
+    display: block;
+    width: 100%;
+    background: var(--cor-primaria, #0A1931);
+    color: #fff;
+    padding: 6px 8px;
+    border-radius: 5px;
+    font-size: 0.95em;
+    margin-bottom: 2px;
+    transition: background 0.2s;
+    text-align: left;
+    word-break: break-word;
 }
 
-/* Estilo de hover para manter a consistência com os outros links */
-.link-sair:hover {
-    background-color: var(--cor-secundaria);
-}
+
+        /* .aula-item:hover {
+            background-color: #dee2e6;
+            transform: scale(1.02);
+        } */
+
+        .aula-item a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .aula-item a:hover {
+            color: #c0392b;
+        }
+
+        /* Calendário estilo dashboard */
+        .calendario-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .calendario-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0px;
+            background-color: #ddd;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .calendario-header {
+            background-color: #081d40;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            font-weight: bold;
+        }
+
+        .calendario-dia {
+            background-color: white;
+            height: 140px;
+            padding: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .calendario-dia.hoje {
+            background-color: #f5f5f5;
+            border: 2px solid red;
+        }
+
+        .calendario-dia.outro-mes {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .dia-numero {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #081d40;
+        }
+
+        #back-link {
+            text-decoration: none;
+            color: #081d40
+        }
+
+        #back-link:hover {
+            text-decoration: none;
+            color: #384d90
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 15px;
+            }
+
+            .calendario-dia {
+                min-height: 80px;
+            }
+        }

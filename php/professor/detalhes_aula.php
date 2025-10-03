@@ -40,26 +40,36 @@ if (!$detalhes_aula) {
     exit;
 }
 
-// --- 2. BUSCAR CONTEÚDOS VINCULADOS A ESTA AULA ---
-$sql_conteudos = "
+// --- 2. BUSCAR TODOS OS TEMAS (PASTAS) DO PROFESSOR E SEU STATUS DE PLANEJAMENTO PARA ESTA AULA ---
+// Filtra apenas conteúdos principais (Temas) onde parent_id é NULL.
+// Inclui uma subconsulta para contar o número de arquivos filhos dentro de cada tema.
+$sql_todos_temas = "
     SELECT 
-        c.id AS conteudo_id, c.titulo, c.descricao, c.caminho_arquivo, 
-        ac.planejado 
+        c.id AS tema_id, 
+        c.titulo, 
+        c.descricao, 
+        (SELECT COUNT(id) FROM conteudos WHERE parent_id = c.id AND professor_id = :professor_id_sub) AS total_arquivos, 
+        COALESCE(ac.planejado, 0) AS planejado
     FROM 
         conteudos c
-    JOIN 
-        aulas_conteudos ac ON c.id = ac.conteudo_id
+    LEFT JOIN 
+        aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
     WHERE 
-        ac.aula_id = :aula_id
+        c.professor_id = :professor_id 
+        AND c.parent_id IS NULL -- Filtra apenas temas principais
     ORDER BY 
         c.titulo ASC
 ";
-$stmt_conteudos = $pdo->prepare($sql_conteudos);
-$stmt_conteudos->execute([':aula_id' => $aula_id]);
-$conteudos_vinculados = $stmt_conteudos->fetchAll(PDO::FETCH_ASSOC);
+$stmt_temas = $pdo->prepare($sql_todos_temas);
+$stmt_temas->execute([
+    ':aula_id' => $aula_id, 
+    ':professor_id' => $professor_id,
+    ':professor_id_sub' => $professor_id // Usado para a subconsulta de contagem
+]);
+$todos_temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
 
-// Mensagens de sucesso ou erro
-// (O AJAX fará a própria notificação para o switch de planejado).
+// Contagem para exibição no filtro
+$count_planejados = array_sum(array_column($todos_temas, 'planejado'));
 ?>
 
 <!DOCTYPE html>
@@ -70,7 +80,8 @@ $conteudos_vinculados = $stmt_conteudos->fetchAll(PDO::FETCH_ASSOC);
     <title>Detalhes da Aula - <?= htmlspecialchars($detalhes_aula['titulo_aula']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="../../css/professor/detalhes_aula.css">
+    <!-- Depende do seu CSS externo para o layout e cores -->
+    <link rel="stylesheet" href="../../css/professor/detalhes_aula.css"> 
 </head>
 <body>
 
@@ -87,13 +98,14 @@ $conteudos_vinculados = $stmt_conteudos->fetchAll(PDO::FETCH_ASSOC);
     <div class="main-content flex-grow-1">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 style="color: var(--cor-primaria);">Detalhes da Aula</h1>
-            <a href="gerenciar_aulas.php?editar=<?= $detalhes_aula['aula_id'] ?>" class="btn btn-primary">
-                <i class="fas fa-edit me-2"></i> Editar/Vincular Conteúdos
+            <a href="gerenciar_aulas.php" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Voltar para Aulas
             </a>
         </div>
         
         <div id="ajax-message-container"></div>
         
+        <!-- DETALHES DA AULA -->
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="row">
@@ -112,62 +124,70 @@ $conteudos_vinculados = $stmt_conteudos->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
 
+        <!-- CONTEÚDO DA AULA (TEMAS DO PROFESSOR) -->
         <div class="card shadow-sm mb-4">
-            <div class="card-header card-header-custom">
-                Conteúdo da Aula (Materiais Vinculados)
+            <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                <span>Conteúdo da Aula (Temas Cadastrados e Visibilidade para o Aluno)</span>
+                
+                <!-- FILTRO (CHECKBOX) -->
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="filtroPlanejadoSwitch">
+                    <label class="form-check-label text-white" for="filtroPlanejadoSwitch">
+                        Mostrar Apenas Temas Visíveis para o Aluno (<?= $count_planejados ?>)
+                    </label>
+                </div>
             </div>
+            
             <div class="card-body">
-                <?php if (empty($conteudos_vinculados)): ?>
-                    <p class="text-center text-muted">Nenhum conteúdo vinculado a esta aula. Use o botão "Editar" acima para vincular.</p>
+                <?php if (empty($todos_temas)): ?>
+                    <p class="text-center text-muted">Você ainda não possui Temas (Pastas) cadastrados. Por favor, vá à seção "Conteúdos" para organizar seus materiais.</p>
                 <?php else: ?>
-                    <div class="row mb-3 align-items-center border-bottom pb-2">
-                        <div class="col-1 text-center">
-                            <strong>Planejado</strong>
-                        </div>
-                        <div class="col-10">
-                            <strong>Título do Conteúdo</strong>
-                        </div>
-                        <div class="col-1 text-center">
-                            <strong>Ação</strong>
-                        </div>
+                    
+                    <!-- NOVOS CABEÇALHOS PARA TEMAS -->
+                    <div class="row mb-3 align-items-center border-bottom pb-2 text-muted small">
+                        <div class="col-1 text-center"><strong>Visível?</strong></div>
+                        <div class="col-11"><strong>Tema / Pasta (Clique para Gerenciar Arquivos)</strong></div>
                     </div>
                     
-                    <?php foreach ($conteudos_vinculados as $c): ?>
-                        <?php $planejado_class = $c['planejado'] == 1 ? 'planejado' : ''; ?>
-                        
-                        <div class="conteudo-item d-flex align-items-center <?= $planejado_class ?>" data-conteudo-id="<?= $c['conteudo_id'] ?>">
+                    <div id="lista-conteudos-container">
+                        <?php foreach ($todos_temas as $t): ?>
+                            <?php 
+                                $is_planejado = $t['planejado'] == 1;
+                                $planejado_class = $is_planejado ? 'planejado' : 'nao-planejado'; 
+                            ?>
                             
-                            <div class="col-1 text-center">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input planejado-switch" 
-                                        type="checkbox" 
-                                        role="switch" 
-                                        id="switch_<?= $c['conteudo_id'] ?>" 
-                                        data-aula-id="<?= $detalhes_aula['aula_id'] ?>"
-                                        data-conteudo-id="<?= $c['conteudo_id'] ?>"
-                                        <?= $c['planejado'] == 1 ? 'checked' : '' ?>>
-                                    <label class="form-check-label small status-label" for="switch_<?= $c['conteudo_id'] ?>">
-                                        <?= $c['planejado'] == 1 ? 'Planejado' : 'Não Usado' ?>
-                                    </label>
+                            <!-- Usa tema_id como data-conteudo-id para compatibilidade com o script AJAX -->
+                            <div class="conteudo-item d-flex align-items-center <?= $planejado_class ?>" 
+                                 data-conteudo-id="<?= $t['tema_id'] ?>" 
+                                 data-planejado="<?= $t['planejado'] ?>">
+                                
+                                <!-- CHECKBOX VISIBILIDADE -->
+                                <div class="col-1 text-center">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input planejado-switch" 
+                                            type="checkbox" 
+                                            role="switch" 
+                                            id="switch_<?= $t['tema_id'] ?>" 
+                                            data-aula-id="<?= $detalhes_aula['aula_id'] ?>"
+                                            data-conteudo-id="<?= $t['tema_id'] ?>"
+                                            <?= $is_planejado ? 'checked' : '' ?>>
+                                        <label class="form-check-label small status-label" for="switch_<?= $t['tema_id'] ?>">
+                                            <?= $is_planejado ? 'Sim' : 'Não' ?>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <!-- TÍTULO E DESCRIÇÃO (COM CONTAGEM DE ARQUIVOS) -->
+                                <div class="col-11">
+                                    <a href="gerenciar_arquivos_tema.php?conteudo_id=<?= $t['tema_id'] ?>" class="link-tema">
+                                        <i class="fas fa-folder me-2"></i> <?= htmlspecialchars($t['titulo']) ?> 
+                                        <span class="badge bg-secondary ms-2"><?= $t['total_arquivos'] ?> Arquivo(s)</span>
+                                    </a>
+                                    
                                 </div>
                             </div>
-                            
-                            <div class="col-10">
-                                <strong><?= htmlspecialchars($c['titulo']) ?></strong>
-                                <p class="text-muted mb-0 small"><?= htmlspecialchars($c['descricao'] ?? 'Sem descrição.') ?></p>
-                            </div>
-
-                            <div class="col-1 text-center">
-                                <?php if ($c['caminho_arquivo']): ?>
-                                    <a href="../<?= htmlspecialchars($c['caminho_arquivo']) ?>" target="_blank" class="btn btn-sm btn-outline-info" title="Visualizar Material">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </a>
-                                <?php else: ?>
-                                    <span class="text-muted small">N/A</span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -193,77 +213,116 @@ function displayAlert(message, type) {
     `;
     container.innerHTML = alertHtml;
     
-    // Opcional: Remover o alerta automaticamente após X segundos
     setTimeout(() => {
         const alertElement = container.querySelector('.alert');
         if (alertElement) {
-            new bootstrap.Alert(alertElement).close();
+            // Usa o método 'hide' do Bootstrap para fechar o alerta
+            const bsAlert = bootstrap.Alert.getOrCreateInstance(alertElement);
+            bsAlert.close();
         }
     }, 5000); // 5 segundos
 }
 
-
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Captura todos os switches com a classe 'planejado-switch'
     const switches = document.querySelectorAll('.planejado-switch');
+    const filtroSwitch = document.getElementById('filtroPlanejadoSwitch');
+    const listaConteudosContainer = document.getElementById('lista-conteudos-container');
 
+    // --- 1. Lógica do Filtro ---
+    function aplicarFiltro() {
+        const mostrarApenasPlanejados = filtroSwitch.checked;
+        
+        listaConteudosContainer.querySelectorAll('.conteudo-item').forEach(item => {
+            // dataset.planejado é uma string '0' ou '1'
+            const isPlanejado = item.dataset.planejado === '1';
+            
+            if (mostrarApenasPlanejados && !isPlanejado) {
+                item.style.display = 'none'; // Esconde se for filtro e não planejado
+            } else {
+                item.style.display = 'flex'; // Mostra caso contrário
+            }
+        });
+    }
+
+    filtroSwitch.addEventListener('change', aplicarFiltro);
+
+
+    // --- 2. Lógica do Toggle (Checkbox de Visibilidade) ---
     switches.forEach(function(switchElement) {
         switchElement.addEventListener('change', function() {
             const aulaId = this.dataset.aulaId;
             const conteudoId = this.dataset.conteudoId;
-            const novoStatus = this.checked ? 1 : 0; // Se marcado = 1, se desmarcado = 0
+            const novoStatus = this.checked ? 1 : 0; // 1 (Visível) ou 0 (Não Visível)
             
-            // Elementos visuais para atualização
             const statusLabel = this.closest('.form-switch').querySelector('.status-label');
             const conteudoItem = this.closest('.conteudo-item');
             
-            // 2. Cria o objeto FormData com os dados a serem enviados
+            // Cria o objeto FormData
             const formData = new FormData();
             formData.append('aula_id', aulaId);
             formData.append('conteudo_id', conteudoId);
-            formData.append('status', novoStatus);
+            formData.append('status', novoStatus); // 0 ou 1
             
-            // 3. Executa a Requisição AJAX usando Fetch API
-            fetch('ajax_update_planejado.php', {
+            // Desabilita o switch durante o AJAX
+            this.disabled = true; 
+            statusLabel.textContent = '...';
+
+            // Executa a Requisição AJAX usando Fetch API
+            fetch('ajax_toggle_conteudo.php', {
                 method: 'POST',
                 body: formData
             })
             .then(response => {
-                // Checa se o status HTTP é de sucesso (200-299)
                 if (!response.ok) {
                     throw new Error('Erro na requisição: Status ' + response.status);
                 }
                 return response.json();
             })
             .then(data => {
+                this.disabled = false; // Habilita o switch de volta
+
                 if (data.success) {
-                    displayAlert('Status do conteúdo atualizado para: ' + (novoStatus === 1 ? 'Planejado' : 'Não Usado'), 'success');
+                    displayAlert(data.message, 'success');
                     
-                    // Atualiza o texto e a classe visual
-                    statusLabel.textContent = novoStatus === 1 ? 'Planejado' : 'Não Usado';
+                    // Atualiza o data-atributo e a classe visual
+                    conteudoItem.dataset.planejado = novoStatus;
+                    
                     if (novoStatus === 1) {
+                        statusLabel.textContent = 'Sim';
                         conteudoItem.classList.add('planejado');
+                        conteudoItem.classList.remove('nao-planejado');
                     } else {
+                        statusLabel.textContent = 'Não';
                         conteudoItem.classList.remove('planejado');
+                        conteudoItem.classList.add('nao-planejado');
                     }
-                    
+
+                    // Reavalia o filtro após a atualização do status (necessário para que a lista se ajuste)
+                    aplicarFiltro();
+
                 } else {
                     console.error('Erro:', data.message);
                     displayAlert('Erro ao atualizar status: ' + data.message, 'danger');
                     
                     // Reverte o estado do switch em caso de falha
                     this.checked = !this.checked; 
+                    statusLabel.textContent = novoStatus === 1 ? 'Não' : 'Sim'; // Reverte o texto do label
                 }
             })
             .catch(error => {
+                this.disabled = false; // Habilita o switch de volta
                 console.error('Erro de conexão ou servidor:', error);
                 displayAlert('Erro de conexão ao servidor ou erro interno.', 'danger');
                 
                 // Reverte o estado do switch em caso de falha
                 this.checked = !this.checked; 
+                statusLabel.textContent = novoStatus === 1 ? 'Não' : 'Sim'; // Reverte o texto do label
             });
         });
     });
+    
+    // Dispara o filtro na carga para aplicar as classes visuais iniciais
+    aplicarFiltro();
 });
 </script>
 </body>

@@ -300,30 +300,30 @@ function get_file_icon($mime_type, $caminho_arquivo = null) {
                                 <input type="hidden" name="acao" value="upload_recurso">
                                 
                                 <div class="mb-3">
-                                    <label for="titulo_recurso" class="form-label">Título do Recurso (Ex: Vídeo de Pronúncia, PDF de Vocabulário)</label>
+                                    <label for="titulo_recurso" class="form-label">Título do Recurso</label>
                                     <input type="text" class="form-control" id="titulo_recurso" name="titulo_recurso" required>
                                 </div>
                                 
                                 <div class="p-3 mb-3 border rounded">
-                                    <h6 class="text-secondary"><i class="fas fa-file-upload me-1"></i> 1. Upload de Arquivo (Opcional)</h6>
+                                    <h6 class="text-secondary"><i class="fas fa-file-upload me-1"></i> 1. Upload de Arquivo</h6>
                                     <div class="mb-2">
-                                        <label for="arquivo" class="form-label">Selecione o Arquivo (PDF ou Imagem)</label>
+                                        <label for="arquivo" class="form-label">Selecione o Arquivo</label>
                                         <input type="file" class="form-control" id="arquivo" name="arquivo" accept=".pdf,image/jpeg,image/png,image/gif">
-                                        <small class="text-muted">Tipos permitidos: **PDF**, **JPG**, **PNG**, **GIF**.</small>
+                                        <small class="text-muted">Tipos permitidos: PDF, JPG,PNG.</small>
                                     </div>
                                 </div>
 
                                 <div class="p-3 mb-3 border rounded">
-                                    <h6 class="text-secondary"><i class="fas fa-link me-1"></i> 2. Link Externo / URL (Opcional)</h6>
+                                    <h6 class="text-secondary"><i class="fas fa-link me-1"></i> 2. Link Externo / URL </h6>
                                     <div class="mb-2">
-                                        <label for="link_url" class="form-label">Link (Ex: Vídeo do YouTube, Artigo)</label>
+                                        <label for="link_url" class="form-label">Link</label>
                                         <input type="url" class="form-control" id="link_url" name="link_url" placeholder="Ex: https://www.youtube.com/watch?v=...">
                                         <small class="text-muted">Se fornecido, este recurso será salvo como um link, e não como um arquivo.</small>
                                     </div>
                                 </div>
 
                                 <div class="alert alert-info small" role="alert">
-                                    <i class="fas fa-info-circle me-1"></i> Você deve fornecer **um arquivo OU um link**, ou ambos. O campo **Título é obrigatório**.
+                                    <i class="fas fa-info-circle me-1"></i> Você deve fornecer um arquivo OU um link. O campo Título é obrigatório.
                                 </div>
                                 
                                 <button type="submit" class="btn text-white" style="background-color: var(--cor-secundaria);">
