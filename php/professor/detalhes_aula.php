@@ -9,6 +9,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
 }
 
 $professor_id = $_SESSION['user_id'];
+$professor_nome = $_SESSION['user_nome'] ?? 'Professor'; // Puxa o nome da sessão
+
 $aula_id = $_GET['aula_id'] ?? null;
 
 if (!$aula_id || !is_numeric($aula_id)) {
@@ -68,7 +70,7 @@ $stmt_temas->execute([
 ]);
 $todos_temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
 
-// Contagem para exibição no filtro
+// Contagem para exibição inicial no filtro (mantida, mas será atualizada pelo JS)
 $count_planejados = array_sum(array_column($todos_temas, 'planejado'));
 ?>
 
@@ -87,7 +89,8 @@ $count_planejados = array_sum(array_column($todos_temas, 'planejado'));
 
 <div class="d-flex">
     <div class="sidebar p-3">
-        <h4 class="text-center mb-4 border-bottom pb-3">RISENGLISH PROFESSOR</h4>
+        <!-- Título do Professor atualizado para puxar o nome da sessão -->
+        <h4 class="text-center mb-4 border-bottom pb-3">Prof. <?= htmlspecialchars($professor_nome) ?></h4>
         <a href="dashboard.php"><i class="fas fa-home me-2"></i> Dashboard </a>
         <a href="gerenciar_aulas.php"><i class="fas fa-calendar-alt me-2"></i>Aulas</a>
         <a href="gerenciar_conteudos.php"><i class="fas fa-book-open me-2"></i>Conteúdos</a>
@@ -99,7 +102,7 @@ $count_planejados = array_sum(array_column($todos_temas, 'planejado'));
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 style="color: var(--cor-primaria);">Detalhes da Aula</h1>
             <a href="gerenciar_aulas.php" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-2"></i> Voltar para Aulas
+                <i class="fas fa-arrow-left me-2" ></i> Voltar para Aulas
             </a>
         </div>
         
@@ -132,7 +135,7 @@ $count_planejados = array_sum(array_column($todos_temas, 'planejado'));
                 <!-- FILTRO (CHECKBOX) -->
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" role="switch" id="filtroPlanejadoSwitch">
-                    <label class="form-check-label text-white" for="filtroPlanejadoSwitch">
+                    <label class="form-check-label text-white" for="filtroPlanejadoSwitch" id="filtroPlanejadoLabel">
                         Mostrar Apenas Temas Visíveis para o Aluno (<?= $count_planejados ?>)
                     </label>
                 </div>
@@ -158,8 +161,8 @@ $count_planejados = array_sum(array_column($todos_temas, 'planejado'));
                             
                             <!-- Usa tema_id como data-conteudo-id para compatibilidade com o script AJAX -->
                             <div class="conteudo-item d-flex align-items-center <?= $planejado_class ?>" 
-                                 data-conteudo-id="<?= $t['tema_id'] ?>" 
-                                 data-planejado="<?= $t['planejado'] ?>">
+                                data-conteudo-id="<?= $t['tema_id'] ?>" 
+                                data-planejado="<?= $t['planejado'] ?>">
                                 
                                 <!-- CHECKBOX VISIBILIDADE -->
                                 <div class="col-1 text-center">
@@ -227,6 +230,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const switches = document.querySelectorAll('.planejado-switch');
     const filtroSwitch = document.getElementById('filtroPlanejadoSwitch');
     const listaConteudosContainer = document.getElementById('lista-conteudos-container');
+    const filtroLabel = document.getElementById('filtroPlanejadoLabel'); // Elemento para a contagem
+
+    // --- 0. Função para atualizar a contagem de Temas Visíveis ---
+    function atualizarContagemPlanejados() {
+        // Conta quantos itens têm data-planejado="1" (Visível para o Aluno)
+        const count = listaConteudosContainer.querySelectorAll('.conteudo-item[data-planejado="1"]').length;
+        
+        // Atualiza o texto do label (ex: Mostrar Apenas Temas Visíveis para o Aluno (5))
+        filtroLabel.innerHTML = `Mostrar Apenas Temas Visíveis para o Aluno (${count})`;
+    }
 
     // --- 1. Lógica do Filtro ---
     function aplicarFiltro() {
@@ -237,9 +250,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const isPlanejado = item.dataset.planejado === '1';
             
             if (mostrarApenasPlanejados && !isPlanejado) {
-                item.style.display = 'none'; // Esconde se for filtro e não planejado
+                // Se o filtro está ligado e o item NÃO está visível, esconde
+                // Usamos 'none' e '!important' para garantir que o 'display: flex' do Bootstrap seja sobreposto.
+                item.style.setProperty('display', 'none', 'important');
             } else {
-                item.style.display = 'flex'; // Mostra caso contrário
+                // Caso contrário (filtro desligado OU item está visível), mostra como 'flex' (padrão 'd-flex')
+                item.style.display = 'flex'; 
             }
         });
     }
@@ -285,7 +301,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     displayAlert(data.message, 'success');
                     
                     // Atualiza o data-atributo e a classe visual
-                    conteudoItem.dataset.planejado = novoStatus;
+                    // IMPORTANTE: O atributo data-planejado deve ser a string '0' ou '1'
+                    conteudoItem.dataset.planejado = String(novoStatus);
                     
                     if (novoStatus === 1) {
                         statusLabel.textContent = 'Sim';
@@ -297,8 +314,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         conteudoItem.classList.add('nao-planejado');
                     }
 
-                    // Reavalia o filtro após a atualização do status (necessário para que a lista se ajuste)
+                    // Reavalia o filtro após a atualização do status
                     aplicarFiltro();
+                    
+                    // Atualiza o contador de temas visíveis
+                    atualizarContagemPlanejados();
 
                 } else {
                     console.error('Erro:', data.message);
@@ -321,8 +341,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Dispara o filtro na carga para aplicar as classes visuais iniciais
+    // Dispara o filtro e a contagem na carga para garantir que a interface esteja consistente
     aplicarFiltro();
+    atualizarContagemPlanejados();
 });
 </script>
 </body>

@@ -7,8 +7,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
     header("Location: ../login.php");
     exit;
 }
+date_default_timezone_set('America/Sao_Paulo');
 
 $professor_id = $_SESSION['user_id'];
+// NOVO: Puxa o nome do professor da sessão. Se não existir, usa 'Professor'
+$professor_nome = $_SESSION['user_nome'] ?? 'Professor';
+
+// DEBUG: Se o nome não estiver aparecendo, remova os comentários da linha abaixo
+// print_r("DEBUG: O nome do professor é: " . $professor_nome); 
+
+
 $data_hoje = new DateTime();
 $mes_atual = $data_hoje->format('m');
 $ano_atual = $data_hoje->format('Y');
@@ -113,9 +121,10 @@ $nomes_meses = [
         <div class="row">
             <!-- Sidebar -->
             <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <!-- Nome do professor -->
+                <!-- Nome do professor puxado da sessão -->
                 <div class="mb-4 text-center">
-                    <h5 class="mt-4">Prof. <?php echo $_SESSION['user_nome'] ?? 'Professor'; ?></h5>
+                    <!-- AQUI É O PONTO CORRIGIDO -->
+                    <h5 class="mt-4">Prof. <?= htmlspecialchars($professor_nome) ?></h5>
                 </div>
 
                 <!-- Menu centralizado verticalmente -->
@@ -163,7 +172,7 @@ $nomes_meses = [
                         $tem_aulas = isset($aulas_por_dia[$dia]);
                     ?>
                         <div class="celula-dia <?= $tem_aulas && count($aulas_por_dia[$dia]) > 3 ? 'muitas-aulas' : '' ?>" 
-                             style="<?= $is_hoje ? 'border: 2px solid #c0392b; background-color: #f0f0f0;' : '' ?>">
+                                style="<?= $is_hoje ? 'border: 2px solid #c0392b; background-color: #f0f0f0;' : '' ?>">
                             <span class="numero-dia"><?= $dia ?></span>
                             
                             <?php if ($tem_aulas): ?>
@@ -188,7 +197,6 @@ $nomes_meses = [
                                             onclick="window.location.href='<?= $url_redirecionamento ?>';">
                                             <strong><?= $aula['hora'] ?></strong>
                                             <span><?= htmlspecialchars($texto_exibido) ?></span>
-                                            
                                         </div>
                                     <?php endforeach; ?>
                                 </div>

@@ -47,6 +47,7 @@
 }
 
 /* Estilo de hover para manter a consistência com os outros links */
-.link-sair:hover {
+.link-sair:hover, .btn-secondary {
     background-color: var(--cor-secundaria);
+    border: #B91D23;
 }
