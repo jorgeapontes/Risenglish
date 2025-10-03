@@ -13,15 +13,12 @@ $mensagem = '';
 $sucesso = false;
 
 // --- NOVO: 1. TRATAMENTO DE MENSAGENS DE SESSÃO (PRG) ---
-// Verifica se há mensagens de sucesso/erro armazenadas na sessão após um redirecionamento
 if (isset($_SESSION['mensagem'])) {
     $mensagem = $_SESSION['mensagem'];
     $sucesso = $_SESSION['sucesso'] ?? false;
-    // Limpa as variáveis de sessão para que a mensagem não reapareça
     unset($_SESSION['mensagem']);
     unset($_SESSION['sucesso']);
 }
-
 
 // --- 2. VALIDAÇÃO DO TEMA (Mantido) ---
 if (!isset($_GET['tema_id']) || !is_numeric($_GET['tema_id'])) {
@@ -38,12 +35,10 @@ $stmt_tema->execute([':id' => $tema_id, ':professor_id' => $professor_id]);
 $tema_info = $stmt_tema->fetch(PDO::FETCH_ASSOC);
 
 if (!$tema_info) {
-    // Mensagem é definida, mas o tema_id é zerado para evitar operações
     $mensagem = "Tema não encontrado ou você não tem permissão para gerenciá-lo.";
     $sucesso = false;
     $tema_id = 0; 
 }
-
 
 // --- NOVO: 3. LÓGICA UNIFICADA DE CADASTRO (ARQUIVO OU LINK) ---
 if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'upload_recurso') {
@@ -54,7 +49,6 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
     $is_file_upload = (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] === UPLOAD_ERR_OK);
     $is_link_provided = !empty($link_url);
 
-    // Validação: Pelo menos o título e um recurso (arquivo ou link) devem ser fornecidos
     if (empty($titulo_recurso) || (!$is_file_upload && !$is_link_provided)) {
         $_SESSION['mensagem'] = "Por favor, preencha o Título e envie um Arquivo ou forneça um Link.";
         $_SESSION['sucesso'] = false;
@@ -66,7 +60,6 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
     $tipo_arquivo = null;
 
     if ($is_file_upload) {
-        // --- Processamento de Arquivo ---
         $upload_dir = '../uploads/conteudos/';
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0777, true);
@@ -77,9 +70,8 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
         $novo_nome = time() . '_' . uniqid() . '.' . $extensao;
         $caminho_destino = $upload_dir . $novo_nome;
 
-        // Filtro de tipos permitidos: PDF, Imagens
         $allowed_mime_types = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif'];
-        $uploaded_mime_type = mime_content_type($_FILES['arquivo']['tmp_name']); // Usa função para obter MIME Type real
+        $uploaded_mime_type = mime_content_type($_FILES['arquivo']['tmp_name']);
 
         if (!in_array($uploaded_mime_type, $allowed_mime_types)) {
             $_SESSION['mensagem'] = "Tipo de arquivo não permitido. Apenas PDF e Imagens (JPG, PNG, GIF).";
@@ -89,7 +81,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
         }
 
         if (move_uploaded_file($_FILES['arquivo']['tmp_name'], $caminho_destino)) {
-            $caminho_arquivo_bd = 'uploads/conteudos/' . $novo_nome; // Caminho relativo para o BD
+            $caminho_arquivo_bd = 'uploads/conteudos/' . $novo_nome;
             $tipo_arquivo = $uploaded_mime_type;
             $descricao_recurso = $titulo_recurso . ' (Arquivo: ' . $nome_arquivo_original . ')';
         } else {
@@ -100,7 +92,6 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
         }
 
     } elseif ($is_link_provided) {
-        // --- Processamento de Link ---
         if (!filter_var($link_url, FILTER_VALIDATE_URL)) {
              $_SESSION['mensagem'] = "O link fornecido não é uma URL válida.";
              $_SESSION['sucesso'] = false;
@@ -109,13 +100,11 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
         }
         
         $caminho_arquivo_bd = $link_url;
-        $tipo_arquivo = 'URL'; // Novo tipo para links
+        $tipo_arquivo = 'URL';
         $descricao_recurso = $titulo_recurso . ' (Link: ' . parse_url($link_url, PHP_URL_HOST) . ')';
     }
 
-
     try {
-        // Insere o Recurso como filho do Tema (parent_id = tema_id)
         $sql = "INSERT INTO conteudos (professor_id, parent_id, titulo, descricao, tipo_arquivo, caminho_arquivo, data_upload) 
                  VALUES (:professor_id, :parent_id, :titulo, :descricao, :tipo_arquivo, :caminho_arquivo, NOW())";
         $stmt = $pdo->prepare($sql);
@@ -128,15 +117,12 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
             ':tipo_arquivo' => $tipo_arquivo,
             ':caminho_arquivo' => $caminho_arquivo_bd
         ])) {
-            // SUCESSO! Armazena a mensagem na sessão e REDIRECIONA
             $tipo_msg = $is_file_upload ? "Arquivo" : "Link";
             $_SESSION['mensagem'] = $tipo_msg . " **" . htmlspecialchars($titulo_recurso) . "** enviado e vinculado ao tema com sucesso!";
             $_SESSION['sucesso'] = true;
         } else {
-            // ERRO BD!
             $_SESSION['mensagem'] = "Erro ao vincular recurso ao banco de dados.";
             $_SESSION['sucesso'] = false;
-            // Se foi um upload de arquivo, tenta reverter (excluir o arquivo que foi movido)
             if ($is_file_upload && file_exists('../' . $caminho_arquivo_bd)) {
                 unlink('../' . $caminho_arquivo_bd);
             }
@@ -146,62 +132,49 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
         $_SESSION['sucesso'] = false;
     }
     
-    // REDIRECIONAMENTO FINAL após qualquer tentativa (PRG)
     header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
     exit;
 }
-
 
 // --- 4. LÓGICA DE EXCLUSÃO DE RECURSO (Mantido com Ajustes) ---
 if ($tema_id > 0 && isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
     $recurso_id = $_GET['excluir'];
     try {
-        // Busca o caminho e o tipo do recurso para exclusão e garante permissão
         $sql_caminho = "SELECT caminho_arquivo, tipo_arquivo FROM conteudos 
                          WHERE id = :id AND professor_id = :professor_id AND parent_id = :parent_id";
         $stmt_caminho = $pdo->prepare($sql_caminho);
         $stmt_caminho->execute([':id' => $recurso_id, ':professor_id' => $professor_id, ':parent_id' => $tema_id]);
         $recurso_info = $stmt_caminho->fetch(PDO::FETCH_ASSOC);
 
-        // Exclui o registro do conteúdo (recurso)
         $sql_delete = "DELETE FROM conteudos 
                         WHERE id = :id AND professor_id = :professor_id AND parent_id = :parent_id";
         $stmt_delete = $pdo->prepare($sql_delete);
         
         if ($stmt_delete->execute([':id' => $recurso_id, ':professor_id' => $professor_id, ':parent_id' => $tema_id])) {
-            
-            // SE FOR ARQUIVO (NÃO FOR LINK), tenta excluir o arquivo físico
             if ($recurso_info && $recurso_info['caminho_arquivo'] && $recurso_info['tipo_arquivo'] !== 'URL') {
                 $caminho_completo = '../' . $recurso_info['caminho_arquivo'];
                 if (file_exists($caminho_completo) && !is_dir($caminho_completo)) {
                     unlink($caminho_completo);
                 }
             }
-            
-            // SUCESSO! Armazena a mensagem na sessão e REDIRECIONA
             $_SESSION['mensagem'] = "Recurso excluído com sucesso!";
             $_SESSION['sucesso'] = true;
         } else {
-            // ERRO BD!
             $_SESSION['mensagem'] = "Erro ao excluir recurso ou recurso não encontrado.";
             $_SESSION['sucesso'] = false;
         }
     } catch (PDOException $e) {
-        // ERRO EXCEÇÃO!
         $_SESSION['mensagem'] = "Erro: O recurso pode estar sendo referenciado. (" . $e->getMessage() . ")";
         $_SESSION['sucesso'] = false;
     }
     
-    // REDIRECIONAMENTO FINAL após a exclusão (PRG)
     header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
     exit;
 }
 
-
 // --- 5. BUSCAR RECURSOS DO TEMA (Mantido) ---
 $recursos = [];
 if ($tema_id > 0) {
-    // Agora selecionamos o caminho_arquivo para URLs também
     $sql_recursos = "SELECT id, titulo, tipo_arquivo, caminho_arquivo, data_upload 
                      FROM conteudos 
                      WHERE parent_id = :tema_id AND professor_id = :professor_id 
@@ -211,28 +184,20 @@ if ($tema_id > 0) {
     $recursos = $stmt_recursos->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Função auxiliar para mostrar o ícone correto
 function get_file_icon($mime_type, $caminho_arquivo = null) {
-    // 1. Tratamento para Links (URL)
     if ($mime_type === 'URL') {
         if ($caminho_arquivo && (strpos($caminho_arquivo, 'youtube.com') !== false || strpos($caminho_arquivo, 'youtu.be') !== false)) {
             return 'fab fa-youtube text-danger';
         }
         return 'fas fa-link text-info';
     }
-    
-    // 2. Tratamento para Arquivos
     if (strpos($mime_type, 'image/') !== false) return 'fas fa-image text-success';
     if (strpos($mime_type, 'pdf') !== false) return 'fas fa-file-pdf text-danger';
-    
-    // Tipos genéricos (mantidos por segurança, caso outros tipos sejam permitidos no futuro)
     if (strpos($mime_type, 'word') !== false || strpos($mime_type, 'document') !== false) return 'fas fa-file-word';
     if (strpos($mime_type, 'audio/') !== false) return 'fas fa-file-audio';
     if (strpos($mime_type, 'video/') !== false) return 'fas fa-file-video';
-    
     return 'fas fa-file text-secondary';
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -245,17 +210,24 @@ function get_file_icon($mime_type, $caminho_arquivo = null) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../../css/professor/gerenciar_conteudos.css">
     <style>
-        /* Mantém a paleta de cores original do gerenciar_conteudos.css (se existir) ou define padrões */
         :root {
-            --cor-primaria: #0A1931; /* Marinho Escuro */
-            --cor-secundaria: #B91D23; /* Vermelho Escuro */
-            --cor-fundo: #F5F5DC; /* Creme/Bege */
+            --cor-primaria: #0A1931;
+            --cor-secundaria: #B91D23;
+            --cor-fundo: #FAF9F6;
         }
         .main-content { padding: 30px; }
         .card-header-custom {
             background-color: var(--cor-primaria);
             color: white;
             font-weight: bold;
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: var(--cor-primaria);
+            color: white;
+        }
+    
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.25rem var(--cor-primaria);
         }
     </style>
 </head>
@@ -273,7 +245,7 @@ function get_file_icon($mime_type, $caminho_arquivo = null) {
 
     <div class="main-content flex-grow-1">
         
-        <h1 class="mb-4" style="color: var(--cor-primaria);">Gerenciamento de Recursos</h1>
+        <h1 class="mb-4" style="color: var(--cor-primaria);">Gerenciamento de Arquivos</h1>
         
         <?php if ($tema_info): ?>
             <p class="lead">Recursos (Arquivos e Links) do Tema: <strong style="color: var(--cor-secundaria);"><?= htmlspecialchars($tema_info['titulo']) ?></strong></p>
@@ -289,47 +261,53 @@ function get_file_icon($mime_type, $caminho_arquivo = null) {
 
         <?php if ($tema_info): ?>
             <div class="row">
-                
+                <!-- Substituição do modal por um accordion recolhível -->
                 <div class="col-lg-12">
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header card-header-custom">
-                            <i class="fas fa-plus-circle me-2"></i> Adicionar Novo Recurso (Arquivo ou Link)
-                        </div>
-                        <div class="card-body">
-                            <form method="POST" enctype="multipart/form-data" action="gerenciar_arquivos_tema.php?tema_id=<?= $tema_id ?>" id="formRecurso">
-                                <input type="hidden" name="acao" value="upload_recurso">
-                                
-                                <div class="mb-3">
-                                    <label for="titulo_recurso" class="form-label">Título do Recurso</label>
-                                    <input type="text" class="form-control" id="titulo_recurso" name="titulo_recurso" required>
-                                </div>
-                                
-                                <div class="p-3 mb-3 border rounded">
-                                    <h6 class="text-secondary"><i class="fas fa-file-upload me-1"></i> 1. Upload de Arquivo</h6>
-                                    <div class="mb-2">
-                                        <label for="arquivo" class="form-label">Selecione o Arquivo</label>
-                                        <input type="file" class="form-control" id="arquivo" name="arquivo" accept=".pdf,image/jpeg,image/png,image/gif">
-                                        <small class="text-muted">Tipos permitidos: PDF, JPG,PNG.</small>
-                                    </div>
-                                </div>
-
-                                <div class="p-3 mb-3 border rounded">
-                                    <h6 class="text-secondary"><i class="fas fa-link me-1"></i> 2. Link Externo / URL </h6>
-                                    <div class="mb-2">
-                                        <label for="link_url" class="form-label">Link</label>
-                                        <input type="url" class="form-control" id="link_url" name="link_url" placeholder="Ex: https://www.youtube.com/watch?v=...">
-                                        <small class="text-muted">Se fornecido, este recurso será salvo como um link, e não como um arquivo.</small>
-                                    </div>
-                                </div>
-
-                                <div class="alert alert-info small" role="alert">
-                                    <i class="fas fa-info-circle me-1"></i> Você deve fornecer um arquivo OU um link. O campo Título é obrigatório.
-                                </div>
-                                
-                                <button type="submit" class="btn text-white" style="background-color: var(--cor-secundaria);">
-                                    <i class="fas fa-save me-2"></i> Salvar Recurso
+                    <div class="accordion mb-4" id="accordionAdicionarRecurso">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingAdicionarRecurso">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdicionarRecurso" aria-expanded="false" aria-controls="collapseAdicionarRecurso">
+                                    <i class="fas fa-plus-circle me-2"></i> Adicionar Novo Recurso (Arquivo ou Link)
                                 </button>
-                            </form>
+                            </h2>
+                            <div id="collapseAdicionarRecurso" class="accordion-collapse collapse" aria-labelledby="headingAdicionarRecurso" data-bs-parent="#accordionAdicionarRecurso">
+                                <div class="accordion-body">
+                                    <form method="POST" enctype="multipart/form-data" action="gerenciar_arquivos_tema.php?tema_id=<?= $tema_id ?>" id="formRecurso">
+                                        <input type="hidden" name="acao" value="upload_recurso">
+                                        <div class="mb-3">
+                                            <label for="titulo_recurso" class="form-label">Título do Arquivo</label>
+                                            <input type="text" class="form-control" id="titulo_recurso" name="titulo_recurso" required>
+                                        </div>
+                                        <div class="p-3 mb-3 border rounded">
+                                            <h6 class="text-secondary"><i class="fas fa-file-upload me-1"></i> 1. Upload de Arquivo</h6>
+                                            <div class="mb-2">
+                                                <label for="arquivo" class="form-label">Selecione o Arquivo</label>
+                                                <input type="file" class="form-control" id="arquivo" name="arquivo" accept=".pdf,image/jpeg,image/png,image/gif">
+                                                <small class="text-muted">Tipos permitidos: PDF, JPG, PNG.</small>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 mb-3 border rounded">
+                                            <h6 class="text-secondary"><i class="fas fa-link me-1"></i> 2. Link Externo / URL </h6>
+                                            <div class="mb-2">
+                                                <label for="link_url" class="form-label">Link</label>
+                                                <input type="url" class="form-control" id="link_url" name="link_url" placeholder="Ex: https://www.youtube.com/watch?v=...">
+                                                <small class="text-muted">Se fornecido, este recurso será salvo como um link, e não como um arquivo.</small>
+                                            </div>
+                                        </div>
+                                        <div class="alert alert-info small" role="alert">
+                                            <i class="fas fa-info-circle me-1"></i> Você deve fornecer um arquivo OU um link. O campo Título é obrigatório.
+                                        </div>
+                                        <div class="d-flex justify-content-end">
+                                            <button type="button" class="btn btn-outline-secondary me-2" data-bs-toggle="collapse" data-bs-target="#collapseAdicionarRecurso" aria-expanded="false" aria-controls="collapseAdicionarRecurso">
+                                                Cancelar
+                                            </button>
+                                            <button type="submit" class="btn text-white" style="background-color: var(--cor-secundaria);">
+                                                <i class="fas fa-save me-2"></i> Salvar Recurso
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -386,7 +364,6 @@ function get_file_icon($mime_type, $caminho_arquivo = null) {
                         </div>
                     </div>
                 </div>
-
             </div>
         <?php else: ?>
              <div class="alert alert-danger">
@@ -396,6 +373,7 @@ function get_file_icon($mime_type, $caminho_arquivo = null) {
     </div>
 </div>
 
+<!-- Modal de Exclusão (mantido) -->
 <div class="modal fade" id="modalExcluirRecurso" tabindex="-1" aria-labelledby="modalExcluirRecursoLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -431,11 +409,10 @@ document.addEventListener('DOMContentLoaded', function () {
         var modalTitle = modalExcluir.querySelector('#recursoTituloModal');
         
         modalTitle.textContent = recursoTitulo;
-        // Monta o link de exclusão com o ID do recurso e o tema_id
         linkExcluir.href = 'gerenciar_arquivos_tema.php?tema_id=' + temaId + '&excluir=' + recursoId;
     });
 
-    // --- NOVO SCRIPT: Validação de Formulário (Garantir que Arquivo OU Link seja enviado) ---
+    // Validação de Formulário (Arquivo OU Link)
     const form = document.getElementById('formRecurso');
     const arquivoInput = document.getElementById('arquivo');
     const linkUrlInput = document.getElementById('link_url');
@@ -454,10 +431,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!isFileProvided && !isLinkProvided) {
             alert('Você deve fornecer um Arquivo OU um Link Externo.');
-            e.preventDefault(); // Impede o envio do formulário
+            e.preventDefault();
             return false;
         }
-        // Se a validação passar, o formulário será enviado
     });
 });
 </script>
