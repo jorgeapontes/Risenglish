@@ -1,0 +1,311 @@
+/* =======================
+    🎨 Paleta de Cores
+    Creme, Vermelho Escuro, Azul Marinho
+======================= */
+:root {
+    --cor-primaria: #0A1931;    /* Azul Marinho */
+    --cor-secundaria: #B91D23;  /* Vermelho Escuro */
+    --cor-fundo: #F8F5EB;       /* Creme/Bege */
+    --cor-texto: #333333;       /* Cinza Escuro */
+    --cor-clara: #ffffff;
+}
+
+/* =======================
+    🌍 Estrutura Global
+======================= */
+body {
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    margin: 0;
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container-fluid {
+    padding: 0;
+}
+
+.main-content {
+    margin-left: 16.666667%;
+    width: 83.333333%;
+    min-height: 100vh;
+    overflow-y: auto;
+    background-color: var(--cor-fundo);
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: #081d40 !important;
+    color: white;
+    border-bottom: none;
+    font-weight: 600;
+}
+
+.btn-danger {
+    background-color: #c0392b;
+    border-color: #c0392b;
+}
+
+.btn-danger:hover {
+    background-color: #a93226;
+    border-color: #a93226;
+}
+
+.btn-outline-secondary {
+    color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: white;
+}
+
+#botao-sair {
+    border: none;
+    font-weight: 500;
+}
+
+#botao-sair:hover {
+    background-color: #c0392b;
+    color: white;
+    transform: none;
+}
+
+/* =======================
+    📅 Calendário
+======================= */
+.calendario {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    margin-top: 20px;
+    background-color: #ddd;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dia-semana {
+    background-color: #081d40;
+    color: white;
+    text-align: center;
+    padding: 12px 5px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.celula-dia {
+    background-color: white;
+    border: none;
+    min-height: 140px;
+    padding: 8px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.celula-dia:hover {
+    background-color: #f8f9fa;
+}
+
+.celula-dia.outros-meses {
+    background-color: #f8f9fa;
+    color: #adb5bd;
+}
+
+.numero-dia {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 8px;
+    display: block;
+    flex-shrink: 0;
+    color: #333;
+}
+
+/* CONTAINER DE AULAS COM SCROLL */
+.aulas-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+/* Custom scrollbar para o container de aulas */
+.aulas-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.aulas-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.aulas-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.aulas-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.bloco-aula {
+    background-color: #081d40;
+    color: white;
+    padding: 6px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    border-left: 3px solid #c0392b;
+}
+
+.bloco-aula:hover {
+    background-color: #32475b;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.bloco-aula strong {
+    display: block;
+    font-size: 0.75em;
+    margin-bottom: 2px;
+}
+
+.bloco-aula span {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.bloco-aula small {
+    display: block;
+    font-size: 0.7em;
+    opacity: 0.9;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Indicador visual de scroll quando há muitas aulas */
+.celula-dia.muitas-aulas::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(transparent, rgba(255,255,255,0.9));
+    pointer-events: none;
+}
+
+/* =======================
+    👤 Sidebar
+======================= */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 16.666667%;
+    background-color: #081d40;
+    color: #fff;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar h5 {
+    color: #fff;
+    font-weight: 600;
+}
+
+.sidebar a {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    padding: 12px 15px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.sidebar a:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateX(5px);
+}
+
+.sidebar .active {
+    background-color: #c0392b;
+    transform: translateX(5px);
+}
+
+.sidebar .active:hover {
+    background-color: #c0392b;
+    transform: translateX(5px);
+}
+
+/* =======================
+    📱 Responsividade
+======================= */
+@media (max-width: 768px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .calendario {
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    .celula-dia {
+        min-height: 120px;
+    }
+    
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .d-flex.justify-content-between.align-items-center.mb-4 h3 {
+        text-align: center;
+        order: -1;
+    }
+}
+
+/* Badges para as próximas aulas */
+.badge {
+    font-size: 0.75em;
+    padding: 4px 8px;
+}
+
+/* Melhorias para o card de próximas aulas */
+.border-bottom {
+    border-color: #e9ecef !important;
+}
+
+.text-primary {
+    color: #081d40 !important;
+}
+
+.bg-primary {
+    background-color: #081d40 !important;
+}
