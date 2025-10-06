@@ -82,7 +82,7 @@ body {
 .calendario {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
+    gap: 0px;
     margin-top: 20px;
     background-color: #ddd;
     border: 1px solid #ddd;

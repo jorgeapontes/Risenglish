@@ -264,7 +264,7 @@ $nomes_meses = [
                                             <h6 class="mb-1"><?= htmlspecialchars($proxima['titulo_aula']) ?></h6>
                                             <small class="text-muted">
                                                 <i class="fas fa-users me-1"></i><?= htmlspecialchars($proxima['nome_turma']) ?> 
-                                                | <i class="fas fa-user me-1"></i><?= htmlspecialchars($proxima['nome_professor']) ?>
+                                                | <i class="fas fa-user me-1"></i>Prof. <?= htmlspecialchars($proxima['nome_professor']) ?>
                                             </small>
                                         </div>
                                         <div class="text-end">
