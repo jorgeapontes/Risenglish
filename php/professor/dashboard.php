@@ -121,18 +121,17 @@ $nomes_meses = [
         <div class="row">
             <!-- Sidebar -->
             <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <!-- Nome do professor puxado da sessão -->
+                <!-- Nome do professor -->
                 <div class="mb-4 text-center">
-                    <!-- AQUI É O PONTO CORRIGIDO -->
-                    <h5 class="mt-4">Prof. <?= htmlspecialchars($professor_nome) ?></h5>
+                    <h5 class="mt-4">Prof. <?php echo $_SESSION['user_nome'] ?? 'Professor'; ?></h5>
                 </div>
 
                 <!-- Menu centralizado verticalmente -->
                 <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="dashboard.php" class="p-2 mb-2 rounded active"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="gerenciar_aulas.php" class="p-2 mb-2 rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
-                    <a href="gerenciar_conteudos.php" class="p-2 mb-2 rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
-                    <a href="gerenciar_alunos.php" class="p-2 mb-2 rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
+                    <a href="dashboard.php" class="rounded active"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
+                    <a href="gerenciar_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
+                    <a href="gerenciar_conteudos.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
+                    <a href="gerenciar_alunos.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
                 </div>
 
                 <!-- Botão sair no rodapé -->
