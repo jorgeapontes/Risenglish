@@ -150,7 +150,7 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
         <div class="tab-content" id="usuarioTabContent">
 
             <div class="tab-pane fade show active" id="professores" role="tabpanel" aria-labelledby="professores-tab">
-                <h3 style="color: var(--cor-secundaria);">Lista de Professores</h3>
+                <h3 style="color: var(--cor-primaria);">Lista de Professores</h3>
                 <div class="table-responsive">
                     <table class="table table-striped table-bordered align-middle">
                         <thead class="bg-light" style="color: var(--cor-primaria);">
@@ -187,7 +187,7 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <div class="tab-pane fade" id="alunos" role="tabpanel" aria-labelledby="alunos-tab">
-                <h3 style="color: var(--cor-secundaria);">Lista de Alunos</h3>
+                <h3 style="color: var(--cor-primaria);">Lista de Alunos</h3>
                 <div class="table-responsive">
                     <table class="table table-striped table-bordered align-middle">
                         <thead class="bg-light" style="color: var(--cor-primaria);">
