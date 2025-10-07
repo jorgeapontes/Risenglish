@@ -29,7 +29,7 @@ $nome_usuario = $_SESSION['user_nome'];
         <h4 class="text-center mb-4 border-bottom pb-3">ADMIN RISENGLISH</h4>
         <a href="dashboard.php"><i class="fas fa-home me-2"></i>Home</a>
         <a href="gerenciar_alunos_turmas.php"><i class="fas fa-users me-2"></i>Gerenciar Alunos/Turmas</a>
-        <a href="recomendacoes.php"><i class="fas fa-book"></i> Recomendações</a>
+        <a href="gerenciar_uteis.php"><i class="fas fa-book"></i> Recomendações</a>
         <a href="../logout.php" style="position: absolute; bottom: 20px; width: calc(100% - 30px);"><i class="fas fa-sign-out-alt me-2"></i> Sair</a>
     </div>
 
