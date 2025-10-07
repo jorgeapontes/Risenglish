@@ -107,6 +107,7 @@ $alunos_associados = $stmt_alunos_associados->fetchAll(PDO::FETCH_ASSOC);
         <a href="dashboard.php"><i class="fas fa-home me-2"></i> Home</a>
         <a href="gerenciar_turmas.php" style="background-color: #92171B;"><i class="fas fa-users-class me-2"></i> Turmas</a>
         <a href="gerenciar_usuarios.php"><i class="fas fa-user-friends me-2"></i> Usuários (Prof/Alunos)</a>
+        <a href="recomendacoes.php"><i class="fas fa-book"></i> Recomendações</a>
         <a href="../logout.php" style="position: absolute; bottom: 20px; width: calc(100% - 30px);"><i class="fas fa-sign-out-alt me-2"></i> Sair</a>
     </div>
 
