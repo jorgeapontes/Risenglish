@@ -32,9 +32,11 @@ body {
     text-decoration: none;
     display: block;
     transition: background-color 0.2s;
+    border-radius: 5px;
 }
 .sidebar a:hover {
     background-color: var(--cor-secundaria);
+    border-radius: 5px;
 }
 .sidebar a[style*="background-color: #92171B;"] {
     background-color: var(--cor-hover-secundaria) !important; /* Mantém a seleção */
