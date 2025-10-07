@@ -1,11 +1,18 @@
 <?php
-    session_start();
-    // Inclui a conexão com o banco de dados e o cabeçalho/navbar do admin
-    // Assume que a estrutura é: php/admin/ -> ../../includes/conexao.php
-    include_once '../includes/conexao.php';
-    
+session_start();
+// 1. Incluir a conexão com o banco
+require_once '../includes/conexao.php';
 
-    // Verifica se a conexão PDO ($pdo) foi estabelecida
+// 2. Checar a autenticação e permissão (Bloqueio de acesso)
+if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'admin') {
+    header("Location: ../login.php");
+    exit;
+}
+
+$nome_usuario = $_SESSION['user_nome'];
+
+
+ // Verifica se a conexão PDO ($pdo) foi estabelecida
     if (!isset($pdo)) {
         // Se $pdo não existe, a conexão falhou. Exibe erro e interrompe.
         die('<div class="alert alert-danger">Erro de Conexão: Variável PDO não definida. Verifique seu arquivo `conexao.php`.</div>');
@@ -89,24 +96,31 @@
         $erro_sql = "Erro ao carregar recursos do banco de dados. Verifique se a tabela 'recursos_uteis' existe. Erro: " . $e->getMessage();
     }
 ?>
-    <!-- Adiciona os estilos específicos desta página -->
-     <!DOCTYPE html>
-     <html lang="en">
-     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Gerenciar Úteis</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-        <link rel="stylesheet" href="../../css/admin/gerenciar_uteis.css">
-     </head>
-     <body>
 
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Risenglish</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../../css/admin/dashboard.css">
+    
+</head>
+<body>
 
+<div class="d-flex">
+    <div class="sidebar p-3">
+        <h4 class="text-center mb-4 border-bottom pb-3">ADMIN RISENGLISH</h4>
+        <a href="dashboard.php"><i class="fas fa-home me-2"></i>Home</a>
+        <a href="gerenciar_alunos_turmas.php"><i class="fas fa-users me-2"></i>Gerenciar Alunos/Turmas</a>
+        <a href="gerenciar_uteis.php" style="background-color: #92171B;"><i class="fas fa-book"></i> Recomendações</a>
+        <a href="../logout.php" style="position: absolute; bottom: 20px; width: calc(100% - 30px);"><i class="fas fa-sign-out-alt me-2"></i> Sair</a>
+    </div>
 
-     
-
-    <div class="page-header">
+    <div class="main-content flex-grow-1">
+        <div class="page-header">
         <h1 class="page-title">Gerenciar Recomendações Úteis (Úteis)</h1>
         <button class="btn-add-resource" onclick="openModal('add')">
             <i class="fas fa-plus-circle"></i> Adicionar Novo Recurso
@@ -149,18 +163,18 @@
                             <td><?php echo htmlspecialchars($recurso['descricao']); ?></td>
                             <td>
                                 <!-- Target _blank abre em nova aba -->
-                                <a href="<?php echo htmlspecialchars($recurso['link']); ?>" target="_blank" class="action-link">
-                                    <i class="fas fa-external-link-alt"></i> Acessar
+                                <a href="<?php echo htmlspecialchars($recurso['link']); ?>" target="_blank" class="btn-open-link">
+                                    <i class="fas fa-eye"></i> 
                                 </a>
                             </td>
                             <td><?php echo (new DateTime($recurso['data_criacao']))->format('d/m/Y'); ?></td>
                             <td class="action-buttons">
                                 <!-- Passa os dados do recurso como JSON para a função JS -->
                                 <button class="btn-edit" onclick='openModal("edit", <?php echo json_encode($recurso); ?>)'>
-                                    <i class="fas fa-edit"></i> Editar
+                                    <i class="fas fa-edit"></i> 
                                 </button>
                                 <button class="btn-delete" onclick="confirmDelete(<?php echo $recurso['id']; ?>)">
-                                    <i class="fas fa-trash-alt"></i> Apagar
+                                    <i class="fas fa-trash-alt"></i> 
                                 </button>
                             </td>
                         </tr>
@@ -195,7 +209,7 @@
                     <textarea id="descricao" name="descricao" rows="3"></textarea>
                 </div>
 
-                <button type="submit" class="btn-primary" id="submitButton">Adicionar Recurso</button>
+                <button type="submit" class="btn-modal-submit" id="submitButton">Adicionar Recurso</button>
             </form>
         </div>
     </div>
@@ -268,5 +282,9 @@
         }
     </script>
 
- </body>
-     </html>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
