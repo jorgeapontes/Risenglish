@@ -1,7 +1,7 @@
 :root {
             --cor-primaria: #0A1931; /* Marinho Escuro */
             --cor-secundaria: #B91D23; /* Vermelho */
-            --cor-fundo: #F5F5DC; /* Creme/Bege */
+            --cor-fundo: #F8F5EB; /* Creme/Bege */
         }
         body { background-color: var(--cor-fundo); }
         .sidebar {
