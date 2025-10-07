@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 02/10/2025 às 18:16
+-- Tempo de geração: 07/10/2025 às 02:46
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -88,6 +88,17 @@ CREATE TABLE `aulas_conteudos` (
   `planejado` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Despejando dados para a tabela `aulas_conteudos`
+--
+
+INSERT INTO `aulas_conteudos` (`id`, `aula_id`, `conteudo_id`, `planejado`) VALUES
+(1, 8, 2, 0),
+(2, 8, 10, 0),
+(3, 8, 15, 1),
+(4, 8, 1, 1),
+(20, 9, 17, 0);
+
 -- --------------------------------------------------------
 
 --
@@ -113,11 +124,35 @@ INSERT INTO `conteudos` (`id`, `professor_id`, `parent_id`, `titulo`, `descricao
 (1, 2, NULL, 'MyCar', 'teste', 'jpeg', '../uploads/conteudos/cont_68d96e5bdebbd4.87423538.jpeg', '2025-09-28 17:20:27'),
 (2, 2, 1, 'imagem teste', 'imagem teste (Arquivo: urus.jpeg)', 'image/jpeg', 'uploads/conteudos/1759411748_68de7e243304d.jpeg', '2025-10-02 13:29:08'),
 (10, 2, 1, 'pdf teste', 'pdf teste (Arquivo: CONTRATO_Laura.pdf)', 'application/pdf', 'uploads/conteudos/1759413616_68de8570c2a0a.pdf', '2025-10-02 14:00:16'),
-(11, 2, 1, 'ppt teste', 'ppt teste (Arquivo: pptTeste.pptx)', 'application/vnd.openxmlformats-officedocument.pres', 'uploads/conteudos/1759413995_68de86ebb1eb2.pptx', '2025-10-02 14:06:35'),
 (12, 2, 1, 'ppt teste pdf', 'ppt teste pdf (Arquivo: pptTeste.pdf)', 'application/pdf', 'uploads/conteudos/1759414097_68de8751e13ba.pdf', '2025-10-02 14:08:17'),
 (13, 2, 1, 'teste de link', 'teste de link (Link: youtu.be)', 'URL', 'https://youtu.be/aq-DH4iwviE?si=xYXctrZTNO343Tfq', '2025-10-02 14:36:05'),
 (14, 2, 1, 'teste pdf de novo', 'teste pdf de novo (Arquivo: Mapa conceitual.pdf)', 'application/pdf', 'uploads/conteudos/1759415810_68de8e0289ad5.pdf', '2025-10-02 14:36:50'),
-(15, 2, NULL, 'My self', '', 'TEMA', '', '2025-10-02 14:44:00');
+(15, 2, NULL, 'My self', '', 'TEMA', '', '2025-10-02 14:44:00'),
+(17, 2, NULL, 'Friendship', '', 'TEMA', '', '2025-10-03 13:19:30');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `recursos_uteis`
+--
+
+CREATE TABLE `recursos_uteis` (
+  `id` int(11) NOT NULL,
+  `titulo` varchar(100) NOT NULL,
+  `link` varchar(255) NOT NULL,
+  `descricao` text DEFAULT NULL,
+  `data_criacao` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `recursos_uteis`
+--
+
+INSERT INTO `recursos_uteis` (`id`, `titulo`, `link`, `descricao`, `data_criacao`) VALUES
+(1, 'Linguee', 'https://www.linguee.com.br/', 'Dicionário inglês-português\r\ne buscador de traduções.', '2025-10-06 21:21:17'),
+(2, 'Youglish', 'https://pt.youglish.com/', 'Use o YouTube para melhorar sua pronúncia em inglês. Com mais de 100 milhões de faixas, o YouGlish te dá respostas rápidas e imparciais sobre como o inglês é falado por pessoas reais dentro de um contexto.', '2025-10-06 21:31:05'),
+(3, 'toPhonetics', 'https://tophonetics.com/', 'Faça a tradução dos seus textos usando o Alfabético Fonético', '2025-10-06 21:33:23'),
+(4, 'DeepL', 'https://www.deepl.com/pt-BR/translator', 'Tradutor recomendado', '2025-10-06 21:33:54');
 
 -- --------------------------------------------------------
 
@@ -151,21 +186,23 @@ CREATE TABLE `usuarios` (
   `nome` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `senha` varchar(255) NOT NULL,
-  `tipo_usuario` enum('admin','professor','aluno') NOT NULL
+  `tipo_usuario` enum('admin','professor','aluno') NOT NULL,
+  `reset_token` varchar(64) DEFAULT NULL,
+  `token_expira_em` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Despejando dados para a tabela `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`) VALUES
-(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'admin'),
-(2, 'Laura Professor', 'laura@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'professor'),
-(4, 'Jorge Augusto Possani Pontes', 'jorgeappontes13@gmail.com', '$2y$10$pU0aqm5w/k.WZOVdU324F.4acQnOKbSJsotAH3eIaJ4U3uJd4Ftne', 'aluno'),
-(5, 'Rafael Tonetti Cardoso', 'rafaeltonetti.cardoso@gmail.com', '$2y$10$ABEbkqnbGsw.a6nFivA6quafuPOwnLwBEJzrpGzjHS7kyo4GTxDT6', 'aluno'),
-(6, 'Silene Cristina Possani', 'silene@gmail.com', '$2y$10$LZcwgOFnEzR6HUbm.R2QJugM1R5y5N.3mVm78DF46VfEPe1KXNf9K', 'aluno'),
-(7, 'João Victor', 'jv@gmail.com', '$2y$10$Ui89Uk.FUac.U0unv4OsvOBW/bugPb5BRrjHmzibFp7bmtQbdd1OC', 'aluno'),
-(8, 'Professor TESTE', 'profteste@risenglish.com', '$2y$10$DWtEWvdKsdhyoNjE9.7U6umkXyoqJdyiEezoLF4Hp6JB7e9VsOnye', 'professor');
+INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`, `reset_token`, `token_expira_em`) VALUES
+(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'admin', NULL, NULL),
+(2, 'Laura ', 'laura@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'professor', NULL, NULL),
+(4, 'Jorge Augusto Possani Pontes', 'jorgeappontes13@gmail.com', '$2y$10$pU0aqm5w/k.WZOVdU324F.4acQnOKbSJsotAH3eIaJ4U3uJd4Ftne', 'aluno', NULL, NULL),
+(5, 'Rafael Tonetti Cardoso', 'rafaeltonetti.cardoso@gmail.com', '$2y$10$ABEbkqnbGsw.a6nFivA6quafuPOwnLwBEJzrpGzjHS7kyo4GTxDT6', 'aluno', NULL, NULL),
+(6, 'Silene Cristina Possani', 'silene@gmail.com', '$2y$10$LZcwgOFnEzR6HUbm.R2QJugM1R5y5N.3mVm78DF46VfEPe1KXNf9K', 'aluno', NULL, NULL),
+(7, 'João Victor', 'jv@gmail.com', '$2y$10$Ui89Uk.FUac.U0unv4OsvOBW/bugPb5BRrjHmzibFp7bmtQbdd1OC', 'aluno', NULL, NULL),
+(8, 'Professor TESTE', 'profteste@risenglish.com', '$2y$10$DWtEWvdKsdhyoNjE9.7U6umkXyoqJdyiEezoLF4Hp6JB7e9VsOnye', 'professor', NULL, NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -203,6 +240,12 @@ ALTER TABLE `conteudos`
   ADD KEY `professor_id` (`professor_id`);
 
 --
+-- Índices de tabela `recursos_uteis`
+--
+ALTER TABLE `recursos_uteis`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Índices de tabela `turmas`
 --
 ALTER TABLE `turmas`
@@ -214,7 +257,8 @@ ALTER TABLE `turmas`
 --
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `idx_reset_token` (`reset_token`);
 
 --
 -- AUTO_INCREMENT para tabelas despejadas
@@ -236,13 +280,19 @@ ALTER TABLE `aulas`
 -- AUTO_INCREMENT de tabela `aulas_conteudos`
 --
 ALTER TABLE `aulas_conteudos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de tabela `conteudos`
 --
 ALTER TABLE `conteudos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT de tabela `recursos_uteis`
+--
+ALTER TABLE `recursos_uteis`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de tabela `turmas`

@@ -3,11 +3,13 @@
 session_start();
 
 // Inclui o arquivo de conexão com o banco de dados
+// Certifique-se de que o caminho 'includes/conexao.php' está correto.
 require_once 'includes/conexao.php';
 
 // Verifica se o formulário foi submetido
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $email = $_POST['email'] ?? '';
+  // Recebe os dados do POST de forma segura, usando o operador null coalescing (??)
+  $email = $_POST['email'] ?? ''; // Esta é a linha 10 que estava com erro.
   $senha = $_POST['senha'] ?? '';
 
   // 1. Prepara a consulta para buscar o usuário pelo email
@@ -26,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $_SESSION['user_nome'] = $usuario['nome'];
     $_SESSION['user_tipo'] = $usuario['tipo_usuario']; // 'admin', 'professor' ou 'aluno'
 
-    // 4. Redireciona de acordo com o tipo de usuário [cite: 42, 48, 37]
+    // 4. Redireciona de acordo com o tipo de usuário
     switch ($_SESSION['user_tipo']) {
       case 'admin':
         header("Location: admin/dashboard.php");
@@ -77,15 +79,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <form method="POST" action="login.php">
       <div class="mb-3 text-start">
         <label for="email" class="form-label">E-MAIL</label>
-        <input type="email" class="form-control" id="email" name="email" placeholder="Digite seu e-mail">
+        <input type="email" class="form-control" id="email" name="email" placeholder="Digite seu e-mail" required>
       </div>
       <div class="mb-3 text-start">
         <label for="senha" class="form-label">SENHA</label>
-        <input type="password" class="form-control" id="senha" name="senha" placeholder="Digite sua senha">
+        <input type="password" class="form-control" id="senha" name="senha" placeholder="Digite sua senha" required>
       </div>
+      
+
       <button type="submit" class="btn btn-login">ENTRAR</button>
     </form>
-    <a class="footer-text" href="index.php">← Home</p>
+    <a class="footer-text" href="index.php">← Home</a><br>
+    <a href="includes/solicitar_reset.php" class="footer-text">Esqueceu sua senha?</a>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

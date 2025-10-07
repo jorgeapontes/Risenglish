@@ -1,0 +1,381 @@
+/*
+    ======================================
+    ESTILOS ESPECÍFICOS: GERENCIAR RECURSOS ÚTEIS (PROFESSOR/ADMIN)
+    ======================================
+*/
+
+/* --- Componentes de Layout Padrão (Cards e Headers) --- */
+
+/* Estilo para o container principal da página (se necessário) */
+.content-area {
+    padding: 20px;
+}
+
+/* Card padrão para agrupar informações */
+.card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 25px;
+    overflow: hidden; /* Garante que o header escuro não vaze */
+}
+
+.card-header {
+    padding: 15px 20px;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+/* Cabeçalho escuro usado para seções importantes */
+.dark-header {
+    background-color: #343a40; /* Cor escura do tema */
+    color: #ffffff;
+}
+
+/* Título principal da página e botão de adicionar */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.page-title {
+    color: #343a40;
+    font-size: 1.8em;
+    font-weight: 700;
+}
+
+/* Botão de Adicionar Recurso (padrão verde) */
+.btn-add-resource {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-add-resource:hover {
+    background-color: #1e7e34;
+}
+
+
+/* --- Alertas de Status --- */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+
+/* --- Tabela de Recursos (Listagem) --- */
+.resource-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.resource-table th,
+.resource-table td {
+    padding: 15px 20px; /* Adicionado padding para melhor espaçamento */
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.resource-table th {
+    background-color: #f8f9fa; /* Fundo mais claro para o header da tabela */
+    color: #343a40;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85em;
+}
+
+.resource-table tr:hover td {
+    background-color: #f0f0f0;
+}
+
+/* Link na Tabela */
+.action-link {
+    color: #007bff; /* Azul padrão para links de ação */
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.action-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Botões de Ação na Tabela (Editar e Apagar) */
+.action-buttons button {
+    margin-left: 5px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: opacity 0.2s;
+}
+
+.btn-edit {
+    background-color: #ffc107; /* Amarelo (Aviso) */
+    color: #343a40;
+}
+.btn-delete {
+    background-color: #dc3545; /* Vermelho (Perigo) */
+    color: white;
+}
+.btn-edit:hover, .btn-delete:hover {
+    opacity: 0.8;
+}
+
+
+/* --- Modal para Adicionar/Editar --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 8% auto;
+    padding: 30px;
+    border: 1px solid #ddd;
+    width: 90%;
+    max-width: 550px; /* Levemente menor que o anterior para um visual mais clean */
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    animation: fadeIn 0.3s;
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 35px;
+    font-weight: normal; /* Normal em vez de negrito */
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.close-modal:hover {
+    color: #007bff;
+}
+
+.modal-content h3 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+    color: #007bff; /* Título do modal em azul */
+}
+
+/* Campos de Formulário no Modal */
+.form-group label {
+    font-weight: 500;
+    color: #495057;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Botão de Submeter no Modal (Azul, padrão) */
+.btn-primary-modal {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    width: 100%;
+    margin-top: 15px;
+    font-size: 1.05em;
+}
+.btn-primary-modal:hover {
+    background-color: #0056b3;
+}
+/*
+    ======================================
+    ESTILOS GLOBAIS DO PAINEL DE ADMINISTRAÇÃO (SIDEBAR)
+    ======================================
+*/
+
+/* --- Cores Base --- */
+:root {
+    --sidebar-bg: #2c3e50; /* Azul Escuro / Cinza Profundo para Sidebar */
+    --link-color: #ecf0f1; /* Cor do Texto no Sidebar */
+    --hover-bg: #b33939; /* Vermelho Vinho Suave para Destaque/Hover */
+    --active-bg: #8B0000; /* Vermelho Vinho Escuro para Item Ativo */
+    --header-bg: #34495e; /* Fundo do Header principal */
+    --content-bg: #f8f9fa; /* Fundo principal da área de conteúdo */
+    --primary-blue: #007bff; /* Azul padrão para botões e títulos */
+}
+
+/* Reset básico e tipografia */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--content-bg);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* --- Estrutura Principal do Layout --- */
+.wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* --- Sidebar (Menu Lateral) --- */
+.sidebar {
+    width: 250px;
+    background-color: var(--sidebar-bg);
+    padding-top: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    position: fixed; /* Fixa o menu lateral */
+    height: 100%;
+    z-index: 100;
+    transition: width 0.3s;
+}
+
+.sidebar-header {
+    color: white;
+    text-align: center;
+    padding: 10px 0 30px;
+    font-size: 1.5em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar ul li a {
+    display: block;
+    padding: 15px 20px;
+    color: var(--link-color);
+    transition: background-color 0.3s, color 0.3s;
+    font-weight: 500;
+}
+
+.sidebar ul li a i {
+    margin-right: 10px;
+    width: 20px; /* Alinha os ícones */
+}
+
+/* Estilo de Hover e Item Ativo */
+.sidebar ul li a:hover {
+    background-color: var(--hover-bg);
+    color: white;
+}
+
+.sidebar ul li a.active {
+    background-color: var(--active-bg);
+    color: white;
+    border-left: 5px solid white; /* Destaque na lateral */
+    padding-left: 15px;
+}
+
+/* --- Área de Conteúdo Principal --- */
+.content {
+    flex-grow: 1;
+    margin-left: 250px; /* Ajusta para o tamanho fixo da sidebar */
+    padding: 0;
+    transition: margin-left 0.3s;
+}
+
+.main-header {
+    background-color: #ffffff;
+    padding: 15px 30px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.user-info {
+    font-weight: 600;
+    color: var(--sidebar-bg);
+}
+
+.content-area {
+    padding: 30px;
+    max-width: 1400px; /* Limita a largura do conteúdo para melhor leitura */
+    margin: 0 auto;
+}
+
+/* --- Estilos de Componentes (reaplicados para consistência) --- */
+
+/* Card padrão com sombra e bordas arredondadas */
+.card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Cabeçalho Escuro */
+.dark-header {
+    background-color: var(--header-bg); /* Usando uma tonalidade escura para o card header */
+}
+
+/* Botões Azuis Padrão (e outros primários) */
+.btn-primary-modal, .btn-primary {
+    background-color: var(--primary-blue);
+    transition: background-color 0.3s;
+}
+.btn-primary-modal:hover, .btn-primary:hover {
+    background-color: #0056b3;
+}
