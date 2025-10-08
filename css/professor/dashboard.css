@@ -14,7 +14,7 @@
     🌍 Estrutura Global
 ======================= */
 body {
-    background-color: var(--cor-fundo);
+    background-color: #FAF9F6;
     color: var(--cor-texto);
     margin: 0;
     overflow-x: hidden;

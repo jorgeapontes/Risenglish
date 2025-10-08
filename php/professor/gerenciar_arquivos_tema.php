@@ -12,7 +12,7 @@ $professor_id = $_SESSION['user_id'];
 $mensagem = '';
 $sucesso = false;
 
-// --- NOVO: 1. TRATAMENTO DE MENSAGENS DE SESSÃO (PRG) ---
+// --- 1. TRATAMENTO DE MENSAGENS DE SESSÃO (PRG) ---
 if (isset($_SESSION['mensagem'])) {
     $mensagem = $_SESSION['mensagem'];
     $sucesso = $_SESSION['sucesso'] ?? false;
@@ -20,7 +20,7 @@ if (isset($_SESSION['mensagem'])) {
     unset($_SESSION['sucesso']);
 }
 
-// --- 2. VALIDAÇÃO DO TEMA (Mantido) ---
+// --- 2. VALIDAÇÃO DO TEMA ---
 if (!isset($_GET['tema_id']) || !is_numeric($_GET['tema_id'])) {
     header("Location: gerenciar_conteudos.php");
     exit;
@@ -40,7 +40,7 @@ if (!$tema_info) {
     $tema_id = 0; 
 }
 
-// --- NOVO: 3. LÓGICA UNIFICADA DE CADASTRO (ARQUIVO OU LINK) ---
+// --- 3. LÓGICA UNIFICADA DE CADASTRO (ARQUIVO OU LINK) ---
 if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'upload_recurso') {
     
     $titulo_recurso = trim($_POST['titulo_recurso']);
@@ -136,7 +136,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
     exit;
 }
 
-// --- 4. LÓGICA DE EXCLUSÃO DE RECURSO (Mantido com Ajustes) ---
+// --- 4. LÓGICA DE EXCLUSÃO DE RECURSO ---
 if ($tema_id > 0 && isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
     $recurso_id = $_GET['excluir'];
     try {
@@ -172,7 +172,7 @@ if ($tema_id > 0 && isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
     exit;
 }
 
-// --- 5. BUSCAR RECURSOS DO TEMA (Mantido) ---
+// --- 5. BUSCAR RECURSOS DO TEMA ---
 $recursos = [];
 if ($tema_id > 0) {
     $sql_recursos = "SELECT id, titulo, tipo_arquivo, caminho_arquivo, data_upload 
@@ -198,6 +198,13 @@ function get_file_icon($mime_type, $caminho_arquivo = null) {
     if (strpos($mime_type, 'video/') !== false) return 'fas fa-file-video';
     return 'fas fa-file text-secondary';
 }
+
+// Função para extrair ID do YouTube
+function get_youtube_id($url) {
+    $pattern = '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/';
+    preg_match($pattern, $url, $matches);
+    return isset($matches[1]) ? $matches[1] : null;
+}
 ?>
 
 <!DOCTYPE html>
@@ -208,181 +215,391 @@ function get_file_icon($mime_type, $caminho_arquivo = null) {
     <title>Gerenciar Arquivos: <?= htmlspecialchars($tema_info['titulo'] ?? 'Tema Inválido') ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="../../css/professor/gerenciar_conteudos.css">
     <style>
-        :root {
-            --cor-primaria: #0A1931;
-            --cor-secundaria: #B91D23;
-            --cor-fundo: #FAF9F6;
+        body {
+            background-color: #FAF9F6;
+            overflow-x: hidden;
         }
-        .main-content { padding: 30px; }
-        .card-header-custom {
-            background-color: var(--cor-primaria);
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 16.666667%;
+            background-color: #081d40;
+            color: #fff;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+            transition: 0.3s;
+        }
+
+        .sidebar .active {
+            background-color: #c0392b;
+        }
+
+        .sidebar .active:hover{
+            background-color: #c0392b;
+        }
+
+        .main-content {
+            margin-left: 16.666667%;
+            width: 83.333333%;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .card-header {
+            background-color: #081d40;
             color: white;
-            font-weight: bold;
         }
-        .accordion-button:not(.collapsed) {
-            background-color: var(--cor-primaria);
+        
+        .btn-danger {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-danger:hover {
+            background-color: #a93226;
+            border-color: #a93226;
+        }
+        
+        .btn-outline-danger {
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-outline-danger:hover {
+            background-color: #c0392b;
             color: white;
         }
-    
-        .accordion-button:focus {
-            box-shadow: 0 0 0 0.25rem var(--cor-primaria);
+
+        #botao-sair {
+            border: none;
+        }
+
+        #botao-sair:hover {
+            background-color: #c0392b;
+            color: white;
+            transform: none;
+        }
+
+        /* Estilos para a tabela */
+        .table-responsive {
+            border-radius: 0 0 5px 5px;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        /* Ajuste para o grupo de botões de ação */
+        .btn-group-sm > .btn, .btn-sm {
+            padding: .25rem .5rem;
+            font-size: .875rem;
+            border-radius: .2rem;
+        }
+        
+        /* Estilo para o botão de visualizar */
+        .btn-info-detalhes {
+            background-color: #099410ff;
+            border-color: #099410ff;
+            color: white;
+        }
+        
+        .btn-info-detalhes:hover {
+            background-color: #087e0eff;
+            border-color: #087e0eff;
+            color: white;
+        }
+
+        /* Estilo para recursos da lista */
+        .recurso-item {
+            transition: all 0.2s ease;
+        }
+        
+        .recurso-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Modal YouTube personalizado */
+        .modal-youtube .modal-dialog {
+            max-width: 70%;
+            max-height: 70vh;
+        }
+        
+        .modal-youtube .modal-content {
+            background: #081d40;
+            border: none;
+            padding: 10px;
+        }
+        
+        .modal-youtube .modal-header {
+            border-bottom: none;
+            padding-bottom: 25px;
+        }
+        
+        .modal-youtube .btn-close {
+            background-color: white;
+            opacity: 1;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #back-link {
+            text-decoration: none;
+            color: #081d40
+        }
+
+        #back-link:hover {
+            text-decoration: none;
+            color: #384d90
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .modal-youtube .modal-dialog {
+                max-width: 95%;
+                margin: 10px auto;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 d-flex flex-column sidebar p-3">
+                <!-- Nome do professor -->
+                <div class="mb-4 text-center">
+                    <h5 class="mt-4">Prof. <?php echo $_SESSION['user_nome'] ?? 'Professor'; ?></h5>
+                </div>
 
-<div class="d-flex">
-    <div class="sidebar p-3">
-        <h4 class="text-center mb-4 border-bottom pb-3">RISENGLISH PROFESSOR</h4>
-        <a href="dashboard.php"><i class="fas fa-home me-2"></i> Dashboard</a>
-        <a href="gerenciar_aulas.php"><i class="fas fa-calendar-alt me-2"></i>Aulas</a>
-        <a href="gerenciar_conteudos.php" style="background-color: #92171B;"><i class="fas fa-book-open me-2"></i>Conteúdos</a>
-        <a href="gerenciar_alunos.php"><i class="fas fa-users me-2"></i> Alunos/Turmas</a>
-        <a href="../logout.php" class="link-sair"><i class="fas fa-sign-out-alt me-2"></i> Sair</a>
+                <!-- Menu centralizado verticalmente -->
+                <div class="d-flex flex-column flex-grow-1 mb-5">
+                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
+                    <a href="gerenciar_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
+                    <a href="gerenciar_conteudos.php" class="rounded active"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
+                    <a href="gerenciar_alunos.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
+                </div>
+
+                <!-- Botão sair no rodapé -->
+                <div class="mt-auto">
+                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+                </div>
+            </div>
+
+            <!-- Conteúdo principal -->
+            <div class="col-md-10 main-content p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mt-3"><a id="back-link" href="gerenciar_conteudos.php"> Gerenciamento de Temas</a> > <?= htmlspecialchars($tema_info['titulo']) ?></h2>
+                    <div>
+                        <div class="mt-4">
+                            <a href="gerenciar_conteudos.php" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-arrow-left me-1"></i> Voltar para Temas
+                            </a>
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalAdicionarRecurso">
+                                <i class="fas fa-plus me-2"></i> Adicionar Recurso
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <?php if (!empty($mensagem)): ?>
+                    <div class="alert alert-<?= $sucesso ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
+                        <?= $mensagem ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Lista de Recursos -->
+                <div class="card rounded">
+                    <div class="card-header text-white">
+                        <i class="fas fa-list-ul me-2"></i> Recursos Vinculados (Total: <?= count($recursos) ?>)
+                    </div>
+                    <div class="card-body p-0 rounded">
+                        <?php if (empty($recursos)): ?>
+                            <p class="p-4 text-center text-muted">Nenhum recurso (arquivo ou link) anexado a este tema ainda.</p>
+                        <?php else: ?>
+                            <div class="table-responsive">
+                                <table class="table table-striped mb-0 rounded">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Título do Recurso</th>
+                                            <th>Data de Upload</th>
+                                            <th style="width: 150px;">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($recursos as $r): 
+                                            $is_youtube = ($r['tipo_arquivo'] === 'URL') && (strpos($r['caminho_arquivo'], 'youtube.com') !== false || strpos($r['caminho_arquivo'], 'youtu.be') !== false);
+                                            $youtube_id = $is_youtube ? get_youtube_id($r['caminho_arquivo']) : null;
+                                        ?>
+                                            <tr class="recurso-item">
+                                                <td>
+                                                    <i class="<?= get_file_icon($r['tipo_arquivo'], $r['caminho_arquivo']) ?> fa-lg"></i>
+                                                    <small class="d-block text-muted">
+                                                        <?= ($r['tipo_arquivo'] === 'URL') 
+                                                            ? 'Link Externo' 
+                                                            : htmlspecialchars($r['tipo_arquivo']) ?>
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <strong><?= htmlspecialchars($r['titulo']) ?></strong>
+                                                    <?php if ($r['tipo_arquivo'] === 'URL'): ?>
+                                                        <br>
+                                                        <small class="text-muted">
+                                                            <?= htmlspecialchars(parse_url($r['caminho_arquivo'], PHP_URL_HOST) ?? 'URL Inválida') ?>
+                                                        </small>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td><?= date('d/m/Y', strtotime($r['data_upload'])) ?></td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <?php if ($r['caminho_arquivo']): ?>
+                                                            <?php if ($is_youtube && $youtube_id): ?>
+                                                                <!-- Botão para abrir YouTube em Modal -->
+                                                                <button class="btn btn-sm btn-outline-primary" 
+                                                                        data-bs-toggle="modal" 
+                                                                        data-bs-target="#modalYouTube"
+                                                                        data-video-id="<?= $youtube_id ?>"
+                                                                        title="Assistir Vídeo">
+                                                                    <i class="fas fa-play"></i>
+                                                                </button>
+                                                            <?php else: ?>
+                                                                <!-- Link normal para outros recursos -->
+                                                                <?php 
+                                                                    $href = ($r['tipo_arquivo'] === 'URL') 
+                                                                        ? htmlspecialchars($r['caminho_arquivo']) 
+                                                                        : '../' . htmlspecialchars($r['caminho_arquivo']);
+                                                                    $text_button = ($r['tipo_arquivo'] === 'URL') ? 'Acessar Link' : 'Visualizar Arquivo';
+                                                                ?>
+                                                                <a href="<?= $href ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="<?= $text_button ?>">
+                                                                    <i class="fas fa-external-link-alt"></i>
+                                                                </a>
+                                                            <?php endif; ?>
+                                                        <?php endif; ?>
+                                                        
+                                                        <button class="btn btn-sm btn-outline-danger" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#modalExcluirRecurso" 
+                                                            data-recurso-titulo="<?= htmlspecialchars($r['titulo']) ?>" 
+                                                            data-recurso-id="<?= $r['id'] ?>" 
+                                                            title="Excluir Recurso">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="main-content flex-grow-1">
-        
-        <h1 class="mb-4" style="color: var(--cor-primaria);">Gerenciamento de Arquivos</h1>
-        
-        <?php if ($tema_info): ?>
-            <p class="lead">Recursos (Arquivos e Links) do Tema: <strong style="color: var(--cor-secundaria);"><?= htmlspecialchars($tema_info['titulo']) ?></strong></p>
-            <a href="gerenciar_conteudos.php" class="btn btn-outline-secondary mb-3"><i class="fas fa-arrow-left me-1"></i> Voltar para Temas</a>
-        <?php endif; ?>
-
-        <?php if (!empty($mensagem)): ?>
-            <div class="alert alert-<?= $sucesso ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
-                <?= $mensagem ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<!-- Modal para Adicionar Recurso -->
+<div class="modal fade" id="modalAdicionarRecurso" tabindex="-1" aria-labelledby="modalAdicionarRecursoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #1a2a3a; color: white;">
+                <h5 class="modal-title" id="modalAdicionarRecursoLabel">Adicionar Novo Recurso</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        <?php endif; ?>
+            <form method="POST" enctype="multipart/form-data" action="gerenciar_arquivos_tema.php?tema_id=<?= $tema_id ?>" id="formRecurso">
+                <div class="modal-body">
+                    <input type="hidden" name="acao" value="upload_recurso">
+                    
+                    <div class="mb-3">
+                        <label for="titulo_recurso" class="form-label">Título do Recurso *</label>
+                        <input type="text" class="form-control" id="titulo_recurso" name="titulo_recurso" required>
+                    </div>
 
-        <?php if ($tema_info): ?>
-            <div class="row">
-                <!-- Substituição do modal por um accordion recolhível -->
-                <div class="col-lg-12">
-                    <div class="accordion mb-4" id="accordionAdicionarRecurso">
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingAdicionarRecurso">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdicionarRecurso" aria-expanded="false" aria-controls="collapseAdicionarRecurso">
-                                    <i class="fas fa-plus-circle me-2"></i> Adicionar Novo Recurso (Arquivo ou Link)
-                                </button>
-                            </h2>
-                            <div id="collapseAdicionarRecurso" class="accordion-collapse collapse" aria-labelledby="headingAdicionarRecurso" data-bs-parent="#accordionAdicionarRecurso">
-                                <div class="accordion-body">
-                                    <form method="POST" enctype="multipart/form-data" action="gerenciar_arquivos_tema.php?tema_id=<?= $tema_id ?>" id="formRecurso">
-                                        <input type="hidden" name="acao" value="upload_recurso">
-                                        <div class="mb-3">
-                                            <label for="titulo_recurso" class="form-label">Título do Arquivo</label>
-                                            <input type="text" class="form-control" id="titulo_recurso" name="titulo_recurso" required>
-                                        </div>
-                                        <div class="p-3 mb-3 border rounded">
-                                            <h6 class="text-secondary"><i class="fas fa-file-upload me-1"></i> 1. Upload de Arquivo</h6>
-                                            <div class="mb-2">
-                                                <label for="arquivo" class="form-label">Selecione o Arquivo</label>
-                                                <input type="file" class="form-control" id="arquivo" name="arquivo" accept=".pdf,image/jpeg,image/png,image/gif">
-                                                <small class="text-muted">Tipos permitidos: PDF, JPG, PNG.</small>
-                                            </div>
-                                        </div>
-                                        <div class="p-3 mb-3 border rounded">
-                                            <h6 class="text-secondary"><i class="fas fa-link me-1"></i> 2. Link Externo / URL </h6>
-                                            <div class="mb-2">
-                                                <label for="link_url" class="form-label">Link</label>
-                                                <input type="url" class="form-control" id="link_url" name="link_url" placeholder="Ex: https://www.youtube.com/watch?v=...">
-                                                <small class="text-muted">Se fornecido, este recurso será salvo como um link, e não como um arquivo.</small>
-                                            </div>
-                                        </div>
-                                        <div class="alert alert-info small" role="alert">
-                                            <i class="fas fa-info-circle me-1"></i> Você deve fornecer um arquivo OU um link. O campo Título é obrigatório.
-                                        </div>
-                                        <div class="d-flex justify-content-end">
-                                            <button type="button" class="btn btn-outline-secondary me-2" data-bs-toggle="collapse" data-bs-target="#collapseAdicionarRecurso" aria-expanded="false" aria-controls="collapseAdicionarRecurso">
-                                                Cancelar
-                                            </button>
-                                            <button type="submit" class="btn text-white" style="background-color: var(--cor-secundaria);">
-                                                <i class="fas fa-save me-2"></i> Salvar Recurso
-                                            </button>
-                                        </div>
-                                    </form>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="p-3 mb-3 border rounded">
+                                <h6 class="text-secondary"><i class="fas fa-file-upload me-1"></i> Upload de Arquivo</h6>
+                                <div class="mb-2">
+                                    <label for="arquivo" class="form-label">Selecione o Arquivo</label>
+                                    <input type="file" class="form-control" id="arquivo" name="arquivo" accept=".pdf,image/jpeg,image/png,image/gif">
+                                    <small class="text-muted">Tipos permitidos: PDF, JPG, PNG, GIF</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 mb-3 border rounded">
+                                <h6 class="text-secondary"><i class="fas fa-link me-1"></i> Link Externo</h6>
+                                <div class="mb-2">
+                                    <label for="link_url" class="form-label">URL</label>
+                                    <input type="url" class="form-control" id="link_url" name="link_url" placeholder="Ex: https://www.youtube.com/watch?v=...">
+                                    <small class="text-muted">Para vídeos do YouTube, links externos, etc.</small>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-lg-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header card-header-custom">
-                            <i class="fas fa-list-ul me-2"></i> Recursos Vinculados (Total: <?= count($recursos) ?>)
-                        </div>
-                        <div class="card-body">
-                            <?php if (empty($recursos)): ?>
-                                <p class="text-center text-muted">Nenhum recurso (arquivo ou link) anexado a este tema ainda.</p>
-                            <?php else: ?>
-                                <ul class="list-group list-group-flush">
-                                    <?php foreach ($recursos as $r): ?>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <i class="<?= get_file_icon($r['tipo_arquivo'], $r['caminho_arquivo']) ?> fa-lg me-2"></i> 
-                                                <strong><?= htmlspecialchars($r['titulo']) ?></strong>
-                                                <p class="text-muted mb-0" style="font-size: 0.8em;">
-                                                    <i class="fas fa-tag"></i> Tipo: 
-                                                    <?= ($r['tipo_arquivo'] === 'URL') 
-                                                        ? 'Link Externo (' . htmlspecialchars(parse_url($r['caminho_arquivo'], PHP_URL_HOST) ?? 'URL Inválida') . ')'
-                                                        : htmlspecialchars($r['tipo_arquivo']) ?> 
-                                                    | Upload/Registro: <?= date('d/m/Y', strtotime($r['data_upload'])) ?>
-                                                </p>
-                                            </div>
-                                            <div class="btn-group" role="group">
-                                                <?php 
-                                                    $href = ($r['tipo_arquivo'] === 'URL') 
-                                                        ? htmlspecialchars($r['caminho_arquivo']) 
-                                                        : '../' . htmlspecialchars($r['caminho_arquivo']);
-                                                    $text_button = ($r['tipo_arquivo'] === 'URL') ? 'Acessar Link' : 'Visualizar Arquivo';
-                                                ?>
-                                                <?php if ($r['caminho_arquivo']): ?>
-                                                    <a href="<?= $href ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="<?= $text_button ?>">
-                                                        <i class="fas fa-external-link-alt"></i>
-                                                    </a>
-                                                <?php endif; ?>
-                                                
-                                                <button class="btn btn-sm btn-outline-danger" 
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#modalExcluirRecurso" 
-                                                    data-recurso-titulo="<?= htmlspecialchars($r['titulo']) ?>" 
-                                                    data-recurso-id="<?= $r['id'] ?>" 
-                                                    title="Excluir Recurso">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </div>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php endif; ?>
-                        </div>
+                    <div class="alert alert-info small" role="alert">
+                        <i class="fas fa-info-circle me-1"></i> 
+                        Você deve fornecer um arquivo <strong>OU</strong> um link. O campo Título é obrigatório.
                     </div>
                 </div>
-            </div>
-        <?php else: ?>
-             <div class="alert alert-danger">
-                 Não foi possível carregar os recursos. O tema especificado não é válido.
-             </div>
-        <?php endif; ?>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-save me-1"></i> Salvar Recurso
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<!-- Modal de Exclusão (mantido) -->
+<!-- Modal de Exclusão -->
 <div class="modal fade" id="modalExcluirRecurso" tabindex="-1" aria-labelledby="modalExcluirRecursoLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="modalExcluirRecursoLabel">Confirmar Exclusão do Recurso</h5>
+                <h5 class="modal-title" id="modalExcluirRecursoLabel">Confirmar Exclusão</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Tem certeza de que deseja **excluir permanentemente** o recurso: <strong id="recursoTituloModal"></strong>?</p>
+                <p>Tem certeza de que deseja <strong>excluir permanentemente</strong> o recurso: <strong id="recursoTituloModal"></strong>?</p>
                 <p class="text-danger small">Esta ação é irreversível e removerá o registro (e o arquivo físico, se for um) do servidor.</p>
             </div>
             <div class="modal-footer">
@@ -393,35 +610,63 @@ function get_file_icon($mime_type, $caminho_arquivo = null) {
     </div>
 </div>
 
+<!-- Modal para YouTube -->
+<div class="modal fade modal-youtube" id="modalYouTube" tabindex="-1" aria-labelledby="modalYouTubeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="color: white;" id="header-title"></h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="ratio ratio-16x9">
+                    <iframe id="youtubePlayer" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    var modalExcluir = document.getElementById('modalExcluirRecurso');
-    var temaId = <?= $tema_id ?>; 
-    
-    // Script para preencher o ID e Título no modal de exclusão
-    modalExcluir.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget;
-        var recursoId = button.getAttribute('data-recurso-id');
-        var recursoTitulo = button.getAttribute('data-recurso-titulo');
+$(document).ready(function() {
+    // Função para preencher o modal de exclusão
+    $('#modalExcluirRecurso').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var recursoId = button.data('recurso-id');
+        var recursoTitulo = button.data('recurso-titulo');
         
-        var linkExcluir = modalExcluir.querySelector('#linkExcluirRecurso');
-        var modalTitle = modalExcluir.querySelector('#recursoTituloModal');
+        var modal = $(this);
+        modal.find('#recursoTituloModal').text(recursoTitulo);
+        modal.find('#linkExcluirRecurso').attr('href', 'gerenciar_arquivos_tema.php?tema_id=<?= $tema_id ?>&excluir=' + recursoId);
+    });
+
+    // Função para o modal do YouTube
+    $('#modalYouTube').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var videoId = button.data('video-id');
         
-        modalTitle.textContent = recursoTitulo;
-        linkExcluir.href = 'gerenciar_arquivos_tema.php?tema_id=' + temaId + '&excluir=' + recursoId;
+        var iframe = $('#youtubePlayer');
+        iframe.attr('src', 'https://www.youtube.com/embed/' + videoId + '?autoplay=1');
+    });
+
+    // Função para fechar o modal do YouTube e parar o vídeo
+    $('#modalYouTube').on('hidden.bs.modal', function () {
+        var iframe = $('#youtubePlayer');
+        iframe.attr('src', '');
     });
 
     // Validação de Formulário (Arquivo OU Link)
-    const form = document.getElementById('formRecurso');
-    const arquivoInput = document.getElementById('arquivo');
-    const linkUrlInput = document.getElementById('link_url');
-    const tituloInput = document.getElementById('titulo_recurso');
+    $('#formRecurso').on('submit', function (e) {
+        var arquivoInput = $('#arquivo')[0];
+        var linkUrlInput = $('#link_url').val().trim();
+        var tituloInput = $('#titulo_recurso').val().trim();
 
-    form.addEventListener('submit', function (e) {
-        let isFileProvided = arquivoInput.files.length > 0;
-        let isLinkProvided = linkUrlInput.value.trim() !== '';
-        let isTituloProvided = tituloInput.value.trim() !== '';
+        var isFileProvided = arquivoInput.files.length > 0;
+        var isLinkProvided = linkUrlInput !== '';
+        var isTituloProvided = tituloInput !== '';
 
         if (!isTituloProvided) {
             alert('O Título do Recurso é obrigatório.');
@@ -431,6 +676,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!isFileProvided && !isLinkProvided) {
             alert('Você deve fornecer um Arquivo OU um Link Externo.');
+            e.preventDefault();
+            return false;
+        }
+
+        if (isFileProvided && isLinkProvided) {
+            alert('Forneça apenas um Arquivo OU um Link Externo, não ambos.');
             e.preventDefault();
             return false;
         }
