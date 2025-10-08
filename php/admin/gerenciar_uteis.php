@@ -114,14 +114,14 @@ $nome_usuario = $_SESSION['user_nome'];
     <div class="sidebar p-3">
         <h4 class="text-center mb-4 border-bottom pb-3">ADMIN RISENGLISH</h4>
         <a href="dashboard.php"><i class="fas fa-home me-2"></i>Home</a>
-        <a href="gerenciar_alunos_turmas.php"><i class="fas fa-users me-2"></i>Gerenciar Alunos/Turmas</a>
+        <a href="gerenciar_alunos_turmas.php"><i class="fas fa-users me-2"></i>Alunos/Turmas</a>
         <a href="gerenciar_uteis.php" style="background-color: #92171B;"><i class="fas fa-book"></i> Recomendações</a>
         <a href="../logout.php" style="position: absolute; bottom: 20px; width: calc(100% - 30px);"><i class="fas fa-sign-out-alt me-2"></i> Sair</a>
     </div>
 
     <div class="main-content flex-grow-1">
         <div class="page-header">
-        <h1 class="page-title">Gerenciar Recomendações Úteis (Úteis)</h1>
+        <h1 class="page-title">Gerenciar Recomendações úteis</h1>
         <button class="btn-add-resource" onclick="openModal('add')">
             <i class="fas fa-plus-circle"></i> Adicionar Novo Recurso
         </button>
@@ -152,7 +152,7 @@ $nome_usuario = $_SESSION['user_nome'];
                             <th>Título</th>
                             <th>Descrição</th>
                             <th>Link</th>
-                            <th>Data Criação</th>
+                            <th>Criado</th>
                             <th style="width: 150px;">Ações</th>
                         </tr>
                     </thead>
