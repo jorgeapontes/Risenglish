@@ -27,15 +27,15 @@ $nome_usuario = $_SESSION['user_nome'];
 <div class="d-flex">
     <div class="sidebar p-3">
         <h4 class="text-center mb-4 border-bottom pb-3">ADMIN RISENGLISH</h4>
-        <a href="dashboard.php"><i class="fas fa-home me-2"></i>Home</a>
-        <a href="gerenciar_alunos_turmas.php"><i class="fas fa-users me-2"></i>Gerenciar Alunos/Turmas</a>
+        <a href="dashboard.php" style="background-color: #92171B;"><i class="fas fa-home me-2"></i>Home</a>
+        <a href="gerenciar_alunos_turmas.php"><i class="fas fa-users me-2"></i>Alunos/Turmas</a>
         <a href="gerenciar_uteis.php"><i class="fas fa-book"></i> Recomendações</a>
         <a href="../logout.php" style="position: absolute; bottom: 20px; width: calc(100% - 30px);"><i class="fas fa-sign-out-alt me-2"></i> Sair</a>
     </div>
 
     <div class="main-content flex-grow-1">
-        <h1 class="mb-4" style="color: var(--cor-primaria);">Bem-vindo, <?= htmlspecialchars($nome_usuario) ?></h1>
-        <p class="lead">Esta é a **Tela de ADMIN**. Aqui você pode cadastrar e organizar alunos e turmas.</p>
+        <h1 class="mb-4" style="color: var(--cor-primaria);">Bem-vindo, Administrador.</h1>
+        <p class="lead">Esta é a Tela de ADMIN. Aqui você pode gerenciar sua plataforma.</p>
         <div class="cards">
         <div class="row mt-5">
             <div class="col-md-6">
@@ -55,7 +55,7 @@ $nome_usuario = $_SESSION['user_nome'];
                     <div class="card-body">
                         <h5 class="card-title">Gerenciar Recomendações</h5>
                         <p class="card-text">Adicionar, Remover e Editar Recomendações para os alunos.</p>
-                        <a href="recomendacoes.php" class="btn btn-sm" style="background-color: var(--cor-secundaria); color: white;">Acessar</a>
+                        <a href="gerenciar_uteis.php" class="btn btn-sm" style="background-color: var(--cor-secundaria); color: white;">Acessar</a>
                     </div><br>
                 </div>
             </div>
