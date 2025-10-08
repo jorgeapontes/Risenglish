@@ -337,11 +337,9 @@ if ($abrir_modal) {
                 <div class="d-flex justify-content-between">
                     <h2 class="mb-4 mt-3">Agendamento e Gerenciamento de Aulas</h2>
                     <div class="mt-4">
-                        <center>
-                            <button class="btn btn-danger mb-3" data-bs-toggle="modal" data-bs-target="#modalAdicionarEditar">
-                                <i class="fas fa-plus me-2"></i> Agendar Nova Aula
-                            </button>
-                        </center>
+                        <button class="btn btn-danger mb-3" data-bs-toggle="modal" data-bs-target="#modalAdicionarEditar">
+                            <i class="fas fa-plus me-2"></i> Agendar Nova Aula
+                        </button>
                     </div>
                 </div>
                 
