@@ -183,10 +183,10 @@ $recursos = [];
 if ($tema_id > 0) {
     $sql_recursos = "SELECT id, titulo, tipo_arquivo, caminho_arquivo, data_upload 
                      FROM conteudos 
-                     WHERE parent_id = :tema_id AND professor_id = :professor_id 
+                     WHERE parent_id = :tema_id 
                      ORDER BY data_upload DESC";
     $stmt_recursos = $pdo->prepare($sql_recursos);
-    $stmt_recursos->execute([':tema_id' => $tema_id, ':professor_id' => $professor_id]);
+    $stmt_recursos->execute([':tema_id' => $tema_id]);
     $recursos = $stmt_recursos->fetchAll(PDO::FETCH_ASSOC);
 }
 
