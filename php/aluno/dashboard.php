@@ -174,7 +174,7 @@ $nomes_meses = [
                                     foreach ($aulas_por_dia[$dia] as $aula): 
                                         $texto_exibido = $aula['turma']; 
                                         
-                                        $url_redirecionamento = "detalhes_aula.php?aula_id=" . $aula['aula_id'];
+                                        $url_redirecionamento = "detalhes_aula.php?id=" . $aula['aula_id'];
                                         
                                         // Define a cor de fundo com base no dia da semana 
                                         $dia_da_semana = (new DateTime($data_completa))->format('w');

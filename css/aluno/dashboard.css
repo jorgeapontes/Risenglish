@@ -101,7 +101,7 @@ body {
 
 .celula-dia {
     background-color: white;
-    border: none;
+    border: 1px solid lightgray;
     min-height: 140px;
     padding: 8px;
     position: relative;
