@@ -5,9 +5,9 @@
             --cor-fundo: #FAF9F6; /* Creme/Bege */
         }
         body { background-color: var(--cor-fundo); }
-        .sidebar { background-color: var(--cor-primaria); color: white; min-height: 100vh; }
-        .sidebar a { color: white; padding: 15px; text-decoration: none; display: block; }
-        .sidebar a:hover { background-color: var(--cor-secundaria); }
+        .sidebar { background-color: var(--cor-primaria); color: white; min-height: 100vh; width: 320px; }
+        .sidebar a { color: white; padding: 15px; text-decoration: none; display: block; border-radius: 5px; }
+        .sidebar a:hover { background-color: var(--cor-secundaria); border-radius: 5px }
         .main-content { padding: 30px; }
         .card-header-custom {
             background-color: var(--cor-primaria);
