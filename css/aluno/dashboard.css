@@ -99,16 +99,27 @@ body {
     font-size: 0.9em;
 }
 
+.celula-dia.muitas-aulas::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(transparent, rgba(255,255,255,0.8));
+    pointer-events: none;
+}
+
 .celula-dia {
     background-color: white;
     border: 1px solid lightgray;
-    min-height: 140px;
     padding: 8px;
     position: relative;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     transition: all 0.2s ease;
+    height: 180px;
 }
 
 .celula-dia:hover {
