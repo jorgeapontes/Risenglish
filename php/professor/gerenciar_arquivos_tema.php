@@ -28,17 +28,23 @@ if (!isset($_GET['tema_id']) || !is_numeric($_GET['tema_id'])) {
 
 $tema_id = (int)$_GET['tema_id'];
 
-// Busca as informações do TEMA para exibição e validação
-$sql_tema = "SELECT id, titulo FROM conteudos WHERE id = :id AND professor_id = :professor_id AND parent_id IS NULL";
-$stmt_tema = $pdo->prepare($sql_tema);
-$stmt_tema->execute([':id' => $tema_id, ':professor_id' => $professor_id]);
-$tema_info = $stmt_tema->fetch(PDO::FETCH_ASSOC);
-
-if (!$tema_info) {
-    $mensagem = "Tema não encontrado ou você não tem permissão para gerenciá-lo.";
-    $sucesso = false;
-    $tema_id = 0; 
+// 1. Validar e buscar dados do Tema Pai
+if (!$tema_id || !is_numeric($tema_id)) {
+    header("Location: gerenciar_conteudos.php");
+    exit;
 }
+
+// Buscar dados do TEMA (incluindo o autor original)
+// A query usa APENAS UM BOUND PARAMETER (:tema_id), o que corresponde à execução abaixo.
+$sql_tema = "SELECT c.titulo, c.professor_id, u.nome AS nome_professor
+             FROM conteudos AS c
+             JOIN usuarios AS u ON c.professor_id = u.id
+             WHERE c.id = :tema_id AND c.parent_id IS NULL"; // parent_id IS NULL é o segundo filtro, mas não usa um placeholder
+$stmt_tema = $pdo->prepare($sql_tema);
+$stmt_tema->execute([':tema_id' => $tema_id]); // Apenas um parâmetro
+$tema = $stmt_tema->fetch(PDO::FETCH_ASSOC); // LINHA 38 (onde o erro ocorria)
+
+
 
 // --- 3. LÓGICA UNIFICADA DE CADASTRO (ARQUIVO OU LINK) ---
 if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'upload_recurso') {
@@ -423,7 +429,7 @@ function get_youtube_id($url) {
             <!-- Conteúdo principal -->
             <div class="col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="mt-3"><a id="back-link" href="gerenciar_conteudos.php"> Gerenciamento de Temas</a> > <?= htmlspecialchars($tema_info['titulo']) ?></h2>
+                    <h2 class="mt-3"><a id="back-link" href="gerenciar_conteudos.php"> Gerenciamento de Temas</a></h2>
                     <div>
                         <div class="mt-4">
                             <a href="gerenciar_conteudos.php" class="btn btn-outline-secondary me-2">
