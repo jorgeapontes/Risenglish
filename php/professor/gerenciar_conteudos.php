@@ -14,7 +14,6 @@ $sucesso = false;
 $acao_executada = false; // Flag para saber se tentamos cadastrar/editar
 
 // --- LÓGICA DE CADASTRO/EDIÇÃO DE TEMA ---
-// Esta lógica trata o envio do formulário, seja o de "Criar Novo Tema" ou o do Modal de "Editar Tema".
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
     $acao_executada = true;
     $titulo = trim($_POST['titulo']);
@@ -22,11 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
     $acao = $_POST['acao'];
     $conteudo_id = $_POST['conteudo_id'] ?? null;
     
-    // Tema não tem arquivo, parent_id é NULL
+    // Temas são conteúdos de nível superior (parent_id é NULL) e tipo_arquivo 'TEMA'.
     
     if ($acao === 'cadastrar') {
-        // CORRIGIDO NOVAMENTE: tipo_arquivo foi definido como 'TEMA'.
-        // CORRIGIDO NOVAMENTE: caminho_arquivo não pode ser NULL, foi definido como string vazia ''.
         $sql = "INSERT INTO conteudos (professor_id, parent_id, titulo, descricao, tipo_arquivo, caminho_arquivo, data_upload) 
                 VALUES (:professor_id, NULL, :titulo, :descricao, 'TEMA', '', NOW())";
         $stmt = $pdo->prepare($sql);
@@ -45,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
             $mensagem = "Erro ao cadastrar tema.";
         }
     } elseif ($acao === 'editar' && $conteudo_id) {
-        // Lógica de edição para o Tema (garantindo que parent_id seja NULL)
+        // Lógica de edição para o Tema (Garantindo que apenas o criador edite)
         $sql = "UPDATE conteudos SET titulo = :titulo, descricao = :descricao WHERE id = :conteudo_id AND professor_id = :professor_id AND parent_id IS NULL";
         $params = [':titulo' => $titulo, ':descricao' => $descricao, ':conteudo_id' => $conteudo_id, ':professor_id' => $professor_id];
         
@@ -59,11 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
     }
 }
 
-// --- LÓGICA DE EXCLUSÃO (Deleta Tema, todos os Recursos e arquivos físicos) ---
+// --- LÓGICA DE EXCLUSÃO (Deleta Tema, todos os Recursos e arquivos físicos - SÓ PARA O DONO) ---
 if (isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
     $conteudo_id = $_GET['excluir'];
     try {
         // 1. Encontra e exclui os arquivos físicos dos RECURSOS (filhos do tema)
+        // Garante que só os arquivos do tema do professor logado serão buscados/deletados
         $sql_filhos = "SELECT caminho_arquivo FROM conteudos WHERE parent_id = :id AND professor_id = :professor_id";
         $stmt_filhos = $pdo->prepare($sql_filhos);
         $stmt_filhos->execute([':id' => $conteudo_id, ':professor_id' => $professor_id]);
@@ -85,11 +83,12 @@ if (isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
 
 
         // 3. Remove a associação do TEMA com AULAS (na tabela aulas_conteudos)
+        // Isso é universal, pois o tema pode estar associado a aulas de outros professores, mas a exclusão do tema deve ser permitida.
         $sql_delete_assoc = "DELETE FROM aulas_conteudos WHERE conteudo_id = :id";
         $stmt_assoc = $pdo->prepare($sql_delete_assoc);
         $stmt_assoc->execute([':id' => $conteudo_id]);
 
-        // 4. Exclui o registro do TEMA principal
+        // 4. Exclui o registro do TEMA principal (Garante que só o criador pode excluir o registro)
         $sql_delete = "DELETE FROM conteudos WHERE id = :id AND professor_id = :professor_id AND parent_id IS NULL"; 
         $stmt_delete = $pdo->prepare($sql_delete);
         
@@ -97,29 +96,34 @@ if (isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
             $mensagem = "Tema e todos os seus arquivos associados foram excluídos com sucesso!";
             $sucesso = true;
         } else {
-            $mensagem = "Erro ao excluir tema.";
+            $mensagem = "Erro ao excluir tema. (Tema não encontrado ou você não é o autor).";
             $sucesso = false;
         }
         
     } catch (PDOException $e) {
+        // Se houver erro de chave estrangeira, isso pode pegar o erro
         $mensagem = "Erro: O tema pode estar associado a uma aula ativa. Exclua a aula primeiro. (" . $e->getMessage() . ")";
         $sucesso = false;
     }
 }
 
 
-// --- LÓGICA PARA CARREGAR TEMA PARA EDIÇÃO (REMOVIDA) ---
-// O carregamento do tema para edição via GET foi removido, pois usaremos o modal.
+// --- BUSCAR TODOS OS TEMAS (parent_id IS NULL) COM O NOME DO PROFESSOR CRIADOR (NOVO) ---
+$sql_temas = "SELECT 
+                 c1.id, 
+                 c1.titulo, 
+                 c1.descricao, 
+                 c1.professor_id, 
+                 c1.data_upload, 
+                 u.nome AS nome_professor, -- Adiciona o nome do professor criador
+                 (SELECT COUNT(id) FROM conteudos AS c2 WHERE c2.parent_id = c1.id) AS total_recursos
+              FROM conteudos AS c1
+              JOIN usuarios AS u ON c1.professor_id = u.id -- JUNTA com a tabela usuarios
+              WHERE c1.parent_id IS NULL 
+              ORDER BY c1.data_upload DESC";
 
-
-// --- BUSCAR APENAS OS TEMAS PRINCIPAIS DO PROFESSOR (parent_id IS NULL) ---
-$sql_temas = "SELECT id, titulo, descricao, data_upload, 
-             (SELECT COUNT(id) FROM conteudos AS c2 WHERE c2.parent_id = c1.id) AS total_recursos
-             FROM conteudos AS c1
-             WHERE professor_id = :professor_id AND parent_id IS NULL 
-             ORDER BY data_upload DESC";
 $stmt_temas = $pdo->prepare($sql_temas);
-$stmt_temas->execute([':professor_id' => $professor_id]);
+$stmt_temas->execute(); // Agora sem o filtro de professor_id, busca todos.
 $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
@@ -307,7 +311,7 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
                         
                         <?php 
                             // O formulário deve estar expandido (show) se uma submissão de cadastro falhou ($acao_executada e !$sucesso)
-                            $collapse_class = ($acao_executada && !$sucesso && $_POST['acao'] === 'cadastrar') ? 'collapse mt-3 show' : 'collapse mt-3'; 
+                            $collapse_class = ($acao_executada && !$sucesso && ($_POST['acao'] ?? '') === 'cadastrar') ? 'collapse mt-3 show' : 'collapse mt-3'; 
                         ?>
                         <!-- Formulário de Novo Tema (Colapsável) -->
                         <div class="<?= $collapse_class ?>" id="collapseNovoTema">
@@ -346,10 +350,19 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
                                     <p class="text-center text-muted">Nenhum tema cadastrado ainda.</p>
                                 <?php else: ?>
                                     <ul class="list-group list-group-flush">
-                                        <?php foreach ($temas as $tema): ?>
+                                        <?php foreach ($temas as $tema): 
+                                            // NOVO: Variável para verificar se o professor logado é o autor do tema
+                                            $is_owner = ($tema['professor_id'] == $professor_id);
+                                        ?>
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <strong><i class="fas fa-folder me-2"></i> <?= htmlspecialchars($tema['titulo']) ?></strong>
+                                                    
+                                                    <!-- NOVO: Exibe o nome do professor criador -->
+                                                    <span class="badge bg-info text-dark ms-2" title="Criado por">
+                                                        <i class="fas fa-chalkboard-teacher me-1"></i> <?= htmlspecialchars($tema['nome_professor']) ?>
+                                                    </span>
+                                                    
                                                     <p class="text-muted mb-0" style="font-size: 0.9em;">
                                                         <?= htmlspecialchars($tema['descricao'] ?? 'Sem descrição.') ?>
                                                     </p>
@@ -360,17 +373,26 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
                                                         <i class="fas fa-file-upload me-1"></i> Gerenciar Arquivos
                                                     </a>
                                                     
+                                                    <!-- Botão de Edição: Desabilitado se não for o criador -->
                                                     <button class="btn btn-sm btn-outline-primary" 
+                                                        <?= $is_owner ? '' : 'disabled' ?> 
                                                         data-bs-toggle="modal" 
                                                         data-bs-target="#modalEditarTema" 
                                                         data-id="<?= $tema['id'] ?>" 
                                                         data-titulo="<?= htmlspecialchars($tema['titulo']) ?>" 
                                                         data-descricao="<?= htmlspecialchars($tema['descricao']) ?>"
-                                                        title="Editar Tema">
+                                                        title="<?= $is_owner ? 'Editar Tema' : 'Você só pode editar temas que você criou.' ?>">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     
-                                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalExcluirConteudo" data-conteudo-titulo="<?= htmlspecialchars($tema['titulo']) ?>" data-conteudo-id="<?= $tema['id'] ?>" title="Excluir Tema (e seus arquivos)">
+                                                    <!-- Botão de Exclusão: Desabilitado se não for o criador -->
+                                                    <button class="btn btn-sm btn-outline-danger" 
+                                                        <?= $is_owner ? '' : 'disabled' ?> 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#modalExcluirConteudo" 
+                                                        data-conteudo-titulo="<?= htmlspecialchars($tema['titulo']) ?>" 
+                                                        data-conteudo-id="<?= $tema['id'] ?>" 
+                                                        title="<?= $is_owner ? 'Excluir Tema (e seus arquivos)' : 'Você só pode excluir temas que você criou.' ?>">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </div>
