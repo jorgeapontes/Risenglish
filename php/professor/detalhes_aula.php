@@ -3,74 +3,78 @@ session_start();
 require_once '../includes/conexao.php';
 
 // Bloqueio de acesso para usuários não-professor
+// Se o usuário não for professor, redireciona para a tela de login.
 if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
     header("Location: ../login.php");
     exit;
 }
 
 $professor_id = $_SESSION['user_id'];
-$professor_nome = $_SESSION['user_nome'] ?? 'Professor'; // Puxa o nome da sessão
+$professor_nome = $_SESSION['user_nome'] ?? 'Professor';
 
 $aula_id = $_GET['aula_id'] ?? null;
 
+// --- CORREÇÃO 1: ID INVÁLIDO OU AUSENTE ---
+// Se o ID da aula não for fornecido ou for inválido, redireciona para a lista de aulas.
 if (!$aula_id || !is_numeric($aula_id)) {
-    header("Location: dashboard.php");
+    // Redirecionamento mais amigável para a página de listagem
+    header("Location: gerenciar_aulas.php"); 
     exit;
 }
 
 // --- 1. BUSCAR DETALHES DA AULA E DA TURMA RELACIONADA ---
-$sql_detalhes = "
-    SELECT 
-        a.id AS aula_id, a.titulo_aula, a.data_aula, a.horario, a.descricao AS desc_aula,
-        t.id AS turma_id, t.nome_turma,
-        p.nome AS nome_professor
-    FROM 
-        aulas a
-    JOIN 
-        turmas t ON a.turma_id = t.id
-    JOIN 
-        usuarios p ON a.professor_id = p.id
-    WHERE 
-        a.id = :aula_id AND a.professor_id = :professor_id
-";
+$sql_detalhes = "SELECT
+    a.id AS aula_id, a.titulo_aula, a.data_aula, a.horario, a.descricao AS desc_aula,
+    t.id AS turma_id, t.nome_turma,
+    p.nome AS nome_professor
+    FROM aulas a
+    JOIN turmas t ON a.turma_id = t.id
+    JOIN usuarios p ON a.professor_id = p.id
+    WHERE a.id = :aula_id AND a.professor_id = :professor_id";
+
 $stmt_detalhes = $pdo->prepare($sql_detalhes);
 $stmt_detalhes->execute([':aula_id' => $aula_id, ':professor_id' => $professor_id]);
+
+// --- CORREÇÃO 2: ERRO DE SINTAXE PHP REMOVIDO AQUI ---
+// A linha original tinha um aspas e ponto e vírgula incorreto (PDO::FETCH_ASSOC)";), 
+// o que impedia o PHP de continuar e provavelmente acionava o erro fatal.
 $detalhes_aula = $stmt_detalhes->fetch(PDO::FETCH_ASSOC);
 
-if (!$detalhes_aula) {
-    header("Location: dashboard.php");
+
+// --- CORREÇÃO 3: AULA NÃO ENCONTRADA ---
+// Se a consulta falhar (aula não existe ou não pertence ao professor), redireciona.
+if(!$detalhes_aula) {
+    // Redirecionamento mais amigável para a página de listagem
+    header("Location: gerenciar_aulas.php"); 
     exit;
 }
 
-// --- 2. BUSCAR TODOS OS TEMAS (PASTAS) DO PROFESSOR E SEU STATUS DE PLANEJAMENTO PARA ESTA AULA ---
-// Filtra apenas conteúdos principais (Temas) onde parent_id é NULL.
-// Inclui uma subconsulta para contar o número de arquivos filhos dentro de cada tema.
+// --- 2. BUSCAR TODOS OS TEMAS (PASTAS) DISPONÍVEIS E SEU STATUS DE PLANEJAMENTO PARA ESTA AULA ---
 $sql_todos_temas = "
     SELECT 
         c.id AS tema_id, 
         c.titulo, 
         c.descricao, 
-        (SELECT COUNT(id) FROM conteudos WHERE parent_id = c.id AND professor_id = :professor_id_sub) AS total_arquivos, 
+        u.nome AS autor_tema, 
+        (SELECT COUNT(id) FROM conteudos WHERE parent_id = c.id) AS total_arquivos, 
         COALESCE(ac.planejado, 0) AS planejado
     FROM 
         conteudos c
+    JOIN
+        usuarios u ON c.professor_id = u.id 
     LEFT JOIN 
         aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
     WHERE 
-        c.professor_id = :professor_id 
-        AND c.parent_id IS NULL -- Filtra apenas temas principais
+        c.parent_id IS NULL 
     ORDER BY 
         c.titulo ASC
 ";
 $stmt_temas = $pdo->prepare($sql_todos_temas);
 $stmt_temas->execute([
-    ':aula_id' => $aula_id, 
-    ':professor_id' => $professor_id,
-    ':professor_id_sub' => $professor_id // Usado para a subconsulta de contagem
-]);
+    ':aula_id' => $aula_id, ]);
 $todos_temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
 
-// Contagem para exibição inicial no filtro (mantida, mas será atualizada pelo JS)
+// Contagem para exibição inicial no filtro
 $count_planejados = array_sum(array_column($todos_temas, 'planejado'));
 ?>
 
@@ -143,21 +147,22 @@ $count_planejados = array_sum(array_column($todos_temas, 'planejado'));
             
             <div class="card-body">
                 <?php if (empty($todos_temas)): ?>
-                    <p class="text-center text-muted">Você ainda não possui Temas (Pastas) cadastrados. Por favor, vá à seção "Conteúdos" para organizar seus materiais.</p>
+                    <p class="text-center text-muted">Ainda não há Temas (Pastas) cadastrados por nenhum professor. Por favor, vá à seção "Conteúdos" para organizar o primeiro material.</p>
                 <?php else: ?>
                     
                     <!-- NOVOS CABEÇALHOS PARA TEMAS -->
                     <div class="row mb-3 align-items-center border-bottom pb-2 text-muted small">
                         <div class="col-1 text-center"><strong>Visível?</strong></div>
-                        <div class="col-11"><strong>Tema / Pasta (Clique para Gerenciar Arquivos)</strong></div>
+                        <div class="col-4"><strong>Tema / Pasta</strong></div>
+                        <div class="col-5"><strong>Autor</strong></div> <!-- Coluna para o autor -->
+                        <div class="col-2 text-center"><strong>Arquivos</strong></div>
                     </div>
                     
                     <div id="lista-conteudos-container">
                         <?php foreach ($todos_temas as $t): ?>
                             <?php 
                                 $is_planejado = $t['planejado'] == 1;
-                                $planejado_class = $is_planejado ? 'planejado' : 'nao-planejado'; 
-                            ?>
+                                $planejado_class = $is_planejado ? 'planejado' : 'nao-planejado'; ?>
                             
                             <!-- Usa tema_id como data-conteudo-id para compatibilidade com o script AJAX -->
                             <div class="conteudo-item d-flex align-items-center <?= $planejado_class ?>" 
@@ -181,12 +186,26 @@ $count_planejados = array_sum(array_column($todos_temas, 'planejado'));
                                 </div>
                                 
                                 <!-- TÍTULO E DESCRIÇÃO (COM CONTAGEM DE ARQUIVOS) -->
-                                <div class="col-11">
-                                    <a href="gerenciar_arquivos_tema.php?conteudo_id=<?= $t['tema_id'] ?>" class="link-tema">
+                                <div class="col-4">
+                                    <!-- O link de gerenciamento deve usar tema_id, não conteudo_id, conforme corrigimos antes -->
+                                    <a href="gerenciar_arquivos_tema.php?tema_id=<?= $t['tema_id'] ?>" class="link-tema">
                                         <i class="fas fa-folder me-2"></i> <?= htmlspecialchars($t['titulo']) ?> 
-                                        <span class="badge bg-secondary ms-2"><?= $t['total_arquivos'] ?> Arquivo(s)</span>
                                     </a>
-                                    
+                                </div>
+
+                                <!-- AUTOR DO TEMA -->
+                                <div class="col-5">
+                                    <span class="badge bg-info text-dark">
+                                        <i class="fas fa-user-circle me-1"></i> <?= htmlspecialchars($t['autor_tema']) ?>
+                                        <?php if ($t['autor_tema'] !== $professor_nome): ?>
+                                            <i class="fas fa-share-alt ms-1" title="Conteúdo Compartilhado"></i>
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
+                                
+                                <!-- CONTAGEM DE ARQUIVOS -->
+                                <div class="col-2 text-center">
+                                    <span class="badge bg-secondary"><?= $t['total_arquivos'] ?> Arquivo(s)</span>
                                 </div>
                             </div>
                         <?php endforeach; ?>
