@@ -560,12 +560,13 @@ html {
     background: linear-gradient(135deg, var(--dark-blue) 0%, #1E3A8A 100%);
     color: var(--cream);
     text-align: center;
+    max-height: 830px;
 }
 
 .contact-container {
     max-width: 800px;
     margin: 0 auto;
-    height: 460px;
+    
 }
 
 .contact .section-title {
@@ -781,24 +782,49 @@ html {
     transform: translateX(0);
 }
 
-.footerfooter{
-    display: flex;
-    justify-content: space-between;
-    margin-top: 4rem;
-    background: linear-gradient(135deg, var(--dark-blue) 0%, #1E3A8A 100%);
-    padding: 10px;
-    
-}
 
 .btn-backtop{
      background: transparent;
     color: var(--cream);
     border: 2px solid var(--cream);
     backdrop-filter: blur(10px);
+    margin-top: 150px;
+    margin-bottom: 100px;
 }
 
 .btn-backtop:hover {
    background: var(--cream);
     color: var(--dark-blue);
     transform: translateY(-3px);
+}
+
+
+.footerfooter {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    background: transparent;
+    color: var(--cream);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    margin-top: 60px; /* cria espaço entre o botão e o footer */
+}
+
+/* Garante que o footer vá até o fim da página, mesmo com pouco conteúdo */
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+section:last-of-type {
+    flex: 1;
+}
+
+.footerfooter {
+    flex-shrink: 0;
 }
