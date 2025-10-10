@@ -104,7 +104,215 @@ $nomes_meses = [
     <title>Dashboard - Minhas Aulas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="../../css/aluno/dashboard.css">
+    <style>
+        body {
+            background-color: #FAF9F6;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 16.666667%;
+            background-color: #081d40;
+            color: #fff;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+            transition: 0.3s;
+        }
+
+        .sidebar .active {
+            background-color: #c0392b;
+        }
+
+        .sidebar .active:hover{
+            background-color: #c0392b;
+        }
+
+        .main-content {
+            margin-left: 16.666667%;
+            width: 83.333333%;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .card-header {
+            background-color: #081d40;
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-danger:hover {
+            background-color: #a93226;
+            border-color: #a93226;
+        }
+        
+        .btn-outline-danger {
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-outline-danger:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+        #botao-sair {
+            border: none;
+        }
+
+        #botao-sair:hover {
+            background-color: #c0392b;
+            color: white;
+            transform: none;
+        }
+
+        .calendario {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            margin-top: 20px;
+        }
+
+        .dia-semana {
+            background-color: #081d40;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            border-radius: 3px;
+        }
+
+        .celula-dia {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            height: 140px;
+            padding: 8px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .celula-dia.outros-meses {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .numero-dia {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            display: block;
+            flex-shrink: 0;
+        }
+
+        .aulas-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .aulas-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .aulas-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .aulas-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .aulas-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .bloco-aula {
+            background-color: #081d40;
+            color: white;
+            padding: 5px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .bloco-aula:hover {
+            background-color: #32475b;
+        }
+
+        .bloco-aula strong {
+            display: block;
+            font-size: 0.8em;
+        }
+
+        .bloco-aula span {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .celula-dia.muitas-aulas::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(transparent, rgba(255,255,255,0.8));
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .calendario {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            .celula-dia {
+                height: 150px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid">
@@ -116,7 +324,6 @@ $nomes_meses = [
                     <h5 class="mt-4"><?php echo $aluno_nome; ?></h5>
                 </div>
 
-                <!-- Menu centralizado verticalmente -->
                 <!-- Menu centralizado verticalmente -->
                 <div class="d-flex flex-column flex-grow-1 mb-5">
                     <a href="dashboard.php" class="rounded active"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>

@@ -77,6 +77,28 @@ $stmt_conteudos = $pdo->prepare($sql_conteudos);
 $stmt_conteudos->execute([':aula_id' => $aula_id]);
 $conteudos = $stmt_conteudos->fetchAll(PDO::FETCH_ASSOC);
 
+// Consulta para obter os conteúdos filhos (arquivos vinculados)
+$arquivos_por_conteudo = [];
+foreach ($conteudos as $conteudo) {
+    $sql_arquivos = "
+        SELECT 
+            id,
+            titulo as nome_arquivo,
+            caminho_arquivo,
+            tipo_arquivo,
+            descricao
+        FROM 
+            conteudos 
+        WHERE 
+            parent_id = :conteudo_id
+        ORDER BY 
+            titulo ASC
+    ";
+    $stmt_arquivos = $pdo->prepare($sql_arquivos);
+    $stmt_arquivos->execute([':conteudo_id' => $conteudo['id']]);
+    $arquivos_por_conteudo[$conteudo['id']] = $stmt_arquivos->fetchAll(PDO::FETCH_ASSOC);
+}
+
 // Verificar se a aula já aconteceu
 $data_aula = new DateTime($aula['data_aula']);
 $data_atual = new DateTime();
@@ -85,6 +107,24 @@ $aula_passada = $data_aula < $data_atual;
 // Formatar data e hora
 $data_formatada = $data_aula->format('d/m/Y');
 $hora_formatada = substr($aula['horario'], 0, 5);
+
+// Função para extrair ID do YouTube
+function get_youtube_id($url) {
+    $pattern = '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/';
+    preg_match($pattern, $url, $matches);
+    return isset($matches[1]) ? $matches[1] : null;
+}
+
+// Função para verificar se é vídeo
+function is_video_file($tipo_arquivo, $caminho_arquivo) {
+    if ($tipo_arquivo === 'URL') {
+        return (strpos($caminho_arquivo, 'youtube.com') !== false || strpos($caminho_arquivo, 'youtu.be') !== false);
+    }
+    
+    $extensao = pathinfo($caminho_arquivo, PATHINFO_EXTENSION);
+    $video_extensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'];
+    return in_array(strtolower($extensao), $video_extensions);
+}
 ?>
 
 <!DOCTYPE html>
@@ -95,14 +135,93 @@ $hora_formatada = substr($aula['horario'], 0, 5);
     <title><?= htmlspecialchars($aula['titulo_aula']) ?> - Risenglish</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="../../css/aluno/dashboard.css">
     <style>
+        body {
+            background-color: #FAF9F6;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 16.666667%;
+            background-color: #081d40;
+            color: #fff;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+            transition: 0.3s;
+        }
+
+        .sidebar .active {
+            background-color: #c0392b;
+        }
+
+        .sidebar .active:hover{
+            background-color: #c0392b;
+        }
+
+        .main-content {
+            margin-left: 16.666667%;
+            width: 83.333333%;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .btn-danger {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-danger:hover {
+            background-color: #a93226;
+            border-color: #a93226;
+        }
+        
+        .btn-outline-danger {
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-outline-danger:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+        #botao-sair {
+            border: none;
+        }
+
+        #botao-sair:hover {
+            background-color: #c0392b;
+            color: white;
+            transform: none;
+        }
+
         .conteudo-card {
             transition: all 0.3s ease;
-            border-left: 4px solid #081d40;
+            border-left: 4px solid #c0392b;
+            height: 100%;
+            cursor: default;
         }
         .conteudo-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .badge-planejado {
@@ -114,6 +233,95 @@ $hora_formatada = substr($aula['horario'], 0, 5);
         .info-card {
             background-color: #f8f9fa;
             border-radius: 8px;
+            border-left: 4px solid #081d40;
+        }
+        .card-header {
+            background-color: #081d40;
+            color: white;
+        }
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .arquivos-dropdown {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .arquivo-item {
+            border-bottom: 1px solid #eee;
+            padding: 8px 0;
+            transition: background-color 0.2s;
+        }
+        .arquivo-item:hover {
+            background-color: #f8f9fa;
+        }
+        .arquivo-item:last-child {
+            border-bottom: none;
+        }
+        .arquivo-icon {
+            width: 24px;
+            text-align: center;
+            margin-right: 8px;
+        }
+        .toggle-arquivos {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .toggle-arquivos:hover {
+            background-color: #f8f9fa;
+        }
+        .collapse-icon {
+            transition: transform 0.3s ease;
+        }
+        .collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        /* Modal YouTube personalizado */
+        .modal-youtube .modal-dialog {
+            max-width: 70%;
+            max-height: 70vh;
+        }
+        
+        .modal-youtube .modal-content {
+            background: #081d40;
+            border: none;
+            padding: 10px;
+        }
+        
+        .modal-youtube .modal-header {
+            border-bottom: none;
+            padding-bottom: 25px;
+        }
+        
+        .modal-youtube .btn-close {
+            background-color: white;
+            opacity: 1;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .modal-youtube .modal-dialog {
+                max-width: 95%;
+                margin: 10px auto;
+            }
         }
     </style>
 </head>
@@ -149,16 +357,222 @@ $hora_formatada = substr($aula['horario'], 0, 5);
                         </a>
                         <h3 class="mb-0"><?= htmlspecialchars($aula['titulo_aula']) ?></h3>
                     </div>
-                    <span class="badge <?= $aula_passada ? 'bg-secondary' : 'bg-primary' ?> fs-6">
-                        <?= $aula_passada ? 'Aula Realizada' : 'Próxima Aula' ?>
-                    </span>
                 </div>
 
                 <div class="row">
+                    <!-- Conteúdos da Aula -->
+                    <div class="col-md-9">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-book me-2"></i>Conteúdos da Aula</h5>
+                            </div>
+                            <div class="card-body">
+                                <?php if (count($conteudos) > 0): ?>
+                                    <div class="row">
+                                        <?php foreach ($conteudos as $conteudo): 
+                                            $arquivos = $arquivos_por_conteudo[$conteudo['id']] ?? [];
+                                            $temArquivos = count($arquivos) > 0;
+                                            
+                                            // Verificar se o conteúdo principal é um vídeo
+                                            $is_video_principal = is_video_file($conteudo['tipo_arquivo'], $conteudo['caminho_arquivo']);
+                                            $youtube_id_principal = null;
+                                            if ($is_video_principal && $conteudo['tipo_arquivo'] === 'URL') {
+                                                $youtube_id_principal = get_youtube_id($conteudo['caminho_arquivo']);
+                                            }
+                                        ?>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card conteudo-card h-100">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <h6 class="card-title mb-0"><?= htmlspecialchars($conteudo['titulo']) ?></h6>
+                                                        <span class="badge <?= $conteudo['planejado'] ? 'badge-planejado' : 'badge-adicionado' ?>">
+                                                            <?= $conteudo['planejado'] ? 'Planejado' : 'Disponível' ?>
+                                                        </span>
+                                                    </div>
+                                                    <?php if (!empty($conteudo['descricao'])): ?>
+                                                        <p class="card-text text-muted small"><?= htmlspecialchars($conteudo['descricao']) ?></p>
+                                                    <?php endif; ?>
+                                                    
+                                                    <!-- Botão principal do conteúdo -->
+                                                    <?php if ($conteudo['tipo_arquivo'] === 'URL'): ?>
+                                                        <?php if ($is_video_principal && $youtube_id_principal): ?>
+                                                            <!-- Botão Play para vídeo do YouTube -->
+                                                            <button class="btn btn-outline-primary btn-sm mt-2" 
+                                                                    data-bs-toggle="modal" 
+                                                                    data-bs-target="#modalYouTube"
+                                                                    data-video-id="<?= $youtube_id_principal ?>"
+                                                                    data-video-title="<?= htmlspecialchars($conteudo['titulo']) ?>">
+                                                                <i class="fas fa-play me-1"></i>Assistir Vídeo
+                                                            </button>
+                                                        <?php else: ?>
+                                                            <!-- Link normal para outras URLs -->
+                                                            <a href="<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
+                                                                <i class="fas fa-external-link-alt me-1"></i>Acessar Link
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    <?php elseif ($conteudo['tipo_arquivo'] !== 'TEMA' && !empty($conteudo['caminho_arquivo'])): ?>
+                                                        <?php if ($is_video_principal): ?>
+                                                            <!-- Botão Play para arquivo de vídeo -->
+                                                            <a href="<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
+                                                                <i class="fas fa-play me-1"></i>Assistir Vídeo
+                                                            </a>
+                                                        <?php else: ?>
+                                                            <!-- Botão normal para outros arquivos -->
+                                                            <a href="<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
+                                                                <i class="fas fa-download me-1"></i>Abrir Arquivo
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    <?php endif; ?>
+
+                                                    <!-- Arquivos vinculados (Dropdown) -->
+                                                    <?php if ($temArquivos): ?>
+                                                    <div class="mt-3">
+                                                        <div class="toggle-arquivos p-2 border rounded" 
+                                                             data-bs-toggle="collapse" 
+                                                             data-bs-target="#arquivos-<?= $conteudo['id'] ?>" 
+                                                             aria-expanded="false">
+                                                            <small class="d-flex justify-content-between align-items-center">
+                                                                <span>
+                                                                    <i class="fas fa-paperclip me-1"></i>
+                                                                    Arquivos vinculados (<?= count($arquivos) ?>)
+                                                                </span>
+                                                                <i class="fas fa-chevron-down collapse-icon"></i>
+                                                            </small>
+                                                        </div>
+                                                        
+                                                        <div class="collapse mt-2" id="arquivos-<?= $conteudo['id'] ?>">
+                                                            <div class="arquivos-dropdown border rounded p-2 bg-light">
+                                                                <?php foreach ($arquivos as $arquivo): 
+                                                                    $extensao = $arquivo['tipo_arquivo'];
+                                                                    $key = '/';
+                                                                    $position = strpos($extensao, $key);
+                                                                    if ($position !== false) {
+                                                                        // +1 para pegar o que vem DEPOIS do caractere
+                                                                        $extensao = substr($extensao, $position + 1);
+                                                                    }
+
+
+                                                                    $icone = 'fas fa-file';
+                                                                    $cor = 'text-secondary';
+                                                                    
+                                                                    // Verificar se é vídeo
+                                                                    $is_video_arquivo = is_video_file($arquivo['tipo_arquivo'], $arquivo['caminho_arquivo']);
+                                                                    $youtube_id_arquivo = null;
+                                                                    if ($is_video_arquivo && $arquivo['tipo_arquivo'] === 'URL') {
+                                                                        $youtube_id_arquivo = get_youtube_id($arquivo['caminho_arquivo']);
+                                                                    }
+                                                                    
+                                                                    // Definir ícone baseado no tipo de arquivo
+                                                                    if ($arquivo['tipo_arquivo'] === 'URL') {
+                                                                        if ($is_video_arquivo && $youtube_id_arquivo) {
+                                                                            $icone = 'fa-brands fa-youtube';
+                                                                            $cor = 'text-danger';
+                                                                        } else {
+                                                                            $icone = 'fas fa-link';
+                                                                            $cor = 'text-primary';
+                                                                        }
+                                                                    } else {
+                                                                        switch(strtolower($extensao)) {
+                                                                            case 'pdf':
+                                                                                $icone = 'fa-solid fa-file-pdf';
+                                                                                $cor = 'text-danger';
+                                                                                break;
+                                                                            case 'mp3':
+                                                                            case 'wav':
+                                                                                $icone = 'fas fa-file-audio';
+                                                                                $cor = 'text-info';
+                                                                                break;
+                                                                            case 'jpg':
+                                                                            case 'jpeg':
+                                                                            case 'png':
+                                                                                $icone = 'fa-solid fa-image';
+                                                                                $cor = 'text-success';
+                                                                                break;
+                                                                            case 'gif':
+                                                                                $icone = 'fa-solid fa-gif';
+                                                                                $cor = 'text-success';
+                                                                                break;
+                                                                        }
+                                                                    }
+                                                                ?>
+                                                                <div class="arquivo-item">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <div class="d-flex align-items-center">
+                                                                            <i class="<?= $icone ?> <?= $cor ?> arquivo-icon"></i>
+                                                                            <small class="text-truncate" style="max-width: 200px;" 
+                                                                                   title="<?= htmlspecialchars($arquivo['nome_arquivo']) ?>">
+                                                                                <?= htmlspecialchars($arquivo['nome_arquivo']) ?>
+                                                                            </small>
+                                                                        </div>
+                                                                        <?php if ($arquivo['tipo_arquivo'] === 'URL'): ?>
+                                                                            <?php if ($is_video_arquivo && $youtube_id_arquivo): ?>
+                                                                                <!-- Botão Play para vídeo do YouTube -->
+                                                                                <button class="btn btn-sm btn-outline-primary" 
+                                                                                        data-bs-toggle="modal" 
+                                                                                        data-bs-target="#modalYouTube"
+                                                                                        data-video-id="<?= $youtube_id_arquivo ?>"
+                                                                                        data-video-title="<?= htmlspecialchars($arquivo['nome_arquivo']) ?>"
+                                                                                        title="Assistir Vídeo">
+                                                                                    <i class="fas fa-play"></i>
+                                                                                </button>
+                                                                            <?php else: ?>
+                                                                                <!-- Link normal para outras URLs -->
+                                                                                <a href="<?= htmlspecialchars($arquivo['caminho_arquivo']) ?>" 
+                                                                                   target="_blank" 
+                                                                                   class="btn btn-sm btn-outline-primary"
+                                                                                   title="Acessar link">
+                                                                                    <i class="fas fa-external-link-alt"></i>
+                                                                                </a>
+                                                                            <?php endif; ?>
+                                                                        <?php elseif (!empty($arquivo['caminho_arquivo'])): ?>
+                                                                            <?php if ($is_video_arquivo): ?>
+                                                                                <!-- Botão Play para arquivo de vídeo -->
+                                                                                <a href="<?= htmlspecialchars($arquivo['caminho_arquivo']) ?>" 
+                                                                                   target="_blank" 
+                                                                                   class="btn btn-sm btn-outline-primary"
+                                                                                   title="Assistir Vídeo">
+                                                                                    <i class="fas fa-play"></i>
+                                                                                </a>
+                                                                            <?php else: ?>
+                                                                                <!-- Botão normal para outros arquivos -->
+                                                                                <a href="../<?= htmlspecialchars($arquivo['caminho_arquivo']) ?>" 
+                                                                                   target="_blank" 
+                                                                                   class="btn btn-sm btn-outline-secondary"
+                                                                                   title="Abrir arquivo">
+                                                                                    <i class="fas fa-external-link-alt"></i>
+                                                                                </a>
+                                                                            <?php endif; ?>
+                                                                        <?php endif; ?>
+                                                                    </div>
+                                                                    <?php if (!empty($arquivo['descricao'])): ?>
+                                                                    <small class="text-muted d-block mt-1">
+                                                                        <?= htmlspecialchars($arquivo['descricao']) ?>
+                                                                    </small>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-folder-open fa-2x text-muted mb-3"></i>
+                                        <p class="text-muted mb-0">Nenhum conteúdo disponível para esta aula.</p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Informações da Aula -->
-                    <div class="col-md-4 mb-4">
-                        <div class="card info-card h-100">
-                            <div class="card-header bg-primary text-white">
+                    <div class="col-md-3">
+                        <div class="card h-100">
+                            <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações da Aula</h5>
                             </div>
                             <div class="card-body">
@@ -188,52 +602,22 @@ $hora_formatada = substr($aula['horario'], 0, 5);
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    <!-- Conteúdos da Aula -->
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0"><i class="fas fa-book me-2"></i>Conteúdos da Aula</h5>
-                            </div>
-                            <div class="card-body">
-                                <?php if (count($conteudos) > 0): ?>
-                                    <div class="row">
-                                        <?php foreach ($conteudos as $conteudo): ?>
-                                            <div class="col-md-6 mb-3">
-                                                <div class="card conteudo-card h-100">
-                                                    <div class="card-body">
-                                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                                            <h6 class="card-title mb-0"><?= htmlspecialchars($conteudo['titulo']) ?></h6>
-                                                            <span class="badge <?= $conteudo['planejado'] ? 'badge-planejado' : 'badge-adicionado' ?>">
-                                                                <?= $conteudo['planejado'] ? 'Planejado' : 'Adicionado' ?>
-                                                            </span>
-                                                        </div>
-                                                        <?php if (!empty($conteudo['descricao'])): ?>
-                                                            <p class="card-text text-muted small"><?= htmlspecialchars($conteudo['descricao']) ?></p>
-                                                        <?php endif; ?>
-                                                        
-                                                        <?php if ($conteudo['tipo_arquivo'] === 'URL'): ?>
-                                                            <a href="<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
-                                                                <i class="fas fa-external-link-alt me-1"></i>Acessar Link
-                                                            </a>
-                                                        <?php elseif ($conteudo['tipo_arquivo'] !== 'TEMA'): ?>
-                                                            <a href="<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
-                                                                <i class="fas fa-download me-1"></i>Baixar Arquivo
-                                                            </a>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                <?php else: ?>
-                                    <div class="text-center py-4">
-                                        <i class="fas fa-folder-open fa-2x text-muted mb-3"></i>
-                                        <p class="text-muted mb-0">Nenhum conteúdo disponível para esta aula.</p>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
+    <!-- Modal para YouTube -->
+    <div class="modal fade modal-youtube" id="modalYouTube" tabindex="-1" aria-labelledby="modalYouTubeLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 style="color: white;" id="header-title"></h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="ratio ratio-16x9">
+                        <iframe id="youtubePlayer" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </div>
                 </div>
             </div>
@@ -241,5 +625,37 @@ $hora_formatada = substr($aula['horario'], 0, 5);
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Inicializar todos os collapses como fechados por padrão
+        document.addEventListener('DOMContentLoaded', function() {
+            var collapses = document.querySelectorAll('.collapse');
+            collapses.forEach(function(collapse) {
+                var bsCollapse = new bootstrap.Collapse(collapse, {
+                    toggle: false
+                });
+            });
+
+            // Função para o modal do YouTube
+            var modalYouTube = document.getElementById('modalYouTube');
+            if (modalYouTube) {
+                modalYouTube.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var videoId = button.getAttribute('data-video-id');
+                    var videoTitle = button.getAttribute('data-video-title');
+                    
+                    var iframe = document.getElementById('youtubePlayer');
+                    var headerTitle = document.getElementById('header-title');
+                    
+                    iframe.setAttribute('src', 'https://www.youtube.com/embed/' + videoId + '?autoplay=1');
+                    headerTitle.textContent = videoTitle;
+                });
+
+                modalYouTube.addEventListener('hidden.bs.modal', function () {
+                    var iframe = document.getElementById('youtubePlayer');
+                    iframe.setAttribute('src', '');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

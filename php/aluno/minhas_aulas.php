@@ -62,8 +62,85 @@ foreach ($aulas as $aula) {
     <title>Minhas Aulas - Risenglish</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="../../css/aluno/dashboard.css">
     <style>
+        body {
+            background-color: #FAF9F6;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 16.666667%;
+            background-color: #081d40;
+            color: #fff;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+            transition: 0.3s;
+        }
+
+        .sidebar .active {
+            background-color: #c0392b;
+        }
+
+        .sidebar .active:hover{
+            background-color: #c0392b;
+        }
+
+        .main-content {
+            margin-left: 16.666667%;
+            width: 83.333333%;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .btn-danger {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-danger:hover {
+            background-color: #a93226;
+            border-color: #a93226;
+        }
+        
+        .btn-outline-danger {
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-outline-danger:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+        #botao-sair {
+            border: none;
+        }
+
+        #botao-sair:hover {
+            background-color: #c0392b;
+            color: white;
+            transform: none;
+        }
+
         .card-aula {
             transition: all 0.3s ease;
             cursor: pointer;
@@ -80,6 +157,35 @@ foreach ($aulas as $aula) {
         }
         .aula-passada {
             opacity: 0.8;
+        }
+        .toggle-section {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .toggle-section:hover {
+            background-color: #f8f9fa;
+        }
+        .aulas-passadas-container {
+            transition: all 0.3s ease;
+        }
+        .collapse-icon {
+            transition: transform 0.3s ease;
+        }
+        .collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -164,36 +270,47 @@ foreach ($aulas as $aula) {
 
                 <!-- Aulas Passadas -->
                 <?php if (count($aulas_passadas) > 0): ?>
-                <div>
-                    <h4 class="mb-3"><i class="fas fa-history text-secondary me-2"></i>Aulas Passadas</h4>
-                    <div class="row">
-                        <?php foreach (array_reverse($aulas_passadas) as $aula): 
-                            $data_aula = new DateTime($aula['data_aula']);
-                        ?>
-                        <div class="col-md-6 col-lg-4 mb-3">
-                            <div class="card card-aula aula-passada h-100" onclick="window.location.href='detalhes_aula.php?id=<?= $aula['aula_id'] ?>'">
-                                <div class="card-body position-relative">
-                                    <span class="badge bg-secondary status-badge">Realizada</span>
-                                    <h5 class="card-title"><?= htmlspecialchars($aula['titulo_aula']) ?></h5>
-                                    <p class="card-text text-muted"><?= htmlspecialchars($aula['descricao'] ?: 'Sem descrição') ?></p>
-                                    <div class="mt-auto">
-                                        <small class="text-muted">
-                                            <i class="fas fa-calendar me-1"></i><?= $data_aula->format('d/m/Y') ?>
-                                            <i class="fas fa-clock ms-2 me-1"></i><?= substr($aula['horario'], 0, 5) ?>
-                                        </small>
-                                        <br>
-                                        <small class="text-muted">
-                                            <i class="fas fa-users me-1"></i><?= htmlspecialchars($aula['nome_turma']) ?>
-                                        </small>
-                                        <br>
-                                        <small class="text-muted">
-                                            <i class="fas fa-user me-1"></i>Prof. <?= htmlspecialchars($aula['nome_professor']) ?>
-                                        </small>
+                <div class="aulas-passadas-container">
+                    <div class="toggle-section mb-3 p-3 border rounded" data-bs-toggle="collapse" data-bs-target="#aulasPassadas" aria-expanded="false">
+                        <h4 class="mb-0 d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="fas fa-history text-secondary me-2"></i>Aulas Passadas
+                                <span class="badge bg-secondary ms-2"><?= count($aulas_passadas) ?></span>
+                            </span>
+                            <i class="fas fa-chevron-down collapse-icon"></i>
+                        </h4>
+                    </div>
+                    
+                    <div class="collapse" id="aulasPassadas">
+                        <div class="row">
+                            <?php foreach (array_reverse($aulas_passadas) as $aula): 
+                                $data_aula = new DateTime($aula['data_aula']);
+                            ?>
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card card-aula aula-passada h-100" onclick="window.location.href='detalhes_aula.php?id=<?= $aula['aula_id'] ?>'">
+                                    <div class="card-body position-relative">
+                                        <span class="badge bg-secondary status-badge">Realizada</span>
+                                        <h5 class="card-title"><?= htmlspecialchars($aula['titulo_aula']) ?></h5>
+                                        <p class="card-text text-muted"><?= htmlspecialchars($aula['descricao'] ?: 'Sem descrição') ?></p>
+                                        <div class="mt-auto">
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar me-1"></i><?= $data_aula->format('d/m/Y') ?>
+                                                <i class="fas fa-clock ms-2 me-1"></i><?= substr($aula['horario'], 0, 5) ?>
+                                            </small>
+                                            <br>
+                                            <small class="text-muted">
+                                                <i class="fas fa-users me-1"></i><?= htmlspecialchars($aula['nome_turma']) ?>
+                                            </small>
+                                            <br>
+                                            <small class="text-muted">
+                                                <i class="fas fa-user me-1"></i>Prof. <?= htmlspecialchars($aula['nome_professor']) ?>
+                                            </small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            <?php endforeach; ?>
                         </div>
-                        <?php endforeach; ?>
                     </div>
                 </div>
                 <?php else: ?>
@@ -208,5 +325,16 @@ foreach ($aulas as $aula) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Inicializar o collapse como fechado por padrão
+        document.addEventListener('DOMContentLoaded', function() {
+            var aulasPassadas = document.getElementById('aulasPassadas');
+            if (aulasPassadas) {
+                var collapse = new bootstrap.Collapse(aulasPassadas, {
+                    toggle: false
+                });
+            }
+        });
+    </script>
 </body>
 </html>

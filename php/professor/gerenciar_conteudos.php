@@ -291,7 +291,7 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
 
             <!-- Conteúdo principal -->
             <div class="col-md-10 main-content p-4">
-                <h2 class="mb-1 mt-3">Gerenciamento de Temas</h2>
+                <h2 class="mb-1 mt-3">Gerenciamento de Conteúdos</h2>
                 <p class="lead mb-4">Crie temas principais e organize seus materiais (arquivos) dentro deles.</p>
                 
                 <?php if (!empty($mensagem)): ?>
@@ -306,7 +306,7 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
                     <!-- NOVO: Botão de Alternância e Formulário Colapsável -->
                     <div class="col-lg-12 mb-4">
                         <button class="btn btn-primary w-100 py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNovoTema" aria-expanded="<?= ($acao_executada && !$sucesso) ? 'true' : 'false' ?>" aria-controls="collapseNovoTema">
-                            <i class="fas fa-folder-plus me-2"></i> Adicionar Novo Tema
+                            <i class="fas fa-folder-plus me-2"></i> Adicionar Novo Conteúdo
                         </button>
                         
                         <?php 
@@ -316,22 +316,22 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
                         <!-- Formulário de Novo Tema (Colapsável) -->
                         <div class="<?= $collapse_class ?>" id="collapseNovoTema">
                             <div class="card card-body rounded">
-                                <h5 class="card-title text-dark">Preencha os dados do novo tema</h5>
+                                <h5 class="card-title text-dark">Preencha os dados do novo Conteúdo</h5>
                                 <form method="POST" action="gerenciar_conteudos.php">
                                     <input type="hidden" name="acao" value="cadastrar">
 
                                     <div class="mb-3">
-                                        <label for="titulo" class="form-label">Título do Tema</label>
+                                        <label for="titulo" class="form-label">Título</label>
                                         <input type="text" class="form-control" id="titulo" name="titulo" required value="<?= htmlspecialchars($_POST['titulo'] ?? '') ?>">
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label for="descricao" class="form-label">Descrição do Tema (Opcional)</label>
+                                        <label for="descricao" class="form-label">Descrição (Opcional)</label>
                                         <textarea class="form-control" id="descricao" name="descricao" rows="2"><?= htmlspecialchars($_POST['descricao'] ?? '') ?></textarea>
                                     </div>
                                     
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-plus-circle me-2"></i> Criar Tema
+                                        <i class="fas fa-plus-circle me-2"></i> Criar Conteúdo
                                     </button>
                                 </form>
                             </div>
@@ -343,11 +343,11 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
                     <div class="col-lg-12">
                         <div class="card rounded">
                             <div class="card-header text-white">
-                                Biblioteca de Temas (Total: <?= count($temas) ?>)
+                                Biblioteca de Conteúdos (Total: <?= count($temas) ?>)
                             </div>
                             <div class="card-body">
                                 <?php if (empty($temas)): ?>
-                                    <p class="text-center text-muted">Nenhum tema cadastrado ainda.</p>
+                                    <p class="text-center text-muted">Nenhum conteúdo cadastrado ainda.</p>
                                 <?php else: ?>
                                     <ul class="list-group list-group-flush">
                                         <?php foreach ($temas as $tema): 
