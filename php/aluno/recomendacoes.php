@@ -37,8 +37,85 @@ $recursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Recomendações - Risenglish</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="../../css/aluno/dashboard.css">
     <style>
+        body {
+            background-color: #FAF9F6;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 16.666667%;
+            background-color: #081d40;
+            color: #fff;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+            transition: 0.3s;
+        }
+
+        .sidebar .active {
+            background-color: #c0392b;
+        }
+
+        .sidebar .active:hover{
+            background-color: #c0392b;
+        }
+
+        .main-content {
+            margin-left: 16.666667%;
+            width: 83.333333%;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .btn-danger {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-danger:hover {
+            background-color: #a93226;
+            border-color: #a93226;
+        }
+        
+        .btn-outline-danger {
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-outline-danger:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+        #botao-sair {
+            border: none;
+        }
+
+        #botao-sair:hover {
+            background-color: #c0392b;
+            color: white;
+            transform: none;
+        }
+
         .card-recurso {
             transition: all 0.3s ease;
             border-left: 4px solid #c0392b;
@@ -48,6 +125,17 @@ $recursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             transform: translateY(-5px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
+
+        .card-text {
+            display: -webkit-box; /* Define a div como uma caixa de flex */
+            -webkit-line-clamp: 3; /* Limita o texto a 3 linhas */
+            line-clamp: 3;
+            -webkit-box-orient: vertical; /* Orienta o conteúdo verticalmente */
+            overflow: hidden; /* Oculta o texto que ultrapassar o limite */
+            text-overflow: ellipsis; /* Adiciona reticências (...) ao final do texto */
+            /* Você também pode adicionar outras propriedades como width, max-width, etc. */
+        }
+
         .recurso-icon {
             font-size: 2.5rem;
             color: #081d40;
@@ -66,6 +154,19 @@ $recursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             position: absolute;
             top: 15px;
             right: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -96,13 +197,12 @@ $recursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h3>Recursos Recomendados</h3>
-                    <span class="badge bg-primary fs-6"><?= count($recursos) ?> recursos disponíveis</span>
                 </div>
 
                 <!-- Introdução -->
                 <div class="row mb-4">
                     <div class="col-12">
-                        <div class="card bg-light border-0">
+                        <div class="card bg-light">
                             <div class="card-body">
                                 <h5 class="card-title text-primary"><i class="fas fa-info-circle me-2"></i>Como usar esses recursos</h5>
                                 <p class="card-text mb-0">
@@ -125,32 +225,13 @@ $recursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         
                         $titulo_lower = strtolower($recurso['titulo']);
                         $descricao_lower = strtolower($recurso['descricao']);
-                        
-                        if (strpos($titulo_lower, 'dicionário') !== false || strpos($descricao_lower, 'dicionário') !== false) {
-                            $icone = 'fa-book';
-                            $categoria = 'Dicionário';
-                        } elseif (strpos($titulo_lower, 'tradutor') !== false || strpos($descricao_lower, 'tradutor') !== false) {
-                            $icone = 'fa-language';
-                            $categoria = 'Tradutor';
-                        } elseif (strpos($titulo_lower, 'pronúncia') !== false || strpos($descricao_lower, 'pronúncia') !== false) {
-                            $icone = 'fa-volume-up';
-                            $categoria = 'Pronúncia';
-                        } elseif (strpos($titulo_lower, 'fonética') !== false || strpos($descricao_lower, 'fonética') !== false) {
-                            $icone = 'fa-music';
-                            $categoria = 'Fonética';
-                        }
-                        
-                        // Formatar data
-                        $data_criacao = new DateTime($recurso['data_criacao']);
-                        $data_formatada = $data_criacao->format('d/m/Y');
                     ?>
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card card-recurso">
-                            <div class="card-body position-relative">
-                                <span class="badge bg-secondary categoria-badge"><?= $categoria ?></span>
+                            <div class="card-body position-relative flex">
                                 
                                 <div class="text-center">
-                                    <i class="fas <?= $icone ?> recurso-icon"></i>
+                                    <i class="fas fa-link recurso-icon"></i>
                                 </div>
                                 
                                 <h5 class="card-title text-center"><?= htmlspecialchars($recurso['titulo']) ?></h5>
@@ -163,14 +244,8 @@ $recursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <a href="<?= htmlspecialchars($recurso['link']) ?>" 
                                        target="_blank" 
                                        class="btn btn-recurso w-100">
-                                        <i class="fas fa-external-link-alt me-2"></i>Acessar Recurso
+                                        <i class="fas fa-external-link-alt me-2"></i>Acessar
                                     </a>
-                                </div>
-                                
-                                <div class="mt-3 text-center">
-                                    <small class="text-muted">
-                                        <i class="fas fa-calendar me-1"></i>Adicionado em <?= $data_formatada ?>
-                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -184,9 +259,6 @@ $recursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <p class="text-muted">Em breve teremos recomendações para você!</p>
                     </div>
                 <?php endif; ?>
-
-                <!-- Dicas de Uso -->
-                
             </div>
         </div>
     </div>
