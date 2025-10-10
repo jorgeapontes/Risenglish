@@ -112,7 +112,11 @@
                     <p class="about-text">
                         Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptates rerum reprehenderit odio deserunt ipsa sequi, illo fugiat laudantium quos eum minus accusamus voluptas reiciendis dicta! Atque culpa aliquam unde quibusdam.
                     </p>
-                    <div class="about-features">
+                    
+                </div>
+            </div>
+        </div>
+        <div class="about-features">
                         <div class="feature">
                             <i class="fa-solid fa-comments"></i>
                             <div class="feature-text">
@@ -135,9 +139,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
     </section>
 
     <!-- Contact Section -->
@@ -170,6 +171,18 @@
                     </a>
                     
                 </div>
+            </div>
+            <div class="backtop">
+                 <a href="#home" class="btn btn-backtop">
+                        <span>Voltar ao topo</span>
+                    </a>
+            </div>
+            <div class="footerfooter">
+                <h1>Risenglish</h1>
+                <p>Copyright © Risenglish by Laura Antero.<br>
+                    All Rights Reserved
+                </p>
+                
             </div>
         </div>
     </section>
