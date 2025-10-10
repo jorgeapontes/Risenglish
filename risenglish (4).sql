@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 07/10/2025 às 02:46
+-- Tempo de geração: 10/10/2025 às 03:21
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -38,12 +38,8 @@ CREATE TABLE `alunos_turmas` (
 --
 
 INSERT INTO `alunos_turmas` (`id`, `aluno_id`, `turma_id`) VALUES
-(7, 4, 1),
-(10, 4, 2),
-(8, 5, 1),
-(11, 5, 2),
-(9, 6, 1),
-(6, 7, 1);
+(12, 4, 3),
+(13, 5, 3);
 
 -- --------------------------------------------------------
 
@@ -66,14 +62,7 @@ CREATE TABLE `aulas` (
 --
 
 INSERT INTO `aulas` (`id`, `titulo_aula`, `descricao`, `data_aula`, `horario`, `turma_id`, `professor_id`) VALUES
-(3, 'myself', '', '2025-09-30', '11:00:00', 2, 2),
-(4, 'sla', '', '2025-09-30', '10:00:00', 1, 2),
-(5, 'testando', 'aulinha', '2025-09-19', '18:00:00', 2, 2),
-(6, 'adwd', '', '2025-09-30', '00:00:00', 2, 2),
-(7, 'adad', '', '2025-09-30', '23:00:00', 1, 2),
-(8, 'n sei', '', '2025-10-02', '22:00:00', 2, 2),
-(9, 'adfwdfa', '', '2025-10-15', '21:00:00', 1, 2),
-(10, 'afaf', '', '2025-10-31', '00:00:00', 2, 2);
+(12, 'Dinossauros', 'Fodase', '2025-10-10', '13:30:00', 3, 2);
 
 -- --------------------------------------------------------
 
@@ -93,11 +82,7 @@ CREATE TABLE `aulas_conteudos` (
 --
 
 INSERT INTO `aulas_conteudos` (`id`, `aula_id`, `conteudo_id`, `planejado`) VALUES
-(1, 8, 2, 0),
-(2, 8, 10, 0),
-(3, 8, 15, 1),
-(4, 8, 1, 1),
-(20, 9, 17, 0);
+(31, 12, 22, 1);
 
 -- --------------------------------------------------------
 
@@ -128,7 +113,14 @@ INSERT INTO `conteudos` (`id`, `professor_id`, `parent_id`, `titulo`, `descricao
 (13, 2, 1, 'teste de link', 'teste de link (Link: youtu.be)', 'URL', 'https://youtu.be/aq-DH4iwviE?si=xYXctrZTNO343Tfq', '2025-10-02 14:36:05'),
 (14, 2, 1, 'teste pdf de novo', 'teste pdf de novo (Arquivo: Mapa conceitual.pdf)', 'application/pdf', 'uploads/conteudos/1759415810_68de8e0289ad5.pdf', '2025-10-02 14:36:50'),
 (15, 2, NULL, 'My self', '', 'TEMA', '', '2025-10-02 14:44:00'),
-(17, 2, NULL, 'Friendship', '', 'TEMA', '', '2025-10-03 13:19:30');
+(17, 2, NULL, 'Friendship', '', 'TEMA', '', '2025-10-03 13:19:30'),
+(19, 2, NULL, 'Verb to be', 'Aprenda verb to be de uma vez por todas', 'TEMA', '', '2025-10-09 22:42:30'),
+(20, 2, 19, 'Imagem verb to be', 'Imagem verb to be (Arquivo: DiagramaAtividades.png)', 'image/png', 'uploads/conteudos/1760049836_68e83aac5f9d6.png', '2025-10-09 22:43:56'),
+(21, 2, 19, 'Vídeo verb to be', 'Vídeo verb to be (Link: www.youtube.com)', 'URL', 'https://www.youtube.com/watch?v=yFj4O4SBFZM', '2025-10-09 22:44:30'),
+(22, 2, NULL, 'Dinosaurs', 'Aulas sobre dinossauros em inglês', 'TEMA', '', '2025-10-09 23:29:40'),
+(26, 2, 22, 'HELL YEAHH ????????????', 'HELL YEAHH ???????????? (Link: youtu.be)', 'URL', 'https://youtu.be/1JEvSMD0JnU', '2025-10-09 23:53:12'),
+(27, 2, 22, 'T-Rex', 'T-Rex (Arquivo: download.jpg)', 'image/jpeg', 'uploads/conteudos/1760054011_68e84afbe2ada.jpg', '2025-10-09 23:53:31'),
+(28, 2, 22, 'Não sei', 'Não sei (Arquivo: download.pdf)', 'application/pdf', 'uploads/conteudos/1760055055_68e84f0f3c483.pdf', '2025-10-10 00:10:55');
 
 -- --------------------------------------------------------
 
@@ -172,8 +164,7 @@ CREATE TABLE `turmas` (
 --
 
 INSERT INTO `turmas` (`id`, `nome_turma`, `professor_id`, `inicio_turma`) VALUES
-(1, 'Turma teste', 2, '2025-09-28'),
-(2, 'turma 1', 2, '2025-09-28');
+(3, 'Turma 1', 2, '0000-00-00');
 
 -- --------------------------------------------------------
 
@@ -201,8 +192,7 @@ INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`, `reset_t
 (4, 'Jorge Augusto Possani Pontes', 'jorgeappontes13@gmail.com', '$2y$10$pU0aqm5w/k.WZOVdU324F.4acQnOKbSJsotAH3eIaJ4U3uJd4Ftne', 'aluno', NULL, NULL),
 (5, 'Rafael Tonetti Cardoso', 'rafaeltonetti.cardoso@gmail.com', '$2y$10$ABEbkqnbGsw.a6nFivA6quafuPOwnLwBEJzrpGzjHS7kyo4GTxDT6', 'aluno', NULL, NULL),
 (6, 'Silene Cristina Possani', 'silene@gmail.com', '$2y$10$LZcwgOFnEzR6HUbm.R2QJugM1R5y5N.3mVm78DF46VfEPe1KXNf9K', 'aluno', NULL, NULL),
-(7, 'João Victor', 'jv@gmail.com', '$2y$10$Ui89Uk.FUac.U0unv4OsvOBW/bugPb5BRrjHmzibFp7bmtQbdd1OC', 'aluno', NULL, NULL),
-(8, 'Professor TESTE', 'profteste@risenglish.com', '$2y$10$DWtEWvdKsdhyoNjE9.7U6umkXyoqJdyiEezoLF4Hp6JB7e9VsOnye', 'professor', NULL, NULL);
+(7, 'João Victor', 'jv@gmail.com', '$2y$10$Ui89Uk.FUac.U0unv4OsvOBW/bugPb5BRrjHmzibFp7bmtQbdd1OC', 'aluno', NULL, NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -268,25 +258,25 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `alunos_turmas`
 --
 ALTER TABLE `alunos_turmas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de tabela `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de tabela `aulas_conteudos`
 --
 ALTER TABLE `aulas_conteudos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT de tabela `conteudos`
 --
 ALTER TABLE `conteudos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT de tabela `recursos_uteis`
@@ -298,7 +288,7 @@ ALTER TABLE `recursos_uteis`
 -- AUTO_INCREMENT de tabela `turmas`
 --
 ALTER TABLE `turmas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `usuarios`
