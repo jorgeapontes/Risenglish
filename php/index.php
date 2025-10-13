@@ -49,10 +49,12 @@
                     <span><i class="fas fa-star"></i> Método Exclusivo</span>
                 </div>
                 <h1 class="hero-title">
-                    <span class="title-line">Vocabulário</span>
-                    <span class="title-line accent">de Ouro</span>
+                    <span class="title-line">Fale inglês com confiança. 
+</span>
+                    <span class="title-line accent">Cresça com propósito.</span>
                 </h1>
-                <p class="hero-subtitle">Desbloqueie seu potencial no inglês com uma metodologia focada em conversação e escuta ativa!</p>
+                <p class="hero-subtitle">Desbloqueie seu potencial com uma metodologia focada em conversação e escuta ativa! Não é só sobre aprender inglês. É sobre transformar sua comunicação e seu futuro.
+</p>
                 <div class="hero-buttons">
                     <a href="#about" class="btn btn-primary">
                         <span>Ver mais</span>
@@ -69,7 +71,7 @@
                     </div>
                     <div class="feature-item">
                         <i class="fas fa-check-circle"></i>
-                        <span>Material Exclusivo</span>
+                        <span>Resultados Reais</span>
                     </div>
                     <div class="feature-item">
                         <i class="fas fa-check-circle"></i>
@@ -81,7 +83,7 @@
                 <div class="image-container">
                     <div class="image-placeholder">
                         <i class="fas fa-graduation-cap"></i>
-                        <p>Logo</p>
+                        <!-- <p>Logo</p> -->
                     </div>
                     <div class="image-decoration"></div>
                 </div>
@@ -121,22 +123,25 @@ Acredito que aprender é um processo de evolução contínua, e é esse crescime
                         <div class="feature">
                             <i class="fa-solid fa-comments"></i>
                             <div class="feature-text">
-                                <h4>Comunicação </h4>
-                                <p>Aprenda a se comunicar com mais confiança!</p>
+                                <h4>Metodologia Conversacional </h4>
+                                <p>Aprenda com foco em speaking e listening, tudo sobre conexão real.
+</p>
                             </div>
                         </div>
                         <div class="feature">
                             <i class="fa-solid fa-mug-hot"></i>
                             <div class="feature-text">
-                                <h4>Aulas particulares</h4>
-                                <p>Materiais exclusivos para você e suas dificuldades.</p>
+                                <h4>Acompanhamento Individual</h4>
+                                <p>Você evolui no seu ritmo, com suporte direto da professora.
+</p>
+</p>
                             </div>
                         </div>
                         <div class="feature">
-                            <i class="fas fa-clock"></i>
+                            <i class="fa-solid fa-star"></i>
                             <div class="feature-text">
-                                <h4>Flexibilidade total</h4>
-                                <p>Horários que se adaptam à sua rotina.</p>
+                                <h4>Exclusividade Risenglish</h4>
+                                <p>Conteúdos autorais e práticos, pensados para cada nível e objetivo.</p>
                             </div>
                         </div>
                     </div>
