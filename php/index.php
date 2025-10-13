@@ -101,7 +101,7 @@
                         <img src="professora.jpg" alt="Professora Risenglish">
                         <div class="image-overlay">
                             <div class="experience-badge">
-                                <span>10+ anos</span>
+                                <span>X+ anos</span>
                                 <small>de experiência</small>
                             </div>
                         </div>
@@ -110,7 +110,8 @@
                 <div class="about-content">
                     <h2 class="section-title">Sobre Mim</h2>
                     <p class="about-text">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptates rerum reprehenderit odio deserunt ipsa sequi, illo fugiat laudantium quos eum minus accusamus voluptas reiciendis dicta! Atque culpa aliquam unde quibusdam.
+                       Sou Laura Antero, natural de Ponta Grossa (PR) e atualmente em Jundiaí (SP). Construí minha trajetória lecionando em escolas e descobri, nas aulas particulares, a melhor forma de acompanhar de perto e celebrar cada pequeno progresso dos meus alunos. Sou formada em Letras – Português/Inglês e Literaturas pela UEPG, com láurea acadêmica, e possuo certificação internacional pela ACE English Malta, onde também fiz intercâmbio. Na Rise English, transformo essa experiência em propósito: ajudar alunos a evoluírem com confiança, fluência e propósito, em um ambiente acolhedor e humano.
+Acredito que aprender é um processo de evolução contínua, e é esse crescimento, em cada história, que me inspira a seguir ensinando com entusiasmo e dedicação todos os dias.
                     </p>
                     
                 </div>

@@ -435,12 +435,13 @@ html {
 }
 
 .about-image {
+    border-radius: 5px;
     position: relative;
 }
 
 .image-frame {
     position: relative;
-    border-radius: 20px;
+    border-radius: 30px;
     overflow: hidden;
     box-shadow: 0 20px 40px rgba(10, 25, 49, 0.1);
 }
