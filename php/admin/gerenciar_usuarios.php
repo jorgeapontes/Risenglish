@@ -16,6 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
     $email = $_POST['email'];
     $senha = $_POST['senha'];
     $tipo = $_POST['tipo_usuario'];
+    $informacoes = $_POST['informacoes'] ?? '';
     $usuario_id = $_POST['usuario_id'] ?? null;
     $acao = $_POST['acao'];
 
@@ -32,13 +33,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
             if ($stmt_check->rowCount() > 0) throw new Exception("O email já está cadastrado.");
 
             $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
-            $sql = "INSERT INTO usuarios (nome, email, senha, tipo_usuario) VALUES (:nome, :email, :senha, :tipo_usuario)";
+            $sql = "INSERT INTO usuarios (nome, email, senha, tipo_usuario, informacoes) VALUES (:nome, :email, :senha, :tipo_usuario, :informacoes)";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':senha', $senha_hash);
+            $stmt->bindParam(':informacoes', $informacoes);
             $mensagem = "Usuário <strong>{$nome}</strong> cadastrado como <strong>{$tipo}</strong> com sucesso!";
 
         } else {
-            $sql_parts = ["nome = :nome", "email = :email", "tipo_usuario = :tipo_usuario"];
+            $sql_parts = ["nome = :nome", "email = :email", "tipo_usuario = :tipo_usuario", "informacoes = :informacoes"];
             if (!empty($senha)) {
                 $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
                 $sql_parts[] = "senha = :senha";
@@ -46,6 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
             $sql = "UPDATE usuarios SET " . implode(', ', $sql_parts) . " WHERE id = :usuario_id";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':usuario_id', $usuario_id);
+            $stmt->bindParam(':informacoes', $informacoes);
             if (!empty($senha)) $stmt->bindParam(':senha', $senha_hash);
             $mensagem = "Usuário <strong>{$nome}</strong> atualizado com sucesso!";
         }
@@ -80,10 +83,10 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
 }
 
 // --- CONSULTAS ---
-$sql_professores = "SELECT id, nome, email, tipo_usuario FROM usuarios WHERE tipo_usuario = 'professor' ORDER BY nome";
+$sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes FROM usuarios WHERE tipo_usuario = 'professor' ORDER BY nome";
 $professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
 
-$sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
+$sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
                FROM usuarios u
                LEFT JOIN alunos_turmas at ON u.id = at.aluno_id
                LEFT JOIN turmas t ON at.turma_id = t.id
@@ -271,14 +274,14 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
             border-left: 4px solid #dc3545;
         }
 
-        .form-control, .form-select {
+        .form-control, .form-select, .form-textarea {
             border: 2px solid #e9ecef;
             border-radius: 8px;
             padding: 10px 15px;
             transition: all 0.3s ease;
         }
 
-        .form-control:focus, .form-select:focus {
+        .form-control:focus, .form-select:focus, .form-textarea:focus {
             border-color: var(--cor-primaria);
             box-shadow: 0 0 0 0.2rem rgba(26, 42, 58, 0.25);
         }
@@ -347,6 +350,13 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
         .nav-link.active:hover {
             background-color: #081d40;
         }
+
+        .informacoes-text {
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
@@ -404,20 +414,26 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
                             <tr>
                                 <th>Nome</th>
                                 <th>Email</th>
+                                <th>Informações</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($professores)): ?>
-                                <tr><td colspan="3" class="text-center">Nenhum professor cadastrado.</td></tr>
+                                <tr><td colspan="4" class="text-center">Nenhum professor cadastrado.</td></tr>
                             <?php else: ?>
                                 <?php foreach ($professores as $professor): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($professor['nome']) ?></td>
                                     <td><?= htmlspecialchars($professor['email']) ?></td>
                                     <td>
+                                        <div class="informacoes-text">
+                                            <?= htmlspecialchars($professor['informacoes'] ?: 'Sem informações adicionais') ?>
+                                        </div>
+                                    </td>
+                                    <td>
                                         <button class="btn btn-sm btn-outline-primary me-2" 
-                                                onclick="openEditUsuarioModal(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['tipo_usuario'], ENT_QUOTES) ?>')">
+                                                onclick="openEditUsuarioModal(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['informacoes'] ?? '', ENT_QUOTES) ?>')">
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
                                         <button class="btn btn-sm btn-outline-danger" 
@@ -441,24 +457,30 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
                             <tr>
                                 <th>Nome</th>
                                 <th>Email</th>
+                                <th>Informações</th>
                                 <th>Turmas</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($alunos)): ?>
-                                <tr><td colspan="4" class="text-center">Nenhum aluno cadastrado.</td></tr>
+                                <tr><td colspan="5" class="text-center">Nenhum aluno cadastrado.</td></tr>
                             <?php else: ?>
                                 <?php foreach ($alunos as $aluno): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($aluno['nome']) ?></td>
                                     <td><?= htmlspecialchars($aluno['email']) ?></td>
                                     <td>
+                                        <div class="informacoes-text">
+                                            <?= htmlspecialchars($aluno['informacoes'] ?: 'Sem informações adicionais') ?>
+                                        </div>
+                                    </td>
+                                    <td>
                                         <span class="badge bg-secondary"><?= htmlspecialchars($aluno['turmas_associadas'] ?: 'Nenhuma') ?></span>
                                     </td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-primary me-2" 
-                                                onclick="openEditUsuarioModal(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['tipo_usuario'], ENT_QUOTES) ?>')">
+                                                onclick="openEditUsuarioModal(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['informacoes'] ?? '', ENT_QUOTES) ?>')">
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
                                         <button class="btn btn-sm btn-outline-danger" 
@@ -509,6 +531,11 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <div class="mb-3">
+                <label for="informacoes" class="form-label">Informações Adicionais</label>
+                <textarea class="form-control form-textarea" id="informacoes" name="informacoes" rows="3" placeholder="Adicione informações relevantes sobre o usuário (ex: nível de inglês, observações, etc.)"></textarea>
+            </div>
+
+            <div class="mb-3">
                 <label for="senha" class="form-label" id="label_senha">Senha (Obrigatória para novo. Deixe vazio para manter a atual)</label>
                 <input type="password" class="form-control" id="senha" name="senha">
             </div>
@@ -537,6 +564,7 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('nome').value = '';
         document.getElementById('email').value = '';
         document.getElementById('tipo_usuario').value = ''; 
+        document.getElementById('informacoes').value = '';
         document.getElementById('senha').value = '';
         document.getElementById('label_senha').innerText = 'Senha (Obrigatória para novo)';
         document.getElementById('btn_salvar_usuario').innerText = 'Salvar Usuário';
@@ -545,13 +573,14 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('senha').removeAttribute('required');
     }
 
-    function openEditUsuarioModal(id, nome, email, tipo) {
+    function openEditUsuarioModal(id, nome, email, tipo, informacoes) {
         document.getElementById('modalAddUsuarioLabel').innerText = `Editar Usuário: ${nome}`;
         document.getElementById('usuario_acao').value = 'editar_usuario';
         document.getElementById('usuario_id').value = id;
         document.getElementById('nome').value = nome;
         document.getElementById('email').value = email;
         document.getElementById('tipo_usuario').value = tipo;
+        document.getElementById('informacoes').value = informacoes || '';
         document.getElementById('senha').value = '';
         document.getElementById('label_senha').innerText = 'Nova Senha (Deixe vazio para manter a atual)';
         document.getElementById('btn_salvar_usuario').innerText = 'Atualizar Usuário';

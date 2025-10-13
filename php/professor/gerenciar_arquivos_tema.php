@@ -28,25 +28,31 @@ if (!isset($_GET['tema_id']) || !is_numeric($_GET['tema_id'])) {
 
 $tema_id = (int)$_GET['tema_id'];
 
-// 1. Validar e buscar dados do Tema Pai
-if (!$tema_id || !is_numeric($tema_id)) {
+// Buscar dados do TEMA
+$sql_tema = "SELECT c.titulo, c.professor_id, u.nome AS nome_professor
+             FROM conteudos AS c
+             JOIN usuarios AS u ON c.professor_id = u.id
+             WHERE c.id = :tema_id AND c.parent_id IS NULL";
+$stmt_tema = $pdo->prepare($sql_tema);
+$stmt_tema->execute([':tema_id' => $tema_id]);
+$tema = $stmt_tema->fetch(PDO::FETCH_ASSOC);
+
+if (!$tema) {
     header("Location: gerenciar_conteudos.php");
     exit;
 }
 
-// Buscar dados do TEMA (incluindo o autor original)
-// A query usa APENAS UM BOUND PARAMETER (:tema_id), o que corresponde à execução abaixo.
-$sql_tema = "SELECT c.titulo, c.professor_id, u.nome AS nome_professor
-             FROM conteudos AS c
-             JOIN usuarios AS u ON c.professor_id = u.id
-             WHERE c.id = :tema_id AND c.parent_id IS NULL"; // parent_id IS NULL é o segundo filtro, mas não usa um placeholder
-$stmt_tema = $pdo->prepare($sql_tema);
-$stmt_tema->execute([':tema_id' => $tema_id]); // Apenas um parâmetro
-$tema = $stmt_tema->fetch(PDO::FETCH_ASSOC); // LINHA 38 (onde o erro ocorria)
+// --- 3. BUSCAR AULAS DO PROFESSOR PARA VISIBILIDADE ---
+$sql_aulas = "SELECT a.id, a.titulo_aula, a.data_aula, t.nome_turma
+              FROM aulas a
+              JOIN turmas t ON a.turma_id = t.id
+              WHERE a.professor_id = :professor_id
+              ORDER BY a.data_aula DESC, a.horario DESC";
+$stmt_aulas = $pdo->prepare($sql_aulas);
+$stmt_aulas->execute([':professor_id' => $professor_id]);
+$aulas = $stmt_aulas->fetchAll(PDO::FETCH_ASSOC);
 
-
-
-// --- 3. LÓGICA UNIFICADA DE CADASTRO (ARQUIVO OU LINK) ---
+// --- 4. LÓGICA UNIFICADA DE CADASTRO (ARQUIVO OU LINK) ---
 if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'upload_recurso') {
     
     $titulo_recurso = trim($_POST['titulo_recurso']);
@@ -142,7 +148,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
     exit;
 }
 
-// --- 4. LÓGICA DE EXCLUSÃO DE RECURSO ---
+// --- 5. LÓGICA DE EXCLUSÃO DE RECURSO ---
 if ($tema_id > 0 && isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
     $recurso_id = $_GET['excluir'];
     try {
@@ -157,6 +163,11 @@ if ($tema_id > 0 && isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
         $stmt_delete = $pdo->prepare($sql_delete);
         
         if ($stmt_delete->execute([':id' => $recurso_id, ':professor_id' => $professor_id, ':parent_id' => $tema_id])) {
+            // Remove também os registros de visibilidade
+            $sql_delete_visibilidade = "DELETE FROM arquivos_visiveis WHERE conteudo_id = :conteudo_id";
+            $stmt_delete_visibilidade = $pdo->prepare($sql_delete_visibilidade);
+            $stmt_delete_visibilidade->execute([':conteudo_id' => $recurso_id]);
+            
             if ($recurso_info && $recurso_info['caminho_arquivo'] && $recurso_info['tipo_arquivo'] !== 'URL') {
                 $caminho_completo = '../' . $recurso_info['caminho_arquivo'];
                 if (file_exists($caminho_completo) && !is_dir($caminho_completo)) {
@@ -178,16 +189,40 @@ if ($tema_id > 0 && isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
     exit;
 }
 
-// --- 5. BUSCAR RECURSOS DO TEMA ---
+// --- 6. BUSCAR RECURSOS DO TEMA COM STATUS DE VISIBILIDADE ---
 $recursos = [];
 if ($tema_id > 0) {
-    $sql_recursos = "SELECT id, titulo, tipo_arquivo, caminho_arquivo, data_upload 
-                     FROM conteudos 
-                     WHERE parent_id = :tema_id 
-                     ORDER BY data_upload DESC";
+    $sql_recursos = "SELECT 
+                        c.id, 
+                        c.titulo, 
+                        c.tipo_arquivo, 
+                        c.caminho_arquivo, 
+                        c.data_upload,
+                        (SELECT COUNT(*) FROM arquivos_visiveis av WHERE av.conteudo_id = c.id AND av.visivel = 1) as aulas_visiveis,
+                        (SELECT COUNT(*) FROM aulas WHERE professor_id = :professor_id) as total_aulas
+                     FROM conteudos c
+                     WHERE c.parent_id = :tema_id 
+                     ORDER BY c.data_upload DESC";
     $stmt_recursos = $pdo->prepare($sql_recursos);
-    $stmt_recursos->execute([':tema_id' => $tema_id]);
+    $stmt_recursos->execute([':tema_id' => $tema_id, ':professor_id' => $professor_id]);
     $recursos = $stmt_recursos->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// --- 7. BUSCAR DETALHES DE VISIBILIDADE POR AULA ---
+$visibilidade_por_aula = [];
+if (!empty($recursos)) {
+    $recurso_ids = array_column($recursos, 'id');
+    $placeholders = str_repeat('?,', count($recurso_ids) - 1) . '?';
+    
+    $sql_visibilidade = "SELECT conteudo_id, aula_id, visivel 
+                         FROM arquivos_visiveis 
+                         WHERE conteudo_id IN ($placeholders)";
+    $stmt_visibilidade = $pdo->prepare($sql_visibilidade);
+    $stmt_visibilidade->execute($recurso_ids);
+    
+    while ($row = $stmt_visibilidade->fetch(PDO::FETCH_ASSOC)) {
+        $visibilidade_por_aula[$row['conteudo_id']][$row['aula_id']] = $row['visivel'];
+    }
 }
 
 function get_file_icon($mime_type, $caminho_arquivo = null) {
@@ -218,7 +253,7 @@ function get_youtube_id($url) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciar Arquivos: <?= htmlspecialchars($tema_info['titulo'] ?? 'Tema Inválido') ?></title>
+    <title>Gerenciar Arquivos: <?= htmlspecialchars($tema['titulo'] ?? 'Tema Inválido') ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -382,6 +417,42 @@ function get_youtube_id($url) {
             color: #384d90
         }
 
+        /* Estilos para visibilidade */
+        .visibilidade-switch {
+            transform: scale(0.8);
+        }
+        
+        .visibilidade-status {
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .visivel {
+            color: #28a745;
+        }
+        
+        .nao-visivel {
+            color: #dc3545;
+        }
+        
+        .aula-selector {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+        
+        .aula-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .aula-item:last-child {
+            border-bottom: none;
+        }
+
         /* Responsividade */
         @media (max-width: 768px) {
             .sidebar {
@@ -429,7 +500,7 @@ function get_youtube_id($url) {
             <!-- Conteúdo principal -->
             <div class="col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="mt-3"><a id="back-link" href="gerenciar_conteudos.php"> Gerenciamento de Temas</a></h2>
+                    <h2 class="mt-3"><a id="back-link" href="gerenciar_conteudos.php"> Gerenciamento de Temas</a> > <strong><?= htmlspecialchars($tema['titulo'] ?? 'Tema') ?></strong></h2>
                     <div>
                         <div class="mt-4">
                             <a href="gerenciar_conteudos.php" class="btn btn-outline-secondary me-2">
@@ -451,8 +522,8 @@ function get_youtube_id($url) {
 
                 <!-- Lista de Recursos -->
                 <div class="card rounded">
-                    <div class="card-header text-white">
-                        <i class="fas fa-list-ul me-2"></i> Recursos Vinculados (Total: <?= count($recursos) ?>)
+                    <div class="card-header text-white d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-list-ul me-2"></i> Recursos Vinculados (Total: <?= count($recursos) ?>)</span>
                     </div>
                     <div class="card-body p-0 rounded">
                         <?php if (empty($recursos)): ?>
@@ -464,16 +535,18 @@ function get_youtube_id($url) {
                                         <tr>
                                             <th>Tipo</th>
                                             <th>Título do Recurso</th>
+                                            <th>Visibilidade</th>
                                             <th>Data de Upload</th>
-                                            <th style="width: 150px;">Ações</th>
+                                            <th style="width: 200px;">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php foreach ($recursos as $r): 
                                             $is_youtube = ($r['tipo_arquivo'] === 'URL') && (strpos($r['caminho_arquivo'], 'youtube.com') !== false || strpos($r['caminho_arquivo'], 'youtu.be') !== false);
                                             $youtube_id = $is_youtube ? get_youtube_id($r['caminho_arquivo']) : null;
+                                            $percentual_visivel = $r['total_aulas'] > 0 ? round(($r['aulas_visiveis'] / $r['total_aulas']) * 100) : 0;
                                         ?>
-                                            <tr class="recurso-item">
+                                            <tr class="recurso-item" data-conteudo-id="<?= $r['id'] ?>">
                                                 <td>
                                                     <i class="<?= get_file_icon($r['tipo_arquivo'], $r['caminho_arquivo']) ?> fa-lg"></i>
                                                     <small class="d-block text-muted">
@@ -490,6 +563,21 @@ function get_youtube_id($url) {
                                                             <?= htmlspecialchars(parse_url($r['caminho_arquivo'], PHP_URL_HOST) ?? 'URL Inválida') ?>
                                                         </small>
                                                     <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <div class="visibilidade-info">
+                                                        <small class="visibilidade-status <?= $percentual_visivel > 0 ? 'visivel' : 'nao-visivel' ?>">
+                                                            <?= $r['aulas_visiveis'] ?> de <?= $r['total_aulas'] ?> aulas (<?= $percentual_visivel ?>%)
+                                                        </small>
+                                                        <br>
+                                                        <button class="btn btn-sm btn-outline-primary mt-1" 
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#modalVisibilidade"
+                                                                data-conteudo-id="<?= $r['id'] ?>"
+                                                                data-conteudo-titulo="<?= htmlspecialchars($r['titulo']) ?>">
+                                                            <i class="fas fa-eye me-1"></i> Gerenciar
+                                                        </button>
+                                                    </div>
                                                 </td>
                                                 <td><?= date('d/m/Y', strtotime($r['data_upload'])) ?></td>
                                                 <td>
@@ -616,6 +704,38 @@ function get_youtube_id($url) {
     </div>
 </div>
 
+<!-- Modal para Gerenciar Visibilidade -->
+<div class="modal fade" id="modalVisibilidade" tabindex="-1" aria-labelledby="modalVisibilidadeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #1a2a3a; color: white;">
+                <h5 class="modal-title" id="modalVisibilidadeLabel">Gerenciar Visibilidade do Recurso</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Recurso: <strong id="recursoTituloVisibilidade"></strong></p>
+                <div class="aula-selector" id="aulaSelector">
+                    <!-- As aulas serão carregadas via JavaScript -->
+                </div>
+                <div class="mt-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btnMarcarTodos">
+                        <i class="fas fa-check-double me-1"></i> Marcar Todos
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btnDesmarcarTodos">
+                        <i class="fas fa-times me-1"></i> Desmarcar Todos
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarVisibilidade">
+                    <i class="fas fa-save me-1"></i> Salvar Alterações
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal para YouTube -->
 <div class="modal fade modal-youtube" id="modalYouTube" tabindex="-1" aria-labelledby="modalYouTubeLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -638,6 +758,10 @@ function get_youtube_id($url) {
 
 <script>
 $(document).ready(function() {
+    let conteudoIdAtual = null;
+    const aulas = <?= json_encode($aulas) ?>;
+    const visibilidadePorAula = <?= json_encode($visibilidade_por_aula) ?>;
+
     // Função para preencher o modal de exclusão
     $('#modalExcluirRecurso').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
@@ -691,6 +815,92 @@ $(document).ready(function() {
             e.preventDefault();
             return false;
         }
+    });
+
+    // Modal de Visibilidade
+    $('#modalVisibilidade').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        conteudoIdAtual = button.data('conteudo-id');
+        var recursoTitulo = button.data('conteudo-titulo');
+        
+        var modal = $(this);
+        modal.find('#recursoTituloVisibilidade').text(recursoTitulo);
+        
+        // Carrega as aulas no seletor
+        carregarAulasNoSeletor(conteudoIdAtual);
+    });
+
+    function carregarAulasNoSeletor(conteudoId) {
+        const container = $('#aulaSelector');
+        container.empty();
+        
+        if (aulas.length === 0) {
+            container.html('<p class="text-muted">Nenhuma aula encontrada.</p>');
+            return;
+        }
+        
+        aulas.forEach(aula => {
+            const isVisivel = visibilidadePorAula[conteudoId] && visibilidadePorAula[conteudoId][aula.id] === 1;
+            const dataFormatada = new Date(aula.data_aula).toLocaleDateString('pt-BR');
+            
+            const aulaHtml = `
+                <div class="aula-item">
+                    <div class="form-check">
+                        <input class="form-check-input aula-checkbox" type="checkbox" 
+                               data-aula-id="${aula.id}" 
+                               id="aula_${aula.id}" 
+                               ${isVisivel ? 'checked' : ''}>
+                        <label class="form-check-label" for="aula_${aula.id}">
+                            <strong>${aula.titulo_aula}</strong> - ${aula.nome_turma} (${dataFormatada})
+                        </label>
+                    </div>
+                </div>
+            `;
+            container.append(aulaHtml);
+        });
+    }
+
+    // Botões para marcar/desmarcar todos
+    $('#btnMarcarTodos').on('click', function() {
+        $('.aula-checkbox').prop('checked', true);
+    });
+
+    $('#btnDesmarcarTodos').on('click', function() {
+        $('.aula-checkbox').prop('checked', false);
+    });
+
+    // Salvar visibilidade
+    $('#btnSalvarVisibilidade').on('click', function() {
+        if (!conteudoIdAtual) return;
+        
+        const visibilidades = [];
+        $('.aula-checkbox').each(function() {
+            const aulaId = $(this).data('aula-id');
+            const visivel = $(this).is(':checked') ? 1 : 0;
+            visibilidades.push({ aula_id: aulaId, visivel: visivel });
+        });
+
+        // Envia via AJAX
+        $.ajax({
+            url: 'ajax_salvar_visibilidade.php',
+            method: 'POST',
+            data: {
+                conteudo_id: conteudoIdAtual,
+                visibilidades: visibilidades
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert('Visibilidade atualizada com sucesso!');
+                    $('#modalVisibilidade').modal('hide');
+                    location.reload(); // Recarrega para atualizar os contadores
+                } else {
+                    alert('Erro ao salvar: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('Erro de comunicação com o servidor.');
+            }
+        });
     });
 });
 </script>
