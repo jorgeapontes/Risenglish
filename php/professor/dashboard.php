@@ -194,7 +194,7 @@ $nomes_meses = [
                                             title="Clique para ver detalhes da Turma <?= htmlspecialchars($aula['turma']) ?>" 
                                             style="background-color: <?= $cor_fundo_aula ?>;"
                                             onclick="window.location.href='<?= $url_redirecionamento ?>';">
-                                            <strong><?= $aula['hora'] ?></strong>
+                                            <?= $aula['hora'] ?>
                                             <span><?= htmlspecialchars($texto_exibido) ?></span>
                                         </div>
                                     <?php endforeach; ?>

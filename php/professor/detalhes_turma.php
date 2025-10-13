@@ -181,19 +181,28 @@ while ($aula = $stmt_aulas->fetch(PDO::FETCH_ASSOC)) {
                     <?php for ($dia = 1; $dia <= $dias_no_mes; $dia++): 
                         $data_completa = $ano . '-' . str_pad($mes, 2, '0', STR_PAD_LEFT) . '-' . str_pad($dia, 2, '0', STR_PAD_LEFT);
                         $is_hoje = (date('Y-m-d') == $data_completa);
+                        $tem_aulas = isset($aulas_por_dia[$dia]);
+                        $quantidade_aulas = $tem_aulas ? count($aulas_por_dia[$dia]) : 0;
+                        $classe_muitas_aulas = $quantidade_aulas > 3 ? 'muitas-aulas' : '';
                     ?>
-                        <div class="calendario-dia <?= $is_hoje ? 'hoje' : '' ?>">
+                        <div class="calendario-dia <?= $is_hoje ? 'hoje' : '' ?> <?= $classe_muitas_aulas ?>">
                             <span class="dia-numero"><?= $dia ?></span>
-                            <?php if (isset($aulas_por_dia[$dia])): ?>
-                                <?php foreach ($aulas_por_dia[$dia] as $aula): ?>
-                                    <a href="detalhes_aula.php?aula_id=<?= $aula['id'] ?>" class="aula-item text-decoration-none" title="<?= htmlspecialchars($aula['titulo_aula']) ?>">
-                                        <small>
-                                            <i class="far fa-clock me-1"></i>
-                                            <?= substr($aula['horario'], 0, 5) ?>
-                                            <?= htmlspecialchars($aula['titulo_aula']) ?>
-                                        </small>
-                                    </a>
-                                <?php endforeach; ?>
+                            <?php if ($tem_aulas): ?>
+                                <div class="aulas-container">
+                                    <?php foreach ($aulas_por_dia[$dia] as $aula): ?>
+                                        <a href="detalhes_aula.php?aula_id=<?= $aula['id'] ?>" class="aula-item text-decoration-none" title="<?= htmlspecialchars($aula['titulo_aula']) ?>">
+                                            <small>
+                                                <i class="far fa-clock me-1"></i>
+                                                <?= substr($aula['horario'], 0, 5) ?>
+                                                <?= htmlspecialchars($aula['titulo_aula']) ?>
+                                            </small>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="aulas-container">
+                                    <!-- Espaço vazio para manter o layout -->
+                                </div>
                             <?php endif; ?>
                         </div>
                     <?php endfor; ?>
