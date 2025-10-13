@@ -102,8 +102,8 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --cor-primaria: #1a2a3a;
-            --cor-secundaria: #92171B;
+            --cor-primaria: #0A1931;
+            --cor-secundaria: #c0392b;
             --cor-destaque: #c0392b;
             --cor-texto: #333;
             --cor-fundo: #f8f9fa;
@@ -118,46 +118,50 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
             padding: 0;
         }
 
-        .d-flex {
-            min-height: 100vh;
+        #botao-sair {
+            border: none;
+        }
+
+        #botao-sair:hover {
+            background-color: #c0392b;
+            color: white;
+            transform: none;
         }
 
         .sidebar {
-            background: linear-gradient(180deg, var(--cor-primaria) 0%, #0d1b2a 100%);
-            color: white;
-            width: 280px;
-            min-height: 100vh;
             position: fixed;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 16.666667%; /* Equivale a col-md-2 */
+            background-color: #081d40;
+            color: #fff;
             z-index: 1000;
-        }
-
-        .sidebar h4 {
-            color: white;
-            font-weight: 600;
-            font-size: 1.2rem;
-            border-bottom: 2px solid var(--cor-secundaria);
+            overflow-y: auto;
         }
 
         .sidebar a {
-            display: block;
-            color: white;
+            color: #fff;
             text-decoration: none;
-            padding: 12px 15px;
-            margin: 5px 0;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            font-weight: 500;
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            transition: 0.3s;
         }
 
         .sidebar a:hover {
-            background-color: rgba(255,255,255,0.1);
-            transform: translateX(5px);
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+            transition: 0.3s;
         }
 
-        .sidebar a.active {
-            background-color: var(--cor-secundaria);
-            box-shadow: 0 2px 8px rgba(146, 23, 27, 0.3);
+        .sidebar .active {
+            background-color: #c0392b;
+        }
+
+        .sidebar .active:hover{
+            background-color: #c0392b;
         }
 
         .main-content {
@@ -167,19 +171,19 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
             min-height: 100vh;
         }
 
-        h1, h2, h3, h4, h5, h6 {
+        .main-content {
+            margin-left: 16.666667%; /* Compensa a largura da sidebar fixa */
+            width: 83.333333%;
+            animation: fadeIn 0.5s ease;
+        }
+
+        h1, h2, h3, h4, h6 {
             color: var(--cor-primaria);
             font-weight: 600;
         }
 
-        h1 {
-            border-bottom: 3px solid var(--cor-secundaria);
-            padding-bottom: 10px;
-            margin-bottom: 25px;
-        }
-
         .btn-acao {
-            background: linear-gradient(135deg, var(--cor-secundaria), #b0151a);
+            background: var(--cor-secundaria);
             color: white;
             border: none;
             padding: 10px 20px;
@@ -189,7 +193,7 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .btn-acao:hover {
-            background: linear-gradient(135deg, #b0151a, var(--cor-secundaria));
+            background: var(--cor-secundaria);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(146, 23, 27, 0.3);
             color: white;
@@ -203,6 +207,7 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
         .btn-outline-primary:hover {
             background-color: var(--cor-primaria);
             border-color: var(--cor-primaria);
+            color: white;
         }
 
         .btn-outline-danger {
@@ -213,6 +218,7 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
         .btn-outline-danger:hover {
             background-color: #dc3545;
             border-color: #dc3545;
+            color: white;
         }
 
         .table {
@@ -222,7 +228,7 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .table thead th {
-            background: linear-gradient(135deg, var(--cor-primaria), #2c3e50);
+            background: var(--cor-primaria);
             color: white;
             border: none;
             padding: 15px;
@@ -243,10 +249,6 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
             font-weight: 500;
             padding: 6px 12px;
             border-radius: 20px;
-        }
-
-        .bg-secondary {
-            background: linear-gradient(135deg, #7f8c8d, #95a5a6) !important;
         }
 
         .alert {
@@ -294,7 +296,7 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .modal-header {
-            background: linear-gradient(135deg, var(--cor-primaria), #2c3e50);
+            background: var(--cor-primaria);
             color: white;
             border-radius: 15px 15px 0 0;
             border: none;
@@ -341,20 +343,33 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
                 padding: 20px;
             }
         }
+
+        .nav-link.active:hover {
+            background-color: #081d40;
+        }
     </style>
 </head>
 <body>
 
 <div class="d-flex">
-    <div class="sidebar p-3">
-        <h4 class="text-center mb-4 border-bottom pb-3">ADMIN RISENGLISH</h4>
-        <a href="dashboard.php"><i class="fas fa-home me-2"></i>Home</a>
-        <a href="gerenciar_turmas.php"><i class="fas fa-users me-2"></i>Turmas</a>
-        <a href="gerenciar_usuarios.php" class="active"><i class="fas fa-user-friends me-2"></i>Usuários</a>
-        <a href="gerenciar_uteis.php"><i class="fas fa-book me-2"></i>Recomendações</a>
-        <a href="../logout.php" class="link-sair" style="position: absolute; bottom: 20px; width: calc(100% - 30px);">
-            <i class="fas fa-sign-out-alt me-2"></i>Sair
-        </a>
+    <div class="col-md-2 d-flex flex-column sidebar p-3">
+        <!-- Nome do professor -->
+        <div class="mb-4 text-center">
+            <h5 class="mt-4"><?php echo $_SESSION['user_nome'] ?? 'Professor'; ?></h5>
+        </div>
+
+        <!-- Menu centralizado verticalmente -->
+        <div class="d-flex flex-column flex-grow-1 mb-5">
+            <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
+            <a href="gerenciar_turmas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Turmas</a>
+            <a href="gerenciar_usuarios.php" class="rounded active"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Usuários</a>
+            <a href="gerenciar_uteis.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Recomendações</a>
+        </div>
+
+        <!-- Botão sair no rodapé -->
+        <div class="mt-auto">
+            <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+        </div>
     </div>
 
     <div class="main-content flex-grow-1">
