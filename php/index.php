@@ -147,7 +147,7 @@ Acredito que aprender é um processo de evolução contínua, e é esse crescime
         <div class="container">
             <div class="contact-container">
                 <h2 class="section-title">Vamos Conversar?</h2>
-                <p class="contact-subtitle">Entre em contato e comece sua jornada no inglês hoje mesmo</p>
+                <p class="contact-subtitle">Entre em contato e comece sua jornada no inglês hoje mesmo:</p>
                 <div class="contact-buttons">
                     <a href="https://docs.google.com/forms/d/e/1FAIpQLSdEDqEX0jYnXMELzBEpa1H-QYoOAyxAFCc_xsPAXOK_PzTPeg/viewform" class="contact-btn forms" target="_blank">
                         <i class="fa-brands fa-wpforms"></i>

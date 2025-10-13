@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 10/10/2025 às 03:21
+-- Tempo de geração: 13/10/2025 às 18:45
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -37,6 +37,10 @@ CREATE TABLE `alunos_turmas` (
 -- Despejando dados para a tabela `alunos_turmas`
 --
 
+INSERT INTO `alunos_turmas` (`id`, `aluno_id`, `turma_id`) VALUES
+(17, 12, 5),
+(18, 12, 6);
+
 -- --------------------------------------------------------
 
 --
@@ -57,6 +61,13 @@ CREATE TABLE `aulas` (
 -- Despejando dados para a tabela `aulas`
 --
 
+INSERT INTO `aulas` (`id`, `titulo_aula`, `descricao`, `data_aula`, `horario`, `turma_id`, `professor_id`) VALUES
+(16, 'teste', 'relationship', '2025-10-14', '15:00:00', 5, 9),
+(17, 'aaaaa', 'edd', '2025-10-06', '00:00:00', 5, 9),
+(18, 'aaa', '', '2025-10-14', '00:00:00', 5, 9),
+(19, 'sss', '', '2025-10-14', '00:00:00', 5, 9),
+(20, 'sss', '', '2025-10-14', '00:00:00', 5, 9);
+
 -- --------------------------------------------------------
 
 --
@@ -73,6 +84,11 @@ CREATE TABLE `aulas_conteudos` (
 --
 -- Despejando dados para a tabela `aulas_conteudos`
 --
+
+INSERT INTO `aulas_conteudos` (`id`, `aula_id`, `conteudo_id`, `planejado`) VALUES
+(48, 16, 34, 1),
+(49, 18, 34, 1),
+(50, 17, 34, 1);
 
 -- --------------------------------------------------------
 
@@ -95,6 +111,12 @@ CREATE TABLE `conteudos` (
 -- Despejando dados para a tabela `conteudos`
 --
 
+INSERT INTO `conteudos` (`id`, `professor_id`, `parent_id`, `titulo`, `descricao`, `tipo_arquivo`, `caminho_arquivo`, `data_upload`) VALUES
+(34, 9, NULL, 'relationship', 'teste', 'TEMA', '', '2025-10-13 15:00:37'),
+(35, 9, 34, 'contrato', 'contrato (Arquivo: CONTRATO_Laura.pdf)', 'application/pdf', 'uploads/conteudos/1760367715_68ed1463a6238.pdf', '2025-10-13 15:01:55'),
+(36, 9, 34, 'video', 'video (Link: youtu.be)', 'URL', 'https://youtu.be/-moW9jvvMr4?si=p_dQzfxi-nh2X4BS', '2025-10-13 15:02:40'),
+(37, 9, NULL, 'teste', '', 'TEMA', '', '2025-10-13 15:13:35');
+
 -- --------------------------------------------------------
 
 --
@@ -113,6 +135,9 @@ CREATE TABLE `recursos_uteis` (
 -- Despejando dados para a tabela `recursos_uteis`
 --
 
+INSERT INTO `recursos_uteis` (`id`, `titulo`, `link`, `descricao`, `data_criacao`) VALUES
+(5, 'Linguee', 'https://www.linguee.com.br/', 'dicionario recomendado', '2025-10-09 22:40:41');
+
 -- --------------------------------------------------------
 
 --
@@ -129,6 +154,10 @@ CREATE TABLE `turmas` (
 --
 -- Despejando dados para a tabela `turmas`
 --
+
+INSERT INTO `turmas` (`id`, `nome_turma`, `professor_id`, `inicio_turma`) VALUES
+(5, 'Jorge', 9, '0000-00-00'),
+(6, 'turma 1', 9, '0000-00-00');
 
 -- --------------------------------------------------------
 
@@ -151,7 +180,9 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`, `reset_token`, `token_expira_em`) VALUES
-(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'admin', NULL, NULL);
+(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'admin', NULL, NULL),
+(9, 'Laura', 'laura@risenglish.com', '$2y$10$L5r6urNbE7tLtiPzZFY/cuIAd65is7jtDcNVTIO/.YkmOsWnt.082', 'professor', NULL, NULL),
+(12, 'Jorge Augusto Possani Pontes', 'jorgeappontes13@gmail.com', '$2y$10$MBlYgYjHcew4oWv08mCSNuIJtbX05eexbZaEQ9w3yru3053kzArdm', 'aluno', NULL, NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -217,43 +248,43 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `alunos_turmas`
 --
 ALTER TABLE `alunos_turmas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de tabela `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de tabela `aulas_conteudos`
 --
 ALTER TABLE `aulas_conteudos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT de tabela `conteudos`
 --
 ALTER TABLE `conteudos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT de tabela `recursos_uteis`
 --
 ALTER TABLE `recursos_uteis`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de tabela `turmas`
 --
 ALTER TABLE `turmas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Restrições para tabelas despejadas

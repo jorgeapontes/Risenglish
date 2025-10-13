@@ -142,6 +142,8 @@ body {
     cursor: pointer;
     transition: background-color 0.2s;
     flex-shrink: 0; /* Não reduz tamanho */
+    display: flex;
+    gap: 5px;
 }
 
 .bloco-aula:hover {
