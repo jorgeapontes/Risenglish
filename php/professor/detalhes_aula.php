@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../includes/conexao.php';
+require_once '../includes/conexao.php'; // Verifique se o caminho está correto: '..' para subir um nível, depois 'includes'
 
 // Bloqueio de acesso para usuários não-professor
 // Se o usuário não for professor, redireciona para a tela de login.
@@ -23,6 +23,7 @@ if (!$aula_id || !is_numeric($aula_id)) {
 }
 
 // --- 1. BUSCAR DETALHES DA AULA E DA TURMA RELACIONADA ---
+// O professor deve ver APENAS as aulas que ele criou.
 $sql_detalhes = "SELECT
     a.id AS aula_id, a.titulo_aula, a.data_aula, a.horario, a.descricao AS desc_aula,
     t.id AS turma_id, t.nome_turma,
@@ -30,16 +31,12 @@ $sql_detalhes = "SELECT
     FROM aulas a
     JOIN turmas t ON a.turma_id = t.id
     JOIN usuarios p ON a.professor_id = p.id
-    WHERE a.id = :aula_id AND a.professor_id = :professor_id";
+    WHERE a.id = :aula_id AND a.professor_id = :professor_id"; // Garante que a aula pertence ao professor logado
 
 $stmt_detalhes = $pdo->prepare($sql_detalhes);
 $stmt_detalhes->execute([':aula_id' => $aula_id, ':professor_id' => $professor_id]);
 
-// --- CORREÇÃO 2: ERRO DE SINTAXE PHP REMOVIDO AQUI ---
-// A linha original tinha um aspas e ponto e vírgula incorreto (PDO::FETCH_ASSOC)";), 
-// o que impedia o PHP de continuar e provavelmente acionava o erro fatal.
 $detalhes_aula = $stmt_detalhes->fetch(PDO::FETCH_ASSOC);
-
 
 // --- CORREÇÃO 3: AULA NÃO ENCONTRADA ---
 // Se a consulta falhar (aula não existe ou não pertence ao professor), redireciona.
@@ -49,7 +46,8 @@ if(!$detalhes_aula) {
     exit;
 }
 
-// --- 2. BUSCAR TODOS OS TEMAS (PASTAS) DISPONÍVEIS E SEU STATUS DE PLANEJAMENTO PARA ESTA AULA ---
+// --- 2. BUSCAR TODOS OS TEMAS (PASTAS) DISPONÍVEIS E SEU STATUS DE VISIBILIDADE PARA ESTA AULA ---
+// A coluna 'planejado' aqui representa a visibilidade.
 $sql_todos_temas = "
     SELECT 
         c.id AS tema_id, 
@@ -57,15 +55,17 @@ $sql_todos_temas = "
         c.descricao, 
         u.nome AS autor_tema, 
         (SELECT COUNT(id) FROM conteudos WHERE parent_id = c.id) AS total_arquivos, 
-        COALESCE(ac.planejado, 0) AS planejado
+        -- COALESCE(ac.planejado, 0) retorna 1 se o tema está na tabela aulas_conteudos (visível) ou 0 (não visível)
+        COALESCE(ac.planejado, 0) AS planejado 
     FROM 
         conteudos c
     JOIN
         usuarios u ON c.professor_id = u.id 
     LEFT JOIN 
+        -- Fazemos um LEFT JOIN. Se não houver registro em aulas_conteudos para este tema/aula, 'planejado' será NULL (e o COALESCE transforma em 0).
         aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
     WHERE 
-        c.parent_id IS NULL 
+        c.parent_id IS NULL -- Filtra apenas os temas/pastas principais (sem pai)
     ORDER BY 
         c.titulo ASC
 ";
@@ -86,8 +86,39 @@ $count_planejados = array_sum(array_column($todos_temas, 'planejado'));
     <title>Detalhes da Aula - <?= htmlspecialchars($detalhes_aula['titulo_aula']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Depende do seu CSS externo para o layout e cores -->
+    <!-- Certifique-se de que o caminho CSS está correto para seu projeto -->
     <link rel="stylesheet" href="../../css/professor/detalhes_aula.css"> 
+    <style>
+        /* Estilos básicos para o funcionamento do JS */
+        .conteudo-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .conteudo-item:last-child {
+            border-bottom: none;
+        }
+        .link-tema {
+            color: var(--cor-secundaria, #007bff); /* Cor padrão de link se a variável CSS não existir */
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .link-tema:hover {
+            text-decoration: underline;
+        }
+        /* Classe para temas visíveis */
+        .planejado {
+             /* Estilo visual para tema visível */
+             background-color: #f0fff0; /* Fundo levemente verde */
+        }
+        /* Classe para temas não visíveis (melhor não aplicar estilo de fundo, mas pode ser útil para contraste) */
+        .nao-planejado {
+            background-color: #fff; 
+            opacity: 0.8; /* Diminui um pouco a opacidade para indicar "não ativo" */
+        }
+        .status-label {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
@@ -165,7 +196,7 @@ $count_planejados = array_sum(array_column($todos_temas, 'planejado'));
                                 $planejado_class = $is_planejado ? 'planejado' : 'nao-planejado'; ?>
                             
                             <!-- Usa tema_id como data-conteudo-id para compatibilidade com o script AJAX -->
-                            <div class="conteudo-item d-flex align-items-center <?= $planejado_class ?>" 
+                            <div class="conteudo-item row mx-0 align-items-center <?= $planejado_class ?>" 
                                 data-conteudo-id="<?= $t['tema_id'] ?>" 
                                 data-planejado="<?= $t['planejado'] ?>">
                                 
@@ -187,7 +218,7 @@ $count_planejados = array_sum(array_column($todos_temas, 'planejado'));
                                 
                                 <!-- TÍTULO E DESCRIÇÃO (COM CONTAGEM DE ARQUIVOS) -->
                                 <div class="col-4">
-                                    <!-- O link de gerenciamento deve usar tema_id, não conteudo_id, conforme corrigimos antes -->
+                                    <!-- O link de gerenciamento deve usar tema_id -->
                                     <a href="gerenciar_arquivos_tema.php?tema_id=<?= $t['tema_id'] ?>" class="link-tema">
                                         <i class="fas fa-folder me-2"></i> <?= htmlspecialchars($t['titulo']) ?> 
                                     </a>
@@ -273,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Usamos 'none' e '!important' para garantir que o 'display: flex' do Bootstrap seja sobreposto.
                 item.style.setProperty('display', 'none', 'important');
             } else {
-                // Caso contrário (filtro desligado OU item está visível), mostra como 'flex' (padrão 'd-flex')
+                // Caso contrário (filtro desligado OU item está visível), mostra como 'flex' (padrão 'd-flex' ou 'row mx-0')
                 item.style.display = 'flex'; 
             }
         });
@@ -298,7 +329,10 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('conteudo_id', conteudoId);
             formData.append('status', novoStatus); // 0 ou 1
             
-            // Desabilita o switch durante o AJAX
+            // Salva o estado atual para reverter em caso de falha
+            const estadoAnterior = novoStatus === 1 ? 0 : 1; 
+
+            // Desabilita o switch durante o AJAX e mostra feedback
             this.disabled = true; 
             statusLabel.textContent = '...';
 
@@ -308,9 +342,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: formData
             })
             .then(response => {
+                // O ERRO FATAL DE PHP GERALMENTE RESULTA EM UM status 500 (Internal Server Error) AQUI.
+                // Mas mesmo que não seja um erro fatal, ele pode retornar um HTML/texto inesperado.
                 if (!response.ok) {
-                    throw new Error('Erro na requisição: Status ' + response.status);
+                    // O erro estava no servidor, mas a promessa de rede falhou. Reverte imediatamente.
+                    // Se o servidor retornar algo que não é JSON ou status 500, o .json() vai falhar.
+                    throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
                 }
+                // Tenta retornar o JSON. Se o servidor retornar HTML (erro fatal do PHP), este passo falha.
                 return response.json();
             })
             .then(data => {
@@ -320,7 +359,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     displayAlert(data.message, 'success');
                     
                     // Atualiza o data-atributo e a classe visual
-                    // IMPORTANTE: O atributo data-planejado deve ser a string '0' ou '1'
                     conteudoItem.dataset.planejado = String(novoStatus);
                     
                     if (novoStatus === 1) {
@@ -340,22 +378,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     atualizarContagemPlanejados();
 
                 } else {
+                    // Erro de lógica (ex: ID inválido), reverte e mostra erro
                     console.error('Erro:', data.message);
                     displayAlert('Erro ao atualizar status: ' + data.message, 'danger');
                     
-                    // Reverte o estado do switch em caso de falha
+                    // Reverte o estado do switch em caso de falha de lógica
                     this.checked = !this.checked; 
-                    statusLabel.textContent = novoStatus === 1 ? 'Não' : 'Sim'; // Reverte o texto do label
+                    statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
                 }
             })
             .catch(error => {
+                // Este bloco é executado se houver erro de rede, erro fatal no PHP ou erro de parsing do JSON
                 this.disabled = false; // Habilita o switch de volta
-                console.error('Erro de conexão ou servidor:', error);
-                displayAlert('Erro de conexão ao servidor ou erro interno.', 'danger');
+                console.error('Erro de conexão, erro fatal do PHP ou JSON inválido:', error);
+                displayAlert('Erro de comunicação ou erro interno do servidor. O tema não foi atualizado.', 'danger');
                 
                 // Reverte o estado do switch em caso de falha
                 this.checked = !this.checked; 
-                statusLabel.textContent = novoStatus === 1 ? 'Não' : 'Sim'; // Reverte o texto do label
+                statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
             });
         });
     });
