@@ -178,9 +178,9 @@ $nome_usuario = $_SESSION['user_nome'];
         <!-- Menu centralizado verticalmente -->
         <div class="d-flex flex-column flex-grow-1 mb-5">
             <a href="dashboard.php" class="rounded active"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-            <a href="gerenciar_turmas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Turmas</a>
-            <a href="gerenciar_usuarios.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Usuários</a>
-            <a href="gerenciar_uteis.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Recomendações</a>
+            <a href="gerenciar_turmas.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;&nbsp;Turmas</a>
+            <a href="gerenciar_usuarios.php" class="rounded"><i class="fas fa-user"></i>&nbsp;&nbsp;Usuários</a>
+            <a href="gerenciar_uteis.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Recomendações</a>
         </div>
 
         <!-- Botão sair no rodapé -->
