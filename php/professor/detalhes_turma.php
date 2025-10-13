@@ -44,6 +44,23 @@ if (!$turma_detalhes) {
     exit;
 }
 
+// --- CONSULTA PARA INFORMAÇÕES DOS ALUNOS DA TURMA ---
+$sql_alunos = "
+    SELECT 
+        u.id, u.nome, u.email, u.informacoes
+    FROM 
+        usuarios u
+    JOIN 
+        alunos_turmas at ON u.id = at.aluno_id
+    WHERE 
+        at.turma_id = :turma_id
+    ORDER BY 
+        u.nome ASC
+";
+$stmt_alunos = $pdo->prepare($sql_alunos);
+$stmt_alunos->execute([':turma_id' => $turma_id]);
+$alunos = $stmt_alunos->fetchAll(PDO::FETCH_ASSOC);
+
 // --- LÓGICA DO CALENDÁRIO ---
 $mes = isset($_GET['mes']) ? intval($_GET['mes']) : intval(date('n'));
 $ano = isset($_GET['ano']) ? intval($_GET['ano']) : intval(date('Y'));
@@ -104,6 +121,44 @@ while ($aula = $stmt_aulas->fetch(PDO::FETCH_ASSOC)) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../../css/professor/detalhes_turma.css">
+    <style>
+        .informacoes-alunos {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f8f9fa;
+        }
+        .aluno-info {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .aluno-info:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .aluno-nome {
+            font-weight: bold;
+            color: #081d40;
+            margin-bottom: 5px;
+        }
+        .aluno-informacoes {
+            font-size: 0.9em;
+            color: #495057;
+            line-height: 1.4;
+        }
+        .sem-informacoes {
+            font-style: italic;
+            color: #6c757d;
+        }
+
+        .agendar {
+            max-height: 200px;
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid">
@@ -144,10 +199,35 @@ while ($aula = $stmt_aulas->fetch(PDO::FETCH_ASSOC)) {
                                         <strong>Status:</strong> <span class="badge bg-success">Ativa</span>
                                     </div>
                                 </div>
+                                
+                                <!-- Nova seção para Informações dos Alunos -->
+                                <?php if (!empty($alunos)): ?>
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <h6><i class="fas fa-user-graduate me-2"></i>Informações dos Alunos:</h6>
+                                        <div class="informacoes-alunos">
+                                            <?php foreach ($alunos as $aluno): ?>
+                                            <div class="aluno-info">
+                                                <div class="aluno-nome">
+                                                    <i class="fas fa-user me-1"></i><?= htmlspecialchars($aluno['nome']) ?>
+                                                </div>
+                                                <div class="aluno-informacoes">
+                                                    <?php if (!empty($aluno['informacoes'])): ?>
+                                                        <?= nl2br(htmlspecialchars($aluno['informacoes'])) ?>
+                                                    <?php else: ?>
+                                                        <span class="sem-informacoes">Sem informações adicionais</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 agendar">
                         <a href="gerenciar_aulas.php?turma_id=<?= $turma_id ?>" class="btn btn-agendar w-100 d-flex flex-column justify-content-center align-items-center text-center">
                             <i class="fas fa-calendar-plus mb-2 fs-4"></i>
                             <span>Agendar Nova Aula</span>
