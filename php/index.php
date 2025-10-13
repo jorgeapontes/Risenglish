@@ -6,6 +6,7 @@
     <title>Risenglish - English Learning</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/index.css">
+    
 </head>
 <body>
     <!-- Navbar -->
@@ -49,12 +50,10 @@
                     <span><i class="fas fa-star"></i> Método Exclusivo</span>
                 </div>
                 <h1 class="hero-title">
-                    <span class="title-line">Fale inglês com confiança. 
-</span>
+                    <span class="title-line">Fale inglês com confiança.</span>
                     <span class="title-line accent">Cresça com propósito.</span>
                 </h1>
-                <p class="hero-subtitle">Desbloqueie seu potencial com uma metodologia focada em conversação e escuta ativa! Não é só sobre aprender inglês. É sobre transformar sua comunicação e seu futuro.
-</p>
+                <p class="hero-subtitle">Desbloqueie seu potencial com uma metodologia focada em conversação e escuta ativa! Não é só sobre aprender inglês. É sobre transformar sua comunicação e seu futuro.</p>
                 <div class="hero-buttons">
                     <a href="#about" class="btn btn-primary">
                         <span>Ver mais</span>
@@ -83,7 +82,6 @@
                 <div class="image-container">
                     <div class="image-placeholder">
                         <i class="fas fa-graduation-cap"></i>
-                        <!-- <p>Logo</p> -->
                     </div>
                     <div class="image-decoration"></div>
                 </div>
@@ -112,39 +110,34 @@
                 <div class="about-content">
                     <h2 class="section-title">Sobre Mim</h2>
                     <p class="about-text">
-                       Sou Laura Antero, natural de Ponta Grossa (PR) e atualmente em Jundiaí (SP). Construí minha trajetória lecionando em escolas e descobri, nas aulas particulares, a melhor forma de acompanhar de perto e celebrar cada pequeno progresso dos meus alunos. Sou formada em Letras – Português/Inglês e Literaturas pela UEPG, com láurea acadêmica, e possuo certificação internacional pela ACE English Malta, onde também fiz intercâmbio. Na Rise English, transformo essa experiência em propósito: ajudar alunos a evoluírem com confiança, fluência e propósito, em um ambiente acolhedor e humano.
-Acredito que aprender é um processo de evolução contínua, e é esse crescimento, em cada história, que me inspira a seguir ensinando com entusiasmo e dedicação todos os dias.
+                        Sou Laura Antero, natural de Ponta Grossa (PR) e atualmente em Jundiaí (SP). Construí minha trajetória lecionando em escolas e descobri, nas aulas particulares, a melhor forma de acompanhar de perto e celebrar cada pequeno progresso dos meus alunos. Sou formada em Letras – Português/Inglês e Literaturas pela UEPG, com láurea acadêmica, e possuo certificação internacional pela ACE English Malta, onde também fiz intercâmbio. Na Rise English, transformo essa experiência em propósito: ajudar alunos a evoluírem com confiança, fluência e propósito, em um ambiente acolhedor e humano. Acredito que aprender é um processo de evolução contínua, e é esse crescimento, em cada história, que me inspira a seguir ensinando com entusiasmo e dedicação todos os dias.
                     </p>
-                    
                 </div>
             </div>
         </div>
         <div class="about-features">
-                        <div class="feature">
-                            <i class="fa-solid fa-comments"></i>
-                            <div class="feature-text">
-                                <h4>Metodologia Conversacional </h4>
-                                <p>Aprenda com foco em speaking e listening, tudo sobre conexão real.
-</p>
-                            </div>
-                        </div>
-                        <div class="feature">
-                            <i class="fa-solid fa-mug-hot"></i>
-                            <div class="feature-text">
-                                <h4>Acompanhamento Individual</h4>
-                                <p>Você evolui no seu ritmo, com suporte direto da professora.
-</p>
-</p>
-                            </div>
-                        </div>
-                        <div class="feature">
-                            <i class="fa-solid fa-star"></i>
-                            <div class="feature-text">
-                                <h4>Exclusividade Risenglish</h4>
-                                <p>Conteúdos autorais e práticos, pensados para cada nível e objetivo.</p>
-                            </div>
-                        </div>
-                    </div>
+            <div class="feature">
+                <i class="fa-solid fa-comments"></i>
+                <div class="feature-text">
+                    <h4>Metodologia Conversacional</h4>
+                    <p>Aprenda com foco em speaking e listening, tudo sobre conexão real.</p>
+                </div>
+            </div>
+            <div class="feature">
+                <i class="fa-solid fa-mug-hot"></i>
+                <div class="feature-text">
+                    <h4>Acompanhamento Individual</h4>
+                    <p>Você evolui no seu ritmo, com suporte direto da professora.</p>
+                </div>
+            </div>
+            <div class="feature">
+                <i class="fa-solid fa-star"></i>
+                <div class="feature-text">
+                    <h4>Exclusividade Risenglish</h4>
+                    <p>Conteúdos autorais e práticos, pensados para cada nível e objetivo.</p>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- Contact Section -->
@@ -175,24 +168,118 @@ Acredito que aprender é um processo de evolução contínua, e é esse crescime
                             <small>@miss.antero</small>
                         </div>
                     </a>
-                    
                 </div>
             </div>
             <div class="backtop">
-                 <a href="#home" class="btn btn-backtop">
-                        <span>Voltar ao topo</span>
-                    </a>
+                <a href="#home" class="btn btn-backtop">
+                    <span>Voltar ao topo</span>
+                </a>
             </div>
             <div class="footerfooter">
                 <h1>Risenglish</h1>
                 <p>Copyright © Risenglish by Laura Antero.<br>
                     All Rights Reserved
                 </p>
-                
             </div>
         </div>
     </section>
 
-    <script src="scripthome.js"></script>
+    <script>
+        // Menu Mobile
+const hamburger = document.querySelector('.hamburger');
+const navMenu = document.querySelector('.nav-menu');
+
+hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    navMenu.classList.toggle('active');
+});
+
+document.querySelectorAll('.nav-link').forEach(link =>
+    link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+    })
+);
+
+// Scroll suave com easing personalizado
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const target = document.querySelector(targetId);
+        if (!target) return;
+
+        const navbarHeight = document.querySelector('.navbar').offsetHeight;
+        const targetPos = target.getBoundingClientRect().top + window.scrollY - navbarHeight;
+        const startPos = window.scrollY;
+        const distance = targetPos - startPos;
+        const duration = 1000;
+        let start = null;
+
+        function easeInOutCubic(t, b, c, d) {
+            t /= d / 2;
+            if (t < 1) return c / 2 * t * t * t + b;
+            t -= 2;
+            return c / 2 * (t * t * t + 2) + b;
+        }
+
+        function animation(currentTime) {
+            if (start === null) start = currentTime;
+            const timeElapsed = currentTime - start;
+            const run = easeInOutCubic(timeElapsed, startPos, distance, duration);
+            window.scrollTo(0, run);
+            if (timeElapsed < duration) requestAnimationFrame(animation);
+        }
+
+        requestAnimationFrame(animation);
+    });
+});
+
+// Navbar dinâmica ao rolar
+window.addEventListener('scroll', () => {
+    const navbar = document.querySelector('.navbar');
+    if (window.scrollY > 100) {
+        navbar.style.background = 'rgba(10,25,49,0.98)';
+        navbar.style.padding = '0.8rem 0';
+        navbar.style.boxShadow = '0 2px 20px rgba(0,0,0,0.1)';
+    } else {
+        navbar.style.background = 'rgba(10,25,49,0.95)';
+        navbar.style.padding = '1rem 0';
+        navbar.style.boxShadow = 'none';
+    }
+    updateActiveNavLink();
+});
+
+// Atualiza link ativo conforme scroll
+function updateActiveNavLink() {
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const scrollY = window.scrollY + document.querySelector('.navbar').offsetHeight + 100;
+    let current = '';
+
+    sections.forEach(section => {
+        if (scrollY >= section.offsetTop && scrollY < section.offsetTop + section.offsetHeight)
+            current = section.getAttribute('id');
+    });
+
+    navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === `#${current}`);
+    });
+}
+
+// Animações de entrada
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+}, { threshold: 0.15 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right')
+        .forEach(el => observer.observe(el));
+});
+
+updateActiveNavLink();
+    </script>
 </body>
 </html>
