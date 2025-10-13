@@ -1,93 +1,86 @@
 <?php
-session_start();
+// Define o tipo de conteúdo como JSON para o JavaScript saber como processar a resposta.
 header('Content-Type: application/json');
-require_once '../includes/conexao.php';
+session_start();
+require_once '../includes/conexao.php'; // Ajuste o caminho conforme a estrutura de pastas
 
-$response = [
-    'success' => false,
-    'message' => 'Requisição inválida.'
-];
+$response = ['success' => false, 'message' => ''];
 
-// 1. VERIFICAÇÃO DE SESSÃO E TIPO DE USUÁRIO
+// 1. Verificação de Sessão e Permissão
 if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
-    $response['message'] = 'Acesso não autorizado.';
+    $response['message'] = 'Acesso negado. Sessão inválida ou usuário não é professor.';
     echo json_encode($response);
     exit;
 }
 
+// 2. Coleta e Validação dos Dados
 $professor_id = $_SESSION['user_id'];
+$aula_id = $_POST['aula_id'] ?? null;
+$conteudo_id = $_POST['conteudo_id'] ?? null; // Aqui é o ID do Tema/Pasta
+$status = $_POST['status'] ?? null; // 1 ou 0
 
-// 2. COLETA E VALIDAÇÃO DOS DADOS POST
-$aula_id = filter_input(INPUT_POST, 'aula_id', FILTER_VALIDATE_INT);
-$conteudo_id = filter_input(INPUT_POST, 'conteudo_id', FILTER_VALIDATE_INT);
-// Garante que o status seja 0 ou 1
-$status = filter_input(INPUT_POST, 'status', FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 1]]);
-
-if (!$aula_id || !$conteudo_id || !isset($status)) {
-    $response['message'] = 'Dados da aula ou conteúdo ausentes/inválidos.';
+// Validação básica dos inputs
+if (!is_numeric($aula_id) || !is_numeric($conteudo_id) || !in_array($status, ['0', '1'])) {
+    $response['message'] = 'Dados inválidos fornecidos.';
     echo json_encode($response);
     exit;
 }
+
+$status = (int)$status; // Converte para inteiro (1 ou 0)
 
 try {
-    // --- 3. VERIFICAÇÃO DE PROPRIEDADE DA AULA (CRÍTICO PARA SEGURANÇA) ---
-    // O professor SÓ PODE VINCULAR conteúdo se ele for o dono da aula.
-    $sql_verifica_aula = "SELECT COUNT(id) FROM aulas WHERE id = :aula_id AND professor_id = :professor_id";
-    $stmt_verifica_aula = $pdo->prepare($sql_verifica_aula);
-    $stmt_verifica_aula->execute([':aula_id' => $aula_id, ':professor_id' => $professor_id]);
-    
-    if ($stmt_verifica_aula->fetchColumn() == 0) {
-        $response['message'] = 'Permissão negada. Você não é o criador desta aula.';
+    // 3. Verifica se a aula pertence ao professor (Segurança!)
+    $sql_check = "SELECT professor_id FROM aulas WHERE id = :aula_id";
+    $stmt_check = $pdo->prepare($sql_check);
+    $stmt_check->execute([':aula_id' => $aula_id]);
+    $aula_data = $stmt_check->fetch(PDO::FETCH_ASSOC);
+
+    if (!$aula_data || $aula_data['professor_id'] != $professor_id) {
+        $response['message'] = 'Aula não encontrada ou você não tem permissão para editá-la.';
         echo json_encode($response);
         exit;
     }
 
-    // --- 4. VERIFICAÇÃO DA EXISTÊNCIA DO CONTEÚDO (CRÍTICO PARA INTEGRIDADE) ---
-    // Apenas verifica se o tema/pasta existe, independente de quem o criou.
-    $sql_verifica_conteudo = "SELECT COUNT(id) FROM conteudos WHERE id = :conteudo_id AND parent_id IS NULL";
-    $stmt_verifica_conteudo = $pdo->prepare($sql_verifica_conteudo);
-    $stmt_verifica_conteudo->execute([':conteudo_id' => $conteudo_id]);
-    
-    if ($stmt_verifica_conteudo->fetchColumn() == 0) {
-        $response['message'] = 'Conteúdo (Tema) não encontrado ou inválido.';
-        echo json_encode($response);
-        exit;
-    }
+    // 4. Lógica de Inserção/Remoção na tabela aulas_conteudos
+    if ($status === 1) {
+        // Tornar visível (planejado = 1): Insere ou ignora se já existir
+        $sql = "INSERT INTO aulas_conteudos (aula_id, conteudo_id, planejado) 
+                VALUES (:aula_id, :conteudo_id, 1)
+                ON DUPLICATE KEY UPDATE planejado = 1"; // Atualiza para 1 se já existir
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':aula_id' => $aula_id,
+            ':conteudo_id' => $conteudo_id
+        ]);
 
-    // --- 5. LÓGICA DE INSERÇÃO/ATUALIZAÇÃO (UPSERT) ---
-    // O status (planejado) é 0 ou 1.
-    $sql_upsert = "
-        INSERT INTO aulas_conteudos (aula_id, conteudo_id, planejado) 
-        VALUES (:aula_id, :conteudo_id, :status)
-        ON DUPLICATE KEY UPDATE 
-            planejado = :status;
-    ";
-
-    $stmt_upsert = $pdo->prepare($sql_upsert);
-    $stmt_upsert->execute([
-        ':aula_id' => $aula_id,
-        ':conteudo_id' => $conteudo_id,
-        ':status' => $status
-    ]);
-    
-    // Sucesso
-    if ($status == 1) {
-        $response['message'] = 'Conteúdo marcado como VISÍVEL para o aluno com sucesso!';
+        $response['success'] = true;
+        $response['message'] = 'Tema marcado como VISÍVEL para os alunos.';
+        
     } else {
-        $response['message'] = 'Conteúdo marcado como NÃO VISÍVEL para o aluno com sucesso!';
+        // Tornar não visível (planejado = 0): Remove o registro da tabela
+        // O COALESCE em detalhes_aula.php garante que a ausência do registro seja interpretada como '0'
+        $sql = "DELETE FROM aulas_conteudos 
+                WHERE aula_id = :aula_id AND conteudo_id = :conteudo_id";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':aula_id' => $aula_id,
+            ':conteudo_id' => $conteudo_id
+        ]);
+
+        $response['success'] = true;
+        $response['message'] = 'Tema marcado como NÃO VISÍVEL para os alunos.';
     }
-    $response['success'] = true;
 
 } catch (PDOException $e) {
-    // Captura e loga erros de banco de dados
-    error_log("Erro PDO em ajax_toggle_conteudo.php: " . $e->getMessage());
-    $response['message'] = 'Erro interno do servidor ao processar a solicitação.';
+    // Em caso de erro no banco de dados
+    $response['message'] = 'Erro no banco de dados: ' . $e->getMessage();
+    // Você pode logar o erro aqui
+} catch (Exception $e) {
+    // Outros erros
+    $response['message'] = 'Erro interno: ' . $e->getMessage();
 }
 
 echo json_encode($response);
-
-// Importante: Para que o UPSERT funcione, a tabela aulas_conteudos DEVE ter uma chave primária (PRIMARY KEY)
-// ou chave única (UNIQUE KEY) combinada nos campos (aula_id, conteudo_id).
-// Exemplo de SQL para criar a chave única (se não existir):
-// ALTER TABLE aulas_conteudos ADD UNIQUE KEY unique_aula_conteudo (aula_id, conteudo_id);
 ?>
