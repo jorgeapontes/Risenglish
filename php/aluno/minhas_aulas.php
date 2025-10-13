@@ -42,11 +42,11 @@ $aulas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Separar aulas passadas e futuras
 $aulas_passadas = [];
 $aulas_futuras = [];
-$data_atual = new DateTime();
+$agora = new DateTime();
 
 foreach ($aulas as $aula) {
-    $data_aula = new DateTime($aula['data_aula']);
-    if ($data_aula < $data_atual) {
+    $data_hora_aula = new DateTime($aula['data_aula'] . ' ' . $aula['horario']);
+    if ($data_hora_aula < $agora) {
         $aulas_passadas[] = $aula;
     } else {
         $aulas_futuras[] = $aula;
