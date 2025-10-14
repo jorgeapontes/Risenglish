@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 14/10/2025 às 16:18
+-- Tempo de geração: 15/10/2025 às 00:59
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -80,7 +80,8 @@ INSERT INTO `aulas` (`id`, `titulo_aula`, `descricao`, `data_aula`, `horario`, `
 (17, 'aaaaa', 'edd', '2025-10-06', '00:00:00', 5, 9),
 (18, 'aaa', '', '2025-10-14', '00:00:00', 5, 9),
 (19, 'sss', '', '2025-10-14', '00:00:00', 5, 9),
-(20, 'sss', '', '2025-10-14', '00:00:00', 5, 9);
+(20, 'sss', '', '2025-10-14', '00:00:00', 5, 9),
+(21, 'Nome da aula', '', '2025-10-14', '20:00:00', 5, 9);
 
 -- --------------------------------------------------------
 
@@ -139,6 +140,27 @@ INSERT INTO `conteudos` (`id`, `professor_id`, `parent_id`, `titulo`, `descricao
 (42, 9, 38, 'pdf teste', 'pdf teste (Arquivo: Mapa conceitual.pdf)', 'application/pdf', 'uploads/conteudos/1760448880_68ee5170bd991.pdf', '2025-10-14 13:34:40', 0),
 (43, 9, 38, 'hsotinger', 'hsotinger (Link: github.com)', 'URL', 'https://github.com/', '2025-10-14 13:51:58', 0),
 (44, 9, 37, 'aaa', 'aaa (Arquivo: {A456EC26-8008-422A-A305-7DCB8EA96953}.png)', 'image/png', 'uploads/conteudos/1760451211_68ee5a8b60d12.png', '2025-10-14 14:13:31', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `presenca_aula`
+--
+
+CREATE TABLE `presenca_aula` (
+  `id` int(11) NOT NULL,
+  `aula_id` int(11) NOT NULL,
+  `aluno_id` int(11) NOT NULL,
+  `presente` tinyint(1) NOT NULL DEFAULT 1,
+  `data_registro` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `presenca_aula`
+--
+
+INSERT INTO `presenca_aula` (`id`, `aula_id`, `aluno_id`, `presente`, `data_registro`) VALUES
+(1, 21, 12, 0, '2025-10-14 22:50:45');
 
 -- --------------------------------------------------------
 
@@ -253,6 +275,14 @@ ALTER TABLE `conteudos`
   ADD KEY `professor_id` (`professor_id`);
 
 --
+-- Índices de tabela `presenca_aula`
+--
+ALTER TABLE `presenca_aula`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `aula_aluno_unique` (`aula_id`,`aluno_id`),
+  ADD KEY `aluno_id` (`aluno_id`);
+
+--
 -- Índices de tabela `recursos_uteis`
 --
 ALTER TABLE `recursos_uteis`
@@ -293,19 +323,25 @@ ALTER TABLE `arquivos_visiveis`
 -- AUTO_INCREMENT de tabela `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de tabela `aulas_conteudos`
 --
 ALTER TABLE `aulas_conteudos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT de tabela `conteudos`
 --
 ALTER TABLE `conteudos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+
+--
+-- AUTO_INCREMENT de tabela `presenca_aula`
+--
+ALTER TABLE `presenca_aula`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de tabela `recursos_uteis`
@@ -363,6 +399,13 @@ ALTER TABLE `aulas_conteudos`
 --
 ALTER TABLE `conteudos`
   ADD CONSTRAINT `conteudos_ibfk_1` FOREIGN KEY (`professor_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
+
+--
+-- Restrições para tabelas `presenca_aula`
+--
+ALTER TABLE `presenca_aula`
+  ADD CONSTRAINT `presenca_aula_ibfk_1` FOREIGN KEY (`aula_id`) REFERENCES `aulas` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `presenca_aula_ibfk_2` FOREIGN KEY (`aluno_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
 -- Restrições para tabelas `turmas`
