@@ -223,6 +223,29 @@ foreach ($temas as $tema) {
         .arquivo-count {
             font-size: 0.85em;
         }
+        .presenca-item {
+            transition: background-color 0.3s ease;
+        }
+
+        .presenca-item.presente {
+            background-color: #f0fff0;
+        }
+
+        .presenca-item.ausente {
+            background-color: #fff0f0;
+        }
+
+        .presenca-item:hover {
+            background-color: #f8f9fa;
+        }
+        #botao-sair {
+            border: none;
+        }
+        #botao-sair:hover {
+            background-color: #c0392b;
+            color: white;
+            transform: none;
+        }
     </style>
 </head>
 <body>
@@ -240,7 +263,7 @@ foreach ($temas as $tema) {
                     <a href="gerenciar_alunos.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
                 </div>
                 <div class="mt-auto">
-                    <a href="../logout.php" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
                 </div>
             </div>
 
@@ -271,6 +294,116 @@ foreach ($temas as $tema) {
                                 <p class="mb-1"><strong>Horário:</strong> <?= substr($detalhes_aula['horario'], 0, 5) ?></p>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- CONTROLE DE PRESENÇA -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <span>Controle de Presença</span>
+                    </div>
+                    
+                    <div class="card-body">
+                        <?php
+                        // Buscar alunos da turma
+                        $sql_alunos = "SELECT 
+                            u.id AS aluno_id, 
+                            u.nome AS aluno_nome,
+                            COALESCE(p.presente, 1) AS presente
+                        FROM usuarios u
+                        INNER JOIN alunos_turmas at ON u.id = at.aluno_id
+                        LEFT JOIN presenca_aula p ON u.id = p.aluno_id AND p.aula_id = :aula_id
+                        WHERE at.turma_id = :turma_id
+                        AND u.tipo_usuario = 'aluno'
+                        ORDER BY u.nome ASC";
+                        
+                        $stmt_alunos = $pdo->prepare($sql_alunos);
+                        $stmt_alunos->execute([
+                            ':aula_id' => $aula_id,
+                            ':turma_id' => $detalhes_aula['turma_id']
+                        ]);
+                        $alunos = $stmt_alunos->fetchAll(PDO::FETCH_ASSOC);
+                        ?>
+                        
+                        <?php if (empty($alunos)): ?>
+                            <p class="text-center text-muted">Não há alunos matriculados nesta turma.</p>
+                        <?php else: ?>
+                            <!-- CABEÇALHOS -->
+                            <div class="row mb-3 align-items-center border-bottom pb-2 text-muted small">
+                                <div class="col-1 text-center"><strong>Presente?</strong></div>
+                                <div class="col-8"><strong>Aluno</strong></div>
+                                <div class="col-3 text-center"><strong>Status</strong></div>
+                            </div>
+                            
+                            <div id="lista-presenca-container">
+                                <?php foreach ($alunos as $aluno): ?>
+                                    <?php 
+                                        $is_presente = $aluno['presente'] == 1;
+                                        $presenca_class = $is_presente ? 'presente' : 'ausente';
+                                        $status_text = $is_presente ? 'Presente' : 'Faltou';
+                                        $status_class = $is_presente ? 'bg-success' : 'bg-danger';
+                                    ?>
+                                    
+                                    <div class="presenca-item row mx-0 align-items-center mb-2 py-2 border-bottom <?= $presenca_class ?>" 
+                                        data-aluno-id="<?= $aluno['aluno_id'] ?>" 
+                                        data-presente="<?= $aluno['presente'] ?>">
+                                        
+                                        <!-- CHECKBOX PRESENÇA -->
+                                        <div class="col-1 text-center">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input presenca-switch" 
+                                                    type="checkbox" 
+                                                    role="switch" 
+                                                    id="presenca_<?= $aluno['aluno_id'] ?>" 
+                                                    data-aula-id="<?= $detalhes_aula['aula_id'] ?>"
+                                                    data-aluno-id="<?= $aluno['aluno_id'] ?>"
+                                                    <?= $is_presente ? 'checked' : '' ?>>
+                                                <label class="form-check-label small" for="presenca_<?= $aluno['aluno_id'] ?>">
+                                                    <?= $is_presente ? 'Sim' : 'Não' ?>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- NOME DO ALUNO -->
+                                        <div class="col-8">
+                                            <strong><?= htmlspecialchars($aluno['aluno_nome']) ?></strong>
+                                        </div>
+                                        
+                                        <!-- STATUS -->
+                                        <div class="col-3 text-center">
+                                            <span class="badge <?= $status_class ?>"><?= $status_text ?></span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            
+                            <!-- RESUMO DE PRESENÇA -->
+                            <?php
+                            $total_alunos = count($alunos);
+                            $presentes = array_filter($alunos, function($aluno) {
+                                return $aluno['presente'] == 1;
+                            });
+                            $total_presentes = count($presentes);
+                            $total_faltas = $total_alunos - $total_presentes;
+                            ?>
+                            
+                            <div class="mt-4 p-3 bg-light rounded">
+                                <div class="row text-center">
+                                    <div class="col-md-4">
+                                        <h4 class="mb-0"><?= $total_alunos ?></h4>
+                                        <small class="text-muted">Total de Alunos</small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h4 class="mb-0 text-success"><?= $total_presentes ?></h4>
+                                        <small class="text-muted">Presentes</small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h4 class="mb-0 text-danger"><?= $total_faltas ?></h4>
+                                        <small class="text-muted">Faltas</small>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -578,6 +711,85 @@ foreach ($temas as $tema) {
         
         aplicarFiltro();
         atualizarContagemPlanejados();
+    });
+
+        // Lógica do Controle de Presença
+    document.addEventListener('DOMContentLoaded', function() {
+        const presencaSwitches = document.querySelectorAll('.presenca-switch');
+
+        presencaSwitches.forEach(function(switchElement) {
+            switchElement.addEventListener('change', function() {
+                const aulaId = this.dataset.aulaId;
+                const alunoId = this.dataset.alunoId;
+                const novoStatus = this.checked ? 1 : 0;
+                
+                const statusLabel = this.closest('.form-switch').querySelector('.form-check-label');
+                const presencaItem = this.closest('.presenca-item');
+                const statusBadge = presencaItem.querySelector('.badge');
+                
+                const formData = new FormData();
+                formData.append('aula_id', aulaId);
+                formData.append('aluno_id', alunoId);
+                formData.append('presente', novoStatus);
+                
+                const estadoAnterior = novoStatus === 1 ? 0 : 1;
+
+                this.disabled = true;
+                statusLabel.textContent = '...';
+
+                fetch('ajax_controle_presenca.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    this.disabled = false;
+
+                    if (data.success) {
+                        displayAlert(data.message, 'success');
+                        
+                        presencaItem.dataset.presente = String(novoStatus);
+                        
+                        if (novoStatus === 1) {
+                            statusLabel.textContent = 'Sim';
+                            presencaItem.classList.add('presente');
+                            presencaItem.classList.remove('ausente');
+                            statusBadge.textContent = 'Presente';
+                            statusBadge.classList.remove('bg-danger');
+                            statusBadge.classList.add('bg-success');
+                        } else {
+                            statusLabel.textContent = 'Não';
+                            presencaItem.classList.remove('presente');
+                            presencaItem.classList.add('ausente');
+                            statusBadge.textContent = 'Faltou';
+                            statusBadge.classList.remove('bg-success');
+                            statusBadge.classList.add('bg-danger');
+                        }
+
+                        // Atualizar contadores
+                        location.reload();
+
+                    } else {
+                        console.error('Erro:', data.message);
+                        displayAlert('Erro ao atualizar presença: ' + data.message, 'danger');
+                        this.checked = !this.checked;
+                        statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+                    }
+                })
+                .catch(error => {
+                    this.disabled = false;
+                    console.error('Erro de conexão:', error);
+                    displayAlert('Erro de comunicação. A presença não foi atualizada.', 'danger');
+                    this.checked = !this.checked;
+                    statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+                });
+            });
+        });
     });
     </script>
 </body>
