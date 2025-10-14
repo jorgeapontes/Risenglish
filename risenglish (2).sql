@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 14/10/2025 às 03:07
+-- Tempo de geração: 14/10/2025 às 16:18
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -102,7 +102,8 @@ CREATE TABLE `aulas_conteudos` (
 INSERT INTO `aulas_conteudos` (`id`, `aula_id`, `conteudo_id`, `planejado`) VALUES
 (48, 16, 34, 1),
 (49, 18, 34, 1),
-(50, 17, 34, 1);
+(50, 17, 34, 1),
+(51, 16, 38, 1);
 
 -- --------------------------------------------------------
 
@@ -133,7 +134,11 @@ INSERT INTO `conteudos` (`id`, `professor_id`, `parent_id`, `titulo`, `descricao
 (37, 9, NULL, 'teste', '', 'TEMA', '', '2025-10-13 15:13:35', 0),
 (38, 9, 34, 'basico', '', 'SUBPASSA', '', '2025-10-14 00:50:07', 1),
 (39, 9, 34, 'intermediario', '', 'SUBPASSA', '', '2025-10-14 00:50:17', 1),
-(40, 9, 38, 'video teste', 'video teste (Link: youtu.be)', 'URL', 'https://youtu.be/zctKiN-okXI?si=qS7R6qef2hQ0wDSM', '2025-10-14 00:51:01', 0);
+(40, 9, 38, 'video teste', 'video teste (Link: youtu.be)', 'URL', 'https://youtu.be/zctKiN-okXI?si=qS7R6qef2hQ0wDSM', '2025-10-14 00:51:01', 0),
+(41, 9, 38, 'imagem teste', 'imagem teste (Arquivo: Imagem1.jpg)', 'image/jpeg', 'uploads/conteudos/1760448862_68ee515eb6b99.jpg', '2025-10-14 13:34:22', 0),
+(42, 9, 38, 'pdf teste', 'pdf teste (Arquivo: Mapa conceitual.pdf)', 'application/pdf', 'uploads/conteudos/1760448880_68ee5170bd991.pdf', '2025-10-14 13:34:40', 0),
+(43, 9, 38, 'hsotinger', 'hsotinger (Link: github.com)', 'URL', 'https://github.com/', '2025-10-14 13:51:58', 0),
+(44, 9, 37, 'aaa', 'aaa (Arquivo: {A456EC26-8008-422A-A305-7DCB8EA96953}.png)', 'image/png', 'uploads/conteudos/1760451211_68ee5a8b60d12.png', '2025-10-14 14:13:31', 0);
 
 -- --------------------------------------------------------
 
@@ -294,13 +299,13 @@ ALTER TABLE `aulas`
 -- AUTO_INCREMENT de tabela `aulas_conteudos`
 --
 ALTER TABLE `aulas_conteudos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT de tabela `conteudos`
 --
 ALTER TABLE `conteudos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT de tabela `recursos_uteis`
