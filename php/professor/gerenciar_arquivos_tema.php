@@ -301,12 +301,13 @@ function get_file_icon($mime_type, $caminho_arquivo = null, $eh_subpasta = false
     return 'fas fa-file text-secondary';
 }
 
+
 function get_youtube_id($url) {
-    $pattern = '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/';
-    preg_match($pattern, $url, $matches);
-    return isset($matches[1]) ? $matches[1] : null;
-}
-?>
+    if (preg_match('/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $url, $matches)) {
+        return $matches[1];
+    }
+    return null;
+}?>
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -426,6 +427,10 @@ function get_youtube_id($url) {
         .arquivos-subpasta {
             background: #f4f8ff;
         }
+        .arquivo-subpasta-item {
+            background-color: #f8f9fa;
+            border-left: 4px solid #28a745;
+        }
         .arquivo-item {
             display: flex;
             align-items: center;
@@ -450,6 +455,12 @@ function get_youtube_id($url) {
             text-decoration: none;
             color: #384d90
         }
+        .subpasta-toggle-icon {
+            transition: transform 0.3s ease;
+        }
+        .subpasta-toggle-icon.rotated {
+            transform: rotate(90deg);
+        }
         @media (max-width: 768px) {
             .sidebar {
                 position: relative;
@@ -461,6 +472,41 @@ function get_youtube_id($url) {
                 width: 100%;
             }
         }
+
+        /* Modal YouTube personalizado */
+.modal-youtube .modal-dialog {
+    max-width: 70%;
+    max-height: 70vh;
+}
+
+.modal-youtube .modal-content {
+    background: #081d40;
+    border: none;
+    padding: 10px;
+}
+
+.modal-youtube .modal-header {
+    border-bottom: none;
+    padding-bottom: 25px;
+}
+
+.modal-youtube .btn-close {
+    background-color: white;
+    opacity: 1;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .modal-youtube .modal-dialog {
+        max-width: 95%;
+        margin: 10px auto;
+    }
+}
     </style>
 </head>
 <body>
@@ -517,6 +563,7 @@ function get_youtube_id($url) {
                             <table class="table table-striped mb-0 rounded">
                                 <thead>
                                     <tr>
+                                        <th style="width: 5%;"></th>
                                         <th>Tipo</th>
                                         <th>Nome da Subpasta</th>
                                         <th>Descrição</th>
@@ -527,7 +574,10 @@ function get_youtube_id($url) {
                                 </thead>
                                 <tbody>
                                     <?php foreach ($subpastas as $subpasta): ?>
-                                        <tr class="recurso-item subpasta-item tema-toggle" data-subpasta-id="<?= $subpasta['id'] ?>">
+                                        <tr class="recurso-item subpasta-item" data-subpasta-id="<?= $subpasta['id'] ?>">
+                                            <td>
+                                                <i class="fas fa-chevron-right subpasta-toggle-icon" style="cursor: pointer;"></i>
+                                            </td>
                                             <td>
                                                 <i class="<?= get_file_icon('', '', true) ?> fa-lg"></i>
                                                 <small class="d-block text-muted">Subpasta</small>
@@ -565,36 +615,65 @@ function get_youtube_id($url) {
                                                 </div>
                                             </td>
                                         </tr>
-                                        <tr class="arquivos-subpasta" id="arquivos-subpasta-<?= $subpasta['id'] ?>" style="display:none;">
-                                            <td colspan="6">
-                                                <?php if (!empty($arquivos_por_subpasta[$subpasta['id']])): ?>
-                                                    <?php foreach ($arquivos_por_subpasta[$subpasta['id']] as $arq): ?>
-                                                        <div class="arquivo-item mb-2">
-                                                            <i class="<?= get_file_icon($arq['tipo_arquivo'], $arq['caminho_arquivo']) ?> me-2"></i>
-                                                            <span class="arquivo-nome"><?= htmlspecialchars($arq['titulo']) ?></span>
-                                                            <?php if (!empty($arq['caminho_arquivo'])): ?>
-                                                                <a href="../<?= htmlspecialchars($arq['caminho_arquivo']) ?>" target="_blank" class="btn btn-sm btn-outline-primary ms-2" title="Visualizar/Download">
-                                                                    <i class="fas fa-download"></i>
-                                                                </a>
-                                                            <?php endif; ?>
-                                                            <span class="ms-2 text-muted" style="font-size:0.85em;">
-                                                                <?= htmlspecialchars($arq['descricao'] ?? '') ?>
-                                                            </span>
-                                                            <button class="btn btn-sm btn-outline-danger ms-2" 
-                                                                data-bs-toggle="modal" 
-                                                                data-bs-target="#modalExcluirRecurso" 
-                                                                data-recurso-titulo="<?= htmlspecialchars($arq['titulo']) ?>" 
-                                                                data-recurso-id="<?= $arq['id'] ?>" 
-                                                                title="Excluir Recurso">
-                                                                <i class="fas fa-trash-alt"></i>
-                                                            </button>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    <span class="text-muted">Nenhum arquivo nesta subpasta.</span>
-                                                <?php endif; ?>
-                                            </td>
-                                        </tr>
+                                        <!-- Arquivos da Subpasta - Estilo igual aos Recursos Diretos -->
+                                        <?php if (!empty($arquivos_por_subpasta[$subpasta['id']])): ?>
+                                            <?php foreach ($arquivos_por_subpasta[$subpasta['id']] as $arq): ?>
+                                                <tr class="arquivo-subpasta-item arquivos-subpasta-<?= $subpasta['id'] ?>" style="display: none;">
+                                                    <td></td>
+                                                    <td>
+                                                        <i class="<?= get_file_icon($arq['tipo_arquivo'], $arq['caminho_arquivo']) ?> fa-lg"></i>
+                                                        <small class="d-block text-muted">
+                                                            <?= ($arq['tipo_arquivo'] === 'URL') 
+                                                                ? 'Link Externo' 
+                                                                : htmlspecialchars($arq['tipo_arquivo']) ?>
+                                                        </small>
+                                                    </td>
+                                                    <td>
+                                                        <strong><?= htmlspecialchars($arq['titulo']) ?></strong>
+                                                        <?php if ($arq['tipo_arquivo'] === 'URL'): ?>
+                                                            <br>
+                                                            <small class="text-muted">
+                                                                <?= htmlspecialchars(parse_url($arq['caminho_arquivo'], PHP_URL_HOST) ?? 'URL Inválida') ?>
+                                                            </small>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td colspan="2">
+                                                        <?= !empty($arq['descricao']) ? htmlspecialchars($arq['descricao']) : '<span class="text-muted">Sem descrição</span>' ?>
+                                                    </td>
+                                                    <td><?= date('d/m/Y', strtotime($arq['data_upload'])) ?></td>
+                                                    <td>
+    <div class="btn-group" role="group">
+        <?php if ($arq['caminho_arquivo']): ?>
+            <?php if ($arq['tipo_arquivo'] === 'URL' && get_youtube_id($arq['caminho_arquivo'])): ?>
+                <!-- Botão para abrir modal do YouTube -->
+                <button class="btn btn-sm btn-outline-primary" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalYouTube"
+                        data-video-id="<?= get_youtube_id($arq['caminho_arquivo']) ?>"
+                        data-video-title="<?= htmlspecialchars($arq['titulo']) ?>"
+                        title="Assistir Vídeo">
+                    <i class="fas fa-play"></i>
+                </button>
+            <?php else: ?>
+                <!-- Link normal para outros URLs e arquivos -->
+                <a href="<?= ($arq['tipo_arquivo'] === 'URL') ? htmlspecialchars($arq['caminho_arquivo']) : '../' . htmlspecialchars($arq['caminho_arquivo']) ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+            <?php endif; ?>
+        <?php endif; ?>
+        <button class="btn btn-sm btn-outline-danger" 
+                data-bs-toggle="modal" 
+                data-bs-target="#modalExcluirRecurso" 
+                data-recurso-titulo="<?= htmlspecialchars($arq['titulo']) ?>" 
+                data-recurso-id="<?= $arq['id'] ?>" 
+                title="Excluir Recurso">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </div>
+</td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
@@ -646,22 +725,35 @@ function get_youtube_id($url) {
                                                 </td>
                                                 <td><?= date('d/m/Y', strtotime($r['data_upload'])) ?></td>
                                                 <td>
-                                                    <div class="btn-group" role="group">
-                                                        <?php if ($r['caminho_arquivo']): ?>
-                                                            <a href="<?= ($r['tipo_arquivo'] === 'URL') ? htmlspecialchars($r['caminho_arquivo']) : '../' . htmlspecialchars($r['caminho_arquivo']) ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Visualizar">
-                                                                <i class="fas fa-external-link-alt"></i>
-                                                            </a>
-                                                        <?php endif; ?>
-                                                        <button class="btn btn-sm btn-outline-danger" 
-                                                            data-bs-toggle="modal" 
-                                                            data-bs-target="#modalExcluirRecurso" 
-                                                            data-recurso-titulo="<?= htmlspecialchars($r['titulo']) ?>" 
-                                                            data-recurso-id="<?= $r['id'] ?>" 
-                                                            title="Excluir Recurso">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
+    <div class="btn-group" role="group">
+        <?php if ($r['caminho_arquivo']): ?>
+            <?php if ($r['tipo_arquivo'] === 'URL' && get_youtube_id($r['caminho_arquivo'])): ?>
+                <!-- Botão para abrir modal do YouTube -->
+                <button class="btn btn-sm btn-outline-primary" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalYouTube"
+                        data-video-id="<?= get_youtube_id($r['caminho_arquivo']) ?>"
+                        data-video-title="<?= htmlspecialchars($r['titulo']) ?>"
+                        title="Assistir Vídeo">
+                    <i class="fas fa-play"></i>
+                </button>
+            <?php else: ?>
+                <!-- Link normal para outros URLs e arquivos -->
+                <a href="<?= ($r['tipo_arquivo'] === 'URL') ? htmlspecialchars($r['caminho_arquivo']) : '../' . htmlspecialchars($r['caminho_arquivo']) ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Visualizar">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+            <?php endif; ?>
+        <?php endif; ?>
+        <button class="btn btn-sm btn-outline-danger" 
+                data-bs-toggle="modal" 
+                data-bs-target="#modalExcluirRecurso" 
+                data-recurso-titulo="<?= htmlspecialchars($r['titulo']) ?>" 
+                data-recurso-id="<?= $r['id'] ?>" 
+                title="Excluir Recurso">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </div>
+</td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
@@ -838,6 +930,23 @@ function get_youtube_id($url) {
     </div>
 </div>
 
+<!-- Modal para YouTube -->
+<div class="modal fade modal-youtube" id="modalYouTube" tabindex="-1" aria-labelledby="modalYouTubeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="color: white;" id="header-title"></h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="ratio ratio-16x9">
+                    <iframe id="youtubePlayer" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -863,11 +972,15 @@ $(document).ready(function() {
     });
 
     // Toggle subpasta para mostrar/ocultar arquivos
-    $('.tema-toggle').on('click', function(e) {
+    $('.subpasta-item').on('click', function(e) {
         if ($(e.target).closest('button').length > 0) return;
+        
         var subpastaId = $(this).data('subpasta-id');
-        var $linha = $('#arquivos-subpasta-' + subpastaId);
-        $linha.toggle();
+        var $icon = $(this).find('.subpasta-toggle-icon');
+        var $arquivos = $('.arquivos-subpasta-' + subpastaId);
+        
+        $icon.toggleClass('rotated');
+        $arquivos.toggle();
     });
 
     // Validação de Formulário (Arquivo OU Link)
@@ -900,6 +1013,27 @@ $(document).ready(function() {
         }
     });
 });
+
+// Função para o modal do YouTube
+var modalYouTube = document.getElementById('modalYouTube');
+if (modalYouTube) {
+    modalYouTube.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var videoId = button.getAttribute('data-video-id');
+        var videoTitle = button.getAttribute('data-video-title');
+        
+        var iframe = document.getElementById('youtubePlayer');
+        var headerTitle = document.getElementById('header-title');
+        
+        iframe.setAttribute('src', 'https://www.youtube.com/embed/' + videoId + '?autoplay=1');
+        headerTitle.textContent = videoTitle;
+    });
+
+    modalYouTube.addEventListener('hidden.bs.modal', function () {
+        var iframe = document.getElementById('youtubePlayer');
+        iframe.setAttribute('src', '');
+    });
+}
 </script>
 </body>
 </html>
