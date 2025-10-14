@@ -55,7 +55,7 @@ if (!$aula) {
     exit;
 }
 
-// Consulta para obter os conteúdos da aula
+// Consulta para obter os conteúdos principais da aula (sem parent_id)
 $sql_conteudos = "
     SELECT 
         c.id,
@@ -70,6 +70,7 @@ $sql_conteudos = "
         conteudos c ON ac.conteudo_id = c.id
     WHERE 
         ac.aula_id = :aula_id
+        AND (c.parent_id IS NULL OR c.parent_id = 0)
     ORDER BY 
         ac.planejado DESC, c.titulo ASC
 ";
@@ -77,26 +78,44 @@ $stmt_conteudos = $pdo->prepare($sql_conteudos);
 $stmt_conteudos->execute([':aula_id' => $aula_id]);
 $conteudos = $stmt_conteudos->fetchAll(PDO::FETCH_ASSOC);
 
-// Consulta para obter os conteúdos filhos (arquivos vinculados)
-$arquivos_por_conteudo = [];
-foreach ($conteudos as $conteudo) {
-    $sql_arquivos = "
+// Função recursiva para obter todos os conteúdos filhos
+function getConteudosFilhos($pdo, $parent_id) {
+    $sql_filhos = "
         SELECT 
             id,
-            titulo as nome_arquivo,
-            caminho_arquivo,
+            titulo,
+            descricao,
             tipo_arquivo,
-            descricao
+            caminho_arquivo,
+            1 as planejado
         FROM 
             conteudos 
         WHERE 
-            parent_id = :conteudo_id
+            parent_id = :parent_id
         ORDER BY 
             titulo ASC
     ";
-    $stmt_arquivos = $pdo->prepare($sql_arquivos);
-    $stmt_arquivos->execute([':conteudo_id' => $conteudo['id']]);
-    $arquivos_por_conteudo[$conteudo['id']] = $stmt_arquivos->fetchAll(PDO::FETCH_ASSOC);
+    $stmt_filhos = $pdo->prepare($sql_filhos);
+    $stmt_filhos->execute([':parent_id' => $parent_id]);
+    $filhos = $stmt_filhos->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Para cada filho, buscar seus próprios filhos recursivamente
+    foreach ($filhos as &$filho) {
+        $subfilhos = getConteudosFilhos($pdo, $filho['id']);
+        if (!empty($subfilhos)) {
+            $filho['filhos'] = $subfilhos;
+        }
+    }
+    
+    return $filhos;
+}
+
+// Para cada conteúdo principal, buscar seus filhos
+foreach ($conteudos as &$conteudo) {
+    $filhos = getConteudosFilhos($pdo, $conteudo['id']);
+    if (!empty($filhos)) {
+        $conteudo['filhos'] = $filhos;
+    }
 }
 
 // Verificar se a aula já aconteceu
@@ -124,6 +143,180 @@ function is_video_file($tipo_arquivo, $caminho_arquivo) {
     $extensao = pathinfo($caminho_arquivo, PATHINFO_EXTENSION);
     $video_extensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'];
     return in_array(strtolower($extensao), $video_extensions);
+}
+
+// Função para obter ícone baseado no tipo de arquivo
+function get_arquivo_icone($tipo_arquivo, $caminho_arquivo) {
+    if ($tipo_arquivo === 'URL') {
+        if (is_video_file($tipo_arquivo, $caminho_arquivo)) {
+            return ['icone' => 'fa-brands fa-youtube', 'cor' => 'text-danger'];
+        } else {
+            return ['icone' => 'fas fa-link', 'cor' => 'text-primary'];
+        }
+    }
+    
+    // Extrair extensão do tipo_arquivo (que pode ser como "application/pdf")
+    $extensao = $tipo_arquivo;
+    if (strpos($tipo_arquivo, '/') !== false) {
+        $parts = explode('/', $tipo_arquivo);
+        $extensao = end($parts);
+    } else {
+        // Se não tem barra, tentar extrair do caminho do arquivo
+        $extensao = pathinfo($caminho_arquivo, PATHINFO_EXTENSION);
+    }
+
+    $icone = 'fas fa-file';
+    $cor = 'text-secondary';
+    
+    switch(strtolower($extensao)) {
+        case 'pdf':
+            $icone = 'fa-solid fa-file-pdf';
+            $cor = 'text-danger';
+            break;
+        case 'mp3':
+        case 'wav':
+        case 'ogg':
+            $icone = 'fas fa-file-audio';
+            $cor = 'text-info';
+            break;
+        case 'jpg':
+        case 'jpeg':
+        case 'png':
+        case 'bmp':
+        case 'svg':
+            $icone = 'fa-solid fa-image';
+            $cor = 'text-success';
+            break;
+        case 'gif':
+            $icone = 'fa-solid fa-gif';
+            $cor = 'text-success';
+            break;
+        case 'mp4':
+        case 'avi':
+        case 'mov':
+        case 'wmv':
+        case 'flv':
+        case 'webm':
+            $icone = 'fas fa-file-video';
+            $cor = 'text-warning';
+            break;
+        case 'doc':
+        case 'docx':
+            $icone = 'fas fa-file-word';
+            $cor = 'text-primary';
+            break;
+        case 'xls':
+        case 'xlsx':
+            $icone = 'fas fa-file-excel';
+            $cor = 'text-success';
+            break;
+        case 'ppt':
+        case 'pptx':
+            $icone = 'fas fa-file-powerpoint';
+            $cor = 'text-danger';
+            break;
+        case 'zip':
+        case 'rar':
+        case '7z':
+            $icone = 'fas fa-file-archive';
+            $cor = 'text-warning';
+            break;
+        case 'txt':
+            $icone = 'fas fa-file-alt';
+            $cor = 'text-secondary';
+            break;
+    }
+    
+    return ['icone' => $icone, 'cor' => $cor];
+}
+
+// Função recursiva para exibir conteúdos
+function displayConteudo($conteudo, $nivel = 0) {
+    $margem = $nivel * 20;
+    $is_video_principal = is_video_file($conteudo['tipo_arquivo'], $conteudo['caminho_arquivo']);
+    $youtube_id_principal = null;
+    if ($is_video_principal && $conteudo['tipo_arquivo'] === 'URL') {
+        $youtube_id_principal = get_youtube_id($conteudo['caminho_arquivo']);
+    }
+    
+    $temFilhos = isset($conteudo['filhos']) && count($conteudo['filhos']) > 0;
+    $icone_info = get_arquivo_icone($conteudo['tipo_arquivo'], $conteudo['caminho_arquivo']);
+    ?>
+    <div class="conteudo-item" style="margin-left: <?= $margem ?>px; border-bottom: 1px solid #eee; padding: 15px 0;">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <h6 class="card-title mb-0">
+                <?php if ($temFilhos): ?>
+                    <i class="fas fa-folder text-warning me-1"></i>
+                <?php else: ?>
+                    <i class="<?= $icone_info['icone'] ?> <?= $icone_info['cor'] ?> me-1"></i>
+                <?php endif; ?>
+                <?= htmlspecialchars($conteudo['titulo']) ?>
+            </h6>
+            <span class="badge <?= $conteudo['planejado'] ? 'badge-planejado' : 'badge-adicionado' ?>">
+                <?= $conteudo['planejado'] ? 'Planejado' : 'Disponível' ?>
+            </span>
+        </div>
+        
+        <?php if (!empty($conteudo['descricao'])): ?>
+            <p class="card-text text-muted small mb-2"><?= htmlspecialchars($conteudo['descricao']) ?></p>
+        <?php endif; ?>
+        
+        <!-- Botão principal do conteúdo (apenas se não for pasta e tiver arquivo) -->
+        <?php if (!$temFilhos && !empty($conteudo['caminho_arquivo'])): ?>
+            <?php if ($conteudo['tipo_arquivo'] === 'URL'): ?>
+                <?php if ($is_video_principal && $youtube_id_principal): ?>
+                    <button class="btn btn-outline-primary btn-sm mt-1" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalYouTube"
+                            data-video-id="<?= $youtube_id_principal ?>"
+                            data-video-title="<?= htmlspecialchars($conteudo['titulo']) ?>">
+                        <i class="fas fa-play me-1"></i>Assistir Vídeo
+                    </button>
+                <?php else: ?>
+                    <a href="<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-1">
+                        <i class="fas fa-external-link-alt me-1"></i>Acessar Link
+                    </a>
+                <?php endif; ?>
+            <?php else: ?>
+                <?php if ($is_video_principal): ?>
+                    <a href="../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-1">
+                        <i class="fas fa-play me-1"></i>Assistir Vídeo
+                    </a>
+                <?php else: ?>
+                    <a href="../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-1">
+                        <i class="fas fa-download me-1"></i>Abrir Arquivo
+                    </a>
+                <?php endif; ?>
+            <?php endif; ?>
+        <?php endif; ?>
+
+        <!-- Conteúdos filhos -->
+        <?php if ($temFilhos): ?>
+            <div class="mt-3">
+                <div class="toggle-arquivos p-2 border rounded" 
+                     data-bs-toggle="collapse" 
+                     data-bs-target="#conteudos-<?= $conteudo['id'] ?>" 
+                     aria-expanded="false">
+                    <small class="d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="fas fa-folder-open me-1"></i>
+                            Conteúdos (<?= count($conteudo['filhos']) ?>)
+                        </span>
+                        <i class="fas fa-chevron-down collapse-icon"></i>
+                    </small>
+                </div>
+                
+                <div class="collapse mt-2" id="conteudos-<?= $conteudo['id'] ?>">
+                    <div class="conteudos-filhos border rounded p-3 bg-light">
+                        <?php foreach ($conteudo['filhos'] as $filho): ?>
+                            <?php displayConteudo($filho, $nivel + 1); ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+    <?php
 }
 ?>
 
@@ -226,9 +419,11 @@ function is_video_file($tipo_arquivo, $caminho_arquivo) {
         }
         .badge-planejado {
             background-color: #28a745;
+            color: white;
         }
         .badge-adicionado {
             background-color: #17a2b8;
+            color: white;
         }
         .info-card {
             background-color: #f8f9fa;
@@ -244,25 +439,18 @@ function is_video_file($tipo_arquivo, $caminho_arquivo) {
             top: 10px;
             right: 10px;
         }
-        .arquivos-dropdown {
-            max-height: 300px;
+        .conteudos-filhos {
+            max-height: 500px;
             overflow-y: auto;
         }
-        .arquivo-item {
-            border-bottom: 1px solid #eee;
-            padding: 8px 0;
+        .conteudo-item {
             transition: background-color 0.2s;
         }
-        .arquivo-item:hover {
+        .conteudo-item:hover {
             background-color: #f8f9fa;
         }
-        .arquivo-item:last-child {
-            border-bottom: none;
-        }
-        .arquivo-icon {
-            width: 24px;
-            text-align: center;
-            margin-right: 8px;
+        .conteudo-item:last-child {
+            border-bottom: none !important;
         }
         .toggle-arquivos {
             cursor: pointer;
@@ -332,7 +520,7 @@ function is_video_file($tipo_arquivo, $caminho_arquivo) {
             <div class="col-md-2 d-flex flex-column sidebar p-3">
                 <!-- Nome do aluno -->
                 <div class="mb-4 text-center">
-                    <h5 class="mt-4"><?php echo $aluno_nome; ?></h5>
+                    <h5 class="mt-4"><?php echo htmlspecialchars($aluno_nome); ?></h5>
                 </div>
 
                 <!-- Menu centralizado verticalmente -->
@@ -368,196 +556,9 @@ function is_video_file($tipo_arquivo, $caminho_arquivo) {
                             </div>
                             <div class="card-body">
                                 <?php if (count($conteudos) > 0): ?>
-                                    <div class="row">
-                                        <?php foreach ($conteudos as $conteudo): 
-                                            $arquivos = $arquivos_por_conteudo[$conteudo['id']] ?? [];
-                                            $temArquivos = count($arquivos) > 0;
-                                            
-                                            // Verificar se o conteúdo principal é um vídeo
-                                            $is_video_principal = is_video_file($conteudo['tipo_arquivo'], $conteudo['caminho_arquivo']);
-                                            $youtube_id_principal = null;
-                                            if ($is_video_principal && $conteudo['tipo_arquivo'] === 'URL') {
-                                                $youtube_id_principal = get_youtube_id($conteudo['caminho_arquivo']);
-                                            }
-                                        ?>
-                                        <div class="col-md-6 mb-3">
-                                            <div class="card conteudo-card h-100">
-                                                <div class="card-body">
-                                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                                        <h6 class="card-title mb-0"><?= htmlspecialchars($conteudo['titulo']) ?></h6>
-                                                        <span class="badge <?= $conteudo['planejado'] ? 'badge-planejado' : 'badge-adicionado' ?>">
-                                                            <?= $conteudo['planejado'] ? 'Planejado' : 'Disponível' ?>
-                                                        </span>
-                                                    </div>
-                                                    <?php if (!empty($conteudo['descricao'])): ?>
-                                                        <p class="card-text text-muted small"><?= htmlspecialchars($conteudo['descricao']) ?></p>
-                                                    <?php endif; ?>
-                                                    
-                                                    <!-- Botão principal do conteúdo -->
-                                                    <?php if ($conteudo['tipo_arquivo'] === 'URL'): ?>
-                                                        <?php if ($is_video_principal && $youtube_id_principal): ?>
-                                                            <!-- Botão Play para vídeo do YouTube -->
-                                                            <button class="btn btn-outline-primary btn-sm mt-2" 
-                                                                    data-bs-toggle="modal" 
-                                                                    data-bs-target="#modalYouTube"
-                                                                    data-video-id="<?= $youtube_id_principal ?>"
-                                                                    data-video-title="<?= htmlspecialchars($conteudo['titulo']) ?>">
-                                                                <i class="fas fa-play me-1"></i>Assistir Vídeo
-                                                            </button>
-                                                        <?php else: ?>
-                                                            <!-- Link normal para outras URLs -->
-                                                            <a href="<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
-                                                                <i class="fas fa-external-link-alt me-1"></i>Acessar Link
-                                                            </a>
-                                                        <?php endif; ?>
-                                                    <?php elseif ($conteudo['tipo_arquivo'] !== 'TEMA' && !empty($conteudo['caminho_arquivo'])): ?>
-                                                        <?php if ($is_video_principal): ?>
-                                                            <!-- Botão Play para arquivo de vídeo -->
-                                                            <a href="<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
-                                                                <i class="fas fa-play me-1"></i>Assistir Vídeo
-                                                            </a>
-                                                        <?php else: ?>
-                                                            <!-- Botão normal para outros arquivos -->
-                                                            <a href="<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
-                                                                <i class="fas fa-download me-1"></i>Abrir Arquivo
-                                                            </a>
-                                                        <?php endif; ?>
-                                                    <?php endif; ?>
-
-                                                    <!-- Arquivos vinculados (Dropdown) -->
-                                                    <?php if ($temArquivos): ?>
-                                                    <div class="mt-3">
-                                                        <div class="toggle-arquivos p-2 border rounded" 
-                                                             data-bs-toggle="collapse" 
-                                                             data-bs-target="#arquivos-<?= $conteudo['id'] ?>" 
-                                                             aria-expanded="false">
-                                                            <small class="d-flex justify-content-between align-items-center">
-                                                                <span>
-                                                                    <i class="fas fa-paperclip me-1"></i>
-                                                                    Arquivos vinculados (<?= count($arquivos) ?>)
-                                                                </span>
-                                                                <i class="fas fa-chevron-down collapse-icon"></i>
-                                                            </small>
-                                                        </div>
-                                                        
-                                                        <div class="collapse mt-2" id="arquivos-<?= $conteudo['id'] ?>">
-                                                            <div class="arquivos-dropdown border rounded p-2 bg-light">
-                                                                <?php foreach ($arquivos as $arquivo): 
-                                                                    $extensao = $arquivo['tipo_arquivo'];
-                                                                    $key = '/';
-                                                                    $position = strpos($extensao, $key);
-                                                                    if ($position !== false) {
-                                                                        // +1 para pegar o que vem DEPOIS do caractere
-                                                                        $extensao = substr($extensao, $position + 1);
-                                                                    }
-
-
-                                                                    $icone = 'fas fa-file';
-                                                                    $cor = 'text-secondary';
-                                                                    
-                                                                    // Verificar se é vídeo
-                                                                    $is_video_arquivo = is_video_file($arquivo['tipo_arquivo'], $arquivo['caminho_arquivo']);
-                                                                    $youtube_id_arquivo = null;
-                                                                    if ($is_video_arquivo && $arquivo['tipo_arquivo'] === 'URL') {
-                                                                        $youtube_id_arquivo = get_youtube_id($arquivo['caminho_arquivo']);
-                                                                    }
-                                                                    
-                                                                    // Definir ícone baseado no tipo de arquivo
-                                                                    if ($arquivo['tipo_arquivo'] === 'URL') {
-                                                                        if ($is_video_arquivo && $youtube_id_arquivo) {
-                                                                            $icone = 'fa-brands fa-youtube';
-                                                                            $cor = 'text-danger';
-                                                                        } else {
-                                                                            $icone = 'fas fa-link';
-                                                                            $cor = 'text-primary';
-                                                                        }
-                                                                    } else {
-                                                                        switch(strtolower($extensao)) {
-                                                                            case 'pdf':
-                                                                                $icone = 'fa-solid fa-file-pdf';
-                                                                                $cor = 'text-danger';
-                                                                                break;
-                                                                            case 'mp3':
-                                                                            case 'wav':
-                                                                                $icone = 'fas fa-file-audio';
-                                                                                $cor = 'text-info';
-                                                                                break;
-                                                                            case 'jpg':
-                                                                            case 'jpeg':
-                                                                            case 'png':
-                                                                                $icone = 'fa-solid fa-image';
-                                                                                $cor = 'text-success';
-                                                                                break;
-                                                                            case 'gif':
-                                                                                $icone = 'fa-solid fa-gif';
-                                                                                $cor = 'text-success';
-                                                                                break;
-                                                                        }
-                                                                    }
-                                                                ?>
-                                                                <div class="arquivo-item">
-                                                                    <div class="d-flex justify-content-between align-items-center">
-                                                                        <div class="d-flex align-items-center">
-                                                                            <i class="<?= $icone ?> <?= $cor ?> arquivo-icon"></i>
-                                                                            <small class="text-truncate" style="max-width: 200px;" 
-                                                                                   title="<?= htmlspecialchars($arquivo['nome_arquivo']) ?>">
-                                                                                <?= htmlspecialchars($arquivo['nome_arquivo']) ?>
-                                                                            </small>
-                                                                        </div>
-                                                                        <?php if ($arquivo['tipo_arquivo'] === 'URL'): ?>
-                                                                            <?php if ($is_video_arquivo && $youtube_id_arquivo): ?>
-                                                                                <!-- Botão Play para vídeo do YouTube -->
-                                                                                <button class="btn btn-sm btn-outline-primary" 
-                                                                                        data-bs-toggle="modal" 
-                                                                                        data-bs-target="#modalYouTube"
-                                                                                        data-video-id="<?= $youtube_id_arquivo ?>"
-                                                                                        data-video-title="<?= htmlspecialchars($arquivo['nome_arquivo']) ?>"
-                                                                                        title="Assistir Vídeo">
-                                                                                    <i class="fas fa-play"></i>
-                                                                                </button>
-                                                                            <?php else: ?>
-                                                                                <!-- Link normal para outras URLs -->
-                                                                                <a href="<?= htmlspecialchars($arquivo['caminho_arquivo']) ?>" 
-                                                                                   target="_blank" 
-                                                                                   class="btn btn-sm btn-outline-primary"
-                                                                                   title="Acessar link">
-                                                                                    <i class="fas fa-external-link-alt"></i>
-                                                                                </a>
-                                                                            <?php endif; ?>
-                                                                        <?php elseif (!empty($arquivo['caminho_arquivo'])): ?>
-                                                                            <?php if ($is_video_arquivo): ?>
-                                                                                <!-- Botão Play para arquivo de vídeo -->
-                                                                                <a href="<?= htmlspecialchars($arquivo['caminho_arquivo']) ?>" 
-                                                                                   target="_blank" 
-                                                                                   class="btn btn-sm btn-outline-primary"
-                                                                                   title="Assistir Vídeo">
-                                                                                    <i class="fas fa-play"></i>
-                                                                                </a>
-                                                                            <?php else: ?>
-                                                                                <!-- Botão normal para outros arquivos -->
-                                                                                <a href="../<?= htmlspecialchars($arquivo['caminho_arquivo']) ?>" 
-                                                                                   target="_blank" 
-                                                                                   class="btn btn-sm btn-outline-secondary"
-                                                                                   title="Abrir arquivo">
-                                                                                    <i class="fas fa-external-link-alt"></i>
-                                                                                </a>
-                                                                            <?php endif; ?>
-                                                                        <?php endif; ?>
-                                                                    </div>
-                                                                    <?php if (!empty($arquivo['descricao'])): ?>
-                                                                    <small class="text-muted d-block mt-1">
-                                                                        <?= htmlspecialchars($arquivo['descricao']) ?>
-                                                                    </small>
-                                                                    <?php endif; ?>
-                                                                </div>
-                                                                <?php endforeach; ?>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="conteudos-lista">
+                                        <?php foreach ($conteudos as $conteudo): ?>
+                                            <?php displayConteudo($conteudo); ?>
                                         <?php endforeach; ?>
                                     </div>
                                 <?php else: ?>
