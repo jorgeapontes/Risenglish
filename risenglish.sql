@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 13/10/2025 às 18:45
+-- Tempo de geração: 14/10/2025 às 02:21
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -39,7 +39,21 @@ CREATE TABLE `alunos_turmas` (
 
 INSERT INTO `alunos_turmas` (`id`, `aluno_id`, `turma_id`) VALUES
 (17, 12, 5),
-(18, 12, 6);
+(22, 12, 6);
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `arquivos_visiveis`
+--
+
+CREATE TABLE `arquivos_visiveis` (
+  `id` int(11) NOT NULL,
+  `aula_id` int(11) NOT NULL,
+  `conteudo_id` int(11) NOT NULL,
+  `visivel` tinyint(1) NOT NULL DEFAULT 1,
+  `data_modificacao` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -171,6 +185,7 @@ CREATE TABLE `usuarios` (
   `email` varchar(255) NOT NULL,
   `senha` varchar(255) NOT NULL,
   `tipo_usuario` enum('admin','professor','aluno') NOT NULL,
+  `informacoes` text DEFAULT NULL,
   `reset_token` varchar(64) DEFAULT NULL,
   `token_expira_em` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -179,10 +194,10 @@ CREATE TABLE `usuarios` (
 -- Despejando dados para a tabela `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`, `reset_token`, `token_expira_em`) VALUES
-(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'admin', NULL, NULL),
-(9, 'Laura', 'laura@risenglish.com', '$2y$10$L5r6urNbE7tLtiPzZFY/cuIAd65is7jtDcNVTIO/.YkmOsWnt.082', 'professor', NULL, NULL),
-(12, 'Jorge Augusto Possani Pontes', 'jorgeappontes13@gmail.com', '$2y$10$MBlYgYjHcew4oWv08mCSNuIJtbX05eexbZaEQ9w3yru3053kzArdm', 'aluno', NULL, NULL);
+INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`, `informacoes`, `reset_token`, `token_expira_em`) VALUES
+(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'admin', NULL, NULL, NULL),
+(9, 'Laura', 'laura@risenglish.com', '$2y$10$L5r6urNbE7tLtiPzZFY/cuIAd65is7jtDcNVTIO/.YkmOsWnt.082', 'professor', NULL, NULL, NULL),
+(12, 'Jorge Augusto Possani Pontes', 'jorgeappontes13@gmail.com', '$2y$10$MBlYgYjHcew4oWv08mCSNuIJtbX05eexbZaEQ9w3yru3053kzArdm', 'aluno', 'teste', NULL, NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -195,6 +210,15 @@ ALTER TABLE `alunos_turmas`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `aluno_id` (`aluno_id`,`turma_id`),
   ADD KEY `turma_id` (`turma_id`);
+
+--
+-- Índices de tabela `arquivos_visiveis`
+--
+ALTER TABLE `arquivos_visiveis`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `aula_conteudo_unique` (`aula_id`,`conteudo_id`),
+  ADD KEY `aula_id` (`aula_id`),
+  ADD KEY `conteudo_id` (`conteudo_id`);
 
 --
 -- Índices de tabela `aulas`
@@ -248,7 +272,13 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `alunos_turmas`
 --
 ALTER TABLE `alunos_turmas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+
+--
+-- AUTO_INCREMENT de tabela `arquivos_visiveis`
+--
+ALTER TABLE `arquivos_visiveis`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `aulas`
@@ -284,7 +314,7 @@ ALTER TABLE `turmas`
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Restrições para tabelas despejadas
@@ -296,6 +326,13 @@ ALTER TABLE `usuarios`
 ALTER TABLE `alunos_turmas`
   ADD CONSTRAINT `alunos_turmas_ibfk_1` FOREIGN KEY (`aluno_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `alunos_turmas_ibfk_2` FOREIGN KEY (`turma_id`) REFERENCES `turmas` (`id`) ON DELETE CASCADE;
+
+--
+-- Restrições para tabelas `arquivos_visiveis`
+--
+ALTER TABLE `arquivos_visiveis`
+  ADD CONSTRAINT `arquivos_visiveis_ibfk_1` FOREIGN KEY (`aula_id`) REFERENCES `aulas` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `arquivos_visiveis_ibfk_2` FOREIGN KEY (`conteudo_id`) REFERENCES `conteudos` (`id`) ON DELETE CASCADE;
 
 --
 -- Restrições para tabelas `aulas`
