@@ -37,53 +37,11 @@ $recursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Recomendações - Risenglish</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../../css/aluno/dashboard.css">
     <style>
         body {
             background-color: #FAF9F6;
             overflow-x: hidden;
-        }
-
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            height: 100vh;
-            width: 16.666667%;
-            background-color: #081d40;
-            color: #fff;
-            z-index: 1000;
-            overflow-y: auto;
-        }
-
-        .sidebar a {
-            color: #fff;
-            text-decoration: none;
-            display: block;
-            padding: 10px 15px;
-            margin-bottom: 5px;
-            border-radius: 5px;
-            transition: 0.3s;
-        }
-
-        .sidebar a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            transform: translateX(3px);
-            transition: 0.3s;
-        }
-
-        .sidebar .active {
-            background-color: #c0392b;
-        }
-
-        .sidebar .active:hover{
-            background-color: #c0392b;
-        }
-
-        .main-content {
-            margin-left: 16.666667%;
-            width: 83.333333%;
-            min-height: 100vh;
-            overflow-y: auto;
         }
 
         .btn-danger {
@@ -127,13 +85,12 @@ $recursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .card-text {
-            display: -webkit-box; /* Define a div como uma caixa de flex */
-            -webkit-line-clamp: 3; /* Limita o texto a 3 linhas */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
             line-clamp: 3;
-            -webkit-box-orient: vertical; /* Orienta o conteúdo verticalmente */
-            overflow: hidden; /* Oculta o texto que ultrapassar o limite */
-            text-overflow: ellipsis; /* Adiciona reticências (...) ao final do texto */
-            /* Você também pode adicionar outras propriedades como width, max-width, etc. */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .recurso-icon {
@@ -156,31 +113,77 @@ $recursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             right: 15px;
         }
 
-        @media (max-width: 768px) {
+        /* Menu Mobile */
+        @media (max-width: 991px) {
             .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
+                display: none !important;
             }
-            
             .main-content {
-                margin-left: 0;
-                width: 100%;
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+            .mobile-navbar-custom {
+                background: #081d40 !important;
+                color: #fff !important;
+            }
+            .mobile-navbar-custom h5 {
+                color: #fff !important;
+            }
+            .mobile-navbar-custom .btn-outline-primary {
+                color: #fff !important;
+                border-color: #fff !important;
+            }
+            .mobile-navbar-custom .btn-outline-primary:active,
+            .mobile-navbar-custom .btn-outline-primary:focus,
+            .mobile-navbar-custom .btn-outline-primary:hover {
+                background: #0a2a5c !important;
+                color: #fff !important;
+                border-color: #fff !important;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 d-flex flex-column sidebar p-3">
+    <div class="container-fluid p-0">
+        
+        <!-- Menu Mobile (Hamburger & Header) -->
+        <header class="d-flex d-md-none mobile-navbar-custom border-bottom shadow-sm p-3 align-items-center sticky-top">
+            <button class="btn btn-outline-primary me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Abrir Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h5 class="mb-0 fw-bold">Recomendações</h5>
+        </header>
+
+        <!-- Sidebar Offcanvas (Menu para Mobile) -->
+        <div class="offcanvas offcanvas-top text-white mobile-offcanvas" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel" style="background-color: #081d40; height: 50vh;">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title fw-bold" id="sidebarOffcanvasLabel"><?php echo $aluno_nome; ?></h5>
+                <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body d-flex flex-column">
+                 <!-- Menu centralizado verticalmente -->
+                <div class="d-flex flex-column flex-grow-1 mb-5">
+                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
+                    <a href="minhas_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
+                    <a href="recomendacoes.php" class="rounded active"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
+                </div>
+
+                <!-- Botão sair no rodapé -->
+                <div class="mt-auto">
+                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-0">
+            <!-- Sidebar Desktop (Visível apenas em md e acima) -->
+            <div class="col-md-2 d-none d-md-flex flex-column sidebar p-3">
                 <!-- Nome do aluno -->
                 <div class="mb-4 text-center">
                     <h5 class="mt-4"><?php echo $aluno_nome; ?></h5>
                 </div>
 
-                <!-- Menu centralizado verticalmente -->
+                <!-- Menu -->
                 <div class="d-flex flex-column flex-grow-1 mb-5">
                     <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                     <a href="minhas_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
@@ -193,8 +196,8 @@ $recursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </div>
 
-            <!-- Conteúdo principal -->
-            <div class="col-md-10 main-content p-4">
+            <!-- Conteúdo Principal -->
+            <div class="col-12 col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h3>Recursos Recomendados</h3>
                 </div>
