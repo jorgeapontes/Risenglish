@@ -84,7 +84,8 @@ $stmt_conteudos->execute([':aula_id' => $aula_id]);
 $conteudos_visiveis = $stmt_conteudos->fetchAll(PDO::FETCH_ASSOC);
 
 // Função para buscar apenas os arquivos de subpastas que estão visíveis
-function buscarArquivosSubpastaVisivel($pdo, $subpasta_id, $aula_id) {
+// Função para buscar arquivos de qualquer pasta (tema principal ou subpasta)
+function buscarArquivosPastaVisivel($pdo, $pasta_id, $aula_id) {
     $sql = "
         SELECT 
             c.id,
@@ -101,13 +102,13 @@ function buscarArquivosSubpastaVisivel($pdo, $subpasta_id, $aula_id) {
         LEFT JOIN
             usuarios u ON c.professor_id = u.id
         WHERE 
-            c.parent_id = :subpasta_id
+            c.parent_id = :pasta_id
             AND c.eh_subpasta = 0
         ORDER BY 
             c.titulo ASC
     ";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':subpasta_id' => $subpasta_id]);
+    $stmt->execute([':pasta_id' => $pasta_id]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -127,15 +128,23 @@ foreach ($conteudos_visiveis as $conteudo) {
                 if ($possivel_filho['parent_id'] == $tema['id'] && $possivel_filho['eh_subpasta'] == 1) {
                     $subpasta = $possivel_filho;
                     // Buscar arquivos desta subpasta visível
-                    $subpasta['filhos'] = buscarArquivosSubpastaVisivel($pdo, $subpasta['id'], $aula_id);
+                    $subpasta['filhos'] = buscarArquivosPastaVisivel($pdo, $subpasta['id'], $aula_id);
                     $tema['filhos'][] = $subpasta;
                 }
             }
             
-            // Se não há subpastas visíveis, buscar arquivos diretamente no tema
-            if (empty($tema['filhos'])) {
-                $tema['filhos'] = buscarArquivosSubpastaVisivel($pdo, $tema['id'], $aula_id);
+            // Buscar arquivos diretamente no tema principal (CORREÇÃO AQUI)
+            $arquivos_tema_principal = buscarArquivosPastaVisivel($pdo, $tema['id'], $aula_id);
+            if (!empty($arquivos_tema_principal)) {
+                // Se já temos subpastas, adicionar os arquivos ao final
+                // Se não temos subpastas, usar os arquivos como filhos diretos
+                foreach ($arquivos_tema_principal as $arquivo) {
+                    $tema['filhos'][] = $arquivo;
+                }
             }
+        } else {
+            // É um arquivo solto no nível principal
+            $tema['filhos'] = [];
         }
         $estrutura_conteudos[] = $tema;
     }
@@ -159,7 +168,7 @@ foreach ($conteudos_visiveis as $conteudo) {
         if (!$ja_incluido && $conteudo['eh_subpasta'] == 1) {
             // É uma subpasta visível sem tema pai visível (adicionar como item principal)
             $subpasta = $conteudo;
-            $subpasta['filhos'] = buscarArquivosSubpastaVisivel($pdo, $subpasta['id'], $aula_id);
+            $subpasta['filhos'] = buscarArquivosPastaVisivel($pdo, $subpasta['id'], $aula_id);
             $estrutura_conteudos[] = $subpasta;
         } elseif (!$ja_incluido && $conteudo['eh_subpasta'] == 0) {
             // É um arquivo solto visível (adicionar como item principal)
@@ -167,6 +176,21 @@ foreach ($conteudos_visiveis as $conteudo) {
         }
     }
 }
+
+// CORREÇÃO ADICIONAL: Buscar arquivos diretamente nos temas principais que podem não ter sido incluídos
+foreach ($estrutura_conteudos as &$item) {
+    if ($item['parent_id'] === null && 
+        ($item['eh_subpasta'] == 1 || empty($item['tipo_arquivo']) || $item['tipo_arquivo'] === 'TEMA') &&
+        (!isset($item['filhos']) || empty($item['filhos']))) {
+        
+        // Buscar arquivos diretamente no tema principal
+        $arquivos_diretos = buscarArquivosPastaVisivel($pdo, $item['id'], $aula_id);
+        if (!empty($arquivos_diretos)) {
+            $item['filhos'] = $arquivos_diretos;
+        }
+    }
+}
+unset($item); // Importante: remover a referência
 
 // Usar a estrutura hierárquica filtrada
 $conteudos = $estrutura_conteudos;
