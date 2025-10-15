@@ -3,10 +3,11 @@
     Creme, Vermelho Escuro, Azul Marinho
 ======================= */
 :root {
-    --cor-primaria: #0A1931;    /* Azul Marinho */
-    --cor-secundaria: #B91D23;  /* Vermelho Escuro */
-    --cor-fundo: #F8F5EB;       /* Creme/Bege */
-    --cor-texto: #333333;       /* Cinza Escuro */
+    --cor-primaria: #081d40;     /* Azul Marinho */
+    --cor-secundaria: #c0392b;   /* Vermelho Escuro */
+    --cor-fundo: #FAF9F6;        /* Creme/Bege */
+    --cor-fundo-hoje: #f0f0f0;   /* Fundo para o dia de hoje */
+    --cor-texto: #333333;        /* Cinza Escuro */
     --cor-clara: #ffffff;
 }
 
@@ -18,51 +19,62 @@ body {
     color: var(--cor-texto);
     margin: 0;
     overflow-x: hidden;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .container-fluid {
     padding: 0;
 }
 
+/* Define a margem para o conteúdo principal apenas no desktop */
 .main-content {
-    margin-left: 16.666667%;
-    width: 83.333333%;
     min-height: 100vh;
     overflow-y: auto;
     background-color: var(--cor-fundo);
 }
+@media (min-width: 768px) {
+    .main-content {
+        margin-left: 16.666667%; /* Offset da sidebar no desktop */
+        width: 83.333333%;
+    }
+}
 
 .card {
     border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
 .card-header {
-    background-color: #081d40 !important;
+    background-color: var(--cor-primaria) !important;
     color: white;
     border-bottom: none;
     font-weight: 600;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
 
-.btn-danger {
-    background-color: #c0392b;
-    border-color: #c0392b;
+/* Estilos de Botões */
+.btn-outline-primary {
+    color: var(--cor-primaria);
+    border-color: var(--cor-primaria);
 }
 
-.btn-danger:hover {
-    background-color: #a93226;
-    border-color: #a93226;
+.btn-outline-primary:hover {
+    background-color: var(--cor-primaria);
+    color: white;
 }
 
 .btn-outline-secondary {
-    color: #6c757d;
-    border-color: #6c757d;
+    color: var(--cor-primaria);
+    border-color: var(--cor-primaria);
+    transition: all 0.2s ease;
 }
 
 .btn-outline-secondary:hover {
-    background-color: #6c757d;
+    background-color: var(--cor-primaria);
     color: white;
+    border-color: var(--cor-primaria);
 }
 
 #botao-sair {
@@ -71,10 +83,80 @@ body {
 }
 
 #botao-sair:hover {
-    background-color: #c0392b;
+    background-color: var(--cor-secundaria);
     color: white;
     transform: none;
 }
+
+/* =======================
+    👤 Sidebar (Desktop e Offcanvas)
+======================= */
+/* Estilos para a Sidebar no Desktop */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 16.666667%;
+    background-color: var(--cor-primaria);
+    color: var(--cor-clara);
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar h5 {
+    color: var(--cor-clara);
+    font-weight: 700;
+}
+
+.sidebar a, .offcanvas-body a {
+    color: var(--cor-clara);
+    text-decoration: none;
+    display: block;
+    padding: 12px 15px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.sidebar a:hover, .offcanvas-body a:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateX(5px);
+}
+
+.sidebar .active, .offcanvas-body .active {
+    background-color: var(--cor-secundaria);
+    transform: translateX(5px);
+}
+
+.sidebar .active:hover, .offcanvas-body .active:hover {
+    background-color: #a93226; /* Um tom um pouco mais escuro para o hover no ativo */
+    transform: translateX(5px);
+}
+
+/* Estilo para a seção "Aulas de Hoje" no mobile */
+.bloco-aula-simples {
+    color: white;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-left: 5px solid var(--cor-secundaria);
+}
+.bloco-aula-simples:hover {
+    background-color: #32475b !important;
+    transform: scale(1.01);
+}
+
+.bloco-aula-simples strong {
+    font-size: 1.1em;
+    display: inline-block;
+    margin-right: 10px;
+}
+
 
 /* =======================
     📅 Calendário
@@ -91,23 +173,12 @@ body {
 }
 
 .dia-semana {
-    background-color: #081d40;
+    background-color: var(--cor-primaria);
     color: white;
     text-align: center;
     padding: 12px 5px;
     font-weight: bold;
     font-size: 0.9em;
-}
-
-.celula-dia.muitas-aulas::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 20px;
-    background: linear-gradient(transparent, rgba(255,255,255,0.8));
-    pointer-events: none;
 }
 
 .celula-dia {
@@ -119,7 +190,7 @@ body {
     flex-direction: column;
     overflow: hidden;
     transition: all 0.2s ease;
-    height: 180px;
+    height: 180px; /* Altura padrão para visualização em grid */
 }
 
 .celula-dia:hover {
@@ -176,7 +247,7 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     flex-shrink: 0;
-    border-left: 3px solid #c0392b;
+    border-left: 3px solid var(--cor-secundaria);
 }
 
 .bloco-aula:hover {
@@ -222,75 +293,38 @@ body {
 }
 
 /* =======================
-    👤 Sidebar
+    📱 Responsividade (Mobile First)
 ======================= */
-.sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    width: 16.666667%;
-    background-color: #081d40;
-    color: #fff;
-    z-index: 1000;
-    overflow-y: auto;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-}
 
-.sidebar h5 {
-    color: #fff;
-    font-weight: 600;
-}
-
-.sidebar a {
-    color: #fff;
-    text-decoration: none;
-    display: block;
-    padding: 12px 15px;
-    margin-bottom: 5px;
-    border-radius: 5px;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-
-.sidebar a:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    transform: translateX(5px);
-}
-
-.sidebar .active {
-    background-color: #c0392b;
-    transform: translateX(5px);
-}
-
-.sidebar .active:hover {
-    background-color: #c0392b;
-    transform: translateX(5px);
-}
-
-/* =======================
-    📱 Responsividade
-======================= */
-@media (max-width: 768px) {
-    .sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
-    }
-    
-    .main-content {
-        margin-left: 0;
-        width: 100%;
-    }
-
+/* Para telas menores que 768px (Mobile) */
+@media (max-width: 767.98px) {
+    /* O calendário se torna uma lista vertical de dias */
     .calendario {
         grid-template-columns: repeat(1, 1fr);
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        background-color: transparent;
+    }
+    
+    .dia-semana {
+        display: none; /* Esconde a linha de DOM, SEG, TER... */
     }
 
     .celula-dia {
-        min-height: 120px;
+        height: auto; /* Altura auto para acomodar conteúdo dinâmico */
+        min-height: 100px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     
+    .celula-dia.outros-meses {
+        display: none; /* Opcional: Oculta dias de outros meses para economizar espaço */
+    }
+    
+    /* Navbar de navegação de mês em coluna */
     .d-flex.justify-content-between.align-items-center.mb-4 {
         flex-direction: column;
         gap: 15px;
@@ -298,25 +332,18 @@ body {
     
     .d-flex.justify-content-between.align-items-center.mb-4 h3 {
         text-align: center;
-        order: -1;
+        order: -1; /* Coloca o título do mês acima das setas */
     }
-}
 
-/* Badges para as próximas aulas */
-.badge {
-    font-size: 0.75em;
-    padding: 4px 8px;
-}
+    .aulas-container {
+        max-height: 100px; /* Limita a altura em mobile para evitar células gigantes */
+    }
+    
+    .celula-dia.muitas-aulas::after {
+        background: linear-gradient(transparent, rgba(255,255,255,1)); /* Corrigindo a cor de fading */
+    }
 
-/* Melhorias para o card de próximas aulas */
-.border-bottom {
-    border-color: #e9ecef !important;
-}
-
-.text-primary {
-    color: #081d40 !important;
-}
-
-.bg-primary {
-    background-color: #081d40 !important;
+    .sidebar{
+        background-color: var(--cor-primaria);
+    }
 }
