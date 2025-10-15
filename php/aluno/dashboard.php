@@ -1,4 +1,5 @@
 <?php
+
 // aaa
 session_start();
 require_once '../includes/conexao.php';
@@ -107,6 +108,16 @@ $nomes_meses = [
     '05' => 'Maio', '06' => 'Junho', '07' => 'Julho', '08' => 'Agosto', 
     '09' => 'Setembro', '10' => 'Outubro', '11' => 'Novembro', '12' => 'Dezembro'
 ];
+
+// Dias com aula marcada (para exibir só eles no mobile)
+$dias_com_aula = [];
+foreach ($aulas_por_dia as $dia => $aulas) {
+    $dias_com_aula[] = [
+        'dia' => $dia,
+        'data' => "$ano-$mes-" . str_pad($dia, 2, '0', STR_PAD_LEFT),
+        'aulas' => $aulas
+    ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -121,6 +132,45 @@ $nomes_meses = [
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- O CSS customizado será carregado em um arquivo separado, conforme solicitado -->
     <link rel="stylesheet" href="../../css/aluno/dashboard.css">
+    <style>
+    @media (max-width: 991px) {
+        .calendario {
+            display: none !important;
+        }
+        .dias-com-aula-mobile {
+            display: block !important;
+        }
+        /* Navbar mobile customizada */
+        .mobile-navbar-custom {
+            background: #081d40 !important;
+            color: #fff !important;
+        }
+        .mobile-navbar-custom h5 {
+            color: #fff !important;
+        }
+        .mobile-navbar-custom .btn-outline-primary {
+            color: #fff !important;
+            border-color: #fff !important;
+        }
+        .mobile-navbar-custom .btn-outline-primary:active,
+        .mobile-navbar-custom .btn-outline-primary:focus,
+        .mobile-navbar-custom .btn-outline-primary:hover {
+            background: #0a2a5c !important;
+            color: #fff !important;
+            border-color: #fff !important;
+        }
+    }
+    @media (min-width: 992px) {
+        .dias-com-aula-mobile {
+            display: none !important;
+        }
+    }
+    /* Horário branco nos cards mobile */
+    .bloco-aula-simples strong.text-warning,
+    .bloco-aula-simples strong {
+        color: #fff !important;
+    }
+    </style>
 </head>
 <body>
     <div class="container-fluid p-0">
@@ -130,11 +180,11 @@ $nomes_meses = [
             1. Menu Mobile (Hamburger & Header)
             =================================================
         -->
-        <header class="d-flex d-md-none bg-white border-bottom shadow-sm p-3 align-items-center sticky-top">
+        <header class="d-flex d-md-none mobile-navbar-custom border-bottom shadow-sm p-3 align-items-center sticky-top">
             <button class="btn btn-outline-primary me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Abrir Menu">
                 <i class="fas fa-bars"></i>
             </button>
-            <h5 class="mb-0 text-primary fw-bold">Minhas Aulas</h5>
+            <h5 class="mb-0 fw-bold">Minhas Aulas</h5>
         </header>
 
         <!-- 
@@ -215,7 +265,7 @@ $nomes_meses = [
                                     onclick="window.location.href='<?= $url_redirecionamento ?>';">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="text-truncate">
-                                            <strong class="text-warning"><?= $aula['hora'] ?></strong>
+                                            <strong><?= $aula['hora'] ?></strong>
                                             <span class="d-block text-white"><?= htmlspecialchars($aula['turma']) ?></span>
                                             <small class="text-light-subtle"><?= htmlspecialchars($aula['topico']) ?></small>
                                         </div>
@@ -226,7 +276,6 @@ $nomes_meses = [
                         <?php endif; ?>
                     </div>
                 </div>
-
 
                 <!-- 
                     Controle de Navegação do Mês (Visível em todas as telas)
@@ -244,7 +293,60 @@ $nomes_meses = [
                 </div>
 
                 <!-- 
-                    CALENDÁRIO COMPLETO (Se torna uma lista vertical no mobile)
+                    LISTA DE DIAS COM AULA (Mobile)
+                -->
+                <div class="dias-com-aula-mobile" style="display:none;">
+                    <?php if (empty($dias_com_aula)): ?>
+                        <div class="alert alert-light text-center mt-3">
+                            Nenhuma aula marcada neste mês.
+                        </div>
+                    <?php else: ?>
+                        <div class="row g-3">
+                            <?php foreach ($dias_com_aula as $dia_info): 
+                                $data_completa = $dia_info['data'];
+                                $is_hoje = ($data_hoje->format('Y-m-d') == $data_completa);
+                                $aulas = $dia_info['aulas'];
+                            ?>
+                                <div class="col-12">
+                                    <div class="card shadow-sm <?= $is_hoje ? 'border-danger' : '' ?>">
+                                        <div class="card-header d-flex align-items-center <?= $is_hoje ? 'bg-danger text-white' : '' ?>">
+                                            <span class="fw-bold me-2"><?= date('d/m', strtotime($data_completa)) ?></span>
+                                            <?php if ($is_hoje): ?>
+                                                <span class="badge bg-warning text-dark ms-2">Hoje</span>
+                                            <?php endif; ?>
+                                            <span class="ms-auto badge bg-primary"><?= count($aulas) ?> aula<?= count($aulas) > 1 ? 's' : '' ?></span>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <?php 
+                                            uasort($aulas, function($a, $b) {
+                                                return strcmp($a['hora'], $b['hora']);
+                                            });
+                                            foreach ($aulas as $aula): 
+                                                $url_redirecionamento = "detalhes_aula.php?id=" . $aula['aula_id'];
+                                            ?>
+                                                <div class="bloco-aula-simples mb-2" 
+                                                    style="background-color: #1a2a3a;"
+                                                    onclick="window.location.href='<?= $url_redirecionamento ?>';">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="text-truncate">
+                                                            <strong><?= $aula['hora'] ?></strong>
+                                                            <span class="d-block text-white"><?= htmlspecialchars($aula['turma']) ?></span>
+                                                            <small class="text-light-subtle"><?= htmlspecialchars($aula['topico']) ?></small>
+                                                        </div>
+                                                        <i class="fas fa-chevron-right text-white opacity-50 ms-2"></i>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- 
+                    CALENDÁRIO COMPLETO (Desktop)
                 -->
                 <div class="calendario card shadow-lg p-0">
                     <?php foreach ($dias_semana as $dia_nome): ?>
