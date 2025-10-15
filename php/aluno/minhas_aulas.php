@@ -313,12 +313,6 @@ foreach ($aulas as $aula) {
                         </div>
                     </div>
                 </div>
-                <?php else: ?>
-                    <div class="text-center py-5">
-                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                        <h4 class="text-muted">Nenhuma aula encontrada</h4>
-                        <p class="text-muted">Você não está matriculado em nenhuma aula.</p>
-                    </div>
                 <?php endif; ?>
             </div>
         </div>

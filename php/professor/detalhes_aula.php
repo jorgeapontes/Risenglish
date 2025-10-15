@@ -243,33 +243,12 @@ foreach ($temas as $tema) {
             color: white;
             transform: none;
         }
-        .no-click-propagation {
-            pointer-events: none;
+        .switch-disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
-        .no-click-propagation * {
-            pointer-events: auto;
-        }
-        /* CSS ADICIONAL PARA CORRIGIR OS TOGGLES */
-        .tema-header > * {
-            pointer-events: auto;
-        }
-
-        .tema-header {
-            pointer-events: none;
-        }
-
-        .tema-header .no-click-propagation,
-        .tema-header .subpasta-toggle,
-        .tema-header a {
-            pointer-events: auto;
-        }
-
-        .subpasta-toggle {
-            pointer-events: auto !important;
-        }
-        .clickable-area {
-            pointer-events: auto;
-            cursor: pointer;
+        .loading {
+            color: #6c757d;
         }
     </style>
 </head>
@@ -461,7 +440,7 @@ foreach ($temas as $tema) {
                                         data-planejado="<?= $tema['planejado'] ?>"
                                         data-tipo="tema">
                                         
-                                        <div class="col-1 text-center no-click-propagation">
+                                        <div class="col-1 text-center">
                                             <div class="form-check form-switch">
                                                 <input class="form-check-input planejado-switch" 
                                                     type="checkbox" 
@@ -480,7 +459,7 @@ foreach ($temas as $tema) {
                                         <div class="col-5">
                                             <div class="d-flex align-items-center">
                                                 <?php if ($tem_subpastas): ?>
-                                                    <i class="fas fa-chevron-right subpasta-toggle me-2 clickable-area" data-tema-id="<?= $tema['tema_id'] ?>" style="cursor: pointer;"></i>
+                                                    <i class="fas fa-chevron-right subpasta-toggle me-2" data-tema-id="<?= $tema['tema_id'] ?>" style="cursor: pointer;"></i>
                                                 <?php else: ?>
                                                     <i class="fas fa-folder me-2 text-primary"></i>
                                                 <?php endif; ?>
@@ -520,7 +499,7 @@ foreach ($temas as $tema) {
                                                     data-planejado="<?= $subpasta['planejado'] ?>"
                                                     data-tipo="subpasta">
                                                     
-                                                    <div class="col-1 text-center no-click-propagation">
+                                                    <div class="col-1 text-center">
                                                         <div class="form-check form-switch">
                                                             <input class="form-check-input planejado-switch" 
                                                                 type="checkbox" 
@@ -604,11 +583,10 @@ document.addEventListener('DOMContentLoaded', function() {
         container.style.display = 'none';
     });
 
-    // SOLUÇÃO SIMPLES E DIRETA PARA OS TOGGLES
+    // TOGGLES DE SUBPASTAS - SIMPLES E FUNCIONAL
     document.querySelectorAll('.subpasta-toggle').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
-            e.stopPropagation(); // Impede a propagação para o elemento pai
-            e.preventDefault(); // Previne comportamento padrão
+            e.stopPropagation();
             
             const temaId = this.getAttribute('data-tema-id');
             const subpastasContainer = document.getElementById(`subpastas-${temaId}`);
@@ -628,31 +606,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Prevenir que cliques nos switches interfiram
-    document.querySelectorAll('.planejado-switch').forEach(switchElement => {
-        switchElement.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    });
-
-    // Prevenir que cliques nos labels interfiram
-    document.querySelectorAll('.form-check-label').forEach(label => {
-        label.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    });
-
-    // Prevenir que cliques nos links interfiram
-    document.querySelectorAll('.link-tema').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    });
-
     // Atualizar contagem de itens visíveis
     function atualizarContagemPlanejados() {
         const count = listaConteudosContainer.querySelectorAll('.conteudo-item[data-planejado="1"]').length;
         filtroLabel.innerHTML = `Mostrar Apenas Itens Visíveis (${count})`;
+        return count;
     }
 
     // Lógica do Filtro
@@ -663,26 +621,28 @@ document.addEventListener('DOMContentLoaded', function() {
             const isPlanejado = item.dataset.planejado === '1';
             
             if (mostrarApenasPlanejados && !isPlanejado) {
-                item.style.setProperty('display', 'none', 'important');
+                item.style.display = 'none';
             } else {
                 item.style.display = 'flex';
             }
         });
 
+        // Gerencia a exibição dos containers de subpastas baseado no filtro
         document.querySelectorAll('.subpastas-container').forEach(container => {
             const temaId = container.id.replace('subpastas-', '');
             const toggle = document.querySelector(`.subpasta-toggle[data-tema-id="${temaId}"]`);
             const temaPai = document.querySelector(`.conteudo-item[data-conteudo-id="${temaId}"]`);
 
+            // Se o tema pai está escondido, esconde as subpastas também
             if (temaPai && temaPai.style.display === 'none') {
                 container.style.display = 'none';
                 if (toggle) toggle.classList.remove('rotated');
                 return;
             }
 
-            const hasVisibleItems = container.querySelector('.conteudo-item[data-planejado="1"]') !== null;
-
+            // Se estamos filtrando, mostra apenas containers que têm itens visíveis
             if (mostrarApenasPlanejados) {
+                const hasVisibleItems = container.querySelector('.conteudo-item[data-planejado="1"]') !== null;
                 if (hasVisibleItems) {
                     container.style.display = 'block';
                     if (toggle) toggle.classList.add('rotated');
@@ -690,107 +650,95 @@ document.addEventListener('DOMContentLoaded', function() {
                     container.style.display = 'none';
                     if (toggle) toggle.classList.remove('rotated');
                 }
-            } else {
-                container.style.display = 'none';
-                if (toggle) toggle.classList.remove('rotated');
             }
         });
     }
 
     filtroSwitch.addEventListener('change', aplicarFiltro);
 
-    // SOLUÇÃO DEFINITIVA - TOGGLES ISOLADOS
-function setupToggles() {
-    // Remove todos os event listeners existentes primeiro
-    document.querySelectorAll('.subpasta-toggle').forEach(toggle => {
-        const newToggle = toggle.cloneNode(true);
-        toggle.parentNode.replaceChild(newToggle, toggle);
-    });
-
-    // Configura os toggles de forma completamente isolada
-    document.querySelectorAll('.subpasta-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
-            console.log('Toggle clicado - evento capturado');
+    // LÓGICA AJAX PARA OS SWITCHES DE CONTEÚDO
+    document.querySelectorAll('.planejado-switch').forEach(function(switchElement) {
+        switchElement.addEventListener('change', function() {
+            const aulaId = this.dataset.aulaId;
+            const conteudoId = this.dataset.conteudoId;
+            const tipo = this.dataset.tipo;
+            const novoStatus = this.checked ? 1 : 0;
             
-            const temaId = this.getAttribute('data-tema-id');
-            const subpastasContainer = document.getElementById(`subpastas-${temaId}`);
+            const statusLabel = this.closest('.form-switch').querySelector('.form-check-label');
+            const conteudoItem = this.closest('.conteudo-item');
+            
+            const formData = new FormData();
+            formData.append('aula_id', aulaId);
+            formData.append('conteudo_id', conteudoId);
+            formData.append('status', novoStatus);
+            
+            const estadoAnterior = this.checked ? 0 : 1;
 
-            if (subpastasContainer) {
-                const isVisible = subpastasContainer.style.display === 'block';
-                
-                if (isVisible) {
-                    subpastasContainer.style.display = 'none';
-                    this.classList.remove('rotated');
-                } else {
-                    subpastasContainer.style.display = 'block';
-                    this.classList.add('rotated');
+            // Feedback visual
+            this.disabled = true;
+            this.classList.add('switch-disabled');
+            statusLabel.textContent = '...';
+            statusLabel.classList.add('loading');
+
+            fetch('ajax_toggle_conteudo.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
                 }
-            }
-            
-            // Para TUDO - não deixa o evento se propagar de forma alguma
-            e.stopImmediatePropagation();
-            e.stopPropagation();
-            e.preventDefault();
-            return false;
+                return response.json();
+            })
+            .then(data => {
+                this.disabled = false;
+                this.classList.remove('switch-disabled');
+                statusLabel.classList.remove('loading');
+
+                if (data.success) {
+                    displayAlert(data.message, 'success');
+                    
+                    // Atualiza o estado no DOM
+                    conteudoItem.dataset.planejado = String(novoStatus);
+                    
+                    if (novoStatus === 1) {
+                        statusLabel.textContent = 'Sim';
+                        conteudoItem.classList.add('planejado');
+                        conteudoItem.classList.remove('nao-planejado');
+                    } else {
+                        statusLabel.textContent = 'Não';
+                        conteudoItem.classList.remove('planejado');
+                        conteudoItem.classList.add('nao-planejado');
+                    }
+
+                    // Atualiza a contagem e aplica filtro se necessário
+                    atualizarContagemPlanejados();
+                    if (filtroSwitch.checked) {
+                        aplicarFiltro();
+                    }
+
+                } else {
+                    console.error('Erro:', data.message);
+                    displayAlert('Erro ao atualizar visibilidade: ' + data.message, 'danger');
+                    // Reverte o estado do switch
+                    this.checked = !this.checked;
+                    statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+                }
+            })
+            .catch(error => {
+                this.disabled = false;
+                this.classList.remove('switch-disabled');
+                statusLabel.classList.remove('loading');
+                console.error('Erro de conexão:', error);
+                displayAlert('Erro de comunicação. A visibilidade não foi atualizada.', 'danger');
+                // Reverte o estado do switch
+                this.checked = !this.checked;
+                statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+            });
         });
     });
 
-    // Remove completamente qualquer evento de clique das linhas dos temas
-    document.querySelectorAll('.tema-header').forEach(header => {
-        header.style.cursor = 'default';
-        
-        // Remove qualquer event listener existente
-        const newHeader = header.cloneNode(true);
-        header.parentNode.replaceChild(newHeader, header);
-    });
-}
-
-// Prevenção agressiva de propagação
-function preventAllPropagation() {
-    // Switches
-    document.querySelectorAll('.planejado-switch').forEach(el => {
-        el.addEventListener('click', function(e) {
-            e.stopImmediatePropagation();
-        });
-    });
-    
-    // Labels dos switches
-    document.querySelectorAll('.form-check-label').forEach(el => {
-        el.addEventListener('click', function(e) {
-            e.stopImmediatePropagation();
-        });
-    });
-    
-    // Links
-    document.querySelectorAll('.link-tema').forEach(el => {
-        el.addEventListener('click', function(e) {
-            e.stopImmediatePropagation();
-        });
-    });
-    
-    // Containers dos switches
-    document.querySelectorAll('.no-click-propagation').forEach(el => {
-        el.addEventListener('click', function(e) {
-            e.stopImmediatePropagation();
-        });
-    });
-}
-
-// Inicialização quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', function() {
-    // Fechar todas as subpastas inicialmente
-    document.querySelectorAll('.subpastas-container').forEach(container => {
-        container.style.display = 'none';
-    });
-
-    // Configurar os toggles
-    setupToggles();
-    preventAllPropagation();
-    
-    // ... o resto do seu código (filtro, AJAX, etc.) permanece igual
-});
-    
-    // Lógica do Controle de Presença
+    // Lógica do Controle de Presença (se necessário)
     document.querySelectorAll('.presenca-switch').forEach(function(switchElement) {
         switchElement.addEventListener('change', function() {
             const aulaId = this.dataset.aulaId;
@@ -806,7 +754,7 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('aluno_id', alunoId);
             formData.append('presente', novoStatus);
             
-            const estadoAnterior = novoStatus === 1 ? 0 : 1;
+            const estadoAnterior = this.checked ? 0 : 1;
 
             this.disabled = true;
             statusLabel.textContent = '...';
@@ -865,7 +813,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    aplicarFiltro();
+    // Inicializar
     atualizarContagemPlanejados();
 });
 </script>
