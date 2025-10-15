@@ -187,12 +187,13 @@ foreach ($aulas_por_dia as $dia => $aulas) {
             <h5 class="mb-0 fw-bold">Minhas Aulas</h5>
         </header>
 
-        <!-- 
+       
+                <!-- 
             =================================================
-            2. Sidebar Offcanvas (Menu para Mobile)
+            2. Sidebar Offcanvas (Menu para Mobile) - AGORA VINDO DO TOPO
             =================================================
         -->
-        <div class="offcanvas offcanvas-start bg-primary text-white" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+        <div class="offcanvas offcanvas-top text-white mobile-offcanvas" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel" style="background-color: var(--cor-primaria); height: 50vh;">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title fw-bold" id="sidebarOffcanvasLabel"><?php echo $aluno_nome; ?></h5>
                 <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -211,6 +212,8 @@ foreach ($aulas_por_dia as $dia => $aulas) {
                 </div>
             </div>
         </div>
+
+
 
         <div class="row g-0">
             <!-- 
@@ -265,7 +268,7 @@ foreach ($aulas_por_dia as $dia => $aulas) {
                                     onclick="window.location.href='<?= $url_redirecionamento ?>';">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="text-truncate">
-                                            <strong><?= $aula['hora'] ?></strong>
+                                            <?= $aula['hora'] ?>
                                             <span class="d-block text-white"><?= htmlspecialchars($aula['turma']) ?></span>
                                             <small class="text-light-subtle"><?= htmlspecialchars($aula['topico']) ?></small>
                                         </div>
@@ -329,8 +332,8 @@ foreach ($aulas_por_dia as $dia => $aulas) {
                                                     onclick="window.location.href='<?= $url_redirecionamento ?>';">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div class="text-truncate">
-                                                            <strong><?= $aula['hora'] ?></strong>
-                                                            <span class="d-block text-white"><?= htmlspecialchars($aula['turma']) ?></span>
+                                                            <?= $aula['hora'] ?>
+                                                            
                                                             <small class="text-light-subtle"><?= htmlspecialchars($aula['topico']) ?></small>
                                                         </div>
                                                         <i class="fas fa-chevron-right text-white opacity-50 ms-2"></i>
@@ -388,9 +391,9 @@ foreach ($aulas_por_dia as $dia => $aulas) {
                                             title="Clique para ver detalhes da Aula: <?= htmlspecialchars($aula['topico']) ?>" 
                                             style="background-color: <?= $cor_fundo_aula ?>;"
                                             onclick="window.location.href='<?= $url_redirecionamento ?>';">
-                                            <strong><?= $aula['hora'] ?></strong>
-                                            <span><?= htmlspecialchars($texto_exibido) ?></span>
-                                            <small><?= htmlspecialchars($aula['topico']) ?></small>
+                                            <?= $aula['hora'] ?>
+                                            
+                                            <?= htmlspecialchars($aula['topico']) ?>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
