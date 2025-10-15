@@ -101,8 +101,8 @@
                         <img src="professora.jpg" alt="Professora Risenglish">
                         <div class="image-overlay">
                             <div class="experience-badge">
-                                <span>X+ anos</span>
-                                <small>de experiência</small>
+                                <span>+ de 500 Alunos</span>
+                                
                             </div>
                         </div>
                     </div>
