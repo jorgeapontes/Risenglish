@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 require_once '../includes/conexao.php';
@@ -207,9 +208,6 @@ foreach ($temas as $tema) {
         .subpastas-container {
             display: none;
         }
-        .subpastas-container.show {
-            display: block;
-        }
         .badge-subpasta {
             background-color: #6c757d;
         }
@@ -246,12 +244,17 @@ foreach ($temas as $tema) {
             color: white;
             transform: none;
         }
+        .no-click-propagation {
+            pointer-events: none;
+        }
+        .no-click-propagation * {
+            pointer-events: auto;
+        }
     </style>
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar -->
             <div class="col-md-2 d-flex flex-column sidebar p-3">
                 <div class="mb-4 text-center">
                     <h5 class="mt-4">Prof. <?= htmlspecialchars($professor_nome) ?></h5>
@@ -267,7 +270,6 @@ foreach ($temas as $tema) {
                 </div>
             </div>
 
-            <!-- Conteúdo principal -->
             <div class="col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h1 style="color: #081d40;">Detalhes da Aula</h1>
@@ -278,7 +280,6 @@ foreach ($temas as $tema) {
                 
                 <div id="ajax-message-container"></div>
                 
-                <!-- DETALHES DA AULA -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <div class="row">
@@ -297,7 +298,6 @@ foreach ($temas as $tema) {
                     </div>
                 </div>
 
-                <!-- CONTROLE DE PRESENÇA -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header">
                         <span>Controle de Presença</span>
@@ -328,7 +328,6 @@ foreach ($temas as $tema) {
                         <?php if (empty($alunos)): ?>
                             <p class="text-center text-muted">Não há alunos matriculados nesta turma.</p>
                         <?php else: ?>
-                            <!-- CABEÇALHOS -->
                             <div class="row mb-3 align-items-center border-bottom pb-2 text-muted small">
                                 <div class="col-1 text-center"><strong>Presente?</strong></div>
                                 <div class="col-8"><strong>Aluno</strong></div>
@@ -348,7 +347,6 @@ foreach ($temas as $tema) {
                                         data-aluno-id="<?= $aluno['aluno_id'] ?>" 
                                         data-presente="<?= $aluno['presente'] ?>">
                                         
-                                        <!-- CHECKBOX PRESENÇA -->
                                         <div class="col-1 text-center">
                                             <div class="form-check form-switch">
                                                 <input class="form-check-input presenca-switch" 
@@ -364,12 +362,10 @@ foreach ($temas as $tema) {
                                             </div>
                                         </div>
                                         
-                                        <!-- NOME DO ALUNO -->
                                         <div class="col-8">
                                             <strong><?= htmlspecialchars($aluno['aluno_nome']) ?></strong>
                                         </div>
                                         
-                                        <!-- STATUS -->
                                         <div class="col-3 text-center">
                                             <span class="badge <?= $status_class ?>"><?= $status_text ?></span>
                                         </div>
@@ -377,7 +373,6 @@ foreach ($temas as $tema) {
                                 <?php endforeach; ?>
                             </div>
                             
-                            <!-- RESUMO DE PRESENÇA -->
                             <?php
                             $total_alunos = count($alunos);
                             $presentes = array_filter($alunos, function($aluno) {
@@ -407,12 +402,10 @@ foreach ($temas as $tema) {
                     </div>
                 </div>
 
-                <!-- CONTEÚDO DA AULA (TEMAS E SUBPASTAS) -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span>Conteúdo da Aula - Controle de Visibilidade</span>
                         
-                        <!-- FILTRO -->
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" role="switch" id="filtroPlanejadoSwitch">
                             <label class="form-check-label text-white" for="filtroPlanejadoSwitch" id="filtroPlanejadoLabel">
@@ -426,7 +419,6 @@ foreach ($temas as $tema) {
                             <p class="text-center text-muted">Não há temas cadastrados.</p>
                         <?php else: ?>
                             
-                            <!-- CABEÇALHOS -->
                             <div class="row mb-3 align-items-center border-bottom pb-2 text-muted small">
                                 <div class="col-1 text-center"><strong>Visível?</strong></div>
                                 <div class="col-5"><strong>Item</strong></div>
@@ -443,14 +435,12 @@ foreach ($temas as $tema) {
                                         $total_subpastas = count($subpastas_por_tema[$tema['tema_id']] ?? []);
                                     ?>
                                     
-                                    <!-- TEMA PRINCIPAL -->
                                     <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>" 
                                         data-conteudo-id="<?= $tema['tema_id'] ?>" 
                                         data-planejado="<?= $tema['planejado'] ?>"
                                         data-tipo="tema">
                                         
-                                        <!-- CHECKBOX VISIBILIDADE -->
-                                        <div class="col-1 text-center">
+                                        <div class="col-1 text-center no-click-propagation">
                                             <div class="form-check form-switch">
                                                 <input class="form-check-input planejado-switch" 
                                                     type="checkbox" 
@@ -466,13 +456,12 @@ foreach ($temas as $tema) {
                                             </div>
                                         </div>
                                         
-                                        <!-- TÍTULO E DESCRIÇÃO -->
                                         <div class="col-5">
                                             <div class="d-flex align-items-center">
                                                 <?php if ($tem_subpastas): ?>
                                                     <i class="fas fa-chevron-right subpasta-toggle me-2" data-tema-id="<?= $tema['tema_id'] ?>" style="cursor: pointer;"></i>
                                                 <?php else: ?>
-                                                    <i class="fas fa-folder me-2 text-warning"></i>
+                                                    <i class="fas fa-folder me-2 text-primary"></i>
                                                 <?php endif; ?>
                                                 <a href="gerenciar_arquivos_tema.php?tema_id=<?= $tema['tema_id'] ?>" class="link-tema">
                                                     <strong><?= htmlspecialchars($tema['titulo']) ?></strong>
@@ -485,14 +474,12 @@ foreach ($temas as $tema) {
                                             <?php endif; ?>
                                         </div>
 
-                                        <!-- AUTOR -->
                                         <div class="col-4">
-                                            <span class="badge bg-info text-dark">
+                                            <span class="badge bg-primary ms-2" title="Criado por">
                                                 <i class="fas fa-user me-1"></i> <?= htmlspecialchars($tema['autor_tema']) ?>
                                             </span>
                                         </div>
                                         
-                                        <!-- CONTAGEM DE SUBPASTAS -->
                                         <div class="col-2 text-center">
                                             <span class="badge bg-secondary arquivo-count">
                                                 <?= $total_subpastas ?> subpasta(s)
@@ -500,7 +487,6 @@ foreach ($temas as $tema) {
                                         </div>
                                     </div>
 
-                                    <!-- SUBPASTAS -->
                                     <?php if ($tem_subpastas): ?>
                                         <div class="subpastas-container" id="subpastas-<?= $tema['tema_id'] ?>">
                                             <?php foreach ($subpastas_por_tema[$tema['tema_id']] as $subpasta): ?>
@@ -513,8 +499,7 @@ foreach ($temas as $tema) {
                                                     data-planejado="<?= $subpasta['planejado'] ?>"
                                                     data-tipo="subpasta">
                                                     
-                                                    <!-- CHECKBOX VISIBILIDADE SUBPASTA -->
-                                                    <div class="col-1 text-center">
+                                                    <div class="col-1 text-center no-click-propagation">
                                                         <div class="form-check form-switch">
                                                             <input class="form-check-input planejado-switch" 
                                                                 type="checkbox" 
@@ -530,7 +515,6 @@ foreach ($temas as $tema) {
                                                         </div>
                                                     </div>
                                                     
-                                                    <!-- TÍTULO DA SUBPASTA -->
                                                     <div class="col-5">
                                                         <div class="d-flex align-items-center">
                                                             <i class="fas fa-folder me-2 text-primary" style="margin-left: 20px;"></i>
@@ -543,14 +527,12 @@ foreach ($temas as $tema) {
                                                         <?php endif; ?>
                                                     </div>
 
-                                                    <!-- TIPO -->
                                                     <div class="col-4">
                                                         <span class="badge bg-light text-dark">
                                                             <i class="fas fa-folder-open me-1"></i> Subpasta
                                                         </span>
                                                     </div>
                                                     
-                                                    <!-- CONTAGEM DE ARQUIVOS -->
                                                     <div class="col-2 text-center">
                                                         <span class="badge badge-subpasta arquivo-count">
                                                             <?= $subpasta['total_arquivos'] ?> arquivo(s)
@@ -571,226 +553,325 @@ foreach ($temas as $tema) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-    function displayAlert(message, type) {
-        const container = document.getElementById('ajax-message-container');
-        const alertHtml = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        `;
-        container.innerHTML = alertHtml;
-        
-        setTimeout(() => {
-            const alertElement = container.querySelector('.alert');
-            if (alertElement) {
-                const bsAlert = bootstrap.Alert.getOrCreateInstance(alertElement);
-                bsAlert.close();
-            }
-        }, 5000);
+<script>
+function displayAlert(message, type) {
+    const container = document.getElementById('ajax-message-container');
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    container.innerHTML = alertHtml;
+    
+    setTimeout(() => {
+        const alertElement = container.querySelector('.alert');
+        if (alertElement) {
+            const bsAlert = bootstrap.Alert.getOrCreateInstance(alertElement);
+            bsAlert.close();
+        }
+    }, 5000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const listaConteudosContainer = document.getElementById('lista-conteudos-container');
+    const filtroSwitch = document.getElementById('filtroPlanejadoSwitch');
+    const filtroLabel = document.getElementById('filtroPlanejadoLabel');
+
+    // INICIALIZAÇÃO: Fechar todas as subpastas
+    document.querySelectorAll('.subpastas-container').forEach(container => {
+        container.style.display = 'none';
+    });
+
+    document.querySelectorAll('.subpasta-toggle').forEach(toggle => {
+        toggle.classList.remove('rotated');
+    });
+
+    // Atualizar contagem de itens visíveis
+    function atualizarContagemPlanejados() {
+        const count = listaConteudosContainer.querySelectorAll('.conteudo-item[data-planejado="1"]').length;
+        filtroLabel.innerHTML = `Mostrar Apenas Itens Visíveis (${count})`;
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const switches = document.querySelectorAll('.planejado-switch');
-        const filtroSwitch = document.getElementById('filtroPlanejadoSwitch');
-        const listaConteudosContainer = document.getElementById('lista-conteudos-container');
-        const filtroLabel = document.getElementById('filtroPlanejadoLabel');
-
-        // Toggle das subpastas
-        document.querySelectorAll('.subpasta-toggle').forEach(toggle => {
-            toggle.addEventListener('click', function() {
-                const temaId = this.getAttribute('data-tema-id');
-                const subpastasContainer = document.getElementById(`subpastas-${temaId}`);
-                this.classList.toggle('rotated');
-                subpastasContainer.classList.toggle('show');
-            });
+    // Lógica do Filtro
+    function aplicarFiltro() {
+        const mostrarApenasPlanejados = filtroSwitch.checked;
+        
+        listaConteudosContainer.querySelectorAll('.conteudo-item').forEach(item => {
+            const isPlanejado = item.dataset.planejado === '1';
+            
+            if (mostrarApenasPlanejados && !isPlanejado) {
+                item.style.setProperty('display', 'none', 'important');
+            } else {
+                item.style.display = 'flex';
+            }
         });
 
-        // Atualizar contagem de itens visíveis
-        function atualizarContagemPlanejados() {
-            const count = listaConteudosContainer.querySelectorAll('.conteudo-item[data-planejado="1"]').length;
-            filtroLabel.innerHTML = `Mostrar Apenas Itens Visíveis (${count})`;
-        }
+        document.querySelectorAll('.subpastas-container').forEach(container => {
+            const temaId = container.id.replace('subpastas-', '');
+            const toggle = document.querySelector(`.subpasta-toggle[data-tema-id="${temaId}"]`);
+            const temaPai = document.querySelector(`.conteudo-item[data-conteudo-id="${temaId}"]`);
 
-        // Lógica do Filtro
-        function aplicarFiltro() {
-            const mostrarApenasPlanejados = filtroSwitch.checked;
-            
-            listaConteudosContainer.querySelectorAll('.conteudo-item').forEach(item => {
-                const isPlanejado = item.dataset.planejado === '1';
-                
-                if (mostrarApenasPlanejados && !isPlanejado) {
-                    item.style.setProperty('display', 'none', 'important');
-                } else {
-                    item.style.display = 'flex';
-                }
-            });
+            if (temaPai && temaPai.style.display === 'none') {
+                container.style.display = 'none';
+                if (toggle) toggle.classList.remove('rotated');
+                return;
+            }
 
-            // Mostrar/ocultar containers de subpastas baseado no filtro
-            document.querySelectorAll('.subpastas-container').forEach(container => {
-                const hasVisibleItems = container.querySelector('.conteudo-item[data-planejado="1"]');
-                if (mostrarApenasPlanejados && !hasVisibleItems) {
-                    container.style.display = 'none';
-                } else {
+            const hasVisibleItems = container.querySelector('.conteudo-item[data-planejado="1"]') !== null;
+
+            if (mostrarApenasPlanejados) {
+                if (hasVisibleItems) {
                     container.style.display = 'block';
+                    if (toggle) toggle.classList.add('rotated');
+                } else {
+                    container.style.display = 'none';
+                    if (toggle) toggle.classList.remove('rotated');
                 }
-            });
+            } else {
+                container.style.display = 'none';
+                if (toggle) toggle.classList.remove('rotated');
+            }
+        });
+    }
+
+    filtroSwitch.addEventListener('change', aplicarFiltro);
+
+    // LÓGICA DO TOGGLE (SETA) - CORRIGIDA
+    document.addEventListener('click', function(e) {
+        // Só processa cliques diretos na seta
+        if (e.target.classList.contains('subpasta-toggle')) {
+            const toggle = e.target;
+            const temaId = toggle.getAttribute('data-tema-id');
+            const subpastasContainer = document.getElementById(`subpastas-${temaId}`);
+
+            if (subpastasContainer) {
+                if (subpastasContainer.style.display === 'none' || subpastasContainer.style.display === '') {
+                    subpastasContainer.style.display = 'block';
+                    toggle.classList.add('rotated');
+                } else {
+                    subpastasContainer.style.display = 'none';
+                    toggle.classList.remove('rotated');
+                }
+            }
+            
+            // Impede qualquer outra propagação
+            e.stopPropagation();
+            e.preventDefault();
         }
+    });
 
-        filtroSwitch.addEventListener('change', aplicarFiltro);
-
-        // Lógica do Toggle (Checkbox de Visibilidade)
-        switches.forEach(function(switchElement) {
-            switchElement.addEventListener('change', function() {
-                const aulaId = this.dataset.aulaId;
-                const conteudoId = this.dataset.conteudoId;
-                const tipo = this.dataset.tipo;
-                const novoStatus = this.checked ? 1 : 0;
-                
-                const statusLabel = this.closest('.form-switch').querySelector('.status-label');
-                const conteudoItem = this.closest('.conteudo-item');
-                
-                const formData = new FormData();
-                formData.append('aula_id', aulaId);
-                formData.append('conteudo_id', conteudoId);
-                formData.append('status', novoStatus);
-                
-                const estadoAnterior = novoStatus === 1 ? 0 : 1;
-
-                this.disabled = true;
-                statusLabel.textContent = '...';
-
-                fetch('ajax_toggle_conteudo.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    this.disabled = false;
-
-                    if (data.success) {
-                        displayAlert(data.message, 'success');
-                        
-                        conteudoItem.dataset.planejado = String(novoStatus);
-                        
-                        if (novoStatus === 1) {
-                            statusLabel.textContent = 'Sim';
-                            conteudoItem.classList.add('planejado');
-                            conteudoItem.classList.remove('nao-planejado');
-                        } else {
-                            statusLabel.textContent = 'Não';
-                            conteudoItem.classList.remove('planejado');
-                            conteudoItem.classList.add('nao-planejado');
-                        }
-
-                        aplicarFiltro();
-                        atualizarContagemPlanejados();
-
-                    } else {
-                        console.error('Erro:', data.message);
-                        displayAlert('Erro ao atualizar status: ' + data.message, 'danger');
-                        this.checked = !this.checked;
-                        statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
-                    }
-                })
-                .catch(error => {
-                    this.disabled = false;
-                    console.error('Erro de conexão:', error);
-                    displayAlert('Erro de comunicação. O item não foi atualizado.', 'danger');
-                    this.checked = !this.checked;
-                    statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
-                });
-            });
+    // Lógica do Toggle (Checkbox de Visibilidade) - CORRIGIDA
+    document.querySelectorAll('.planejado-switch').forEach(function(switchElement) {
+        // Adiciona prevenção de propagação diretamente no evento de change
+        switchElement.addEventListener('click', function(e) {
+            e.stopPropagation();
         });
         
-        aplicarFiltro();
-        atualizarContagemPlanejados();
-    });
-
-        // Lógica do Controle de Presença
-    document.addEventListener('DOMContentLoaded', function() {
-        const presencaSwitches = document.querySelectorAll('.presenca-switch');
-
-        presencaSwitches.forEach(function(switchElement) {
-            switchElement.addEventListener('change', function() {
-                const aulaId = this.dataset.aulaId;
-                const alunoId = this.dataset.alunoId;
-                const novoStatus = this.checked ? 1 : 0;
-                
-                const statusLabel = this.closest('.form-switch').querySelector('.form-check-label');
-                const presencaItem = this.closest('.presenca-item');
-                const statusBadge = presencaItem.querySelector('.badge');
-                
-                const formData = new FormData();
-                formData.append('aula_id', aulaId);
-                formData.append('aluno_id', alunoId);
-                formData.append('presente', novoStatus);
-                
-                const estadoAnterior = novoStatus === 1 ? 0 : 1;
-
-                this.disabled = true;
-                statusLabel.textContent = '...';
-
-                fetch('ajax_controle_presenca.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    this.disabled = false;
-
-                    if (data.success) {
-                        displayAlert(data.message, 'success');
-                        
-                        presencaItem.dataset.presente = String(novoStatus);
-                        
-                        if (novoStatus === 1) {
-                            statusLabel.textContent = 'Sim';
-                            presencaItem.classList.add('presente');
-                            presencaItem.classList.remove('ausente');
-                            statusBadge.textContent = 'Presente';
-                            statusBadge.classList.remove('bg-danger');
-                            statusBadge.classList.add('bg-success');
-                        } else {
-                            statusLabel.textContent = 'Não';
-                            presencaItem.classList.remove('presente');
-                            presencaItem.classList.add('ausente');
-                            statusBadge.textContent = 'Faltou';
-                            statusBadge.classList.remove('bg-success');
-                            statusBadge.classList.add('bg-danger');
+        switchElement.addEventListener('change', function(e) {
+            e.stopPropagation();
+            
+            const aulaId = this.dataset.aulaId;
+            const conteudoId = this.dataset.conteudoId;
+            const tipo = this.dataset.tipo;
+            const novoStatus = this.checked ? 1 : 0;
+            
+            const statusLabel = this.closest('.form-switch').querySelector('.status-label');
+            const conteudoItem = this.closest('.conteudo-item');
+            
+            // REGRA 1: Se desmarcando um TEMA, desmarcar todas as subpastas
+            if (tipo === 'tema' && novoStatus === 0) {
+                const temaId = conteudoId;
+                const subpastasContainer = document.getElementById(`subpastas-${temaId}`);
+                if (subpastasContainer) {
+                    const subpastasSwitches = subpastasContainer.querySelectorAll('.planejado-switch');
+                    subpastasSwitches.forEach(subpastaSwitch => {
+                        if (subpastaSwitch.checked) {
+                            subpastaSwitch.checked = false;
+                            const subpastaItem = subpastaSwitch.closest('.conteudo-item');
+                            subpastaItem.dataset.planejado = '0';
+                            subpastaItem.classList.remove('planejado');
+                            subpastaItem.classList.add('nao-planejado');
+                            
+                            const subpastaStatusLabel = subpastaSwitch.closest('.form-switch').querySelector('.status-label');
+                            subpastaStatusLabel.textContent = 'Não';
                         }
+                    });
+                }
+            }
+            
+            // REGRA 2: Se marcando uma SUBPASTA, garantir que o tema pai está marcado
+            if (tipo === 'subpasta' && novoStatus === 1) {
+                const temaPaiItem = conteudoItem.closest('.subpastas-container').previousElementSibling;
+                const temaPaiSwitch = temaPaiItem.querySelector('.planejado-switch');
+                
+                if (!temaPaiSwitch.checked) {
+                    temaPaiSwitch.checked = true;
+                    temaPaiItem.dataset.planejado = '1';
+                    temaPaiItem.classList.add('planejado');
+                    temaPaiItem.classList.remove('nao-planejado');
+                    
+                    const temaPaiStatusLabel = temaPaiSwitch.closest('.form-switch').querySelector('.status-label');
+                    temaPaiStatusLabel.textContent = 'Sim';
+                }
+            }
 
-                        // Atualizar contadores
-                        location.reload();
+            const formData = new FormData();
+            formData.append('aula_id', aulaId);
+            formData.append('conteudo_id', conteudoId);
+            formData.append('status', novoStatus);
+            
+            const estadoAnterior = novoStatus === 1 ? 0 : 1;
 
+            this.disabled = true;
+            statusLabel.textContent = '...';
+
+            fetch('ajax_toggle_conteudo.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                this.disabled = false;
+
+                if (data.success) {
+                    displayAlert(data.message, 'success');
+                    
+                    conteudoItem.dataset.planejado = String(novoStatus);
+                    
+                    if (novoStatus === 1) {
+                        statusLabel.textContent = 'Sim';
+                        conteudoItem.classList.add('planejado');
+                        conteudoItem.classList.remove('nao-planejado');
                     } else {
-                        console.error('Erro:', data.message);
-                        displayAlert('Erro ao atualizar presença: ' + data.message, 'danger');
-                        this.checked = !this.checked;
-                        statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+                        statusLabel.textContent = 'Não';
+                        conteudoItem.classList.remove('planejado');
+                        conteudoItem.classList.add('nao-planejado');
                     }
-                })
-                .catch(error => {
-                    this.disabled = false;
-                    console.error('Erro de conexão:', error);
-                    displayAlert('Erro de comunicação. A presença não foi atualizada.', 'danger');
+
+                    aplicarFiltro();
+                    atualizarContagemPlanejados();
+
+                } else {
+                    console.error('Erro:', data.message);
+                    displayAlert('Erro ao atualizar status: ' + data.message, 'danger');
                     this.checked = !this.checked;
                     statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
-                });
+                    
+                    // Reverter as mudanças visuais se houver erro
+                    if (tipo === 'tema' && novoStatus === 0) {
+                        // Reverter desmarcação das subpastas em caso de erro
+                        const temaId = conteudoId;
+                        const subpastasContainer = document.getElementById(`subpastas-${temaId}`);
+                        if (subpastasContainer) {
+                            const subpastasSwitches = subpastasContainer.querySelectorAll('.planejado-switch');
+                            subpastasSwitches.forEach(subpastaSwitch => {
+                                const subpastaItem = subpastaSwitch.closest('.conteudo-item');
+                                if (subpastaItem.dataset.planejado === '1') {
+                                    subpastaSwitch.checked = true;
+                                    subpastaItem.classList.add('planejado');
+                                    subpastaItem.classList.remove('nao-planejado');
+                                    const subpastaStatusLabel = subpastaSwitch.closest('.form-switch').querySelector('.status-label');
+                                    subpastaStatusLabel.textContent = 'Sim';
+                                }
+                            });
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                this.disabled = false;
+                console.error('Erro de conexão:', error);
+                displayAlert('Erro de comunicação. O item não foi atualizado.', 'danger');
+                this.checked = !this.checked;
+                statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
             });
         });
     });
-    </script>
+    
+    // Lógica do Controle de Presença
+    document.querySelectorAll('.presenca-switch').forEach(function(switchElement) {
+        switchElement.addEventListener('change', function() {
+            const aulaId = this.dataset.aulaId;
+            const alunoId = this.dataset.alunoId;
+            const novoStatus = this.checked ? 1 : 0;
+            
+            const statusLabel = this.closest('.form-switch').querySelector('.form-check-label');
+            const presencaItem = this.closest('.presenca-item');
+            const statusBadge = presencaItem.querySelector('.badge');
+            
+            const formData = new FormData();
+            formData.append('aula_id', aulaId);
+            formData.append('aluno_id', alunoId);
+            formData.append('presente', novoStatus);
+            
+            const estadoAnterior = novoStatus === 1 ? 0 : 1;
+
+            this.disabled = true;
+            statusLabel.textContent = '...';
+
+            fetch('ajax_controle_presenca.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                this.disabled = false;
+
+                if (data.success) {
+                    displayAlert(data.message, 'success');
+                    
+                    presencaItem.dataset.presente = String(novoStatus);
+                    
+                    if (novoStatus === 1) {
+                        statusLabel.textContent = 'Sim';
+                        presencaItem.classList.add('presente');
+                        presencaItem.classList.remove('ausente');
+                        statusBadge.textContent = 'Presente';
+                        statusBadge.classList.remove('bg-danger');
+                        statusBadge.classList.add('bg-success');
+                    } else {
+                        statusLabel.textContent = 'Não';
+                        presencaItem.classList.remove('presente');
+                        presencaItem.classList.add('ausente');
+                        statusBadge.textContent = 'Faltou';
+                        statusBadge.classList.remove('bg-success');
+                        statusBadge.classList.add('bg-danger');
+                    }
+
+                    // Atualizar contadores
+                    location.reload();
+
+                } else {
+                    console.error('Erro:', data.message);
+                    displayAlert('Erro ao atualizar presença: ' + data.message, 'danger');
+                    this.checked = !this.checked;
+                    statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+                }
+            })
+            .catch(error => {
+                this.disabled = false;
+                console.error('Erro de conexão:', error);
+                displayAlert('Erro de comunicação. A presença não foi atualizada.', 'danger');
+                this.checked = !this.checked;
+                statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+            });
+        });
+    });
+
+    aplicarFiltro();
+    atualizarContagemPlanejados();
+});
+</script>
 </body>
 </html>

@@ -55,68 +55,121 @@ if (!$aula) {
     exit;
 }
 
-// Consulta para obter os conteúdos principais da aula (sem parent_id)
-$sql_conteudos = "
-    SELECT 
+// BUSCAR APENAS CONTEÚDOS EXPLICITAMENTE MARCADOS COMO VISÍVEIS PARA ESTA AULA
+$sql_conteudos_visiveis = "
+    SELECT DISTINCT
         c.id,
         c.titulo,
         c.descricao,
         c.tipo_arquivo,
         c.caminho_arquivo,
-        ac.planejado
+        c.parent_id,
+        c.eh_subpasta,
+        1 as planejado,
+        u.nome AS autor_nome
     FROM 
         aulas_conteudos ac
     JOIN 
         conteudos c ON ac.conteudo_id = c.id
+    LEFT JOIN
+        usuarios u ON c.professor_id = u.id
     WHERE 
         ac.aula_id = :aula_id
-        AND (c.parent_id IS NULL OR c.parent_id = 0)
+        AND ac.planejado = 1
     ORDER BY 
-        ac.planejado DESC, c.titulo ASC
+        c.parent_id IS NULL DESC, c.titulo ASC
 ";
-$stmt_conteudos = $pdo->prepare($sql_conteudos);
+$stmt_conteudos = $pdo->prepare($sql_conteudos_visiveis);
 $stmt_conteudos->execute([':aula_id' => $aula_id]);
-$conteudos = $stmt_conteudos->fetchAll(PDO::FETCH_ASSOC);
+$conteudos_visiveis = $stmt_conteudos->fetchAll(PDO::FETCH_ASSOC);
 
-// Função recursiva para obter todos os conteúdos filhos
-function getConteudosFilhos($pdo, $parent_id) {
-    $sql_filhos = "
+// Função para buscar apenas os arquivos de subpastas que estão visíveis
+function buscarArquivosSubpastaVisivel($pdo, $subpasta_id, $aula_id) {
+    $sql = "
         SELECT 
-            id,
-            titulo,
-            descricao,
-            tipo_arquivo,
-            caminho_arquivo,
-            1 as planejado
+            c.id,
+            c.titulo,
+            c.descricao,
+            c.tipo_arquivo,
+            c.caminho_arquivo,
+            c.parent_id,
+            c.eh_subpasta,
+            1 as planejado,
+            u.nome AS autor_nome
         FROM 
-            conteudos 
+            conteudos c
+        LEFT JOIN
+            usuarios u ON c.professor_id = u.id
         WHERE 
-            parent_id = :parent_id
+            c.parent_id = :subpasta_id
+            AND c.eh_subpasta = 0
         ORDER BY 
-            titulo ASC
+            c.titulo ASC
     ";
-    $stmt_filhos = $pdo->prepare($sql_filhos);
-    $stmt_filhos->execute([':parent_id' => $parent_id]);
-    $filhos = $stmt_filhos->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Para cada filho, buscar seus próprios filhos recursivamente
-    foreach ($filhos as &$filho) {
-        $subfilhos = getConteudosFilhos($pdo, $filho['id']);
-        if (!empty($subfilhos)) {
-            $filho['filhos'] = $subfilhos;
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':subpasta_id' => $subpasta_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Construir estrutura apenas com conteúdos explicitamente visíveis
+$estrutura_conteudos = [];
+
+foreach ($conteudos_visiveis as $conteudo) {
+    if ($conteudo['parent_id'] === null) {
+        // É um tema principal visível
+        $tema = $conteudo;
+        if ($conteudo['eh_subpasta'] == 1 || empty($conteudo['tipo_arquivo']) || $conteudo['tipo_arquivo'] === 'TEMA') {
+            // É uma pasta - buscar apenas subpastas que também estão visíveis
+            $tema['filhos'] = [];
+            
+            // Buscar subpastas visíveis dentro deste tema
+            foreach ($conteudos_visiveis as $possivel_filho) {
+                if ($possivel_filho['parent_id'] == $tema['id'] && $possivel_filho['eh_subpasta'] == 1) {
+                    $subpasta = $possivel_filho;
+                    // Buscar arquivos desta subpasta visível
+                    $subpasta['filhos'] = buscarArquivosSubpastaVisivel($pdo, $subpasta['id'], $aula_id);
+                    $tema['filhos'][] = $subpasta;
+                }
+            }
+            
+            // Se não há subpastas visíveis, buscar arquivos diretamente no tema
+            if (empty($tema['filhos'])) {
+                $tema['filhos'] = buscarArquivosSubpastaVisivel($pdo, $tema['id'], $aula_id);
+            }
+        }
+        $estrutura_conteudos[] = $tema;
+    }
+}
+
+// Também incluir subpastas que são visíveis mas não têm parent (caso raro)
+foreach ($conteudos_visiveis as $conteudo) {
+    if ($conteudo['parent_id'] !== null) {
+        $ja_incluido = false;
+        foreach ($estrutura_conteudos as $tema) {
+            if (isset($tema['filhos'])) {
+                foreach ($tema['filhos'] as $filho) {
+                    if ($filho['id'] == $conteudo['id']) {
+                        $ja_incluido = true;
+                        break 2;
+                    }
+                }
+            }
+        }
+        
+        if (!$ja_incluido && $conteudo['eh_subpasta'] == 1) {
+            // É uma subpasta visível sem tema pai visível (adicionar como item principal)
+            $subpasta = $conteudo;
+            $subpasta['filhos'] = buscarArquivosSubpastaVisivel($pdo, $subpasta['id'], $aula_id);
+            $estrutura_conteudos[] = $subpasta;
+        } elseif (!$ja_incluido && $conteudo['eh_subpasta'] == 0) {
+            // É um arquivo solto visível (adicionar como item principal)
+            $estrutura_conteudos[] = $conteudo;
         }
     }
-    
-    return $filhos;
 }
 
-// Para cada conteúdo principal, buscar seus filhos
-foreach ($conteudos as &$conteudo) {
-    $filhos = getConteudosFilhos($pdo, $conteudo['id']);
-    if (!empty($filhos)) {
-        $conteudo['filhos'] = $filhos;
-    }
-}
+// Usar a estrutura hierárquica filtrada
+$conteudos = $estrutura_conteudos;
 
 // Verificar se a aula já aconteceu
 $data_aula = new DateTime($aula['data_aula']);
@@ -166,7 +219,7 @@ function get_arquivo_icone($tipo_arquivo, $caminho_arquivo) {
     }
 
     $icone = 'fas fa-file';
-    $cor = 'text-secondary';
+    $cor = 'text-primary';
     
     switch(strtolower($extensao)) {
         case 'pdf':
@@ -233,27 +286,37 @@ function get_arquivo_icone($tipo_arquivo, $caminho_arquivo) {
 // Função recursiva para exibir conteúdos
 function displayConteudo($conteudo, $nivel = 0) {
     $margem = $nivel * 20;
-    $is_video_principal = is_video_file($conteudo['tipo_arquivo'], $conteudo['caminho_arquivo']);
-    $youtube_id_principal = null;
-    if ($is_video_principal && $conteudo['tipo_arquivo'] === 'URL') {
-        $youtube_id_principal = get_youtube_id($conteudo['caminho_arquivo']);
-    }
-    
     $temFilhos = isset($conteudo['filhos']) && count($conteudo['filhos']) > 0;
-    $icone_info = get_arquivo_icone($conteudo['tipo_arquivo'], $conteudo['caminho_arquivo']);
+    $ePasta = $conteudo['eh_subpasta'] == 1 || empty($conteudo['tipo_arquivo']) || $conteudo['tipo_arquivo'] === 'TEMA';
+    
+    // Se não for pasta, é um arquivo
+    if (!$ePasta) {
+        $is_video = is_video_file($conteudo['tipo_arquivo'], $conteudo['caminho_arquivo']);
+        $youtube_id = null;
+        if ($is_video && $conteudo['tipo_arquivo'] === 'URL') {
+            $youtube_id = get_youtube_id($conteudo['caminho_arquivo']);
+        }
+        $icone_info = get_arquivo_icone($conteudo['tipo_arquivo'], $conteudo['caminho_arquivo']);
+    }
     ?>
     <div class="conteudo-item" style="margin-left: <?= $margem ?>px; border-bottom: 1px solid #eee; padding: 15px 0;">
         <div class="d-flex justify-content-between align-items-start mb-2">
             <h6 class="card-title mb-0">
-                <?php if ($temFilhos): ?>
-                    <i class="fas fa-folder text-warning me-1"></i>
+                <?php if ($ePasta): ?>
+                    <i class="fas fa-folder text-primary me-1"></i>
                 <?php else: ?>
                     <i class="<?= $icone_info['icone'] ?> <?= $icone_info['cor'] ?> me-1"></i>
                 <?php endif; ?>
                 <?= htmlspecialchars($conteudo['titulo']) ?>
+                
+                <?php if (isset($conteudo['autor_nome']) && $ePasta): ?>
+                    <small class="text-muted ms-2">
+                        <i class="fas fa-user"></i> <?= htmlspecialchars($conteudo['autor_nome']) ?>
+                    </small>
+                <?php endif; ?>
             </h6>
-            <span class="badge <?= $conteudo['planejado'] ? 'badge-planejado' : 'badge-adicionado' ?>">
-                <?= $conteudo['planejado'] ? 'Planejado' : 'Disponível' ?>
+            <span class="badge bg-success">
+                Disponível
             </span>
         </div>
         
@@ -261,14 +324,14 @@ function displayConteudo($conteudo, $nivel = 0) {
             <p class="card-text text-muted small mb-2"><?= htmlspecialchars($conteudo['descricao']) ?></p>
         <?php endif; ?>
         
-        <!-- Botão principal do conteúdo (apenas se não for pasta e tiver arquivo) -->
-        <?php if (!$temFilhos && !empty($conteudo['caminho_arquivo'])): ?>
+        <!-- Botões para arquivos (não pastas) -->
+        <?php if (!$ePasta && !empty($conteudo['caminho_arquivo'])): ?>
             <?php if ($conteudo['tipo_arquivo'] === 'URL'): ?>
-                <?php if ($is_video_principal && $youtube_id_principal): ?>
+                <?php if ($is_video && $youtube_id): ?>
                     <button class="btn btn-outline-primary btn-sm mt-1" 
                             data-bs-toggle="modal" 
                             data-bs-target="#modalYouTube"
-                            data-video-id="<?= $youtube_id_principal ?>"
+                            data-video-id="<?= $youtube_id ?>"
                             data-video-title="<?= htmlspecialchars($conteudo['titulo']) ?>">
                         <i class="fas fa-play me-1"></i>Assistir Vídeo
                     </button>
@@ -278,20 +341,20 @@ function displayConteudo($conteudo, $nivel = 0) {
                     </a>
                 <?php endif; ?>
             <?php else: ?>
-                <?php if ($is_video_principal): ?>
+                <?php if ($is_video): ?>
                     <a href="../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-1">
                         <i class="fas fa-play me-1"></i>Assistir Vídeo
                     </a>
                 <?php else: ?>
                     <a href="../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-1">
-                        <i class="fas fa-download me-1"></i>Abrir Arquivo
+                        <i class="fas fa-download me-1"></i>Baixar Arquivo
                     </a>
                 <?php endif; ?>
             <?php endif; ?>
         <?php endif; ?>
 
-        <!-- Conteúdos filhos -->
-        <?php if ($temFilhos): ?>
+        <!-- Conteúdos filhos (para pastas) -->
+        <?php if ($ePasta && $temFilhos): ?>
             <div class="mt-3">
                 <div class="toggle-arquivos p-2 border rounded" 
                      data-bs-toggle="collapse" 
@@ -594,12 +657,15 @@ function displayConteudo($conteudo, $nivel = 0) {
                                     <p class="mb-0"><?= htmlspecialchars($aula['nome_professor']) ?></p>
                                     <small class="text-muted"><?= htmlspecialchars($aula['email_professor']) ?></small>
                                 </div>
-                                <?php if (!empty($aula['descricao'])): ?>
-                                <div>
-                                    <strong><i class="fas fa-file-alt me-2 text-primary"></i>Descrição:</strong>
-                                    <p class="mb-0"><?= htmlspecialchars($aula['descricao']) ?></p>
+                                <!-- DESCRIÇÃO DA AULA - ADICIONADA AQUI -->
+                                <div class="mb-3">
+                                    <strong><i class="fas fa-file-alt me-2 text-primary"></i>Descrição da Aula:</strong>
+                                    <?php if (!empty($aula['descricao'])): ?>
+                                        <p class="mb-0 mt-1"><?= htmlspecialchars($aula['descricao']) ?></p>
+                                    <?php else: ?>
+                                        <p class="mb-0 mt-1 text-muted">Nenhuma descrição fornecida.</p>
+                                    <?php endif; ?>
                                 </div>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -656,6 +722,14 @@ function displayConteudo($conteudo, $nivel = 0) {
                     iframe.setAttribute('src', '');
                 });
             }
+
+            // Adicionar evento de clique para os toggles de pasta
+            document.querySelectorAll('.toggle-arquivos').forEach(function(toggle) {
+                toggle.addEventListener('click', function() {
+                    var icon = this.querySelector('.collapse-icon');
+                    icon.classList.toggle('collapsed');
+                });
+            });
         });
     </script>
 </body>

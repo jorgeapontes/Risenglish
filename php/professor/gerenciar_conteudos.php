@@ -359,7 +359,7 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
                                                     <strong><i class="fas fa-folder me-2"></i> <?= htmlspecialchars($tema['titulo']) ?></strong>
                                                     
                                                     <!-- NOVO: Exibe o nome do professor criador -->
-                                                    <span class="badge bg-info text-dark ms-2" title="Criado por">
+                                                    <span class="badge bg-primary ms-2" title="Criado por">
                                                         <i class="fas fa-chalkboard-teacher me-1"></i> <?= htmlspecialchars($tema['nome_professor']) ?>
                                                     </span>
                                                     
