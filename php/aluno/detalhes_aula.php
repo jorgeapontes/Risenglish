@@ -325,23 +325,44 @@ function displayConteudo($conteudo, $nivel = 0) {
     ?>
     <div class="conteudo-item" style="margin-left: <?= $margem ?>px; border-bottom: 1px solid #eee; padding: 15px 0;">
         <div class="d-flex justify-content-between align-items-start mb-2">
-            <h6 class="card-title mb-0">
+            <h6 class="card-title mb-0 flex-grow-1">
                 <?php if ($ePasta): ?>
-                    <i class="fas fa-folder text-primary me-1"></i>
+                    <div class="toggle-pasta" 
+                         data-bs-toggle="collapse" 
+                         data-bs-target="#conteudos-<?= $conteudo['id'] ?>" 
+                         aria-expanded="false">
+                        <div class="toggle-pasta-content">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-folder text-primary me-2"></i>
+                                <?= htmlspecialchars($conteudo['titulo']) ?>
+                                
+                                <?php if (isset($conteudo['autor_nome'])): ?>
+                                    <small class="text-muted ms-2">
+                                        <i class="fas fa-user"></i> <?= htmlspecialchars($conteudo['autor_nome']) ?>
+                                    </small>
+                                <?php endif; ?>
+                            </div>
+                            <?php if ($temFilhos): ?>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-secondary me-2"><?= count($conteudo['filhos']) ?></span>
+                                    <i class="fas fa-chevron-down collapse-icon"></i>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 <?php else: ?>
-                    <i class="<?= $icone_info['icone'] ?> <?= $icone_info['cor'] ?> me-1"></i>
-                <?php endif; ?>
-                <?= htmlspecialchars($conteudo['titulo']) ?>
-                
-                <?php if (isset($conteudo['autor_nome']) && $ePasta): ?>
-                    <small class="text-muted ms-2">
-                        <i class="fas fa-user"></i> <?= htmlspecialchars($conteudo['autor_nome']) ?>
-                    </small>
+                    <div class="d-flex align-items-center">
+                        <i class="<?= $icone_info['icone'] ?> <?= $icone_info['cor'] ?> me-2"></i>
+                        <?= htmlspecialchars($conteudo['titulo']) ?>
+                        
+                        <?php if (isset($conteudo['autor_nome'])): ?>
+                            <small class="text-muted ms-2">
+                                <i class="fas fa-user"></i> <?= htmlspecialchars($conteudo['autor_nome']) ?>
+                            </small>
+                        <?php endif; ?>
+                    </div>
                 <?php endif; ?>
             </h6>
-            <span class="badge bg-success">
-                Disponível
-            </span>
         </div>
         
         <?php if (!empty($conteudo['descricao'])): ?>
@@ -352,7 +373,7 @@ function displayConteudo($conteudo, $nivel = 0) {
         <?php if (!$ePasta && !empty($conteudo['caminho_arquivo'])): ?>
             <?php if ($conteudo['tipo_arquivo'] === 'URL'): ?>
                 <?php if ($is_video && $youtube_id): ?>
-                    <button class="btn btn-outline-primary btn-sm mt-1" 
+                    <button class="btn btn-outline-primary btn-sm mt-2" 
                             data-bs-toggle="modal" 
                             data-bs-target="#modalYouTube"
                             data-video-id="<?= $youtube_id ?>"
@@ -360,18 +381,18 @@ function displayConteudo($conteudo, $nivel = 0) {
                         <i class="fas fa-play me-1"></i>Assistir Vídeo
                     </button>
                 <?php else: ?>
-                    <a href="<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-1">
+                    <a href="<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
                         <i class="fas fa-external-link-alt me-1"></i>Acessar Link
                     </a>
                 <?php endif; ?>
             <?php else: ?>
                 <?php if ($is_video): ?>
-                    <a href="../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-1">
+                    <a href="../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
                         <i class="fas fa-play me-1"></i>Assistir Vídeo
                     </a>
                 <?php else: ?>
-                    <a href="../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-1">
-                        <i class="fas fa-download me-1"></i>Baixar Arquivo
+                    <a href="../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
+                        <i class="fas fa-external-link me-1"></i>Abrir Arquivo
                     </a>
                 <?php endif; ?>
             <?php endif; ?>
@@ -380,20 +401,7 @@ function displayConteudo($conteudo, $nivel = 0) {
         <!-- Conteúdos filhos (para pastas) -->
         <?php if ($ePasta && $temFilhos): ?>
             <div class="mt-3">
-                <div class="toggle-arquivos p-2 border rounded" 
-                     data-bs-toggle="collapse" 
-                     data-bs-target="#conteudos-<?= $conteudo['id'] ?>" 
-                     aria-expanded="false">
-                    <small class="d-flex justify-content-between align-items-center">
-                        <span>
-                            <i class="fas fa-folder-open me-1"></i>
-                            Conteúdos (<?= count($conteudo['filhos']) ?>)
-                        </span>
-                        <i class="fas fa-chevron-down collapse-icon"></i>
-                    </small>
-                </div>
-                
-                <div class="collapse mt-2" id="conteudos-<?= $conteudo['id'] ?>">
+                <div class="collapse" id="conteudos-<?= $conteudo['id'] ?>">
                     <div class="conteudos-filhos border rounded p-3 bg-light">
                         <?php foreach ($conteudo['filhos'] as $filho): ?>
                             <?php displayConteudo($filho, $nivel + 1); ?>
@@ -533,18 +541,16 @@ function displayConteudo($conteudo, $nivel = 0) {
         .conteudo-item {
             transition: background-color 0.2s;
         }
-        .conteudo-item:hover {
-            background-color: #f8f9fa;
-        }
         .conteudo-item:last-child {
             border-bottom: none !important;
         }
-        .toggle-arquivos {
-            cursor: pointer;
+        .toggle-pasta {
             transition: all 0.3s ease;
+            padding: 5px 10px;
+            border-radius: 5px;
         }
-        .toggle-arquivos:hover {
-            background-color: #f8f9fa;
+        .toggle-pasta:hover {
+            background-color: #e8e9ea;
         }
         .collapse-icon {
             transition: transform 0.3s ease;
@@ -568,6 +574,26 @@ function displayConteudo($conteudo, $nivel = 0) {
         .modal-youtube .modal-header {
             border-bottom: none;
             padding-bottom: 25px;
+        }
+
+        .toggle-pasta {
+            transition: all 0.3s ease;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin: 5px 0;
+            width: 100%;
+            cursor: pointer;
+        }
+        .toggle-pasta:hover {
+            background-color: #e8e9ea;
+            border-color: #081d40;
+        }
+        .toggle-pasta-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
         }
         
         .modal-youtube .btn-close {
@@ -747,11 +773,39 @@ function displayConteudo($conteudo, $nivel = 0) {
                 });
             }
 
-            // Adicionar evento de clique para os toggles de pasta
-            document.querySelectorAll('.toggle-arquivos').forEach(function(toggle) {
-                toggle.addEventListener('click', function() {
+            // Adicionar evento de clique para as pastas (toggle-pasta)
+            document.querySelectorAll('.toggle-pasta').forEach(function(toggle) {
+                toggle.addEventListener('click', function(e) {
+                    // Encontrar o ícone de collapse dentro desta pasta
                     var icon = this.querySelector('.collapse-icon');
-                    icon.classList.toggle('collapsed');
+                    if (icon) {
+                        icon.classList.toggle('collapsed');
+                    }
+                });
+            });
+
+            // Adicionar evento para quando um collapse é mostrado ou escondido
+            document.querySelectorAll('.collapse').forEach(function(collapse) {
+                collapse.addEventListener('show.bs.collapse', function () {
+                    var id = this.id;
+                    var toggle = document.querySelector('[data-bs-target="#' + id + '"]');
+                    if (toggle) {
+                        var icon = toggle.querySelector('.collapse-icon');
+                        if (icon) {
+                            icon.classList.remove('collapsed');
+                        }
+                    }
+                });
+                
+                collapse.addEventListener('hide.bs.collapse', function () {
+                    var id = this.id;
+                    var toggle = document.querySelector('[data-bs-target="#' + id + '"]');
+                    if (toggle) {
+                        var icon = toggle.querySelector('.collapse-icon');
+                        if (icon) {
+                            icon.classList.add('collapsed');
+                        }
+                    }
                 });
             });
         });
