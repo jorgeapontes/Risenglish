@@ -228,19 +228,22 @@ foreach ($aulas as $aula) {
                     <h4 class="mb-3"><i class="fas fa-clock text-primary me-2"></i>Próximas Aulas</h4>
                     <div class="row">
                         <?php foreach ($aulas_futuras as $aula): 
-                            $data_aula = new DateTime($aula['data_aula']);
-                            $hoje = new DateTime();
-                            $diferenca = $hoje->diff($data_aula);
-                            $dias_restantes = $diferenca->days;
+                            $data_hora_aula = new DateTime($aula['data_aula'] . ' ' . $aula['horario']);
+                            $agora = new DateTime();
                             
-                            if ($dias_restantes == 0) {
+                            // Calcula a diferença apenas em dias (ignorando horas)
+                            $data_aula_sem_hora = new DateTime($aula['data_aula']);
+                            $hoje_sem_hora = new DateTime('today');
+                            $diferenca_dias = $hoje_sem_hora->diff($data_aula_sem_hora)->days;
+                            
+                            if ($diferenca_dias == 0) {
                                 $texto_data = "Hoje";
                                 $badge_class = "bg-warning";
-                            } elseif ($dias_restantes == 1) {
+                            } elseif ($diferenca_dias == 1) {
                                 $texto_data = "Amanhã";
                                 $badge_class = "bg-info";
                             } else {
-                                $texto_data = "Em " . $dias_restantes . " dias";
+                                $texto_data = "Em " . $diferenca_dias . " dias";
                                 $badge_class = "bg-primary";
                             }
                         ?>
@@ -252,7 +255,7 @@ foreach ($aulas as $aula) {
                                     <p class="card-text text-muted"><?= htmlspecialchars($aula['descricao'] ?: 'Sem descrição') ?></p>
                                     <div class="mt-auto">
                                         <small class="text-muted">
-                                            <i class="fas fa-calendar me-1"></i><?= $data_aula->format('d/m/Y') ?>
+                                            <i class="fas fa-calendar me-1"></i><?= $data_hora_aula->format('d/m/Y') ?>
                                             <i class="fas fa-clock ms-2 me-1"></i><?= substr($aula['horario'], 0, 5) ?>
                                         </small>
                                         <br>
