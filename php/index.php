@@ -115,6 +115,7 @@
                 </div>
             </div>
         </div>
+        <center>
         <div class="about-features">
             <div class="feature">
                 <i class="fa-solid fa-comments"></i>
@@ -138,6 +139,7 @@
                 </div>
             </div>
         </div>
+        </center>
     </section>
 
     <!-- Contact Section -->
