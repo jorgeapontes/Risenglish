@@ -225,7 +225,20 @@ $nome_usuario = $_SESSION['user_nome'];
                         </div>
                     </div>
                 </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h5 class="card-title">Sair para login de Professor</h5>
+                            <p class="card-text">Clique aqui para ir para a tela de Login mais rápidamente.</p>
+                            <a href="../logout.php"  class="btn btn-acao"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+                        </div>
+                    </div>
+                </div>
+
             </div>
+
+            
         </div>
     </div>
 </div>
