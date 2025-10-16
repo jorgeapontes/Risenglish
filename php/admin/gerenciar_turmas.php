@@ -17,13 +17,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
     $turma_id = $_POST['turma_id'] ?? null;
     $acao = $_POST['acao'];
     
+    $inicio_turma = date('Y-m-d'); // Data atual como padrão
+    
     try {
         if ($acao == 'add_turma') {
-            $sql = "INSERT INTO turmas (nome_turma, professor_id) VALUES (:nome_turma, :professor_id)";
+            $sql = "INSERT INTO turmas (nome_turma, professor_id, inicio_turma) VALUES (:nome_turma, :professor_id, :inicio_turma)";
             $stmt = $pdo->prepare($sql);
             $mensagem = "Turma <strong>{$nome_turma}</strong> criada e associada com sucesso!";
         } else {
-            $sql = "UPDATE turmas SET nome_turma = :nome_turma, professor_id = :professor_id WHERE id = :turma_id";
+            $sql = "UPDATE turmas SET nome_turma = :nome_turma, professor_id = :professor_id, inicio_turma = :inicio_turma WHERE id = :turma_id";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':turma_id', $turma_id);
             $mensagem = "Turma <strong>{$nome_turma}</strong> atualizada com sucesso!";
@@ -31,6 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
         
         $stmt->bindParam(':nome_turma', $nome_turma);
         $stmt->bindParam(':professor_id', $professor_id);
+        $stmt->bindParam(':inicio_turma', $inicio_turma);
         $stmt->execute();
         $tipo_mensagem = 'success';
 
