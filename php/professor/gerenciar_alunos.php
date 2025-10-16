@@ -278,9 +278,7 @@ foreach ($turmas as $turma) {
                             $collapse_id = "collapse" . $turma_id;
                             $heading_id = "heading" . $turma_id;
                             $num_alunos = count($turma['alunos']);
-                            $data_inicio_display = isset($turma['inicio_turma']) && $turma['inicio_turma'] ? 
-                                                date('d/m/Y', strtotime($turma['inicio_turma'])) : 
-                                                'N/D';
+                            
                         ?>
                             <div class="accordion-item">
                                 <h2 class="accordion-header accordion-header-custom" id="<?= $heading_id ?>">
@@ -295,7 +293,7 @@ foreach ($turmas as $turma) {
                                             
                                             <br>
                                             <small class="text-white opacity-75">
-                                                Professor: <?= htmlspecialchars($turma['nome_professor']) ?> | Início: <?= $data_inicio_display ?>
+                                                Professor: <?= htmlspecialchars($turma['nome_professor']) ?>
                                             </small>
                                         </div>
                                         <div class="end">
