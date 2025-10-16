@@ -529,15 +529,17 @@
 
         .about-features {
             display: flex;
-            justify-content: center;
+            max-width: 85%;
+            justify-content: space-around;
             gap: 1.5rem;
             margin-top: 6rem;
             flex-wrap: wrap;
+            margin-left: 7.5%;
         }
 
         .feature {
             display: flex;
-            align-items: flex-start;
+            align-items: space;
             gap: 1rem;
             padding: 1.5rem;
             background: white;
@@ -764,7 +766,6 @@
 
             .about-content {
                 padding-left: 0;
-                text-align: center;
             }
 
             .section-title::after {
