@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 15/10/2025 às 00:59
+-- Tempo de geração: 16/10/2025 às 21:22
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -32,14 +32,6 @@ CREATE TABLE `alunos_turmas` (
   `aluno_id` int(11) NOT NULL,
   `turma_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Despejando dados para a tabela `alunos_turmas`
---
-
-INSERT INTO `alunos_turmas` (`id`, `aluno_id`, `turma_id`) VALUES
-(17, 12, 5),
-(22, 12, 6);
 
 -- --------------------------------------------------------
 
@@ -71,18 +63,6 @@ CREATE TABLE `aulas` (
   `professor_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Despejando dados para a tabela `aulas`
---
-
-INSERT INTO `aulas` (`id`, `titulo_aula`, `descricao`, `data_aula`, `horario`, `turma_id`, `professor_id`) VALUES
-(16, 'teste', 'relationship', '2025-10-14', '15:00:00', 5, 9),
-(17, 'aaaaa', 'edd', '2025-10-06', '00:00:00', 5, 9),
-(18, 'aaa', '', '2025-10-14', '00:00:00', 5, 9),
-(19, 'sss', '', '2025-10-14', '00:00:00', 5, 9),
-(20, 'sss', '', '2025-10-14', '00:00:00', 5, 9),
-(21, 'Nome da aula', '', '2025-10-14', '20:00:00', 5, 9);
-
 -- --------------------------------------------------------
 
 --
@@ -95,16 +75,6 @@ CREATE TABLE `aulas_conteudos` (
   `conteudo_id` int(11) NOT NULL,
   `planejado` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Despejando dados para a tabela `aulas_conteudos`
---
-
-INSERT INTO `aulas_conteudos` (`id`, `aula_id`, `conteudo_id`, `planejado`) VALUES
-(48, 16, 34, 1),
-(49, 18, 34, 1),
-(50, 17, 34, 1),
-(51, 16, 38, 1);
 
 -- --------------------------------------------------------
 
@@ -124,23 +94,6 @@ CREATE TABLE `conteudos` (
   `eh_subpasta` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Despejando dados para a tabela `conteudos`
---
-
-INSERT INTO `conteudos` (`id`, `professor_id`, `parent_id`, `titulo`, `descricao`, `tipo_arquivo`, `caminho_arquivo`, `data_upload`, `eh_subpasta`) VALUES
-(34, 9, NULL, 'relationship', 'teste', 'TEMA', '', '2025-10-13 15:00:37', 0),
-(35, 9, 34, 'contrato', 'contrato (Arquivo: CONTRATO_Laura.pdf)', 'application/pdf', 'uploads/conteudos/1760367715_68ed1463a6238.pdf', '2025-10-13 15:01:55', 0),
-(36, 9, 34, 'video', 'video (Link: youtu.be)', 'URL', 'https://youtu.be/-moW9jvvMr4?si=p_dQzfxi-nh2X4BS', '2025-10-13 15:02:40', 0),
-(37, 9, NULL, 'teste', '', 'TEMA', '', '2025-10-13 15:13:35', 0),
-(38, 9, 34, 'basico', '', 'SUBPASSA', '', '2025-10-14 00:50:07', 1),
-(39, 9, 34, 'intermediario', '', 'SUBPASSA', '', '2025-10-14 00:50:17', 1),
-(40, 9, 38, 'video teste', 'video teste (Link: youtu.be)', 'URL', 'https://youtu.be/zctKiN-okXI?si=qS7R6qef2hQ0wDSM', '2025-10-14 00:51:01', 0),
-(41, 9, 38, 'imagem teste', 'imagem teste (Arquivo: Imagem1.jpg)', 'image/jpeg', 'uploads/conteudos/1760448862_68ee515eb6b99.jpg', '2025-10-14 13:34:22', 0),
-(42, 9, 38, 'pdf teste', 'pdf teste (Arquivo: Mapa conceitual.pdf)', 'application/pdf', 'uploads/conteudos/1760448880_68ee5170bd991.pdf', '2025-10-14 13:34:40', 0),
-(43, 9, 38, 'hsotinger', 'hsotinger (Link: github.com)', 'URL', 'https://github.com/', '2025-10-14 13:51:58', 0),
-(44, 9, 37, 'aaa', 'aaa (Arquivo: {A456EC26-8008-422A-A305-7DCB8EA96953}.png)', 'image/png', 'uploads/conteudos/1760451211_68ee5a8b60d12.png', '2025-10-14 14:13:31', 0);
-
 -- --------------------------------------------------------
 
 --
@@ -154,13 +107,6 @@ CREATE TABLE `presenca_aula` (
   `presente` tinyint(1) NOT NULL DEFAULT 1,
   `data_registro` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Despejando dados para a tabela `presenca_aula`
---
-
-INSERT INTO `presenca_aula` (`id`, `aula_id`, `aluno_id`, `presente`, `data_registro`) VALUES
-(1, 21, 12, 0, '2025-10-14 22:50:45');
 
 -- --------------------------------------------------------
 
@@ -181,7 +127,10 @@ CREATE TABLE `recursos_uteis` (
 --
 
 INSERT INTO `recursos_uteis` (`id`, `titulo`, `link`, `descricao`, `data_criacao`) VALUES
-(5, 'Linguee', 'https://www.linguee.com.br/', 'dicionario recomendado', '2025-10-09 22:40:41');
+(5, 'Linguee', 'https://www.linguee.com.br/', 'Dicionário inglês-português\r\ne buscador de traduções.', '2025-10-09 22:40:41'),
+(6, 'DeepL', 'https://www.deepl.com/pt-BR/translator', 'Serviço de tradução que utiliza IA para oferecer traduções de qualidade.', '2025-10-16 10:07:00'),
+(7, 'toPhonetics', 'https://tophonetics.com/', 'Conversos de textos em Inglês para sua tradução fonética.', '2025-10-16 10:07:44'),
+(8, 'Youglish', 'https://pt.youglish.com/', 'O YouGlish te dá respostas rápidas sobre como o inglês é falado por pessoas reais dentro de um contexto.', '2025-10-16 10:08:26');
 
 -- --------------------------------------------------------
 
@@ -195,14 +144,6 @@ CREATE TABLE `turmas` (
   `professor_id` int(11) DEFAULT NULL,
   `inicio_turma` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Despejando dados para a tabela `turmas`
---
-
-INSERT INTO `turmas` (`id`, `nome_turma`, `professor_id`, `inicio_turma`) VALUES
-(5, 'Jorge', 9, '0000-00-00'),
-(6, 'turma 1', 9, '0000-00-00');
 
 -- --------------------------------------------------------
 
@@ -226,9 +167,7 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`, `informacoes`, `reset_token`, `token_expira_em`) VALUES
-(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'admin', NULL, NULL, NULL),
-(9, 'Laura', 'laura@risenglish.com', '$2y$10$L5r6urNbE7tLtiPzZFY/cuIAd65is7jtDcNVTIO/.YkmOsWnt.082', 'professor', NULL, NULL, NULL),
-(12, 'Jorge Augusto Possani Pontes', 'jorgeappontes13@gmail.com', '$2y$10$MBlYgYjHcew4oWv08mCSNuIJtbX05eexbZaEQ9w3yru3053kzArdm', 'aluno', 'teste', NULL, NULL);
+(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'admin', NULL, NULL, NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -311,7 +250,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `alunos_turmas`
 --
 ALTER TABLE `alunos_turmas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT de tabela `arquivos_visiveis`
@@ -323,43 +262,43 @@ ALTER TABLE `arquivos_visiveis`
 -- AUTO_INCREMENT de tabela `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT de tabela `aulas_conteudos`
 --
 ALTER TABLE `aulas_conteudos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
 
 --
 -- AUTO_INCREMENT de tabela `conteudos`
 --
 ALTER TABLE `conteudos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT de tabela `presenca_aula`
 --
 ALTER TABLE `presenca_aula`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de tabela `recursos_uteis`
 --
 ALTER TABLE `recursos_uteis`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de tabela `turmas`
 --
 ALTER TABLE `turmas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- Restrições para tabelas despejadas
