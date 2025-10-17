@@ -90,7 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <button type="submit" class="btn btn-login">ENTRAR</button>
     </form>
     <a class="footer-text" href="index.php">← Home</a><br>
-    <a href="includes/solicitar_reset.php" class="footer-text">Esqueceu sua senha?</a>
+    <a href="solicitar_reset.php" class="footer-text">Esqueceu sua senha?</a>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

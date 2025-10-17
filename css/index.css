@@ -702,11 +702,19 @@
             .about-container {
                 gap: 3rem;
             }
+            
+            .scroll-indicator  {
+                display: none;
+            }
         }
 
         @media (max-width: 768px) {
             .hamburger {
                 display: flex;
+            }
+            
+            .scroll-indicator {
+                display: none;
             }
 
             .nav-menu {
@@ -793,6 +801,10 @@
         }
 
         @media (max-width: 480px) {
+            
+            .scroll-indicator{
+                display: none;
+            }
             .container, .nav-container, .hero-container {
                 padding: 0 1rem;
             }

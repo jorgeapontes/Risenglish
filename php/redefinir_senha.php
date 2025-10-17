@@ -1,5 +1,5 @@
 <?php
-    include_once 'includes/conexao.php'; 
+    include_once 'php/includes/conexao.php'; 
 
     $token = $_GET['token'] ?? null;
     $aluno_id = 0;
@@ -10,7 +10,7 @@
     if ($token) {
         try {
             // Verifica se o token existe e se ainda não expirou
-            $stmt = $pdo->prepare("SELECT id FROM alunos WHERE reset_token = ? AND token_expira_em > NOW()");
+            $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE reset_token = ? AND token_expira_em > NOW()");
             $stmt->execute([$token]);
             $aluno = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -42,7 +42,7 @@
                 $senha_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
 
                 // Atualiza a senha e limpa o token e a expiração (para invalidar o link)
-                $stmt_update = $pdo->prepare("UPDATE alunos SET senha = ?, reset_token = NULL, token_expira_em = NULL WHERE id = ?");
+                $stmt_update = $pdo->prepare("UPDATE usuarios SET senha = ?, reset_token = NULL, token_expira_em = NULL WHERE id = ?");
                 $stmt_update->execute([$senha_hash, $aluno_id]);
 
                 $message = '<div class="alert alert-success">Sua senha foi redefinida com sucesso! Você pode <a href="login.php" style="font-weight: bold;">fazer login agora</a>.</div>';
@@ -62,7 +62,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redefinir Senha</title>
     <!-- Inclua o CSS da sua tela de login aqui -->
-    <link rel="stylesheet" href="caminho/para/seu/login.css">
+    <link rel="stylesheet" href="../../css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
