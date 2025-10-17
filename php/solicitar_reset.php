@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
 
             } else {
                 // Mensagem genérica por segurança
-                $message = '<div class="alert alert-warning">Se o e-mail estiver cadastrado, um link de redefinição foi enviado. Verifique sua caixa de entrada e spam.</div>';
+                $message = '<div class="alert alert-warning">Um link de redefinição de senha foi enviado para o e-amil fornecido.</div>';
             }
         } catch (Exception $e) {
             error_log("Erro no processo de reset: " . $e->getMessage());
@@ -68,15 +68,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Esqueci Minha Senha - Ris English</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .login-container { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.15); width: 100%; max-width: 400px; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(to bottom right, #8B0000, #0B2C59);; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .login-container { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.15); width: 100%; max-width: 400px; height: 350px; }
         h2 { text-align: center; color: #333; margin-top: 0; }
-        .form-group { margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; margin-top: 40px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
         .form-control { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; transition: border-color 0.3s; }
         .form-control:focus { border-color: #007bff; outline: none; }
         .btn-primary { 
-            background-color: #007bff; 
+            background-color: #0B2C59; 
             color: white; 
             padding: 12px; 
             border: none; 
@@ -86,8 +86,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
             font-size: 16px;
             font-weight: bold;
             transition: background-color 0.3s ease; 
+            margin-top: 15px;
         }
-        .btn-primary:hover { background-color: #0056b3; }
+        .btn-primary:hover { background-color: #173b6d; }
         .alert { padding: 15px; margin-bottom: 20px; border-radius: 6px; text-align: center; font-weight: bold; }
         .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
@@ -101,7 +102,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
         <?php echo $message; ?>
 
         <form method="POST" action="solicitar_reset.php">
-            <p style="text-align: center; margin-bottom: 25px; color: #666;">Informe o email cadastrado para receber o link de redefinição.</p>
+            <p style="text-align: center; margin-bottom: 25px; color: #666;">Informe o email cadastrado para redefinir a senha.</p>
+            <hr>
             
             <div class="form-group">
                 <label for="email">E-mail</label>
