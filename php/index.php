@@ -13,7 +13,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <h2>Risenglish</h2>
+                <h3>RISENGLISH</h3>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">
@@ -81,7 +81,7 @@
             <div class="hero-image">
                 <div class="image-container">
                     <div class="image-placeholder">
-                        <i class="fas fa-graduation-cap"></i>
+                        <img src="LogoRisenglish.png" alt="Imagem Ilustrativa" class="hero-main-image" style="width: 100%; height: auto; border-radius: 20px; display: block;">
                     </div>
                     <div class="image-decoration"></div>
                 </div>
