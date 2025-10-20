@@ -14,6 +14,7 @@ $tipo_mensagem = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['acao'] == 'add_turma' || $_POST['acao'] == 'editar_turma')) {
     $nome_turma = $_POST['nome_turma'];
     $professor_id = $_POST['professor_id']; 
+    $link_aula = $_POST['link_aula'] ?? null;
     $turma_id = $_POST['turma_id'] ?? null;
     $acao = $_POST['acao'];
     
@@ -21,11 +22,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
     
     try {
         if ($acao == 'add_turma') {
-            $sql = "INSERT INTO turmas (nome_turma, professor_id, inicio_turma) VALUES (:nome_turma, :professor_id, :inicio_turma)";
+            $sql = "INSERT INTO turmas (nome_turma, professor_id, inicio_turma, link_aula) VALUES (:nome_turma, :professor_id, :inicio_turma, :link_aula)";
             $stmt = $pdo->prepare($sql);
             $mensagem = "Turma <strong>{$nome_turma}</strong> criada e associada com sucesso!";
         } else {
-            $sql = "UPDATE turmas SET nome_turma = :nome_turma, professor_id = :professor_id, inicio_turma = :inicio_turma WHERE id = :turma_id";
+            $sql = "UPDATE turmas SET nome_turma = :nome_turma, professor_id = :professor_id, inicio_turma = :inicio_turma, link_aula = :link_aula WHERE id = :turma_id";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':turma_id', $turma_id);
             $mensagem = "Turma <strong>{$nome_turma}</strong> atualizada com sucesso!";
@@ -34,6 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
         $stmt->bindParam(':nome_turma', $nome_turma);
         $stmt->bindParam(':professor_id', $professor_id);
         $stmt->bindParam(':inicio_turma', $inicio_turma);
+        $stmt->bindParam(':link_aula', $link_aula);
         $stmt->execute();
         $tipo_mensagem = 'success';
 
@@ -358,12 +360,13 @@ $professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
                         <th>ID</th>
                         <th>Nome da Turma</th>
                         <th>Professor Responsável</th>
+                        <th>Link da Aula</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($turmas)): ?>
-                        <tr><td colspan="4" class="text-center">Nenhuma turma cadastrada.</td></tr>
+                        <tr><td colspan="5" class="text-center">Nenhuma turma cadastrada.</td></tr>
                     <?php else: ?>
                         <?php foreach ($turmas as $turma): ?>
                         <tr>
@@ -375,11 +378,20 @@ $professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
                                 </span>
                             </td>
                             <td>
+                                <?php if (!empty($turma['link_aula'])): ?>
+                                    <a href="<?= htmlspecialchars($turma['link_aula']) ?>" target="_blank" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-link"></i> Acessar Aula
+                                    </a>
+                                <?php else: ?>
+                                    <span class="text-muted">Nenhum link</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
                                 <a href="gerenciar_alunos_turmas.php?turma_id=<?= $turma['id'] ?>" class="btn btn-sm btn-outline-success me-2">
                                     <i class="fas fa-user-plus"></i> Alunos
                                 </a>
                                 <button class="btn btn-sm btn-outline-primary me-2" 
-                                        onclick="openEditTurmaModal(<?= $turma['id'] ?>, '<?= htmlspecialchars($turma['nome_turma'], ENT_QUOTES) ?>', '<?= htmlspecialchars($turma['professor_id'] ?? '', ENT_QUOTES) ?>')">
+                                        onclick="openEditTurmaModal(<?= $turma['id'] ?>, '<?= htmlspecialchars($turma['nome_turma'], ENT_QUOTES) ?>', '<?= htmlspecialchars($turma['professor_id'] ?? '', ENT_QUOTES) ?>', '<?= htmlspecialchars($turma['link_aula'] ?? '', ENT_QUOTES) ?>')">
                                     <i class="fas fa-edit"></i> Editar
                                 </button>
                                 <button class="btn btn-sm btn-outline-danger" 
@@ -425,6 +437,11 @@ $professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
                     <small class="text-danger">Nenhum professor cadastrado. Cadastre um na seção Usuários.</small>
                 <?php endif; ?>
             </div>
+
+            <div class="mb-3">
+                <label for="link_aula" class="form-label">Link da Aula (Opcional)</label>
+                <input type="url" class="form-control" id="link_aula" name="link_aula" >
+            </div>
             
         </div>
         <div class="modal-footer">
@@ -450,15 +467,17 @@ $professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('turma_id').value = '';
         document.getElementById('nome_turma').value = '';
         document.getElementById('professor_id').value = '';
+        document.getElementById('link_aula').value = '';
         document.getElementById('btn_salvar_turma').innerText = 'Salvar Turma';
     }
 
-    function openEditTurmaModal(id, nome, professorId) {
+    function openEditTurmaModal(id, nome, professorId, linkAula) {
         document.getElementById('modalAddTurmaLabel').innerText = `Editar Turma: ${nome}`;
         document.getElementById('turma_acao').value = 'editar_turma';
         document.getElementById('turma_id').value = id;
         document.getElementById('nome_turma').value = nome;
         document.getElementById('professor_id').value = professorId;
+        document.getElementById('link_aula').value = linkAula;
         document.getElementById('btn_salvar_turma').innerText = 'Atualizar Turma';
         
         var myModal = new bootstrap.Modal(document.getElementById('modalAddTurma'));
