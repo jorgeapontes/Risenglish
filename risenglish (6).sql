@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 20/10/2025 às 15:35
+-- Tempo de geração: 20/10/2025 às 16:07
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -67,16 +67,21 @@ CREATE TABLE `aulas` (
   `data_aula` date NOT NULL,
   `horario` time NOT NULL,
   `turma_id` int(11) NOT NULL,
-  `professor_id` int(11) NOT NULL
+  `professor_id` int(11) NOT NULL,
+  `recorrente` tinyint(1) NOT NULL DEFAULT 0,
+  `dia_semana` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Despejando dados para a tabela `aulas`
 --
 
-INSERT INTO `aulas` (`id`, `titulo_aula`, `descricao`, `data_aula`, `horario`, `turma_id`, `professor_id`) VALUES
-(29, 'teste', '', '2025-10-23', '20:00:00', 8, 16),
-(30, 'sla', '', '2025-10-20', '15:00:00', 8, 16);
+INSERT INTO `aulas` (`id`, `titulo_aula`, `descricao`, `data_aula`, `horario`, `turma_id`, `professor_id`, `recorrente`, `dia_semana`) VALUES
+(39, 'Aulas Jorge', '', '2025-11-17', '09:00:00', 8, 16, 1, 'monday'),
+(40, 'Aulas Jorge', '', '2025-10-27', '09:00:00', 8, 16, 1, 'monday'),
+(41, 'Aulas Jorge', '', '2025-11-03', '09:00:00', 8, 16, 1, 'monday'),
+(42, 'Aulas Jorge', '', '2025-11-10', '09:00:00', 8, 16, 1, 'monday'),
+(43, 'Aulas Jorge', '', '2025-11-17', '09:00:00', 8, 16, 1, 'monday');
 
 -- --------------------------------------------------------
 
@@ -287,7 +292,7 @@ ALTER TABLE `arquivos_visiveis`
 -- AUTO_INCREMENT de tabela `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT de tabela `aulas_conteudos`
