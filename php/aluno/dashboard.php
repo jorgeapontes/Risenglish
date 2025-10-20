@@ -385,7 +385,7 @@ foreach ($aulas_por_dia as $dia => $aulas) {
                                         
                                         // Define a cor de fundo com base no dia da semana 
                                         $dia_da_semana = (new DateTime($data_completa))->format('w');
-                                        $cor_fundo_aula = $dia_da_semana == 0 || $dia_da_semana == 6 ? '#A0A0A0' : '#1a2a3a'; // Cinza no Fim de Semana
+                                        $cor_fundo_aula = '#1a2a3a';
                                     ?>
                                         <div class="bloco-aula" 
                                             title="Clique para ver detalhes da Aula: <?= htmlspecialchars($aula['topico']) ?>" 
