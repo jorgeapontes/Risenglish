@@ -22,7 +22,7 @@ if (!$aula_id || !is_numeric($aula_id)) {
 // Buscar detalhes da aula
 $sql_detalhes = "SELECT
     a.id AS aula_id, a.titulo_aula, a.data_aula, a.horario, a.descricao AS desc_aula,
-    t.id AS turma_id, t.nome_turma,
+    t.id AS turma_id, t.nome_turma, t.link_aula,
     p.nome AS nome_professor
     FROM aulas a
     JOIN turmas t ON a.turma_id = t.id
@@ -250,6 +250,15 @@ foreach ($temas as $tema) {
         .loading {
             color: #6c757d;
         }
+        .link-aula {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .link-aula:hover {
+            text-decoration: underline;
+            color: #0a58ca;
+        }
     </style>
 </head>
 <body>
@@ -293,6 +302,16 @@ foreach ($temas as $tema) {
                                 <p class="mb-1"><strong>Turma:</strong> <?= htmlspecialchars($detalhes_aula['nome_turma']) ?></p>
                                 <p class="mb-1"><strong>Data:</strong> <?= (new DateTime($detalhes_aula['data_aula']))->format('d/m/Y') ?></p>
                                 <p class="mb-1"><strong>Horário:</strong> <?= substr($detalhes_aula['horario'], 0, 5) ?></p>
+                                <p class="mb-1">
+                                    <strong>Link da Aula:</strong> 
+                                    <?php if (!empty($detalhes_aula['link_aula'])): ?>
+                                        <a href="<?= htmlspecialchars($detalhes_aula['link_aula']) ?>" target="_blank" class="link-aula">
+                                            <i class="fas fa-external-link-alt me-1"></i>Acessar Aula
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-muted">Nenhum link configurado</span>
+                                    <?php endif; ?>
+                                </p>
                             </div>
                         </div>
                     </div>

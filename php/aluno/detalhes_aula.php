@@ -28,6 +28,7 @@ $sql_aula = "
         a.descricao,
         t.id AS turma_id,
         t.nome_turma,
+        t.link_aula,
         u.nome AS nome_professor,
         u.email AS email_professor
     FROM 
@@ -558,6 +559,14 @@ function displayConteudo($conteudo, $nivel = 0) {
         .collapsed .collapse-icon {
             transform: rotate(-90deg);
         }
+        .link-aula {
+            
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .link-aula:hover {
+            text-decoration: underline;
+        }
 
         /* Modal YouTube personalizado */
         .modal-youtube .modal-dialog {
@@ -690,6 +699,20 @@ function displayConteudo($conteudo, $nivel = 0) {
                                 <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações da Aula</h5>
                             </div>
                             <div class="card-body">
+                                <!-- LINK DA AULA - AGORA EM PRIMEIRO LUGAR -->
+                                <div class="mb-3">
+                                    <strong><i class="fas fa-video me-2 text-primary"></i>Link da Aula:</strong>
+                                    <?php if (!empty($aula['link_aula'])): ?>
+                                        <div class="mt-2">
+                                            <a href="<?= htmlspecialchars($aula['link_aula']) ?>" target="_blank" class="btn btn-primary btn-sm w-100 link-aula">
+                                                <i class="fas fa-external-link-alt me-1"></i>Entrar na Aula
+                                            </a>
+                                        </div>
+                                    <?php else: ?>
+                                        <p class="mb-0 text-muted mt-1">Nenhum link disponível</p>
+                                    <?php endif; ?>
+                                </div>
+                                
                                 <div class="mb-3">
                                     <strong><i class="fas fa-calendar me-2 text-primary"></i>Data:</strong>
                                     <p class="mb-0"><?= $data_formatada ?></p>
@@ -707,7 +730,7 @@ function displayConteudo($conteudo, $nivel = 0) {
                                     <p class="mb-0"><?= htmlspecialchars($aula['nome_professor']) ?></p>
                                     <small class="text-muted"><?= htmlspecialchars($aula['email_professor']) ?></small>
                                 </div>
-                                <!-- DESCRIÇÃO DA AULA - ADICIONADA AQUI -->
+                                <!-- DESCRIÇÃO DA AULA -->
                                 <div class="mb-3">
                                     <strong><i class="fas fa-file-alt me-2 text-primary"></i>Descrição da Aula:</strong>
                                     <?php if (!empty($aula['descricao'])): ?>

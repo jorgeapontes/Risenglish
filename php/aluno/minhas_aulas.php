@@ -8,6 +8,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'aluno') {
     exit;
 }
 
+date_default_timezone_set('America/Sao_Paulo');
+
 $aluno_id = $_SESSION['user_id'];
 $aluno_nome = $_SESSION['user_nome'] ?? 'Aluno';
 
@@ -39,7 +41,7 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute([':aluno_id' => $aluno_id]);
 $aulas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Separar aulas passadas e futuras
+// Separar aulas passadas e futuras - CORREÇÃO APLICADA
 $aulas_passadas = [];
 $aulas_futuras = [];
 $agora = new DateTime();
@@ -231,18 +233,20 @@ foreach ($aulas as $aula) {
                             $data_hora_aula = new DateTime($aula['data_aula'] . ' ' . $aula['horario']);
                             $agora = new DateTime();
                             
-                            // Calcula a diferença apenas em dias (ignorando horas)
+                            // CORREÇÃO: Cálculo preciso considerando data e hora
+                            $hoje = new DateTime('today');
+                            $amanha = new DateTime('tomorrow');
                             $data_aula_sem_hora = new DateTime($aula['data_aula']);
-                            $hoje_sem_hora = new DateTime('today');
-                            $diferenca_dias = $hoje_sem_hora->diff($data_aula_sem_hora)->days;
                             
-                            if ($diferenca_dias == 0) {
+                            if ($data_aula_sem_hora == $hoje) {
                                 $texto_data = "Hoje";
                                 $badge_class = "bg-warning";
-                            } elseif ($diferenca_dias == 1) {
+                            } elseif ($data_aula_sem_hora == $amanha) {
                                 $texto_data = "Amanhã";
                                 $badge_class = "bg-info";
                             } else {
+                                $diferenca = $hoje->diff($data_aula_sem_hora);
+                                $diferenca_dias = $diferenca->days;
                                 $texto_data = "Em " . $diferenca_dias . " dias";
                                 $badge_class = "bg-primary";
                             }

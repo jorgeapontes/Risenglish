@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 16/10/2025 às 21:22
+-- Tempo de geração: 20/10/2025 às 15:35
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -32,6 +32,13 @@ CREATE TABLE `alunos_turmas` (
   `aluno_id` int(11) NOT NULL,
   `turma_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `alunos_turmas`
+--
+
+INSERT INTO `alunos_turmas` (`id`, `aluno_id`, `turma_id`) VALUES
+(27, 17, 8);
 
 -- --------------------------------------------------------
 
@@ -62,6 +69,14 @@ CREATE TABLE `aulas` (
   `turma_id` int(11) NOT NULL,
   `professor_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `aulas`
+--
+
+INSERT INTO `aulas` (`id`, `titulo_aula`, `descricao`, `data_aula`, `horario`, `turma_id`, `professor_id`) VALUES
+(29, 'teste', '', '2025-10-23', '20:00:00', 8, 16),
+(30, 'sla', '', '2025-10-20', '15:00:00', 8, 16);
 
 -- --------------------------------------------------------
 
@@ -142,8 +157,16 @@ CREATE TABLE `turmas` (
   `id` int(11) NOT NULL,
   `nome_turma` varchar(100) NOT NULL,
   `professor_id` int(11) DEFAULT NULL,
-  `inicio_turma` date NOT NULL
+  `inicio_turma` date NOT NULL,
+  `link_aula` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `turmas`
+--
+
+INSERT INTO `turmas` (`id`, `nome_turma`, `professor_id`, `inicio_turma`, `link_aula`) VALUES
+(8, 'Jorge', 16, '2025-10-20', 'https://meet.google.com/aji-dvjc-rqs');
 
 -- --------------------------------------------------------
 
@@ -167,7 +190,9 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`, `informacoes`, `reset_token`, `token_expira_em`) VALUES
-(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'admin', NULL, NULL, NULL);
+(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$/43jnz3JO8o5umNcabQ16eXnt1.pVdef3L7.6HvaILzUYbrRqPhBS', 'admin', NULL, NULL, NULL),
+(16, 'Laura', 'laura@risenglish.com', '$2y$10$ITUszPmaUWJpTf0jeNCWbOTZb/zUPtYHPZXcJbZh1OcR/MdBrUz2S', 'professor', '', NULL, NULL),
+(17, 'Jorge Pontes', 'jorgeappontes13@gmail.com', '$2y$10$lqwgCxf3iB/cYCQ/9iLRLe.r2YFZJbOYy3E2SaFjyGuj4JWeKvv.q', 'aluno', '', NULL, NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -250,7 +275,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `alunos_turmas`
 --
 ALTER TABLE `alunos_turmas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT de tabela `arquivos_visiveis`
@@ -262,7 +287,7 @@ ALTER TABLE `arquivos_visiveis`
 -- AUTO_INCREMENT de tabela `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT de tabela `aulas_conteudos`
@@ -292,13 +317,13 @@ ALTER TABLE `recursos_uteis`
 -- AUTO_INCREMENT de tabela `turmas`
 --
 ALTER TABLE `turmas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Restrições para tabelas despejadas
