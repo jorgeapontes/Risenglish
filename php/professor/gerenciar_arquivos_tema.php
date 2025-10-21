@@ -301,13 +301,13 @@ function get_file_icon($mime_type, $caminho_arquivo = null, $eh_subpasta = false
     return 'fas fa-file text-secondary';
 }
 
-
 function get_youtube_id($url) {
     if (preg_match('/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $url, $matches)) {
         return $matches[1];
     }
     return null;
-}?>
+}
+?>
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -411,6 +411,7 @@ function get_youtube_id($url) {
         }
         .recurso-item {
             transition: all 0.2s ease;
+            cursor: pointer;
         }
         .recurso-item:hover {
             background-color: #f8f9fa;
@@ -430,6 +431,7 @@ function get_youtube_id($url) {
         .arquivo-subpasta-item {
             background-color: #f8f9fa;
             border-left: 4px solid #28a745;
+            cursor: pointer;
         }
         .arquivo-item {
             display: flex;
@@ -461,6 +463,13 @@ function get_youtube_id($url) {
         .subpasta-toggle-icon.rotated {
             transform: rotate(90deg);
         }
+        .clickable-row {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .clickable-row:hover {
+            background-color: #f8f9fa;
+        }
         @media (max-width: 768px) {
             .sidebar {
                 position: relative;
@@ -474,39 +483,39 @@ function get_youtube_id($url) {
         }
 
         /* Modal YouTube personalizado */
-.modal-youtube .modal-dialog {
-    max-width: 70%;
-    max-height: 70vh;
-}
+        .modal-youtube .modal-dialog {
+            max-width: 70%;
+            max-height: 70vh;
+        }
 
-.modal-youtube .modal-content {
-    background: #081d40;
-    border: none;
-    padding: 10px;
-}
+        .modal-youtube .modal-content {
+            background: #081d40;
+            border: none;
+            padding: 10px;
+        }
 
-.modal-youtube .modal-header {
-    border-bottom: none;
-    padding-bottom: 25px;
-}
+        .modal-youtube .modal-header {
+            border-bottom: none;
+            padding-bottom: 25px;
+        }
 
-.modal-youtube .btn-close {
-    background-color: white;
-    opacity: 1;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .modal-youtube .btn-close {
+            background-color: white;
+            opacity: 1;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-@media (max-width: 768px) {
-    .modal-youtube .modal-dialog {
-        max-width: 95%;
-        margin: 10px auto;
-    }
-}
+        @media (max-width: 768px) {
+            .modal-youtube .modal-dialog {
+                max-width: 95%;
+                margin: 10px auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -618,7 +627,8 @@ function get_youtube_id($url) {
                                         <!-- Arquivos da Subpasta - Estilo igual aos Recursos Diretos -->
                                         <?php if (!empty($arquivos_por_subpasta[$subpasta['id']])): ?>
                                             <?php foreach ($arquivos_por_subpasta[$subpasta['id']] as $arq): ?>
-                                                <tr class="arquivo-subpasta-item arquivos-subpasta-<?= $subpasta['id'] ?>" style="display: none;">
+                                                <tr class="arquivo-subpasta-item arquivos-subpasta-<?= $subpasta['id'] ?> clickable-row" style="display: none;" 
+                                                    onclick="abrirRecurso('<?= htmlspecialchars($arq['caminho_arquivo']) ?>', '<?= $arq['tipo_arquivo'] ?>', '<?= htmlspecialchars($arq['titulo']) ?>')">
                                                     <td></td>
                                                     <td>
                                                         <i class="<?= get_file_icon($arq['tipo_arquivo'], $arq['caminho_arquivo']) ?> fa-lg"></i>
@@ -642,35 +652,36 @@ function get_youtube_id($url) {
                                                     </td>
                                                     <td><?= date('d/m/Y', strtotime($arq['data_upload'])) ?></td>
                                                     <td>
-    <div class="btn-group" role="group">
-        <?php if ($arq['caminho_arquivo']): ?>
-            <?php if ($arq['tipo_arquivo'] === 'URL' && get_youtube_id($arq['caminho_arquivo'])): ?>
-                <!-- Botão para abrir modal do YouTube -->
-                <button class="btn btn-sm btn-outline-primary" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#modalYouTube"
-                        data-video-id="<?= get_youtube_id($arq['caminho_arquivo']) ?>"
-                        data-video-title="<?= htmlspecialchars($arq['titulo']) ?>"
-                        title="Assistir Vídeo">
-                    <i class="fas fa-play"></i>
-                </button>
-            <?php else: ?>
-                <!-- Link normal para outros URLs e arquivos -->
-                <a href="<?= ($arq['tipo_arquivo'] === 'URL') ? htmlspecialchars($arq['caminho_arquivo']) : '../' . htmlspecialchars($arq['caminho_arquivo']) ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Visualizar">
-                    <i class="fas fa-external-link-alt"></i>
-                </a>
-            <?php endif; ?>
-        <?php endif; ?>
-        <button class="btn btn-sm btn-outline-danger" 
-                data-bs-toggle="modal" 
-                data-bs-target="#modalExcluirRecurso" 
-                data-recurso-titulo="<?= htmlspecialchars($arq['titulo']) ?>" 
-                data-recurso-id="<?= $arq['id'] ?>" 
-                title="Excluir Recurso">
-            <i class="fas fa-trash-alt"></i>
-        </button>
-    </div>
-</td>
+                                                        <div class="btn-group" role="group">
+                                                            <?php if ($arq['caminho_arquivo']): ?>
+                                                                <?php if ($arq['tipo_arquivo'] === 'URL' && get_youtube_id($arq['caminho_arquivo'])): ?>
+                                                                    <!-- Botão para abrir modal do YouTube -->
+                                                                    <button class="btn btn-sm btn-outline-primary" 
+                                                                            data-bs-toggle="modal" 
+                                                                            data-bs-target="#modalYouTube"
+                                                                            data-video-id="<?= get_youtube_id($arq['caminho_arquivo']) ?>"
+                                                                            data-video-title="<?= htmlspecialchars($arq['titulo']) ?>"
+                                                                            title="Assistir Vídeo">
+                                                                        <i class="fas fa-play"></i>
+                                                                    </button>
+                                                                <?php else: ?>
+                                                                    <!-- Link normal para outros URLs e arquivos -->
+                                                                    <a href="<?= ($arq['tipo_arquivo'] === 'URL') ? htmlspecialchars($arq['caminho_arquivo']) : '../' . htmlspecialchars($arq['caminho_arquivo']) ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Visualizar" onclick="event.stopPropagation()">
+                                                                        <i class="fas fa-external-link-alt"></i>
+                                                                    </a>
+                                                                <?php endif; ?>
+                                                            <?php endif; ?>
+                                                            <button class="btn btn-sm btn-outline-danger" 
+                                                                    data-bs-toggle="modal" 
+                                                                    data-bs-target="#modalExcluirRecurso" 
+                                                                    data-recurso-titulo="<?= htmlspecialchars($arq['titulo']) ?>" 
+                                                                    data-recurso-id="<?= $arq['id'] ?>" 
+                                                                    title="Excluir Recurso"
+                                                                    onclick="event.stopPropagation()">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         <?php endif; ?>
@@ -705,7 +716,8 @@ function get_youtube_id($url) {
                                     </thead>
                                     <tbody>
                                         <?php foreach ($recursos as $r): ?>
-                                            <tr class="recurso-item" data-conteudo-id="<?= $r['id'] ?>">
+                                            <tr class="recurso-item clickable-row" 
+                                                onclick="abrirRecurso('<?= htmlspecialchars($r['caminho_arquivo']) ?>', '<?= $r['tipo_arquivo'] ?>', '<?= htmlspecialchars($r['titulo']) ?>')">
                                                 <td>
                                                     <i class="<?= get_file_icon($r['tipo_arquivo'], $r['caminho_arquivo']) ?> fa-lg"></i>
                                                     <small class="d-block text-muted">
@@ -725,35 +737,37 @@ function get_youtube_id($url) {
                                                 </td>
                                                 <td><?= date('d/m/Y', strtotime($r['data_upload'])) ?></td>
                                                 <td>
-    <div class="btn-group" role="group">
-        <?php if ($r['caminho_arquivo']): ?>
-            <?php if ($r['tipo_arquivo'] === 'URL' && get_youtube_id($r['caminho_arquivo'])): ?>
-                <!-- Botão para abrir modal do YouTube -->
-                <button class="btn btn-sm btn-outline-primary" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#modalYouTube"
-                        data-video-id="<?= get_youtube_id($r['caminho_arquivo']) ?>"
-                        data-video-title="<?= htmlspecialchars($r['titulo']) ?>"
-                        title="Assistir Vídeo">
-                    <i class="fas fa-play"></i>
-                </button>
-            <?php else: ?>
-                <!-- Link normal para outros URLs e arquivos -->
-                <a href="<?= ($r['tipo_arquivo'] === 'URL') ? htmlspecialchars($r['caminho_arquivo']) : '../' . htmlspecialchars($r['caminho_arquivo']) ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Visualizar">
-                    <i class="fas fa-external-link-alt"></i>
-                </a>
-            <?php endif; ?>
-        <?php endif; ?>
-        <button class="btn btn-sm btn-outline-danger" 
-                data-bs-toggle="modal" 
-                data-bs-target="#modalExcluirRecurso" 
-                data-recurso-titulo="<?= htmlspecialchars($r['titulo']) ?>" 
-                data-recurso-id="<?= $r['id'] ?>" 
-                title="Excluir Recurso">
-            <i class="fas fa-trash-alt"></i>
-        </button>
-    </div>
-</td>
+                                                    <div class="btn-group" role="group">
+                                                        <?php if ($r['caminho_arquivo']): ?>
+                                                            <?php if ($r['tipo_arquivo'] === 'URL' && get_youtube_id($r['caminho_arquivo'])): ?>
+                                                                <!-- Botão para abrir modal do YouTube -->
+                                                                <button class="btn btn-sm btn-outline-primary" 
+                                                                        data-bs-toggle="modal" 
+                                                                        data-bs-target="#modalYouTube"
+                                                                        data-video-id="<?= get_youtube_id($r['caminho_arquivo']) ?>"
+                                                                        data-video-title="<?= htmlspecialchars($r['titulo']) ?>"
+                                                                        title="Assistir Vídeo"
+                                                                        onclick="event.stopPropagation()">
+                                                                    <i class="fas fa-play"></i>
+                                                                </button>
+                                                            <?php else: ?>
+                                                                <!-- Link normal para outros URLs e arquivos -->
+                                                                <a href="<?= ($r['tipo_arquivo'] === 'URL') ? htmlspecialchars($r['caminho_arquivo']) : '../' . htmlspecialchars($r['caminho_arquivo']) ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Visualizar" onclick="event.stopPropagation()">
+                                                                    <i class="fas fa-external-link-alt"></i>
+                                                                </a>
+                                                            <?php endif; ?>
+                                                        <?php endif; ?>
+                                                        <button class="btn btn-sm btn-outline-danger" 
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#modalExcluirRecurso" 
+                                                                data-recurso-titulo="<?= htmlspecialchars($r['titulo']) ?>" 
+                                                                data-recurso-id="<?= $r['id'] ?>" 
+                                                                title="Excluir Recurso"
+                                                                onclick="event.stopPropagation()">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
@@ -1034,6 +1048,45 @@ if (modalYouTube) {
         iframe.setAttribute('src', '');
     });
 }
+
+// Função para abrir recursos (arquivos e links)
+function abrirRecurso(caminho, tipo, titulo) {
+    if (tipo === 'URL') {
+        // Verificar se é YouTube para abrir no modal
+        var youtubeId = getYouTubeId(caminho);
+        if (youtubeId) {
+            // Para YouTube, vamos usar o modal existente
+            var iframe = document.getElementById('youtubePlayer');
+            var headerTitle = document.getElementById('header-title');
+            
+            iframe.setAttribute('src', 'https://www.youtube.com/embed/' + youtubeId + '?autoplay=1');
+            headerTitle.textContent = titulo;
+            
+            var modal = new bootstrap.Modal(document.getElementById('modalYouTube'));
+            modal.show();
+        } else {
+            // Para outros links, abrir em nova aba
+            window.open(caminho, '_blank');
+        }
+    } else {
+        // Para arquivos, abrir em nova aba
+        window.open('../' + caminho, '_blank');
+    }
+}
+
+// Função auxiliar para extrair ID do YouTube
+function getYouTubeId(url) {
+    var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    var match = url.match(regExp);
+    return (match && match[7].length == 11) ? match[7] : false;
+}
+
+// Prevenir que cliques nos botões de ação propaguem para a linha
+document.querySelectorAll('.clickable-row .btn-group button, .clickable-row .btn-group a').forEach(function(element) {
+    element.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+});
 </script>
 </body>
 </html>
