@@ -248,6 +248,24 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
             border: 1px solid #dee2e6;
             border-radius: 5px;
             margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .list-group-item .clickable-area {
+            flex: 1;
+            padding: 10px 0;
+        }
+
+        .list-group-item .actions {
+            flex-shrink: 0;
+            margin-left: 15px;
         }
 
         /* Responsividade */
@@ -355,7 +373,7 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
                                             $is_owner = ($tema['professor_id'] == $professor_id);
                                         ?>
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <div>
+                                                <div class="clickable-area" onclick="window.location.href='gerenciar_arquivos_tema.php?tema_id=<?= $tema['id'] ?>'">
                                                     <strong><i class="fas fa-folder me-2"></i> <?= htmlspecialchars($tema['titulo']) ?></strong>
                                                     
                                                     <!-- NOVO: Exibe o nome do professor criador -->
@@ -368,11 +386,7 @@ $temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
                                                     </p>
                                                     <span class="badge bg-secondary"><?= $tema['total_recursos'] ?> Arquivo(s)</span>
                                                 </div>
-                                                <div class="" role="group">
-                                                    <a href="gerenciar_arquivos_tema.php?tema_id=<?= $tema['id'] ?>" class="btn btn-sm btn-gerenciar-arquivos" title="Gerenciar Arquivos do Tema">
-                                                        <i class="fas fa-file-upload me-1"></i> Gerenciar Arquivos
-                                                    </a>
-                                                    
+                                                <div class="actions" role="group">
                                                     <!-- Botão de Edição: Desabilitado se não for o criador -->
                                                     <button class="btn btn-sm btn-outline-primary" 
                                                         <?= $is_owner ? '' : 'disabled' ?> 
@@ -497,6 +511,13 @@ document.addEventListener('DOMContentLoaded', function () {
         // Opcional: Atualiza o título do modal
         var modalLabel = modalEditar.querySelector('#modalEditarTemaLabel');
         modalLabel.textContent = 'Editar Tema: ' + temaTitulo;
+    });
+
+    // Prevenir que cliques nos botões de ação propaguem para a área clicável
+    document.querySelectorAll('.list-group-item .actions button').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
     });
 });
 </script>
