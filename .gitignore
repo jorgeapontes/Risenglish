@@ -1,0 +1,6 @@
+# Arquivos de Sistema Operacional/Ambiente
+.DS_Store
+*.log
+
+# CRUCIAL: Ignorar arquivo de conexão com credenciais reais
+/php/includes/conexao.php
