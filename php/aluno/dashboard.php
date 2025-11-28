@@ -132,6 +132,7 @@ foreach ($aulas_por_dia as $dia => $aulas) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- O CSS customizado será carregado em um arquivo separado, conforme solicitado -->
     <link rel="stylesheet" href="../../css/aluno/dashboard.css">
+    <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
     <style>
     @media (max-width: 991px) {
         .calendario {

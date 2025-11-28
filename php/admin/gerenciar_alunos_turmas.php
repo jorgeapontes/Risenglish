@@ -86,6 +86,7 @@ $alunos_associados = $stmt_alunos_associados->fetchAll(PDO::FETCH_ASSOC);
     <title>Gerenciar Alunos - <?= htmlspecialchars($nome_turma) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
     <style>
         :root {
             --cor-primaria: #0A1931;

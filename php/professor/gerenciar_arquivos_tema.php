@@ -317,6 +317,7 @@ function get_youtube_id($url) {
     <title>Gerenciar Arquivos: <?= htmlspecialchars($tema['titulo'] ?? 'Tema Inválido') ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
     <style>
         body {
             background-color: #FAF9F6;
