@@ -89,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
       <button type="submit" class="btn btn-login">ENTRAR</button>
     </form>
-    <a class="footer-text" href="index.php">← Home</a><br>
+    <a class="footer-text" href="../index.php">← Home</a><br>
     <a href="solicitar_reset.php" class="footer-text">Esqueceu sua senha?</a>
   </div>
 
