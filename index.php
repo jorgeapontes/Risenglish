@@ -155,6 +155,7 @@
                     <li><i class="fas fa-check"></i> Foco na comunicação, não em regras</li>
                     <li><i class="fas fa-check"></i> Evolução contínua e personalizada</li>
                     <li><i class="fas fa-check"></i> Microvitórias diárias que constroem fluência duradoura</li>
+                    <li><i class="fas fa-check"></i> Desenvolvimento emocional e confiança comunicativa</li>
                 </ul>
             </div>
         </div>
