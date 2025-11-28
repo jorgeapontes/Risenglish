@@ -62,6 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <title>Login - Risenglish</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../css/login.css">
+  <link rel="shortcut icon" href="../LogoRisenglish.png" type="image/x-icon">
 </head>
 
 <body>
