@@ -171,7 +171,8 @@ foreach ($turmas as $turma) {
         }
 
         .accordion-button {
-            background-color: #081d40;
+            /* background-color: #081d40; */
+            border: 2px solid #333
             color: white;
             font-weight: bold;
         }
@@ -182,8 +183,8 @@ foreach ($turmas as $turma) {
         }
 
         .accordion-button:hover {
-            background-color: #0a2a5c;
-            color: white;
+            /* background-color: #0a2a5c; */
+            /* color: white; */
             font-weight: bold;
         }
 
@@ -206,6 +207,8 @@ foreach ($turmas as $turma) {
             background-color: #f8f9fa;
         }
 
+
+        
         /* Badge personalizado */
         .badge.bg-light {
             background-color: white !important;
@@ -293,12 +296,12 @@ foreach ($turmas as $turma) {
                                             <?= htmlspecialchars($turma['nome_turma']) ?> 
                                             
                                             <br>
-                                            <small class="text-white opacity-75">
+                                            <small class="text-black opacity-75">
                                                 Professor: <?= htmlspecialchars($turma['nome_professor']) ?>
                                             </small>
                                         </div>
                                         <div class="end">
-                                            <span class="badge float-end bg-light text-dark ms-3"><?= $num_alunos ?> Aluno(s)</span>
+                                        <span class="badge float-end bg-light text-dark ms-3" style="border: 1px solid #081d40; border-radius: 4px;"><?= $num_alunos ?> Aluno(s)</span>
                                         </div>
                                     </button>
                                     
