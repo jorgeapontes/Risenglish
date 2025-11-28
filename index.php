@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Risenglish - English Learning</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="css/index.css">
     
 </head>
 <body>
@@ -26,7 +26,7 @@
                     <a href="#contact" class="nav-link">Contato</a>
                 </li>
                 <li class="nav-item">
-                    <a href="login.php" class="nav-link login-btn">Login</a>
+                    <a href="php/login.php" class="nav-link login-btn">Login</a>
                 </li>
             </ul>
             <div class="hamburger">
