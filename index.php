@@ -170,7 +170,7 @@
                         <img src="php/professora.jpg" alt="Professora Risenglish">
                         <div class="image-overlay">
                             <div class="experience-badge">
-                                <span>+ de 500 Alunos</span>
+                                <span>+ de 500 alunos</span>
                             </div>
                         </div>
                     </div>
