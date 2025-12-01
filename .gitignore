@@ -4,3 +4,4 @@
 
 # CRUCIAL: Ignorar arquivo de conexão com credenciais reais
 /php/includes/conexao.php
+/php/includes/email_config.php
