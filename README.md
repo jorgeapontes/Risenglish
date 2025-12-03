@@ -1,9 +1,9 @@
 # ✍️ Risenglish: Online English School
 
-[![Project Status](https://img.shields.io/badge/Status-Concluído-blue)](https://github.com/seu-usuario/seu-repositorio)
+[![Project Status](https://img.shields.io/badge/Status-Finished-blue)](https://github.com/seu-usuario/seu-repositorio)
 
 
-> Uma plataforma on-line para gerenciar aulas de ingês da escola Risenglish com foco em transparência e eficiência.
+> An online platform to manage English classes for Risenglish school with a focus on transparency and efficiency.
 
 ## ✨ Key Features
 
@@ -27,3 +27,4 @@
 * [MySQL/MariaDB]
 * [Composer]  (To manage PHP dependencies)
 * Servidor Web (Apache or Nginx, or use PHP's built-in server)
+
