@@ -228,6 +228,24 @@ if (isset($_GET['editar'])) {
         $abrir_modal_edicao = true;
     }
 }
+
+function renderTimePicker($id_prefix, $currentTime = '09:00') {
+    $parts = explode(':', $currentTime);
+    $h_sel = $parts[0];
+    $m_sel = $parts[1];
+    ?>
+    <div class="d-flex align-items-center gap-2">
+        <select class="form-select time-hour" data-prefix="<?= $id_prefix ?>" style="width: 80px;">
+            <?php for($i=0; $i<24; $i++) { $v = sprintf("%02d", $i); echo "<option value='$v' ".($v==$h_sel?'selected':'').">$v</option>"; } ?>
+        </select>
+        <strong>:</strong>
+        <select class="form-select time-minute" data-prefix="<?= $id_prefix ?>" style="width: 80px;">
+            <?php for($i=0; $i<60; $i+=5) { $v = sprintf("%02d", $i); echo "<option value='$v' ".($v==$m_sel?'selected':'').">$v</option>"; } ?>
+        </select>
+        <input type="hidden" name="horario" id="real_time_<?= $id_prefix ?>" value="<?= $currentTime ?>">
+    </div>
+    <?php
+}
 ?>
 
 <!DOCTYPE html>
@@ -521,9 +539,8 @@ if (isset($_GET['editar'])) {
                                     value="<?= date('Y-m-d') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="horario_unica" class="form-label">Horário <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" id="horario_unica" name="horario" required 
-                                    value="09:00">
+                            <label class="form-label">Horário</label>
+                            <?php renderTimePicker('unica', '09:00'); ?>
                         </div>
                     </div>
 
@@ -585,7 +602,15 @@ if (isset($_GET['editar'])) {
                                 <option value="sunday">Domingo</option>
                             </select>
                         </div>
+                        
                         <div class="col-md-6 mb-3">
+                            <label class="form-label">Horário</label>
+                             <?php renderTimePicker('recorrente', '09:00'); ?>
+                        
+                        
+                    </div>
+
+                    <div class="col-md-6 mb-3">
                             <label for="quantidade_semanas" class="form-label">Número de Semanas <span class="text-danger">*</span></label>
                             <select class="form-select" id="quantidade_semanas" name="quantidade_semanas" required>
                                 <option value="2">2 semanas</option>
@@ -593,13 +618,6 @@ if (isset($_GET['editar'])) {
                                 <option value="8">8 semanas (2 meses)</option>
                                 <option value="12">12 semanas (3 meses)</option>
                             </select>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="horario_recorrente" class="form-label">Horário <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" id="horario_recorrente" name="horario" required value="09:00">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Próximas Datas</label>
@@ -670,9 +688,8 @@ if (isset($_GET['editar'])) {
                                     value="<?= htmlspecialchars($aula_para_editar['data_aula'] ?? '') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="horario_editar" class="form-label">Horário <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" id="horario_editar" name="horario" required 
-                                    value="<?= htmlspecialchars(substr($aula_para_editar['horario'] ?? '00:00:00', 0, 5)) ?>">
+                            <label class="form-label">Horário</label>
+                            <?php renderTimePicker('editar', substr($aula_para_editar['horario'] ?? '09:00', 0, 5)); ?>
                         </div>
                     </div>
 
@@ -771,6 +788,14 @@ $(document).ready(function() {
     // Atualizar quantidade de aulas no texto informativo
     $('#quantidade_semanas').change(function() {
         $('#quantidade_aulas_span').text($(this).val());
+    });
+
+    // Sincroniza os selects de Hora/Minuto com o input oculto que o PHP lê
+    $('.time-hour, .time-minute').on('change', function() {
+    var prefix = $(this).data('prefix');
+    var h = $('.time-hour[data-prefix="'+prefix+'"]').val();
+    var m = $('.time-minute[data-prefix="'+prefix+'"]').val();
+    $('#real_time_' + prefix).val(h + ':' + m);
     });
 
     // Abrir modal de edição automaticamente se necessário
