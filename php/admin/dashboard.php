@@ -182,6 +182,7 @@ $nome_usuario = $_SESSION['user_nome'];
             <a href="gerenciar_turmas.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;&nbsp;Turmas</a>
             <a href="gerenciar_usuarios.php" class="rounded"><i class="fas fa-user"></i>&nbsp;&nbsp;Usuários</a>
             <a href="gerenciar_uteis.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Recomendações</a>
+            <a href="pagamentos.php" class="rounded"><i class="fas fa-dollar-sign"></i>&nbsp;&nbsp;Pagamentos</a>
         </div>
 
         <!-- Botão sair no rodapé -->
@@ -230,9 +231,9 @@ $nome_usuario = $_SESSION['user_nome'];
                 <div class="col-md-6">
                     <div class="card shadow">
                         <div class="card-body">
-                            <h5 class="card-title">Sair para login de Professor</h5>
-                            <p class="card-text">Clique aqui para ir para a tela de Login mais rápidamente.</p>
-                            <a href="../logout.php"  class="btn btn-acao"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+                            <h5 class="card-title">Pagamentos</h5>
+                            <p class="card-text">Gerencie os pagamentos.</p>
+                            <a href="pagamentos.php" class="btn btn-acao">Acessar</a>
                         </div>
                     </div>
                 </div>
