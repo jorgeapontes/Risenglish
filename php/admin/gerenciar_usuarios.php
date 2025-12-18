@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'admin') {
 
 $mensagem = '';
 $tipo_mensagem = '';
+$termo_pesquisa = '';
 
 // --- LÓGICA DE CRUD DE USUÁRIOS ---
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['acao'] == 'add_usuario' || $_POST['acao'] == 'editar_usuario')) {
@@ -82,18 +83,50 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
     }
 }
 
-// --- CONSULTAS ---
-$sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes FROM usuarios WHERE tipo_usuario = 'professor' ORDER BY nome";
-$professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
+// --- VERIFICAR SE HÁ PESQUISA ---
+if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
+    $termo_pesquisa = trim($_GET['pesquisa']);
+    $termo_like = "%" . $termo_pesquisa . "%";
+    
+    // --- CONSULTA PARA PESQUISAR PROFESSORES ---
+    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes 
+                        FROM usuarios 
+                        WHERE tipo_usuario = 'professor' 
+                        AND (nome LIKE :termo OR email LIKE :termo OR informacoes LIKE :termo)
+                        ORDER BY nome";
+    $stmt_professores = $pdo->prepare($sql_professores);
+    $stmt_professores->bindParam(':termo', $termo_like);
+    $stmt_professores->execute();
+    $professores = $stmt_professores->fetchAll(PDO::FETCH_ASSOC);
+    
+    // --- CONSULTA PARA PESQUISAR ALUNOS ---
+    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, 
+                          GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
+                   FROM usuarios u
+                   LEFT JOIN alunos_turmas at ON u.id = at.aluno_id
+                   LEFT JOIN turmas t ON at.turma_id = t.id
+                   WHERE u.tipo_usuario = 'aluno'
+                   AND (u.nome LIKE :termo OR u.email LIKE :termo OR u.informacoes LIKE :termo)
+                   GROUP BY u.id
+                   ORDER BY u.nome";
+    $stmt_alunos = $pdo->prepare($sql_alunos);
+    $stmt_alunos->bindParam(':termo', $termo_like);
+    $stmt_alunos->execute();
+    $alunos = $stmt_alunos->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    // --- CONSULTAS SEM PESQUISA (TODOS OS USUÁRIOS) ---
+    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes FROM usuarios WHERE tipo_usuario = 'professor' ORDER BY nome";
+    $professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
 
-$sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
-               FROM usuarios u
-               LEFT JOIN alunos_turmas at ON u.id = at.aluno_id
-               LEFT JOIN turmas t ON at.turma_id = t.id
-               WHERE u.tipo_usuario = 'aluno'
-               GROUP BY u.id
-               ORDER BY u.nome";
-$alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
+    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
+                   FROM usuarios u
+                   LEFT JOIN alunos_turmas at ON u.id = at.aluno_id
+                   LEFT JOIN turmas t ON at.turma_id = t.id
+                   WHERE u.tipo_usuario = 'aluno'
+                   GROUP BY u.id
+                   ORDER BY u.nome";
+    $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -169,16 +202,10 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .main-content {
-            margin-left: 280px;
-            padding: 30px;
-            background-color: white;
-            min-height: 100vh;
-        }
-
-        .main-content {
             margin-left: 16.666667%; /* Compensa a largura da sidebar fixa */
             width: 83.333333%;
             animation: fadeIn 0.5s ease;
+            padding: 30px;
         }
 
         h1, h2, h3, h4, h6 {
@@ -358,15 +385,96 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
             font-size: 0.9em;
             line-height: 1.4;
         }
+        
+        /* Estilos para a barra de pesquisa */
+        .search-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .search-input-group {
+            position: relative;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            z-index: 5;
+        }
+        
+        .search-input {
+            padding-left: 45px;
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            height: 45px;
+        }
+        
+        .search-input:focus {
+            border-color: #081d40;
+            box-shadow: 0 0 0 0.2rem rgba(8, 29, 64, 0.25);
+        }
+        
+        .search-results-info {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .search-results-info .badge {
+            background-color: #081d40 !important;
+            color: white !important;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #dee2e6;
+        }
+        
+        /* Estilo para destacar o termo de pesquisa */
+        mark.bg-warning {
+            background-color: #ffc107 !important;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        /* Estilos para o cabeçalho com pesquisa */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .page-header h1 {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
 
 <div class="d-flex">
     <div class="col-md-2 d-flex flex-column sidebar p-3">
-        <!-- Nome do professor -->
+        <!-- Nome do admin -->
         <div class="mb-4 text-center">
-            <h5 class="mt-4"><?php echo $_SESSION['user_nome'] ?? 'Professor'; ?></h5>
+            <h5 class="mt-4"><?php echo $_SESSION['user_nome'] ?? 'Admin'; ?></h5>
         </div>
 
         <!-- Menu centralizado verticalmente -->
@@ -384,7 +492,10 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <div class="main-content flex-grow-1">
-        <h1 class="mb-4">Gerenciar Usuários</h1>
+        <div class="page-header">
+            <h1>Gerenciar Usuários</h1>
+            
+        </div>
         
         <?php if ($mensagem): ?>
             <div class="alert alert-<?= $tipo_mensagem ?> alert-dismissible fade show" role="alert">
@@ -393,43 +504,98 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
             </div>
         <?php endif; ?>
 
+        
+
         <button class="btn btn-acao mb-4" data-bs-toggle="modal" data-bs-target="#modalAddUsuario" onclick="resetForm()">
             <i class="fas fa-plus"></i> Cadastrar Novo Usuário (Prof/Aluno)
         </button>
 
+        <!-- Barra de Pesquisa -->
+        <div class="search-container">
+            <form method="GET" action="" class="mb-0">
+                <div class="search-input-group">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           name="pesquisa" 
+                           class="form-control search-input" 
+                           placeholder="Pesquisar por nome, email ou informações de usuários..." 
+                           value="<?php echo htmlspecialchars($termo_pesquisa); ?>"
+                           autocomplete="off">
+                </div>
+                
+                <?php if (!empty($termo_pesquisa)): ?>
+                    <div class="search-results-info mt-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Pesquisando por: <strong>"<?php echo htmlspecialchars($termo_pesquisa); ?>"</strong>
+                        <span class="badge ms-2"><?php echo (count($professores) + count($alunos)); ?> usuário(s) encontrado(s)</span>
+                          <?php if (!empty($termo_pesquisa)): ?>
+                <a href="gerenciar_usuarios.php" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i> Limpar Pesquisa
+                </a>
+            <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            </form>
+        </div>
+
         <ul class="nav nav-tabs mb-4" id="usuarioTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="professores-tab" data-bs-toggle="tab" data-bs-target="#professores" type="button" role="tab" aria-controls="professores" aria-selected="true">Professores</button>
+                <button class="nav-link active" id="alunos-tab" data-bs-toggle="tab" data-bs-target="#alunos" type="button" role="tab" aria-controls="alunos" aria-selected="true">
+                    Alunos <span class="badge bg-secondary ms-1"><?php echo count($alunos); ?></span>
+                </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="alunos-tab" data-bs-toggle="tab" data-bs-target="#alunos" type="button" role="tab" aria-controls="alunos" aria-selected="false">Alunos</button>
+                <button class="nav-link" id="professores-tab" data-bs-toggle="tab" data-bs-target="#professores" type="button" role="tab" aria-controls="professores" aria-selected="false">
+                    Professores <span class="badge bg-secondary ms-1"><?php echo count($professores); ?></span>
+                </button>
             </li>
         </ul>
 
         <div class="tab-content" id="usuarioTabContent">
             <div class="tab-pane fade show active" id="professores" role="tabpanel" aria-labelledby="professores-tab">
-                <h3>Lista de Professores</h3>
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered align-middle">
-                        <thead class="bg-light">
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Informações</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($professores)): ?>
-                                <tr><td colspan="4" class="text-center">Nenhum professor cadastrado.</td></tr>
-                            <?php else: ?>
-                                <?php foreach ($professores as $professor): ?>
+                <h3>Professores <?php if (!empty($termo_pesquisa)): ?><small class="text-muted">(Resultados da pesquisa)</small><?php endif; ?></h3>
+                
+                <?php if (empty($professores) && !empty($termo_pesquisa)): ?>
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h4 class="mt-3">Nenhum professor encontrado</h4>
+                        <p class="text-muted">Não encontramos professores com o termo "<?php echo htmlspecialchars($termo_pesquisa); ?>"</p>
+                    </div>
+                <?php elseif (empty($professores)): ?>
+                    <div class="alert alert-info">
+                        Nenhum professor cadastrado.
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered align-middle">
+                            <thead class="bg-light">
                                 <tr>
-                                    <td><?= htmlspecialchars($professor['nome']) ?></td>
-                                    <td><?= htmlspecialchars($professor['email']) ?></td>
+                                    <th>Nome</th>
+                                    <th>Email</th>
+                                    <th>Informações</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($professores as $professor): 
+                                    // Destacar o termo de pesquisa nos resultados
+                                    $nome_professor = htmlspecialchars($professor['nome']);
+                                    $email_professor = htmlspecialchars($professor['email']);
+                                    $informacoes_professor = htmlspecialchars($professor['informacoes'] ?: 'Sem informações adicionais');
+                                    
+                                    if (!empty($termo_pesquisa)) {
+                                        $termo_highlight = preg_quote(htmlspecialchars($termo_pesquisa), '/');
+                                        $nome_professor = preg_replace("/($termo_highlight)/i", '<mark class="bg-warning">$1</mark>', $nome_professor);
+                                        $email_professor = preg_replace("/($termo_highlight)/i", '<mark class="bg-warning">$1</mark>', $email_professor);
+                                        $informacoes_professor = preg_replace("/($termo_highlight)/i", '<mark class="bg-warning">$1</mark>', $informacoes_professor);
+                                    }
+                                ?>
+                                <tr>
+                                    <td><?= $nome_professor ?></td>
+                                    <td><?= $email_professor ?></td>
                                     <td>
                                         <div class="informacoes-text">
-                                            <?= htmlspecialchars($professor['informacoes'] ?: 'Sem informações adicionais') ?>
+                                            <?= $informacoes_professor ?>
                                         </div>
                                     </td>
                                     <td>
@@ -444,40 +610,63 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="tab-pane fade" id="alunos" role="tabpanel" aria-labelledby="alunos-tab">
-                <h3>Lista de Alunos</h3>
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered align-middle">
-                        <thead class="bg-light">
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Informações</th>
-                                <th>Turmas</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($alunos)): ?>
-                                <tr><td colspan="5" class="text-center">Nenhum aluno cadastrado.</td></tr>
-                            <?php else: ?>
-                                <?php foreach ($alunos as $aluno): ?>
+                <h3>Alunos <?php if (!empty($termo_pesquisa)): ?><small class="text-muted">(Resultados da pesquisa)</small><?php endif; ?></h3>
+                
+                <?php if (empty($alunos) && !empty($termo_pesquisa)): ?>
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h4 class="mt-3">Nenhum aluno encontrado</h4>
+                        <p class="text-muted">Não encontramos alunos com o termo "<?php echo htmlspecialchars($termo_pesquisa); ?>"</p>
+                    </div>
+                <?php elseif (empty($alunos)): ?>
+                    <div class="alert alert-info">
+                        Nenhum aluno cadastrado.
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered align-middle">
+                            <thead class="bg-light">
                                 <tr>
-                                    <td><?= htmlspecialchars($aluno['nome']) ?></td>
-                                    <td><?= htmlspecialchars($aluno['email']) ?></td>
+                                    <th>Nome</th>
+                                    <th>Email</th>
+                                    <th>Informações</th>
+                                    <th>Turmas</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($alunos as $aluno): 
+                                    // Destacar o termo de pesquisa nos resultados
+                                    $nome_aluno = htmlspecialchars($aluno['nome']);
+                                    $email_aluno = htmlspecialchars($aluno['email']);
+                                    $informacoes_aluno = htmlspecialchars($aluno['informacoes'] ?: 'Sem informações adicionais');
+                                    $turmas_aluno = htmlspecialchars($aluno['turmas_associadas'] ?: 'Nenhuma');
+                                    
+                                    if (!empty($termo_pesquisa)) {
+                                        $termo_highlight = preg_quote(htmlspecialchars($termo_pesquisa), '/');
+                                        $nome_aluno = preg_replace("/($termo_highlight)/i", '<mark class="bg-warning">$1</mark>', $nome_aluno);
+                                        $email_aluno = preg_replace("/($termo_highlight)/i", '<mark class="bg-warning">$1</mark>', $email_aluno);
+                                        $informacoes_aluno = preg_replace("/($termo_highlight)/i", '<mark class="bg-warning">$1</mark>', $informacoes_aluno);
+                                        $turmas_aluno = preg_replace("/($termo_highlight)/i", '<mark class="bg-warning">$1</mark>', $turmas_aluno);
+                                    }
+                                ?>
+                                <tr>
+                                    <td><?= $nome_aluno ?></td>
+                                    <td><?= $email_aluno ?></td>
                                     <td>
                                         <div class="informacoes-text">
-                                            <?= htmlspecialchars($aluno['informacoes'] ?: 'Sem informações adicionais') ?>
+                                            <?= $informacoes_aluno ?>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-secondary"><?= htmlspecialchars($aluno['turmas_associadas'] ?: 'Nenhuma') ?></span>
+                                        <span class="badge bg-secondary"><?= $turmas_aluno ?></span>
                                     </td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-primary me-2" 
@@ -491,10 +680,10 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -597,6 +786,15 @@ $alunos = $pdo->query($sql_alunos)->fetchAll(PDO::FETCH_ASSOC);
             document.getElementById('formRemover').submit();
         }
     }
+    
+    // Auto-focus na barra de pesquisa se houver um termo de pesquisa
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="pesquisa"]');
+        if (searchInput && searchInput.value) {
+            searchInput.focus();
+            searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+        }
+    });
 </script>
 </body>
 </html>
