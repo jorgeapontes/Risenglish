@@ -10,55 +10,126 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
 
 $professor_id = $_SESSION['user_id'];
 
-// --- CONSULTA PARA LISTAR TURMAS E ALUNOS ---
+// Variável para armazenar o termo de pesquisa
+$termo_pesquisa = '';
+$resultados_filtrados = [];
 
-// 1. Puxa todas as turmas que o professor gerencia E O NOME DO PROFESSOR
-$sql_turmas = "
-    SELECT 
-        t.id, t.nome_turma, t.inicio_turma, u.nome AS nome_professor
-    FROM 
-        turmas t
-    JOIN 
-        usuarios u ON t.professor_id = u.id
-    WHERE 
-        t.professor_id = :professor_id 
-    ORDER BY 
-        t.nome_turma ASC
-";
-$stmt_turmas = $pdo->prepare($sql_turmas);
-$stmt_turmas->bindParam(':professor_id', $professor_id);
-$stmt_turmas->execute();
-$turmas = $stmt_turmas->fetchAll(PDO::FETCH_ASSOC);
-
-// 2. Para cada turma, busca os alunos associados
-$turmas_com_alunos = [];
-
-foreach ($turmas as $turma) {
-    $turma['alunos'] = [];
+// Verificar se há um termo de pesquisa enviado via GET
+if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
+    $termo_pesquisa = trim($_GET['pesquisa']);
     
-    // Consulta para buscar os alunos na turma
-    $sql_alunos = "
-        SELECT 
-            u.id AS aluno_id, 
-            u.nome AS nome_aluno,
-            u.email AS email_aluno
+    // --- CONSULTA PARA PESQUISAR TURMAS E ALUNOS ---
+    $sql_pesquisa = "
+        SELECT DISTINCT
+            t.id,
+            t.nome_turma,
+            t.inicio_turma,
+            u.nome AS nome_professor
         FROM 
-            alunos_turmas at
+            turmas t
         JOIN 
-            usuarios u ON at.aluno_id = u.id
+            usuarios u ON t.professor_id = u.id
+        LEFT JOIN 
+            alunos_turmas at ON t.id = at.turma_id
+        LEFT JOIN 
+            usuarios a ON at.aluno_id = a.id AND a.tipo_usuario = 'aluno'
         WHERE 
-            at.turma_id = :turma_id
-            AND u.tipo_usuario = 'aluno'
-        ORDER BY
-            u.nome ASC
+            t.professor_id = :professor_id 
+            AND (
+                t.nome_turma LIKE :termo
+                OR a.nome LIKE :termo
+                OR a.email LIKE :termo
+            )
+        ORDER BY 
+            t.nome_turma ASC
     ";
-    $stmt_alunos = $pdo->prepare($sql_alunos);
-    $stmt_alunos->bindParam(':turma_id', $turma['id']);
-    $stmt_alunos->execute();
-    $turma['alunos'] = $stmt_alunos->fetchAll(PDO::FETCH_ASSOC);
-
-    $turmas_com_alunos[] = $turma;
+    
+    $stmt_pesquisa = $pdo->prepare($sql_pesquisa);
+    $termo_like = "%" . $termo_pesquisa . "%";
+    $stmt_pesquisa->bindParam(':professor_id', $professor_id);
+    $stmt_pesquisa->bindParam(':termo', $termo_like);
+    $stmt_pesquisa->execute();
+    $turmas_pesquisa = $stmt_pesquisa->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Para cada turma encontrada na pesquisa, busca os alunos (todos ou filtrados pelo termo)
+    foreach ($turmas_pesquisa as $turma) {
+        $sql_alunos_turma = "
+            SELECT 
+                u.id AS aluno_id, 
+                u.nome AS nome_aluno,
+                u.email AS email_aluno
+            FROM 
+                alunos_turmas at
+            JOIN 
+                usuarios u ON at.aluno_id = u.id
+            WHERE 
+                at.turma_id = :turma_id
+                AND u.tipo_usuario = 'aluno'
+                AND (
+                    u.nome LIKE :termo_aluno
+                    OR u.email LIKE :termo_aluno
+                    OR :termo_global LIKE '%'  -- Permite mostrar todos alunos da turma se a turma foi encontrada
+                )
+            ORDER BY
+                u.nome ASC
+        ";
+        
+        $stmt_alunos_turma = $pdo->prepare($sql_alunos_turma);
+        $stmt_alunos_turma->bindParam(':turma_id', $turma['id']);
+        $stmt_alunos_turma->bindParam(':termo_aluno', $termo_like);
+        $stmt_alunos_turma->bindParam(':termo_global', $termo_pesquisa);
+        $stmt_alunos_turma->execute();
+        $turma['alunos'] = $stmt_alunos_turma->fetchAll(PDO::FETCH_ASSOC);
+        
+        $resultados_filtrados[] = $turma;
+    }
+} else {
+    // --- CONSULTA NORMAL PARA LISTAR TODAS AS TURMAS E ALUNOS ---
+    $sql_turmas = "
+        SELECT 
+            t.id, t.nome_turma, t.inicio_turma, u.nome AS nome_professor
+        FROM 
+            turmas t
+        JOIN 
+            usuarios u ON t.professor_id = u.id
+        WHERE 
+            t.professor_id = :professor_id 
+        ORDER BY 
+            t.nome_turma ASC
+    ";
+    $stmt_turmas = $pdo->prepare($sql_turmas);
+    $stmt_turmas->bindParam(':professor_id', $professor_id);
+    $stmt_turmas->execute();
+    $turmas = $stmt_turmas->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Para cada turma, busca os alunos associados
+    foreach ($turmas as $turma) {
+        $sql_alunos = "
+            SELECT 
+                u.id AS aluno_id, 
+                u.nome AS nome_aluno,
+                u.email AS email_aluno
+            FROM 
+                alunos_turmas at
+            JOIN 
+                usuarios u ON at.aluno_id = u.id
+            WHERE 
+                at.turma_id = :turma_id
+                AND u.tipo_usuario = 'aluno'
+            ORDER BY
+                u.nome ASC
+        ";
+        $stmt_alunos = $pdo->prepare($sql_alunos);
+        $stmt_alunos->bindParam(':turma_id', $turma['id']);
+        $stmt_alunos->execute();
+        $turma['alunos'] = $stmt_alunos->fetchAll(PDO::FETCH_ASSOC);
+        
+        $resultados_filtrados[] = $turma;
+    }
 }
+
+// Variável para exibir os resultados
+$turmas_com_alunos = $resultados_filtrados;
 
 ?>
 <!DOCTYPE html>
@@ -170,28 +241,67 @@ foreach ($turmas as $turma) {
             color: white;
         }
 
+        /* CORREÇÃO AQUI: Estilos mais simples para o accordion */
         .accordion-button {
-            /* background-color: #081d40; */
-            border: 2px solid #333
-            color: white;
+            background-color: #f8f9fa;
+            color: #333;
             font-weight: bold;
+            border: 1px solid #dee2e6;
         }
 
         .accordion-button:not(.collapsed) {
-            background-color: #0a2a5c;
-            color: white;
+            background-color: #e9ecef;
+            color: #333;
+            box-shadow: none;
+            border-bottom: none;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.25rem rgba(192, 57, 43, 0.25);
+            border-color: #c0392b;
         }
 
         .accordion-button:hover {
-            /* background-color: #0a2a5c; */
-            /* color: white; */
-            font-weight: bold;
+            background-color: #e9ecef;
+            color: #333;
+        }
+
+        /* Garantindo que o conteúdo fique visível */
+        .accordion-button i.fa-graduation-cap {
+            color: #081d40;
+        }
+
+        .accordion-button small {
+            color: #6c757d !important;
+            opacity: 1 !important;
+        }
+
+        .accordion-button:not(.collapsed) small {
+            color: #6c757d !important;
+        }
+
+        /* Estilo para a badge de contagem de alunos */
+        .aluno-badge {
+            position: absolute;
+            right: 1300px; /* Posição ajustada para não sobrepor o botão gerenciar */
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: white;
+            color: #081d40;
+            border: 1px solid #081d40;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            font-weight: normal;
         }
 
         .accordion-item {
             border: 1px solid #dee2e6;
             border-radius: 5px;
-            margin-bottom: 3px;
+            margin-bottom: 8px;
+            overflow: hidden;
         }
 
         .aluno-item {
@@ -206,13 +316,72 @@ foreach ($turmas as $turma) {
         .aluno-item:hover {
             background-color: #f8f9fa;
         }
-
-
         
-        /* Badge personalizado */
-        .badge.bg-light {
-            background-color: white !important;
-            color: #081d40 !important;
+        /* Estilos para a barra de pesquisa */
+        .search-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .search-input-group {
+            position: relative;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            z-index: 5;
+        }
+        
+        .search-input {
+            padding-left: 45px;
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            height: 45px;
+        }
+        
+        .search-input:focus {
+            border-color: #081d40;
+            
+        }
+        
+        .search-results-info {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .search-results-info .badge {
+            background-color: #081d40 !important;
+            color: white !important;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #dee2e6;
+        }
+        
+        /* Estilo para destacar o termo de pesquisa */
+        mark.bg-warning {
+            background-color: #ffc107 !important;
+            padding: 2px 4px;
+            border-radius: 3px;
         }
 
         /* Responsividade */
@@ -239,6 +408,24 @@ foreach ($turmas as $turma) {
                 transform: none;
                 margin-top: 10px;
                 width: 100%;
+            }
+            
+            .search-container {
+                margin-top: 15px;
+            }
+            
+            .aluno-badge {
+                position: relative;
+                right: auto;
+                top: auto;
+                transform: none;
+                display: inline-block;
+                margin-left: 10px;
+                margin-top: 5px;
+            }
+            
+            .accordion-button {
+                padding-right: 15px;
             }
         }
     </style>
@@ -269,9 +456,47 @@ foreach ($turmas as $turma) {
 
             <!-- Conteúdo principal -->
             <div class="col-md-10 main-content p-4">
-                <h2 class="mb-4 mt-3">Gerenciamento de Turmas</h2>
+                <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+                    <h2 class="mb-0">Gerenciamento de Turmas</h2>
+                    <?php if (!empty($termo_pesquisa)): ?>
+                        <a href="gerenciar_alunos.php" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i> Limpar Pesquisa
+                        </a>
+                    <?php endif; ?>
+                </div>
                 
-                <?php if (empty($turmas_com_alunos)): ?>
+                <!-- Barra de Pesquisa -->
+                <div class="search-container">
+                    <form method="GET" action="" class="mb-0">
+                        <div class="search-input-group">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" 
+                                   name="pesquisa" 
+                                   class="form-control search-input" 
+                                   placeholder="Pesquisar por nome de turma, nome de aluno ou email..." 
+                                   value="<?php echo htmlspecialchars($termo_pesquisa); ?>"
+                                   autocomplete="off">
+                        </div>
+                        <?php if (!empty($termo_pesquisa)): ?>
+                            <div class="search-results-info mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Pesquisando por: <strong>"<?php echo htmlspecialchars($termo_pesquisa); ?>"</strong>
+                                <span class="badge ms-2"><?php echo count($turmas_com_alunos); ?> turma(s) encontrada(s)</span>
+                            </div>
+                        <?php endif; ?>
+                    </form>
+                </div>
+                
+                <?php if (empty($turmas_com_alunos) && !empty($termo_pesquisa)): ?>
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h4 class="mt-3">Nenhum resultado encontrado</h4>
+                        <p class="text-muted">Não encontramos turmas ou alunos com o termo "<?php echo htmlspecialchars($termo_pesquisa); ?>"</p>
+                        <a href="gerenciar_alunos.php" class="btn btn-outline-danger">
+                             Ver todas as turmas
+                        </a>
+                    </div>
+                <?php elseif (empty($turmas_com_alunos)): ?>
                     <div class="alert alert-info">
                         Você ainda não possui turmas cadastradas ou associadas ao seu perfil.
                     </div>
@@ -283,26 +508,33 @@ foreach ($turmas as $turma) {
                             $heading_id = "heading" . $turma_id;
                             $num_alunos = count($turma['alunos']);
                             
+                            // Destacar o termo de pesquisa no nome da turma
+                            $nome_turma_display = htmlspecialchars($turma['nome_turma']);
+                            $nome_professor_display = htmlspecialchars($turma['nome_professor']);
+                            
+                            if (!empty($termo_pesquisa)) {
+                                $termo_highlight = preg_quote(htmlspecialchars($termo_pesquisa), '/');
+                                $nome_turma_display = preg_replace("/($termo_highlight)/i", '<mark class="bg-warning">$1</mark>', $nome_turma_display);
+                                $nome_professor_display = preg_replace("/($termo_highlight)/i", '<mark class="bg-warning">$1</mark>', $nome_professor_display);
+                            }
                         ?>
                             <div class="accordion-item">
                                 <h2 class="accordion-header accordion-header-custom" id="<?= $heading_id ?>">
-                                    
                                     <button class="container-fluid accordion-button collapsed" type="button" 
                                         data-bs-toggle="collapse" data-bs-target="#<?= $collapse_id ?>" 
-                                        aria-expanded="<?= $index === 0 ? 'true' : 'false' ?>" aria-controls="<?= $collapse_id ?>">
+                                        aria-expanded="false" aria-controls="<?= $collapse_id ?>">
                                         
-                                        <span class="me-3"><i class="fas fa-graduation-cap"></i></span>
-                                        <div>
-                                            <?= htmlspecialchars($turma['nome_turma']) ?> 
-                                            
+                                        <span class="me-2"><i class="fas fa-graduation-cap"></i></span>
+                                        <div class="text-start flex-grow-1">
+                                            <span class="d-inline-block fw-bold"><?= $nome_turma_display ?></span> 
                                             <br>
-                                            <small class="text-black opacity-75">
-                                                Professor: <?= htmlspecialchars($turma['nome_professor']) ?>
+                                            <small class="text-muted d-block">
+                                                Professor: <?= $nome_professor_display ?>
                                             </small>
                                         </div>
-                                        <div class="end">
-                                        <span class="badge float-end bg-light text-dark ms-3" style="border: 1px solid #081d40; border-radius: 4px;"><?= $num_alunos ?> Aluno(s)</span>
-                                        </div>
+                                        <span class="aluno-badge">
+                                            <?= $num_alunos ?> Aluno(s)
+                                        </span>
                                     </button>
                                     
                                     <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>" class="btn btn-sm btn-gerenciar" title="Gerenciar Turma e Aulas">
@@ -312,19 +544,32 @@ foreach ($turmas as $turma) {
                                 <div id="<?= $collapse_id ?>" class="accordion-collapse collapse" aria-labelledby="<?= $heading_id ?>" data-bs-parent="#accordionTurmas">
                                     <div class="accordion-body p-0">
                                         <?php if ($num_alunos > 0): ?>
-                                            <ul class="list-unstyled mb-0">
-                                                <?php foreach ($turma['alunos'] as $aluno): ?>
-                                                    <li class="aluno-item d-flex justify-content-between align-items-center">
-                                                        <div>
-                                                            <i class="fas fa-user-circle me-2" style="color: #c0392b;"></i> 
-                                                            <strong><?= htmlspecialchars($aluno['nome_aluno']) ?></strong>
-                                                        </div>
-                                                        <small class="text-muted"><?= htmlspecialchars($aluno['email_aluno']) ?></small>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ul>
+                                            <div class="p-3 bg-light border-top">
+                                                <h6 class="mb-3"><i class="fas fa-users me-2 text-danger" style="color: #081d40;"></i> Alunos desta turma:</h6>
+                                                <ul class="list-unstyled mb-0">
+                                                    <?php foreach ($turma['alunos'] as $aluno): 
+                                                        // Destacar o termo de pesquisa nos resultados
+                                                        $nome_aluno = htmlspecialchars($aluno['nome_aluno']);
+                                                        $email_aluno = htmlspecialchars($aluno['email_aluno']);
+                                                        
+                                                        if (!empty($termo_pesquisa)) {
+                                                            $termo_highlight = preg_quote(htmlspecialchars($termo_pesquisa), '/');
+                                                            $nome_aluno = preg_replace("/($termo_highlight)/i", '<mark class="bg-warning">$1</mark>', $nome_aluno);
+                                                            $email_aluno = preg_replace("/($termo_highlight)/i", '<mark class="bg-warning">$1</mark>', $email_aluno);
+                                                        }
+                                                    ?>
+                                                        <li class="aluno-item d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <i class="fas fa-user-circle me-2" style="color: #081d40;"></i> 
+                                                                <strong><?= $nome_aluno ?></strong>
+                                                            </div>
+                                                            <small class="text-muted"><?= $email_aluno ?></small>
+                                                        </li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            </div>
                                         <?php else: ?>
-                                            <p class="p-3 text-center text-muted m-0">
+                                            <p class="p-3 text-center text-muted m-0 bg-light border-top">
                                                 <i class="fas fa-exclamation-circle me-2"></i> Esta turma ainda não tem alunos associados.
                                             </p>
                                         <?php endif; ?>
@@ -333,16 +578,40 @@ foreach ($turmas as $turma) {
                             </div>
                         <?php endforeach; ?>
                     </div>
+                    
+                    <?php if (!empty($termo_pesquisa)): ?>
+                        <div class="alert alert-light border mt-3">
+                            <i class="fas fa-lightbulb me-2 text-warning"></i>
+                            <small>Os termos pesquisados estão destacados em <mark class="bg-warning">amarelo</mark> nos resultados acima.</small>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
 
-                <p class="mt-1 text-muted">
-                    &nbsp;* Clique no nome da turma para ver a lista de alunos. Clique em "Gerenciar" para ver o calendário de aulas.
-                </p>
-                
+            
             </div>
         </div>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-focus na barra de pesquisa se houver um termo de pesquisa
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[name="pesquisa"]');
+            if (searchInput && searchInput.value) {
+                searchInput.focus();
+                searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+            }
+            
+            // Expandir automaticamente o primeiro resultado se estiver pesquisando
+            const urlParams = new URLSearchParams(window.location.search);
+            const pesquisa = urlParams.get('pesquisa');
+            if (pesquisa && document.querySelector('.accordion-button')) {
+                const firstAccordionButton = document.querySelector('.accordion-button');
+                if (firstAccordionButton && firstAccordionButton.getAttribute('aria-expanded') === 'false') {
+                    firstAccordionButton.click();
+                }
+            }
+        });
+    </script>
 </body>
 </html>
