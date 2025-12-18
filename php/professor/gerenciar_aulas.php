@@ -338,7 +338,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
         
         .btn-success:hover {
             background-color: #218838;
-            border-color: #1e7e34;
+            border-color: #218838;
         }
 
         #botao-sair {

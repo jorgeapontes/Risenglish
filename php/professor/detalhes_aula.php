@@ -103,6 +103,13 @@ foreach ($temas as $tema) {
         }
     }
 }
+
+// Função para converter URLs em links clicáveis
+function makeLinksClickable($text) {
+    $pattern = '/(https?:\/\/[^\s]+)/';
+    $replacement = '<a href="$1" target="_blank" class="link-descricao">$1</a>';
+    return preg_replace($pattern, $replacement, htmlspecialchars($text));
+}
 ?>
 
 <!DOCTYPE html>
@@ -168,6 +175,16 @@ foreach ($temas as $tema) {
             background-color: #a93226;
             border-color: #a93226;
         }
+        .btn-warning {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        .btn-warning:hover {
+            background-color: #218838;
+            border-color: #218838;
+            color: white;
+        }
         .conteudo-item {
             padding: 10px 0;
             border-bottom: 1px solid #eee;
@@ -182,6 +199,15 @@ foreach ($temas as $tema) {
         }
         .link-tema:hover {
             text-decoration: underline;
+        }
+        .link-descricao {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .link-descricao:hover {
+            text-decoration: underline;
+            color: #0a58ca;
         }
         .planejado {
             background-color: #f0fff0;
@@ -260,6 +286,13 @@ foreach ($temas as $tema) {
             text-decoration: underline;
             color: #0a58ca;
         }
+        .modal-header {
+            background-color: #081d40;
+            color: white;
+        }
+        .btn-group-actions {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -283,9 +316,17 @@ foreach ($temas as $tema) {
             <div class="col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h1 style="color: #081d40;">Detalhes da Aula</h1>
-                    <a href="detalhes_turma.php?turma_id=<?= $detalhes_aula['turma_id'] ?>" class="btn btn-secondary">
-    <i class="fas fa-arrow-left me-2"></i> Voltar para Turma
-</a>
+                    <div>
+                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editarAulaModal">
+                            <i class="fas fa-edit me-2"></i> Editar Aula
+                        </button>
+                        <button class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#excluirAulaModal">
+                            <i class="fas fa-trash me-2"></i> Excluir Aula
+                        </button>
+                        <a href="detalhes_turma.php?turma_id=<?= $detalhes_aula['turma_id'] ?>" class="btn btn-secondary ms-2">
+                            <i class="fas fa-arrow-left me-2"></i> Voltar para Turma
+                        </a>
+                    </div>
                 </div>
                 
                 <div id="ajax-message-container"></div>
@@ -297,7 +338,16 @@ foreach ($temas as $tema) {
                                 <p class="mb-1"><strong>ID da Aula:</strong> <?= $detalhes_aula['aula_id'] ?></p>
                                 <p class="mb-1"><strong>Professor:</strong> <?= htmlspecialchars($detalhes_aula['nome_professor']) ?></p>
                                 <p class="mb-1"><strong>Tópico:</strong> <?= htmlspecialchars($detalhes_aula['titulo_aula']) ?></p>
-                                <p class="mb-1"><strong>Descrição:</strong> <?= htmlspecialchars($detalhes_aula['desc_aula'] ?? 'N/A') ?></p>
+                                <p class="mb-1"><strong>Descrição:</strong> 
+                                    <?php 
+                                        $descricao = $detalhes_aula['desc_aula'] ?? 'N/A';
+                                        if ($descricao !== 'N/A') {
+                                            echo makeLinksClickable($descricao);
+                                        } else {
+                                            echo 'N/A';
+                                        }
+                                    ?>
+                                </p>
                             </div>
                             <div class="col-md-6">
                                 <p class="mb-1"><strong>Turma:</strong> <?= htmlspecialchars($detalhes_aula['nome_turma']) ?></p>
@@ -457,7 +507,7 @@ foreach ($temas as $tema) {
                                     
                                     <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>" 
                                         data-conteudo-id="<?= $tema['tema_id'] ?>" 
-                                        data-planejado="<?= $tema['planejado'] ?>"
+                                        data-planejado="<?= $tema['planejado'] ?>" 
                                         data-tipo="tema">
                                         
                                         <div class="col-1 text-center">
@@ -466,9 +516,9 @@ foreach ($temas as $tema) {
                                                     type="checkbox" 
                                                     role="switch" 
                                                     id="switch_<?= $tema['tema_id'] ?>" 
-                                                    data-aula-id="<?= $detalhes_aula['aula_id'] ?>"
-                                                    data-conteudo-id="<?= $tema['tema_id'] ?>"
-                                                    data-tipo="tema"
+                                                    data-aula-id="<?= $detalhes_aula['aula_id'] ?>" 
+                                                    data-conteudo-id="<?= $tema['tema_id'] ?>" 
+                                                    data-tipo="tema" 
                                                     <?= $is_planejado ? 'checked' : '' ?>>
                                                 <label class="form-check-label small status-label" for="switch_<?= $tema['tema_id'] ?>">
                                                     <?= $is_planejado ? 'Sim' : 'Não' ?>
@@ -516,7 +566,7 @@ foreach ($temas as $tema) {
                                                 ?>
                                                 <div class="conteudo-item subpasta-item row mx-0 align-items-center <?= $subpasta_planejado_class ?>" 
                                                     data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
-                                                    data-planejado="<?= $subpasta['planejado'] ?>"
+                                                    data-planejado="<?= $subpasta['planejado'] ?>" 
                                                     data-tipo="subpasta">
                                                     
                                                     <div class="col-1 text-center">
@@ -525,9 +575,9 @@ foreach ($temas as $tema) {
                                                                 type="checkbox" 
                                                                 role="switch" 
                                                                 id="switch_<?= $subpasta['subpasta_id'] ?>" 
-                                                                data-aula-id="<?= $detalhes_aula['aula_id'] ?>"
-                                                                data-conteudo-id="<?= $subpasta['subpasta_id'] ?>"
-                                                                data-tipo="subpasta"
+                                                                data-aula-id="<?= $detalhes_aula['aula_id'] ?>" 
+                                                                data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
+                                                                data-tipo="subpasta" 
                                                                 <?= $is_subpasta_planejada ? 'checked' : '' ?>>
                                                             <label class="form-check-label small status-label" for="switch_<?= $subpasta['subpasta_id'] ?>">
                                                                 <?= $is_subpasta_planejada ? 'Sim' : 'Não' ?>
@@ -571,271 +621,466 @@ foreach ($temas as $tema) {
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-function displayAlert(message, type) {
-    const container = document.getElementById('ajax-message-container');
-    const alertHtml = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <!-- Modal Editar Aula -->
+    <div class="modal fade" id="editarAulaModal" tabindex="-1" aria-labelledby="editarAulaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editarAulaModalLabel">Editar Detalhes da Aula</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formEditarAula" method="POST" action="ajax_editar_aula.php">
+                    <div class="modal-body">
+                        <div id="editarAulaMessageContainer"></div>
+                        <input type="hidden" name="aula_id" value="<?= $detalhes_aula['aula_id'] ?>">
+                        
+                        <div class="mb-3">
+                            <label for="titulo_aula" class="form-label">Tópico da Aula *</label>
+                            <input type="text" class="form-control" id="titulo_aula" name="titulo_aula" 
+                                   value="<?= htmlspecialchars($detalhes_aula['titulo_aula']) ?>" required>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="data_aula" class="form-label">Data *</label>
+                                <input type="date" class="form-control" id="data_aula" name="data_aula" 
+                                       value="<?= $detalhes_aula['data_aula'] ?>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="horario" class="form-label">Horário *</label>
+                                <input type="time" class="form-control" id="horario" name="horario" 
+                                       value="<?= substr($detalhes_aula['horario'], 0, 5) ?>" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="descricao" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="descricao" name="descricao" rows="3"><?= htmlspecialchars($detalhes_aula['desc_aula'] ?? '') ?></textarea>
+                            <small class="text-muted">Você pode inserir links que serão clicáveis automaticamente.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    `;
-    container.innerHTML = alertHtml;
-    
-    setTimeout(() => {
-        const alertElement = container.querySelector('.alert');
-        if (alertElement) {
-            const bsAlert = bootstrap.Alert.getOrCreateInstance(alertElement);
-            bsAlert.close();
-        }
-    }, 5000);
-}
+    </div>
 
-document.addEventListener('DOMContentLoaded', function() {
-    const listaConteudosContainer = document.getElementById('lista-conteudos-container');
-    const filtroSwitch = document.getElementById('filtroPlanejadoSwitch');
-    const filtroLabel = document.getElementById('filtroPlanejadoLabel');
+    <!-- Modal Excluir Aula -->
+    <div class="modal fade" id="excluirAulaModal" tabindex="-1" aria-labelledby="excluirAulaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="excluirAulaModalLabel">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+                    </div>
+                    <p>Tem certeza que deseja excluir a aula <strong>"<?= htmlspecialchars($detalhes_aula['titulo_aula']) ?>"</strong>?</p>
+                    <p class="text-muted small">
+                        Serão excluídos: 
+                        <br>• Os registros de presença desta aula
+                        <br>• As associações com conteúdos planejados
+                        <br>• A aula será removida permanentemente
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="formExcluirAula" method="POST" action="ajax_excluir_aula.php" style="display: inline;">
+                        <input type="hidden" name="aula_id" value="<?= $detalhes_aula['aula_id'] ?>">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i> Sim, Excluir Aula
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    // INICIALIZAÇÃO: Fechar todas as subpastas
-    document.querySelectorAll('.subpastas-container').forEach(container => {
-        container.style.display = 'none';
-    });
-
-    // TOGGLES DE SUBPASTAS - SIMPLES E FUNCIONAL
-    document.querySelectorAll('.subpasta-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            
-            const temaId = this.getAttribute('data-tema-id');
-            const subpastasContainer = document.getElementById(`subpastas-${temaId}`);
-
-            if (subpastasContainer) {
-                const isHidden = subpastasContainer.style.display === 'none' || 
-                               subpastasContainer.style.display === '';
-                
-                if (isHidden) {
-                    subpastasContainer.style.display = 'block';
-                    this.classList.add('rotated');
-                } else {
-                    subpastasContainer.style.display = 'none';
-                    this.classList.remove('rotated');
-                }
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function displayAlert(message, type) {
+        const container = document.getElementById('ajax-message-container');
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        container.innerHTML = alertHtml;
+        
+        setTimeout(() => {
+            const alertElement = container.querySelector('.alert');
+            if (alertElement) {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alertElement);
+                bsAlert.close();
             }
-        });
-    });
-
-    // Atualizar contagem de itens visíveis
-    function atualizarContagemPlanejados() {
-        const count = listaConteudosContainer.querySelectorAll('.conteudo-item[data-planejado="1"]').length;
-        filtroLabel.innerHTML = `Mostrar Apenas Itens Visíveis (${count})`;
-        return count;
+        }, 5000);
     }
 
-    // Lógica do Filtro
-    function aplicarFiltro() {
-        const mostrarApenasPlanejados = filtroSwitch.checked;
+    function displayModalAlert(containerId, message, type) {
+        const container = document.getElementById(containerId);
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        container.innerHTML = alertHtml;
         
-        listaConteudosContainer.querySelectorAll('.conteudo-item').forEach(item => {
-            const isPlanejado = item.dataset.planejado === '1';
-            
-            if (mostrarApenasPlanejados && !isPlanejado) {
-                item.style.display = 'none';
-            } else {
-                item.style.display = 'flex';
+        setTimeout(() => {
+            const alertElement = container.querySelector('.alert');
+            if (alertElement) {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alertElement);
+                bsAlert.close();
             }
+        }, 5000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const listaConteudosContainer = document.getElementById('lista-conteudos-container');
+        const filtroSwitch = document.getElementById('filtroPlanejadoSwitch');
+        const filtroLabel = document.getElementById('filtroPlanejadoLabel');
+
+        // INICIALIZAÇÃO: Fechar todas as subpastas
+        document.querySelectorAll('.subpastas-container').forEach(container => {
+            container.style.display = 'none';
         });
 
-        // Gerencia a exibição dos containers de subpastas baseado no filtro
-        document.querySelectorAll('.subpastas-container').forEach(container => {
-            const temaId = container.id.replace('subpastas-', '');
-            const toggle = document.querySelector(`.subpasta-toggle[data-tema-id="${temaId}"]`);
-            const temaPai = document.querySelector(`.conteudo-item[data-conteudo-id="${temaId}"]`);
+        // TOGGLES DE SUBPASTAS - SIMPLES E FUNCIONAL
+        document.querySelectorAll('.subpasta-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                const temaId = this.getAttribute('data-tema-id');
+                const subpastasContainer = document.getElementById(`subpastas-${temaId}`);
 
-            // Se o tema pai está escondido, esconde as subpastas também
-            if (temaPai && temaPai.style.display === 'none') {
-                container.style.display = 'none';
-                if (toggle) toggle.classList.remove('rotated');
-                return;
-            }
+                if (subpastasContainer) {
+                    const isHidden = subpastasContainer.style.display === 'none' || 
+                                   subpastasContainer.style.display === '';
+                    
+                    if (isHidden) {
+                        subpastasContainer.style.display = 'block';
+                        this.classList.add('rotated');
+                    } else {
+                        subpastasContainer.style.display = 'none';
+                        this.classList.remove('rotated');
+                    }
+                }
+            });
+        });
 
-            // Se estamos filtrando, mostra apenas containers que têm itens visíveis
-            if (mostrarApenasPlanejados) {
-                const hasVisibleItems = container.querySelector('.conteudo-item[data-planejado="1"]') !== null;
-                if (hasVisibleItems) {
-                    container.style.display = 'block';
-                    if (toggle) toggle.classList.add('rotated');
+        // Atualizar contagem de itens visíveis
+        function atualizarContagemPlanejados() {
+            const count = listaConteudosContainer.querySelectorAll('.conteudo-item[data-planejado="1"]').length;
+            filtroLabel.innerHTML = `Mostrar Apenas Itens Visíveis (${count})`;
+            return count;
+        }
+
+        // Lógica do Filtro
+        function aplicarFiltro() {
+            const mostrarApenasPlanejados = filtroSwitch.checked;
+            
+            listaConteudosContainer.querySelectorAll('.conteudo-item').forEach(item => {
+                const isPlanejado = item.dataset.planejado === '1';
+                
+                if (mostrarApenasPlanejados && !isPlanejado) {
+                    item.style.display = 'none';
                 } else {
+                    item.style.display = 'flex';
+                }
+            });
+
+            // Gerencia a exibição dos containers de subpastas baseado no filtro
+            document.querySelectorAll('.subpastas-container').forEach(container => {
+                const temaId = container.id.replace('subpastas-', '');
+                const toggle = document.querySelector(`.subpasta-toggle[data-tema-id="${temaId}"]`);
+                const temaPai = document.querySelector(`.conteudo-item[data-conteudo-id="${temaId}"]`);
+
+                // Se o tema pai está escondido, esconde as subpastas também
+                if (temaPai && temaPai.style.display === 'none') {
                     container.style.display = 'none';
                     if (toggle) toggle.classList.remove('rotated');
+                    return;
                 }
-            }
-        });
-    }
 
-    filtroSwitch.addEventListener('change', aplicarFiltro);
-
-    // LÓGICA AJAX PARA OS SWITCHES DE CONTEÚDO
-    document.querySelectorAll('.planejado-switch').forEach(function(switchElement) {
-        switchElement.addEventListener('change', function() {
-            const aulaId = this.dataset.aulaId;
-            const conteudoId = this.dataset.conteudoId;
-            const tipo = this.dataset.tipo;
-            const novoStatus = this.checked ? 1 : 0;
-            
-            const statusLabel = this.closest('.form-switch').querySelector('.form-check-label');
-            const conteudoItem = this.closest('.conteudo-item');
-            
-            const formData = new FormData();
-            formData.append('aula_id', aulaId);
-            formData.append('conteudo_id', conteudoId);
-            formData.append('status', novoStatus);
-            
-            const estadoAnterior = this.checked ? 0 : 1;
-
-            // Feedback visual
-            this.disabled = true;
-            this.classList.add('switch-disabled');
-            statusLabel.textContent = '...';
-            statusLabel.classList.add('loading');
-
-            fetch('ajax_toggle_conteudo.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                this.disabled = false;
-                this.classList.remove('switch-disabled');
-                statusLabel.classList.remove('loading');
-
-                if (data.success) {
-                    displayAlert(data.message, 'success');
-                    
-                    // Atualiza o estado no DOM
-                    conteudoItem.dataset.planejado = String(novoStatus);
-                    
-                    if (novoStatus === 1) {
-                        statusLabel.textContent = 'Sim';
-                        conteudoItem.classList.add('planejado');
-                        conteudoItem.classList.remove('nao-planejado');
+                // Se estamos filtrando, mostra apenas containers que têm itens visíveis
+                if (mostrarApenasPlanejados) {
+                    const hasVisibleItems = container.querySelector('.conteudo-item[data-planejado="1"]') !== null;
+                    if (hasVisibleItems) {
+                        container.style.display = 'block';
+                        if (toggle) toggle.classList.add('rotated');
                     } else {
-                        statusLabel.textContent = 'Não';
-                        conteudoItem.classList.remove('planejado');
-                        conteudoItem.classList.add('nao-planejado');
+                        container.style.display = 'none';
+                        if (toggle) toggle.classList.remove('rotated');
                     }
+                }
+            });
+        }
 
-                    // Atualiza a contagem e aplica filtro se necessário
-                    atualizarContagemPlanejados();
-                    if (filtroSwitch.checked) {
-                        aplicarFiltro();
+        filtroSwitch.addEventListener('change', aplicarFiltro);
+
+        // LÓGICA AJAX PARA OS SWITCHES DE CONTEÚDO
+        document.querySelectorAll('.planejado-switch').forEach(function(switchElement) {
+            switchElement.addEventListener('change', function() {
+                const aulaId = this.dataset.aulaId;
+                const conteudoId = this.dataset.conteudoId;
+                const tipo = this.dataset.tipo;
+                const novoStatus = this.checked ? 1 : 0;
+                
+                const statusLabel = this.closest('.form-switch').querySelector('.form-check-label');
+                const conteudoItem = this.closest('.conteudo-item');
+                
+                const formData = new FormData();
+                formData.append('aula_id', aulaId);
+                formData.append('conteudo_id', conteudoId);
+                formData.append('status', novoStatus);
+                
+                const estadoAnterior = this.checked ? 0 : 1;
+
+                // Feedback visual
+                this.disabled = true;
+                this.classList.add('switch-disabled');
+                statusLabel.textContent = '...';
+                statusLabel.classList.add('loading');
+
+                fetch('ajax_toggle_conteudo.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    this.disabled = false;
+                    this.classList.remove('switch-disabled');
+                    statusLabel.classList.remove('loading');
 
-                } else {
-                    console.error('Erro:', data.message);
-                    displayAlert('Erro ao atualizar visibilidade: ' + data.message, 'danger');
+                    if (data.success) {
+                        displayAlert(data.message, 'success');
+                        
+                        // Atualiza o estado no DOM
+                        conteudoItem.dataset.planejado = String(novoStatus);
+                        
+                        if (novoStatus === 1) {
+                            statusLabel.textContent = 'Sim';
+                            conteudoItem.classList.add('planejado');
+                            conteudoItem.classList.remove('nao-planejado');
+                        } else {
+                            statusLabel.textContent = 'Não';
+                            conteudoItem.classList.remove('planejado');
+                            conteudoItem.classList.add('nao-planejado');
+                        }
+
+                        // Atualiza a contagem e aplica filtro se necessário
+                        atualizarContagemPlanejados();
+                        if (filtroSwitch.checked) {
+                            aplicarFiltro();
+                        }
+
+                    } else {
+                        console.error('Erro:', data.message);
+                        displayAlert('Erro ao atualizar visibilidade: ' + data.message, 'danger');
+                        // Reverte o estado do switch
+                        this.checked = !this.checked;
+                        statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+                    }
+                })
+                .catch(error => {
+                    this.disabled = false;
+                    this.classList.remove('switch-disabled');
+                    statusLabel.classList.remove('loading');
+                    console.error('Erro de conexão:', error);
+                    displayAlert('Erro de comunicação. A visibilidade não foi atualizada.', 'danger');
                     // Reverte o estado do switch
                     this.checked = !this.checked;
                     statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
-                }
-            })
-            .catch(error => {
-                this.disabled = false;
-                this.classList.remove('switch-disabled');
-                statusLabel.classList.remove('loading');
-                console.error('Erro de conexão:', error);
-                displayAlert('Erro de comunicação. A visibilidade não foi atualizada.', 'danger');
-                // Reverte o estado do switch
-                this.checked = !this.checked;
-                statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+                });
             });
         });
-    });
 
-    // Lógica do Controle de Presença (se necessário)
-    document.querySelectorAll('.presenca-switch').forEach(function(switchElement) {
-        switchElement.addEventListener('change', function() {
-            const aulaId = this.dataset.aulaId;
-            const alunoId = this.dataset.alunoId;
-            const novoStatus = this.checked ? 1 : 0;
-            
-            const statusLabel = this.closest('.form-switch').querySelector('.form-check-label');
-            const presencaItem = this.closest('.presenca-item');
-            const statusBadge = presencaItem.querySelector('.badge');
-            
-            const formData = new FormData();
-            formData.append('aula_id', aulaId);
-            formData.append('aluno_id', alunoId);
-            formData.append('presente', novoStatus);
-            
-            const estadoAnterior = this.checked ? 0 : 1;
+        // Lógica do Controle de Presença (se necessário)
+        document.querySelectorAll('.presenca-switch').forEach(function(switchElement) {
+            switchElement.addEventListener('change', function() {
+                const aulaId = this.dataset.aulaId;
+                const alunoId = this.dataset.alunoId;
+                const novoStatus = this.checked ? 1 : 0;
+                
+                const statusLabel = this.closest('.form-switch').querySelector('.form-check-label');
+                const presencaItem = this.closest('.presenca-item');
+                const statusBadge = presencaItem.querySelector('.badge');
+                
+                const formData = new FormData();
+                formData.append('aula_id', aulaId);
+                formData.append('aluno_id', alunoId);
+                formData.append('presente', novoStatus);
+                
+                const estadoAnterior = this.checked ? 0 : 1;
 
-            this.disabled = true;
-            statusLabel.textContent = '...';
+                this.disabled = true;
+                statusLabel.textContent = '...';
 
-            fetch('ajax_controle_presenca.php', {
+                fetch('ajax_controle_presenca.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    this.disabled = false;
+
+                    if (data.success) {
+                        displayAlert(data.message, 'success');
+                        
+                        presencaItem.dataset.presente = String(novoStatus);
+                        
+                        if (novoStatus === 1) {
+                            statusLabel.textContent = 'Sim';
+                            presencaItem.classList.add('presente');
+                            presencaItem.classList.remove('ausente');
+                            statusBadge.textContent = 'Presente';
+                            statusBadge.classList.remove('bg-danger');
+                            statusBadge.classList.add('bg-success');
+                        } else {
+                            statusLabel.textContent = 'Não';
+                            presencaItem.classList.remove('presente');
+                            presencaItem.classList.add('ausente');
+                            statusBadge.textContent = 'Faltou';
+                            statusBadge.classList.remove('bg-success');
+                            statusBadge.classList.add('bg-danger');
+                        }
+
+                        // Atualizar contadores
+                        location.reload();
+
+                    } else {
+                        console.error('Erro:', data.message);
+                        displayAlert('Erro ao atualizar presença: ' + data.message, 'danger');
+                        this.checked = !this.checked;
+                        statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+                    }
+                })
+                .catch(error => {
+                    this.disabled = false;
+                    console.error('Erro de conexão:', error);
+                    displayAlert('Erro de comunicação. A presença não foi atualizada.', 'danger');
+                    this.checked = !this.checked;
+                    statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+                });
+            });
+        });
+
+        // Formulário de Edição de Aula
+        document.getElementById('formEditarAula').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Salvando...';
+            
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
                 method: 'POST',
                 body: formData
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
+                    return response.text().then(text => {
+                        console.error('Server response:', text);
+                        throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
+                    });
                 }
                 return response.json();
             })
             .then(data => {
-                this.disabled = false;
-
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                
                 if (data.success) {
-                    displayAlert(data.message, 'success');
-                    
-                    presencaItem.dataset.presente = String(novoStatus);
-                    
-                    if (novoStatus === 1) {
-                        statusLabel.textContent = 'Sim';
-                        presencaItem.classList.add('presente');
-                        presencaItem.classList.remove('ausente');
-                        statusBadge.textContent = 'Presente';
-                        statusBadge.classList.remove('bg-danger');
-                        statusBadge.classList.add('bg-success');
-                    } else {
-                        statusLabel.textContent = 'Não';
-                        presencaItem.classList.remove('presente');
-                        presencaItem.classList.add('ausente');
-                        statusBadge.textContent = 'Faltou';
-                        statusBadge.classList.remove('bg-success');
-                        statusBadge.classList.add('bg-danger');
-                    }
-
-                    // Atualizar contadores
-                    location.reload();
-
+                    displayModalAlert('editarAulaMessageContainer', data.message, 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
                 } else {
-                    console.error('Erro:', data.message);
-                    displayAlert('Erro ao atualizar presença: ' + data.message, 'danger');
-                    this.checked = !this.checked;
-                    statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+                    displayModalAlert('editarAulaMessageContainer', 'Erro: ' + data.message, 'danger');
                 }
             })
             .catch(error => {
-                this.disabled = false;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
                 console.error('Erro de conexão:', error);
-                displayAlert('Erro de comunicação. A presença não foi atualizada.', 'danger');
-                this.checked = !this.checked;
-                statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
+                displayModalAlert('editarAulaMessageContainer', 'Erro de comunicação. Tente novamente.', 'danger');
             });
         });
-    });
 
-    // Inicializar
-    atualizarContagemPlanejados();
-});
-</script>
+        // Formulário de Exclusão de Aula
+        document.getElementById('formExcluirAula').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            const modal = bootstrap.Modal.getInstance(document.getElementById('excluirAulaModal'));
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Excluindo...';
+            
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.error('Server response:', text);
+                        throw new Error('Erro na comunicação com o servidor. Status: ' + response.status);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                
+                if (data.success) {
+                    modal.hide();
+                    displayAlert(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = 'detalhes_turma.php?turma_id=<?= $detalhes_aula['turma_id'] ?>';
+                    }, 1500);
+                } else {
+                    displayAlert('Erro: ' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                console.error('Erro de conexão:', error);
+                displayAlert('Erro de comunicação. Tente novamente.', 'danger');
+            });
+        });
+
+        // Inicializar
+        atualizarContagemPlanejados();
+    });
+    </script>
 </body>
 </html>

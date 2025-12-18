@@ -84,7 +84,6 @@ $stmt_conteudos = $pdo->prepare($sql_conteudos_visiveis);
 $stmt_conteudos->execute([':aula_id' => $aula_id]);
 $conteudos_visiveis = $stmt_conteudos->fetchAll(PDO::FETCH_ASSOC);
 
-// Função para buscar apenas os arquivos de subpastas que estão visíveis
 // Função para buscar arquivos de qualquer pasta (tema principal ou subpasta)
 function buscarArquivosPastaVisivel($pdo, $pasta_id, $aula_id) {
     $sql = "
@@ -306,6 +305,21 @@ function get_arquivo_icone($tipo_arquivo, $caminho_arquivo) {
     }
     
     return ['icone' => $icone, 'cor' => $cor];
+}
+
+// FUNÇÃO PARA TRANSFORMAR LINKS EM TEXTO CLICÁVEL
+function transformarLinksClicaveis($texto) {
+    // Padrão para URLs
+    $padrao = '/(https?:\/\/[^\s]+)/i';
+    
+    // Substituir URLs por links clicáveis
+    $texto_com_links = preg_replace($padrao, '<a href="$1" target="_blank" class="text-primary link-descricao">$1</a>', $texto);
+    
+    // Se houver texto sem http:// ou https://, mas com www.
+    $padrao_www = '/(\s|^)(www\.[^\s]+)/i';
+    $texto_com_links = preg_replace($padrao_www, '$1<a href="http://$2" target="_blank" class="text-primary link-descricao">$2</a>', $texto_com_links);
+    
+    return $texto_com_links;
 }
 
 // Função recursiva para exibir conteúdos
@@ -568,6 +582,18 @@ function displayConteudo($conteudo, $nivel = 0) {
         .link-aula:hover {
             text-decoration: underline;
         }
+        
+        /* Estilo para links na descrição */
+        .link-descricao {
+            text-decoration: none;
+            font-weight: 500;
+            word-break: break-all;
+        }
+        
+        .link-descricao:hover {
+            text-decoration: underline;
+            color: #c0392b !important;
+        }
 
         /* Modal YouTube personalizado */
         .modal-youtube .modal-dialog {
@@ -735,7 +761,9 @@ function displayConteudo($conteudo, $nivel = 0) {
                                 <div class="mb-3">
                                     <strong><i class="fas fa-file-alt me-2 text-primary"></i>Descrição da Aula:</strong>
                                     <?php if (!empty($aula['descricao'])): ?>
-                                        <p class="mb-0 mt-1"><?= htmlspecialchars($aula['descricao']) ?></p>
+                                        <div class="mb-0 mt-1">
+                                            <?= transformarLinksClicaveis(nl2br(htmlspecialchars($aula['descricao']))) ?>
+                                        </div>
                                     <?php else: ?>
                                         <p class="mb-0 mt-1 text-muted">Nenhuma descrição fornecida.</p>
                                     <?php endif; ?>
