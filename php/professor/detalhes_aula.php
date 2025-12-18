@@ -283,9 +283,9 @@ foreach ($temas as $tema) {
             <div class="col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h1 style="color: #081d40;">Detalhes da Aula</h1>
-                    <a href="gerenciar_aulas.php" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-2"></i> Voltar para Aulas
-                    </a>
+                    <a href="detalhes_turma.php?turma_id=<?= $detalhes_aula['turma_id'] ?>" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-2"></i> Voltar para Turma
+</a>
                 </div>
                 
                 <div id="ajax-message-container"></div>
@@ -329,7 +329,7 @@ foreach ($temas as $tema) {
                         $sql_alunos = "SELECT 
                             u.id AS aluno_id, 
                             u.nome AS aluno_nome,
-                            COALESCE(p.presente, 1) AS presente
+                            COALESCE(p.presente, 0) AS presente
                         FROM usuarios u
                         INNER JOIN alunos_turmas at ON u.id = at.aluno_id
                         LEFT JOIN presenca_aula p ON u.id = p.aluno_id AND p.aula_id = :aula_id
