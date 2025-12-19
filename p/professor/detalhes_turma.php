@@ -367,6 +367,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../../css/professor/detalhes_turma.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <style>
         .informacoes-alunos {
             max-height: 300px;
@@ -834,67 +835,19 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
                         <?php endif; ?>
                     </div>
                 </div>
-                
+                <div class="espacamento">
+                    
+                </div>
                 <!-- Calendário de Aulas -->
-                <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
-                    <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>&mes=<?= $mes_anterior ?>&ano=<?= $ano_anterior ?>" class="btn btn-outline-secondary">
-                        <i class="fas fa-chevron-left"></i> <?= $nomes_meses[$mes_anterior] ?>
-                    </a>
-                    <h3 class="mb-0"><?= $nomes_meses[$mes] ?> de <?= $ano ?></h3>
-                    <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>&mes=<?= $mes_proximo ?>&ano=<?= $ano_proximo ?>" class="btn btn-outline-secondary">
-                        <?= $nomes_meses[$mes_proximo] ?> <i class="fas fa-chevron-right"></i>
-                    </a>
-                </div>
-                <div class="calendario-grid">
-                    <!-- Cabeçalho dos dias da semana -->
-                    <div class="calendario-header">DOM</div>
-                    <div class="calendario-header">SEG</div>
-                    <div class="calendario-header">TER</div>
-                    <div class="calendario-header">QUA</div>
-                    <div class="calendario-header">QUI</div>
-                    <div class="calendario-header">SEX</div>
-                    <div class="calendario-header">SÁB</div>
-                    <!-- Dias vazios no início -->
-                    <?php for ($i = 0; $i < $dia_inicio_semana; $i++): ?>
-                        <div class="calendario-dia outro-mes"></div>
-                    <?php endfor; ?>
-                    <!-- Dias do mês -->
-                    <?php for ($dia = 1; $dia <= $dias_no_mes; $dia++): 
-                        $data_completa = $ano . '-' . str_pad($mes, 2, '0', STR_PAD_LEFT) . '-' . str_pad($dia, 2, '0', STR_PAD_LEFT);
-                        $is_hoje = (date('Y-m-d') == $data_completa);
-                        $tem_aulas = isset($aulas_por_dia[$dia]);
-                        $quantidade_aulas = $tem_aulas ? count($aulas_por_dia[$dia]) : 0;
-                        $classe_muitas_aulas = $quantidade_aulas > 3 ? 'muitas-aulas' : '';
-                    ?>
-                        <div class="calendario-dia <?= $is_hoje ? 'hoje' : '' ?> <?= $classe_muitas_aulas ?>">
-                            <span class="dia-numero"><?= $dia ?></span>
-                            <?php if ($tem_aulas): ?>
-                                <div class="aulas-container">
-                                    <?php foreach ($aulas_por_dia[$dia] as $aula): ?>
-                                        <a href="detalhes_aula.php?aula_id=<?= $aula['id'] ?>" class="aula-item text-decoration-none" title="<?= htmlspecialchars($aula['titulo_aula']) ?>">
-                                            <small>
-                                                <i class="far fa-clock me-1"></i>
-                                                <?= substr($aula['horario'], 0, 5) ?>
-                                                <?= htmlspecialchars($aula['titulo_aula']) ?>
-                                            </small>
-                                        </a>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php else: ?>
-                                <div class="aulas-container">
-                                    <!-- Espaço vazio para manter o layout -->
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endfor; ?>
-                    <!-- Dias vazios no final -->
-                    <?php 
-                    $total_celulas = $dia_inicio_semana + $dias_no_mes;
-                    $celulas_faltantes = (7 - ($total_celulas % 7)) % 7;
-                    for ($i = 0; $i < $celulas_faltantes; $i++): ?>
-                        <div class="calendario-dia outro-mes"></div>
-                    <?php endfor; ?>
-                </div>
+                <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark-blue text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Agenda da Turma</h5>
+        <small>Arraste para reagendar</small>
+    </div>
+    <div class="card-body p-3">
+        <div id='calendar-turma'></div>
+    </div>
+</div>
                 <div class="text-center mt-3">
                     <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>&mes=<?= date('n') ?>&ano=<?= date('Y') ?>" class="btn btn-secondary">
                         <i class="fas fa-calendar-day me-2"></i>Voltar para Mês Atual
@@ -1150,6 +1103,63 @@ $(document).ready(function() {
     setTimeout(function() {
         $('.alert').alert('close');
     }, 5000);
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar-turma');
+    var turmaId = <?= $turma_id ?>; // Pega o ID da turma via PHP
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth', // Alterado para MÊS por padrão como solicitado
+        locale: 'pt-br',
+        timeZone: 'local',
+        firstDay: 1, 
+        slotMinTime: '06:00:00',
+        slotMaxTime: '24:00:00',
+        allDaySlot: false,
+        height: 'auto',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana', day: 'Dia' },
+        editable: true, 
+        droppable: true,
+        eventDisplay: 'block',
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
+        
+        // Carrega apenas aulas desta turma específica
+        events: 'buscar_aulas_turma.php?turma_id=' + turmaId,
+        
+        eventClick: function(info) {
+            window.location.href = 'detalhes_aula.php?aula_id=' + info.event.id;
+        },
+
+        eventDrop: function(info) {
+            fetch('atualizar_aula.php', { // Reutiliza o arquivo que já funciona na dashboard
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: info.event.id,
+                    novaData: info.event.startStr
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== 'success') {
+                    alert("Erro ao atualizar: " + data.message);
+                    info.revert();
+                }
+            })
+            .catch(error => {
+                alert("Erro de conexão.");
+                info.revert();
+            });
+        }
+    });
+    calendar.render();
 });
 </script>
 </body>

@@ -231,3 +231,239 @@ body {
 .sidebar .active:hover{
     background-color: #c0392b;
 }
+
+/* Container Principal */
+.calendar-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 25px;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+/* Customização dos Botões do FullCalendar */
+.fc .fc-button-primary {
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+    color: #081d40 !important;
+    text-transform: capitalize !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    box-shadow: none !important;
+    padding: 8px 16px !important;
+    transition: all 0.2s ease;
+}
+
+.fc .fc-button-primary:hover {
+    background-color: #e9ecef !important;
+    border-color: #ced4da !important;
+}
+
+.fc .fc-button-active {
+    background-color: #081d40 !important;
+    border-color: #081d40 !important;
+    color: white !important;
+}
+
+/* Título do Mês/Ano */
+.fc .fc-toolbar-title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #081d40;
+}
+
+/* Cabeçalho dos Dias */
+.fc th {
+    padding: 12px 0 !important;
+    background-color: #fbfbfb;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    color: #6c757d !important;
+    border-bottom: 2px solid #f1f1f1 !important;
+}
+
+/* Estilo dos Cards de Aula (Eventos) */
+.fc-v-event {
+    background-color: #081d40 !important;
+    border: none !important;
+    margin-bottom: 2px !important;
+}
+
+.fc-event-main {
+    padding: 4px 8px !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+}
+
+/* Linhas da Grade */
+.fc td, .fc th {
+    border-color: #f1f1f1 !important;
+}
+
+/* Marcador de Hora Atual */
+.fc .fc-timegrid-now-indicator-line {
+    border-color: #c0392b !important;
+}
+
+/* Botão Nova Aula Customizado */
+.btn-primary-modern {
+    background-color: #081d40;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-primary-modern:hover {
+    background-color: #0a2755;
+    transform: translateY(-2px);
+    color: white;
+}
+
+/* Ajustes Mobile */
+@media (max-width: 768px) {
+    .fc .fc-toolbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .calendar-card {
+        padding: 10px;
+    }
+}
+
+/* Cabeçalho dos dias (Ex: Seg 15/12) */
+.fc .fc-col-header-cell {
+    background-color: #081d40 !important;
+    padding: 15px 0 !important;
+    border-color: #0a2755 !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+    color: #ffffff !important; /* Letras Brancas */
+    text-transform: capitalize;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+
+/* Ajuste das bordas para combinar com o cabeçalho escuro */
+.fc-theme-standard .fc-scrollgrid {
+    border: 1px solid #081d40 !important;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Estilo do card da aula no calendário */
+.fc-event {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.fc-event:hover {
+    opacity: 0.9;
+}
+
+/* Remove aquela linha de "mais" (more) se houver muitas aulas num dia */
+.fc-daygrid-more-link {
+    color: #081d40 !important;
+    font-weight: bold;
+}
+
+/* --- PADRONIZAÇÃO DOS NÚMEROS E LINKS DO CALENDÁRIO --- */
+
+/* Remove o azul e o sublinhado dos números no modo Mês */
+.fc .fc-daygrid-day-number {
+    color: #333333 !important; /* Preto suave */
+    text-decoration: none !important; /* Remove o traço embaixo */
+    font-weight: 500;
+    padding: 8px !important;
+    transition: color 0.2s ease;
+}
+
+/* Remove o sublinhado ao passar o mouse */
+.fc .fc-daygrid-day-number:hover {
+    color: #081d40 !important;
+    text-decoration: none !important;
+}
+
+/* Garante que os nomes dos dias na semana/dia também sigam o padrão */
+.fc .fc-timegrid-col-header-cell-cushion,
+.fc .fc-list-day-text,
+.fc .fc-list-day-side-text {
+    color: #ffffff !important; /* Mantém branco no cabeçalho azul que fizemos */
+    text-decoration: none !important;
+}
+
+/* Ajuste específico para os links de "Ver mais" (quando há muitos eventos) */
+.fc .fc-daygrid-more-link {
+    color: #081d40 !important;
+    text-decoration: none !important;
+    font-weight: 600;
+}
+
+/* --- ESTILO DO DIA ATUAL (HOJE) --- */
+
+/* Muda a cor de fundo do número do dia atual para destacar discretamente */
+.fc .fc-day-today {
+    background-color: rgba(8, 29, 64, 0.02) !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+    background-color: #081d40;
+    color: #ffffff !important;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 4px;
+}
+
+/* --- CORREÇÃO DO CABEÇALHO (AZUL MARINHO) --- */
+
+/* Alvo principal: as células do topo */
+.fc .fc-col-header-cell {
+    background-color: #081d40 !important;
+    border-color: #0a2755 !important;
+    vertical-align: middle !important;
+    padding: 0 !important; /* Resetamos o padding aqui */
+}
+
+/* O conteúdo dentro da célula (onde fica o texto Seg 15/12) */
+.fc .fc-col-header-cell-cushion {
+    display: block !important;
+    padding: 12px 5px !important; /* Espaçamento controlado */
+    color: #ffffff !important;
+    text-decoration: none !important;
+    text-transform: capitalize;
+    font-weight: 600 !important;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+/* Ajuste específico para a visão de Semana/Dia (TimeGrid) */
+.fc-timegrid-axis-cushion, 
+.fc-timegrid-slot-label-cushion {
+    color: #666 !important; /* Horas na lateral esquerda em cinza */
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+/* Remove qualquer borda branca que possa sobrar no topo */
+.fc-theme-standard .fc-scrollgrid {
+    border: 1px solid #081d40 !important;
+}
+
+/* --- AJUSTE DOS NÚMEROS NO MÊS (SEM LINKS AZUIS) --- */
+.fc .fc-daygrid-day-number {
+    color: #333333 !important;
+    text-decoration: none !important;
+    font-weight: 500;
+}
+
+/* Garante que ao passar o mouse não mude para azul */
+.fc .fc-daygrid-day-number:hover {
+    text-decoration: none !important;
+    color: #081d40 !important;
+}

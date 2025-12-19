@@ -363,3 +363,48 @@ body {
                 min-height: 150px;
             }
         }
+
+        /* Estilização do Calendário igual à Dashboard */
+#calendar-turma {
+    background: #ffffff;
+    border-radius: 8px;
+    margin-top: 30px;
+}
+
+.fc .fc-col-header-cell {
+    background-color: #081d40 !important;
+    border: 1px solid #0a2755 !important;
+    padding: 0 !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+    display: block !important;
+    padding: 12px 5px !important;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+}
+
+/* Números do mês pretos e sem sublinhado */
+.fc .fc-daygrid-day-number {
+    color: #333 !important;
+    text-decoration: none !important;
+    padding: 8px !important;
+}
+
+/* Eventos (Aulas) */
+.fc-event {
+    cursor: pointer;
+    background-color: #081d40 !important;
+    border: none !important;
+    padding: 2px 5px !important;
+}
+
+/* Destaque para o dia atual */
+.fc .fc-day-today {
+    background-color: rgba(8, 29, 64, 0.05) !important;
+}
+
+.espacamento {
+    margin-top: 32px;
+}
