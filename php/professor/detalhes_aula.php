@@ -39,6 +39,131 @@ if(!$detalhes_aula) {
     exit;
 }
 
+// ========== SISTEMA DE ANOTAÇÕES COMPARTILHADAS ==========
+// Verificar se a tabela de anotações existe
+$sql_check_table = "SHOW TABLES LIKE 'anotacoes_aula'";
+$table_exists = $pdo->query($sql_check_table)->rowCount() > 0;
+
+if (!$table_exists) {
+    // Criar tabela de anotações se não existir
+    $sql_create_table = "CREATE TABLE anotacoes_aula (
+        id INT(11) NOT NULL AUTO_INCREMENT,
+        aula_id INT(11) NOT NULL,
+        aluno_id INT(11) NOT NULL,
+        conteudo TEXT NOT NULL,
+        comentario_professor TEXT NULL,
+        data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        data_atualizacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY aula_aluno_unique (aula_id, aluno_id),
+        KEY aluno_id (aluno_id),
+        CONSTRAINT anotacoes_aula_ibfk_1 FOREIGN KEY (aula_id) REFERENCES aulas (id) ON DELETE CASCADE,
+        CONSTRAINT anotacoes_aula_ibfk_2 FOREIGN KEY (aluno_id) REFERENCES usuarios (id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
+    
+    try {
+        $pdo->exec($sql_create_table);
+    } catch (PDOException $e) {
+        // Ignora erros se a tabela já existir
+    }
+} else {
+    // Verificar se a coluna comentario_professor existe
+    $sql_check_column = "SHOW COLUMNS FROM anotacoes_aula LIKE 'comentario_professor'";
+    $column_exists = $pdo->query($sql_check_column)->rowCount() > 0;
+    
+    if (!$column_exists) {
+        // Adicionar coluna comentario_professor se não existir
+        try {
+            $sql_add_column = "ALTER TABLE anotacoes_aula ADD COLUMN comentario_professor TEXT NULL AFTER conteudo";
+            $pdo->exec($sql_add_column);
+        } catch (PDOException $e) {
+            // Ignora erros se a coluna já existir
+        }
+    }
+}
+
+// Buscar todos os alunos da turma
+$sql_alunos_turma = "SELECT 
+    u.id AS aluno_id, 
+    u.nome AS aluno_nome,
+    u.email AS aluno_email
+FROM usuarios u
+INNER JOIN alunos_turmas at ON u.id = at.aluno_id
+WHERE at.turma_id = :turma_id
+AND u.tipo_usuario = 'aluno'
+ORDER BY u.nome ASC";
+
+$stmt_alunos_turma = $pdo->prepare($sql_alunos_turma);
+$stmt_alunos_turma->execute([':turma_id' => $detalhes_aula['turma_id']]);
+$alunos_turma = $stmt_alunos_turma->fetchAll(PDO::FETCH_ASSOC);
+
+// Processar salvamento do comentário do professor
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_comentario'])) {
+    $aluno_id = $_POST['aluno_id'] ?? null;
+    $comentario = $_POST['comentario_professor'] ?? '';
+    
+    if ($aluno_id) {
+        // Verificar se já existe uma anotação para este aluno nesta aula
+        $sql_check = "SELECT id FROM anotacoes_aula WHERE aula_id = :aula_id AND aluno_id = :aluno_id";
+        $stmt_check = $pdo->prepare($sql_check);
+        $stmt_check->execute([':aula_id' => $aula_id, ':aluno_id' => $aluno_id]);
+        $anotacao_existente = $stmt_check->fetch(PDO::FETCH_ASSOC);
+        
+        if ($anotacao_existente) {
+            // Atualizar comentário do professor
+            $sql_update = "UPDATE anotacoes_aula SET comentario_professor = :comentario WHERE id = :id";
+            $stmt_update = $pdo->prepare($sql_update);
+            $stmt_update->execute([
+                ':comentario' => $comentario,
+                ':id' => $anotacao_existente['id']
+            ]);
+        } else {
+            // Criar novo registro com apenas o comentário do professor
+            $sql_insert = "INSERT INTO anotacoes_aula (aula_id, aluno_id, conteudo, comentario_professor) VALUES (:aula_id, :aluno_id, '', :comentario)";
+            $stmt_insert = $pdo->prepare($sql_insert);
+            $stmt_insert->execute([
+                ':aula_id' => $aula_id,
+                ':aluno_id' => $aluno_id,
+                ':comentario' => $comentario
+            ]);
+        }
+        
+        // Redirecionar para evitar reenvio do formulário
+        header("Location: detalhes_aula.php?aula_id=" . $aula_id . "&saved=1");
+        exit;
+    }
+}
+
+// Buscar anotações dos alunos (incluindo registros vazios criados pelo professor)
+$anotacoes_alunos = [];
+foreach ($alunos_turma as $aluno) {
+    $sql_anotacao = "SELECT 
+        aa.id,
+        aa.conteudo,
+        aa.comentario_professor,
+        aa.data_atualizacao
+    FROM anotacoes_aula aa
+    WHERE aa.aula_id = :aula_id AND aa.aluno_id = :aluno_id";
+    
+    $stmt_anotacao = $pdo->prepare($sql_anotacao);
+    $stmt_anotacao->execute([':aula_id' => $aula_id, ':aluno_id' => $aluno['aluno_id']]);
+    $anotacao = $stmt_anotacao->fetch(PDO::FETCH_ASSOC);
+    
+    // Se não existe registro, criar um array vazio
+    if (!$anotacao) {
+        $anotacao = [
+            'id' => null,
+            'conteudo' => '',
+            'comentario_professor' => '',
+            'data_atualizacao' => null
+        ];
+    }
+    
+    // Combinar dados do aluno com a anotação
+    $anotacoes_alunos[] = array_merge($aluno, $anotacao);
+}
+// ========== FIM SISTEMA DE ANOTAÇÕES COMPARTILHADAS ==========
+
 // Buscar todos os temas e suas subpastas
 $sql_temas = "
     SELECT 
@@ -106,9 +231,17 @@ foreach ($temas as $tema) {
 
 // Função para converter URLs em links clicáveis
 function makeLinksClickable($text) {
+    if (empty($text)) return '';
     $pattern = '/(https?:\/\/[^\s]+)/';
     $replacement = '<a href="$1" target="_blank" class="link-descricao">$1</a>';
     return preg_replace($pattern, $replacement, htmlspecialchars($text));
+}
+
+// Função para formatar data
+function formatarData($data) {
+    if (empty($data)) return '';
+    $date = new DateTime($data);
+    return $date->format('d/m/Y H:i');
 }
 ?>
 
@@ -293,6 +426,170 @@ function makeLinksClickable($text) {
         .btn-group-actions {
             margin-bottom: 15px;
         }
+        
+        /* Estilos para o container de anotações - AZUL MARINHO */
+        .anotacoes-container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .anotacoes-header {
+            background: linear-gradient(135deg, #081d40 0%, #0a2351 100%);
+            border-radius: 8px 8px 0 0;
+            color: white;
+            padding: 15px;
+        }
+        
+        .anotacoes-body {
+            padding: 20px;
+            overflow-y: visible;
+            max-height: none;
+        }
+        
+        .anotacao-aluno {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .aluno-info {
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .anotacao-conteudo {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .comentario-professor {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .anotacoes-footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .btn-salvar-comentario {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-salvar-comentario:hover {
+            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+            transform: translateY(-2px);
+        }
+        
+        .data-atualizacao {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+        }
+        
+        .sem-anotacoes {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .comentario-textarea {
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 120px;
+            padding: 12px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .comentario-textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+        
+        .badge-aluno {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+        }
+        
+        .badge-professor {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+        
+        .aluno-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .avatar-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .contador-caracteres {
+            font-size: 12px;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .anotacao-aluno {
+                padding: 15px;
+            }
+            
+            .avatar-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .aluno-avatar {
+                margin-bottom: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -330,6 +627,15 @@ function makeLinksClickable($text) {
                 </div>
                 
                 <div id="ajax-message-container"></div>
+                
+                <!-- Mensagem de sucesso -->
+                <?php if (isset($_GET['saved'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Comentário salvo com sucesso!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
                 
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
@@ -375,7 +681,7 @@ function makeLinksClickable($text) {
                     
                     <div class="card-body">
                         <?php
-                        // Buscar alunos da turma
+                        // Buscar alunos da turma com presença
                         $sql_alunos = "SELECT 
                             u.id AS aluno_id, 
                             u.nome AS aluno_nome,
@@ -471,6 +777,119 @@ function makeLinksClickable($text) {
                         <?php endif; ?>
                     </div>
                 </div>
+                
+                <!-- ========== CONTAINER DE ANOTAÇÕES DOS ALUNOS ========== -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Anotações dos Alunos</h5>
+                        <small class="text-white">Veja as anotações dos alunos e adicione seus comentários e correções. Você pode comentar mesmo que o aluno não tenha feito anotações.</small>
+                    </div>
+                    
+                    <div class="card-body">
+                        <?php if (empty($anotacoes_alunos)): ?>
+                            <div class="sem-anotacoes">
+                                <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">Nenhum aluno nesta turma</h6>
+                                <p class="text-muted small">Não há alunos matriculados para esta aula.</p>
+                            </div>
+                        <?php else: ?>
+                            <?php foreach ($anotacoes_alunos as $anotacao): ?>
+                                <div class="anotacao-aluno">
+                                    <div class="aluno-info d-flex justify-content-between align-items-center">
+                                        <div class="avatar-container">
+                                            <div class="aluno-avatar">
+                                                <?= strtoupper(substr($anotacao['aluno_nome'], 0, 1)) ?>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0"><?= htmlspecialchars($anotacao['aluno_nome']) ?></h6>
+                                                <small class="text-muted"><?= htmlspecialchars($anotacao['aluno_email']) ?></small>
+                                            </div>
+                                        </div>
+                                        <span class="badge badge-aluno">Aluno</span>
+                                    </div>
+                                    
+                                    <?php if (!empty($anotacao['conteudo'])): ?>
+                                        <div class="anotacao-conteudo mt-3">
+                                            <strong class="d-block mb-2"><i class="fas fa-sticky-note me-2 text-success"></i>Anotações do Aluno:</strong>
+                                            <p class="mb-0"><?= nl2br(htmlspecialchars($anotacao['conteudo'])) ?></p>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="alert alert-warning mt-3">
+                                            <i class="fas fa-exclamation-circle me-2"></i>
+                                            Este aluno ainda não fez anotações para esta aula.
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <form method="POST" action="" class="mt-3">
+                                        <input type="hidden" name="aluno_id" value="<?= $anotacao['aluno_id'] ?>">
+                                        
+                                        <div class="comentario-professor mb-2">
+                                            <strong class="d-block mb-2"><i class="fas fa-comment-dots me-2 text-primary"></i>Seu Comentário:</strong>
+                                            <?php if (!empty($anotacao['comentario_professor'])): ?>
+                                                <p class="mb-2"><?= nl2br(htmlspecialchars($anotacao['comentario_professor'])) ?></p>
+                                            <?php else: ?>
+                                                <p class="text-muted mb-2"><i>Nenhum comentário ainda. Adicione um comentário para o aluno.</i></p>
+                                            <?php endif; ?>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="comentario_<?= $anotacao['aluno_id'] ?>" class="form-label"><small><i class="fas fa-edit me-1"></i> Editar comentário:</small></label>
+                                            <textarea 
+                                                name="comentario_professor" 
+                                                id="comentario_<?= $anotacao['aluno_id'] ?>" 
+                                                class="comentario-textarea" 
+                                                placeholder="Digite seu comentário, correção ou feedback para o aluno aqui..."
+                                            ><?= htmlspecialchars($anotacao['comentario_professor'] ?? '') ?></textarea>
+                                            <div class="contador-caracteres">
+                                                Caracteres: <span id="contador_<?= $anotacao['aluno_id'] ?>"><?= strlen($anotacao['comentario_professor'] ?? '') ?></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <?php if (!empty($anotacao['data_atualizacao'])): ?>
+                                                <div class="data-atualizacao">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        Última atualização: <?= formatarData($anotacao['data_atualizacao']) ?>
+                                                    </small>
+                                                </div>
+                                            <?php else: ?>
+                                                <div></div>
+                                            <?php endif; ?>
+                                            <button type="submit" name="salvar_comentario" class="btn btn-salvar-comentario">
+                                                <i class="fas fa-save me-1"></i>Salvar Comentário
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <i class="fas fa-info-circle text-primary me-1"></i>
+                                <small class="text-muted">
+                                    Total de alunos: <strong><?= count($anotacoes_alunos) ?></strong>
+                                    <?php 
+                                        $alunos_com_anotacoes = array_filter($anotacoes_alunos, function($a) {
+                                            return !empty($a['conteudo']);
+                                        });
+                                    ?>
+                                    | Com anotações: <strong><?= count($alunos_com_anotacoes) ?></strong>
+                                </small>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <small class="text-muted">
+                                    <i class="fas fa-user-graduate me-1"></i>
+                                    Os alunos podem ver seus comentários em suas telas
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ========== FIM CONTAINER DE ANOTAÇÕES DOS ALUNOS ========== -->
 
                 <div class="card shadow-sm mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -686,6 +1105,7 @@ function makeLinksClickable($text) {
                         Serão excluídos: 
                         <br>• Os registros de presença desta aula
                         <br>• As associações com conteúdos planejados
+                        <br>• As anotações dos alunos
                         <br>• A aula será removida permanentemente
                     </p>
                 </div>
@@ -1077,6 +1497,52 @@ function makeLinksClickable($text) {
                 displayAlert('Erro de comunicação. Tente novamente.', 'danger');
             });
         });
+
+        // ========== FUNCIONALIDADES DAS ANOTAÇÕES ==========
+        // Contador de caracteres para os textareas de comentário
+        document.querySelectorAll('.comentario-textarea').forEach(function(textarea) {
+            const alunoId = textarea.id.replace('comentario_', '');
+            const contador = document.getElementById('contador_' + alunoId);
+            
+            if (contador) {
+                // Atualizar contador inicial
+                contador.textContent = textarea.value.length;
+                
+                textarea.addEventListener('input', function() {
+                    contador.textContent = this.value.length;
+                });
+            }
+        });
+        
+        // Auto-salvar depois de 30 segundos de inatividade (opcional)
+        document.querySelectorAll('.comentario-textarea').forEach(function(textarea) {
+            let timeout;
+            
+            textarea.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    const form = textarea.closest('form');
+                    if (form) {
+                        const submitBtn = form.querySelector('button[type="submit"]');
+                        if (submitBtn) {
+                            // Mostrar feedback visual
+                            const originalText = submitBtn.innerHTML;
+                            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Auto-salvando...';
+                            submitBtn.disabled = true;
+                            
+                            submitBtn.click();
+                            
+                            // Restaurar após 2 segundos
+                            setTimeout(() => {
+                                submitBtn.innerHTML = originalText;
+                                submitBtn.disabled = false;
+                            }, 2000);
+                        }
+                    }
+                }, 30000);
+            });
+        });
+        // ========== FIM FUNCIONALIDADES DAS ANOTAÇÕES ==========
 
         // Inicializar
         atualizarContagemPlanejados();
