@@ -30,7 +30,7 @@
                     <a href="#contact" class="nav-link">Contato</a>
                 </li>
                 <li class="nav-item">
-                    <a href="php/login.php" class="nav-link login-btn">Login</a>
+                    <a href="p/login.php" class="nav-link login-btn">Login</a>
                 </li>
             </ul>
             <div class="hamburger">
