@@ -187,13 +187,6 @@ foreach ($aulas_por_dia as $dia => $aulas) {
             </button>
             <h5 class="mb-0 fw-bold">Minhas Aulas</h5>
         </header>
-
-       
-                <!-- 
-            =================================================
-            2. Sidebar Offcanvas (Menu para Mobile) - AGORA VINDO DO TOPO
-            =================================================
-        -->
         <div class="offcanvas offcanvas-top text-white mobile-offcanvas" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel" style="background-color: var(--cor-primaria); height: 50vh;">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title fw-bold" id="sidebarOffcanvasLabel"><?php echo $aluno_nome; ?></h5>

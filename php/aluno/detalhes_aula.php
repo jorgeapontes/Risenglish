@@ -56,6 +56,53 @@ if (!$aula) {
     exit;
 }
 
+// ========== SISTEMA DE ANOTAÇÕES ==========
+// Buscar anotação existente para esta aula
+$sql_anotacao = "SELECT id, conteudo, comentario_professor FROM anotacoes_aula WHERE aula_id = :aula_id AND aluno_id = :aluno_id";
+$stmt_anotacao = $pdo->prepare($sql_anotacao);
+$stmt_anotacao->execute([':aula_id' => $aula_id, ':aluno_id' => $aluno_id]);
+$anotacao_existente = $stmt_anotacao->fetch(PDO::FETCH_ASSOC);
+
+$anotacao_id = null;
+$anotacao_conteudo = '';
+$comentario_professor = '';
+
+if ($anotacao_existente) {
+    $anotacao_id = $anotacao_existente['id'];
+    $anotacao_conteudo = $anotacao_existente['conteudo'];
+    $comentario_professor = $anotacao_existente['comentario_professor'] ?? '';
+}
+
+// Salvar anotação
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_anotacao'])) {
+    $conteudo = $_POST['conteudo_anotacao'] ?? '';
+    
+    if ($anotacao_existente) {
+        // Atualizar anotação existente
+        $sql_update = "UPDATE anotacoes_aula SET conteudo = :conteudo WHERE id = :id";
+        $stmt_update = $pdo->prepare($sql_update);
+        $stmt_update->execute([
+            ':conteudo' => $conteudo,
+            ':id' => $anotacao_id
+        ]);
+    } else {
+        // Inserir nova anotação
+        $sql_insert = "INSERT INTO anotacoes_aula (aula_id, aluno_id, conteudo) VALUES (:aula_id, :aluno_id, :conteudo)";
+        $stmt_insert = $pdo->prepare($sql_insert);
+        $stmt_insert->execute([
+            ':aula_id' => $aula_id,
+            ':aluno_id' => $aluno_id,
+            ':conteudo' => $conteudo
+        ]);
+        $anotacao_id = $pdo->lastInsertId();
+    }
+    
+    // Redirecionar para evitar reenvio do formulário
+    header("Location: detalhes_aula.php?id=" . $aula_id . "&saved=1");
+    exit;
+}
+// ========== FIM SISTEMA DE ANOTAÇÕES ==========
+
 // BUSCAR APENAS CONTEÚDOS EXPLICITAMENTE MARCADOS COMO VISÍVEIS PARA ESTA AULA
 $sql_conteudos_visiveis = "
     SELECT DISTINCT
@@ -575,7 +622,6 @@ function displayConteudo($conteudo, $nivel = 0) {
             transform: rotate(-90deg);
         }
         .link-aula {
-            
             text-decoration: none;
             font-weight: 500;
         }
@@ -643,6 +689,144 @@ function displayConteudo($conteudo, $nivel = 0) {
             justify-content: center;
         }
 
+        /* Estilos para o container de anotações - AZUL MARINHO */
+        .anotacoes-container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .anotacao-aluno {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .minhas-anotacoes {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .comentario-professor {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .anotacoes-footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .btn-salvar-anotacao {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-salvar-anotacao:hover {
+            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+            transform: translateY(-2px);
+        }
+        
+        .data-atualizacao {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+        }
+        
+        .sem-anotacoes {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .anotacoes-textarea {
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 16px;
+            line-height: 1.6;
+            min-height: 250px;
+            padding: 15px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .anotacoes-textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+        
+        .badge-aluno {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+        }
+        
+        .badge-professor {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+        
+        .aluno-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .avatar-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .contador-caracteres {
+            font-size: 12px;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .professor-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .professor-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #081d40 0%, #0a2351 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 position: relative;
@@ -677,6 +861,7 @@ function displayConteudo($conteudo, $nivel = 0) {
                     <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                     <a href="minhas_aulas.php" class="rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
                     <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
+                    <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
                 </div>
 
                 <!-- Botão sair no rodapé -->
@@ -696,10 +881,19 @@ function displayConteudo($conteudo, $nivel = 0) {
                     </div>
                 </div>
 
+                <!-- Mensagem de sucesso -->
+                <?php if (isset($_GET['saved'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Anotações salvas com sucesso!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
+                
                 <div class="row">
                     <!-- Conteúdos da Aula -->
                     <div class="col-md-9">
-                        <div class="card h-100">
+                        <div class="card mb-4">
                             <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-book me-2"></i>Conteúdos da Aula</h5>
                             </div>
@@ -718,6 +912,75 @@ function displayConteudo($conteudo, $nivel = 0) {
                                 <?php endif; ?>
                             </div>
                         </div>
+                        
+                        <!-- ========== CONTAINER DE ANOTAÇÕES ========== -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Minhas Anotações</h5>
+                                <small class="text-white">Escreva suas anotações, respostas de dever de casa, dúvidas, etc.</small>
+                            </div>
+                            <form method="POST" action="">
+                                <div class="card-body">
+                                    <div class="anotacao-aluno">
+                                        <!-- Minhas Anotações -->
+                                        <div class="minhas-anotacoes">
+                                            <strong class="d-block mb-2">
+                                                <i class="fas fa-sticky-note me-2 text-success"></i>
+                                                Suas Anotações:
+                                            </strong>
+                                            <textarea 
+                                                name="conteudo_anotacao" 
+                                                id="conteudo_anotacao" 
+                                                class="anotacoes-textarea" 
+                                                placeholder="Escreva suas anotações aqui... "
+                                            ><?= htmlspecialchars($anotacao_conteudo) ?></textarea>
+                                            <div class="contador-caracteres mt-2">
+                                                Caracteres: <span id="contador_anotacoes"><?= strlen($anotacao_conteudo) ?></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Comentário do Professor (se existir) -->
+                                        <?php if (!empty($comentario_professor)): ?>
+                                            <div class="comentario-professor mt-3">
+                                                <div class="professor-info">
+                                                    <div class="professor-avatar">
+                                                        <?= strtoupper(substr($aula['nome_professor'], 0, 1)) ?>
+                                                    </div>
+                                                    <div>
+                                                        <strong><?= htmlspecialchars($aula['nome_professor']) ?></strong>
+                                                        <small class="text-muted d-block">Professor</small>
+                                                    </div>
+                                                </div>
+                                                <strong class="d-block mb-2"><i class="fas fa-comment-dots me-2 text-primary"></i>Comentário do Professor:</strong>
+                                                <p class="mb-0"><?= nl2br(htmlspecialchars($comentario_professor)) ?></p>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="alert alert-info mt-3">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                Seu professor ainda não fez comentários.
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-info-circle text-primary me-1"></i>
+                                            <small class="text-muted">
+                                                Suas anotações são salvas automaticamente quando você clica em "Salvar".
+                                                <?php if (!empty($comentario_professor)): ?>
+                                                    <br>Você pode ver o comentário do professor acima.
+                                                <?php endif; ?>
+                                            </small>
+                                        </div>
+                                        <button type="submit" name="salvar_anotacao" class="btn btn-salvar-anotacao">
+                                            <i class="fas fa-save me-1"></i>Salvar Anotações
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- ========== FIM CONTAINER DE ANOTAÇÕES ========== -->
                     </div>
                     <!-- Informações da Aula -->
                     <div class="col-md-3">
@@ -860,6 +1123,75 @@ function displayConteudo($conteudo, $nivel = 0) {
                     }
                 });
             });
+
+            // ========== SISTEMA DE ANOTAÇÕES ==========
+            // Contador de caracteres
+            var textareaAnotacao = document.getElementById('conteudo_anotacao');
+            var contadorAnotacoes = document.getElementById('contador_anotacoes');
+            
+            if (textareaAnotacao && contadorAnotacoes) {
+                // Atualizar contador inicial
+                contadorAnotacoes.textContent = textareaAnotacao.value.length;
+                
+                // Atualizar contador quando o usuário digitar
+                textareaAnotacao.addEventListener('input', function() {
+                    contadorAnotacoes.textContent = this.value.length;
+                });
+                
+                // Auto-salvar após 10 segundos de inatividade (opcional)
+                var autoSaveTimeout;
+                textareaAnotacao.addEventListener('input', function() {
+                    clearTimeout(autoSaveTimeout);
+                    autoSaveTimeout = setTimeout(function() {
+                        // Mostrar notificação de auto-salvamento
+                        var alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-info alert-dismissible fade show';
+                        alertDiv.innerHTML = `
+                            <i class="fas fa-sync-alt me-2"></i>
+                            <strong>Auto-salvando...</strong> Suas anotações estão sendo salvas automaticamente.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        
+                        // Adicionar antes do formulário
+                        var form = textareaAnotacao.closest('form');
+                        if (form) {
+                            form.parentNode.insertBefore(alertDiv, form);
+                            
+                            // Remover após 3 segundos
+                            setTimeout(function() {
+                                var bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
+                                bsAlert.close();
+                            }, 3000);
+                        }
+                    }, 10000);
+                });
+            }
+            
+            // Mostrar mensagem de sucesso se acabou de salvar
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('saved')) {
+                var toast = document.createElement('div');
+                toast.className = 'position-fixed bottom-0 end-0 p-3';
+                toast.style.zIndex = '1050';
+                toast.innerHTML = `
+                    <div class="toast show" role="alert">
+                        <div class="toast-header bg-success text-white">
+                            <strong class="me-auto"><i class="fas fa-check-circle"></i> Sucesso</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                        </div>
+                        <div class="toast-body">
+                            Anotações salvas com sucesso!
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(toast);
+                
+                // Remover toast após 3 segundos
+                setTimeout(function() {
+                    toast.remove();
+                }, 3000);
+            }
+            // ========== FIM SISTEMA DE ANOTAÇÕES ==========
         });
     </script>
 </body>
