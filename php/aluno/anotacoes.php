@@ -108,6 +108,10 @@ if (isset($_GET['editar']) && is_numeric($_GET['editar'])) {
     $anotacao_edit = $stmt_edit->fetch(PDO::FETCH_ASSOC);
 }
 
+// Determinar se o formulário deve começar aberto (se estiver editando ou se houve erro)
+// A classe 'show' do Bootstrap mantém o collapse aberto
+$classe_collapse = ($anotacao_edit || ($mensagem && $tipo_mensagem == 'danger')) ? 'show' : '';
+
 // Função para formatar data
 function formatarData($data) {
     if (empty($data)) return '';
@@ -229,7 +233,6 @@ function resumirTexto($texto, $limite = 150) {
             background: white;
             border-radius: 8px;
             padding: 25px;
-            margin-bottom: 30px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
         
@@ -316,7 +319,38 @@ function resumirTexto($texto, $limite = 150) {
             background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
             transform: translateY(-2px);
         }
+
+        /* Botão Toggle */
+        .btn-toggle-form {
+            background-color: #081d40;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-toggle-form:hover {
+            background-color: #0a2755;
+            color: white;
+        }
         
+        /* Ajuste do ícone de seta quando aberto */
+        .btn-toggle-form[aria-expanded="true"] .fa-chevron-down {
+            transform: rotate(180deg);
+            transition: transform 0.3s;
+        }
+
+        .btn-toggle-form .fa-chevron-down {
+            transition: transform 0.3s;
+        }
+
         .form-control, .form-control:focus {
             border-color: #ced4da;
             box-shadow: none;
@@ -378,14 +412,11 @@ function resumirTexto($texto, $limite = 150) {
 <body>
     <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar -->
             <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <!-- Nome do aluno -->
                 <div class="mb-4 text-center">
                     <h5 class="mt-4"><?php echo htmlspecialchars($aluno_nome); ?></h5>
                 </div>
 
-                <!-- Menu centralizado verticalmente -->
                 <div class="d-flex flex-column flex-grow-1 mb-5">
                     <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                     <a href="minhas_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
@@ -393,13 +424,11 @@ function resumirTexto($texto, $limite = 150) {
                     <a href="anotacoes.php" class="rounded active"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
                 </div>
 
-                <!-- Botão sair no rodapé -->
                 <div class="mt-auto">
                     <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
                 </div>
             </div>
 
-            <!-- Conteúdo principal -->
             <div class="col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h1 style="color: #081d40;">Caderno de Anotações</h1>
@@ -411,7 +440,6 @@ function resumirTexto($texto, $limite = 150) {
                     </div>
                 </div>
                 
-                <!-- Mensagens -->
                 <?php if ($mensagem): ?>
                     <div class="alert alert-<?= $tipo_mensagem ?> alert-dismissible fade show" role="alert">
                         <i class="fas fa-<?= $tipo_mensagem == 'success' ? 'check-circle' : 'exclamation-triangle' ?> me-2"></i>
@@ -420,74 +448,81 @@ function resumirTexto($texto, $limite = 150) {
                     </div>
                 <?php endif; ?>
                 
-                <!-- Formulário de anotação -->
-                <div class="caderno-container p-4 mb-4">
-                    <div class="form-container">
-                        <h4 class="mb-4" style="color: #081d40;">
-                            <i class="fas fa-edit me-2"></i>
-                            <?= $anotacao_edit ? 'Editar Anotação' : 'Nova Anotação' ?>
-                        </h4>
-                        
-                        <form method="POST" action="">
-                            <input type="hidden" name="acao" value="salvar">
-                            <input type="hidden" name="anotacao_id" value="<?= $anotacao_edit ? $anotacao_edit['id'] : '' ?>">
+                <div class="mb-3">
+                    <button class="btn btn-toggle-form shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFormulario" aria-expanded="<?= $anotacao_edit ? 'true' : 'false' ?>" aria-controls="collapseFormulario">
+                        <span>
+                            <i class="fas fa-plus-circle me-2"></i>
+                            <?= $anotacao_edit ? 'Modo de Edição' : 'Criar Nova Anotação' ?>
+                        </span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+
+                <div class="collapse <?= $classe_collapse ?>" id="collapseFormulario">
+                    <div class="caderno-container p-4 mb-4">
+                        <div class="form-container">
+                            <h4 class="mb-4" style="color: #081d40;">
+                                <i class="fas fa-edit me-2"></i>
+                                <?= $anotacao_edit ? 'Editar Anotação' : 'Preencha os dados' ?>
+                            </h4>
                             
-                            <div class="mb-3">
-                                <label for="titulo" class="form-label">
-                                    <strong>Título <span class="text-danger">*</span></strong>
-                                </label>
-                                <input type="text" 
-                                       class="form-control form-control-lg" 
-                                       id="titulo" 
-                                       name="titulo" 
-                                       value="<?= htmlspecialchars($anotacao_edit ? $anotacao_edit['titulo'] : $titulo) ?>" 
-                                       placeholder="Digite um título para sua anotação" 
-                                       required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="conteudo" class="form-label">
-                                    <strong>Conteúdo</strong>
-                                </label>
-                                <textarea 
-                                    class="form-control" 
-                                    id="conteudo" 
-                                    name="conteudo" 
-                                    rows="8" 
-                                    placeholder="Escreva suas anotações aqui... Você pode incluir:
-- Vocabulário novo que aprendeu
-- Regras gramaticais importantes
-- Pronúncia de palavras difíceis
-- Frases úteis para conversação
-- Dicas de estudo
-- Links de recursos
-- Qualquer outra informação importante"
-                                ><?= htmlspecialchars($anotacao_edit ? $anotacao_edit['conteudo'] : $conteudo) ?></textarea>
-                                <div class="contador-caracteres">
-                                    Caracteres: <span id="contador_conteudo"><?= strlen($anotacao_edit ? $anotacao_edit['conteudo'] : $conteudo) ?></span>
+                            <form method="POST" action="">
+                                <input type="hidden" name="acao" value="salvar">
+                                <input type="hidden" name="anotacao_id" value="<?= $anotacao_edit ? $anotacao_edit['id'] : '' ?>">
+                                
+                                <div class="mb-3">
+                                    <label for="titulo" class="form-label">
+                                        <strong>Título <span class="text-danger">*</span></strong>
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control form-control-lg" 
+                                           id="titulo" 
+                                           name="titulo" 
+                                           value="<?= htmlspecialchars($anotacao_edit ? $anotacao_edit['titulo'] : $titulo) ?>" 
+                                           placeholder="Digite um título para sua anotação" 
+                                           required>
                                 </div>
-                            </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center mt-4">
-                                <div>
-                                    <?php if ($anotacao_edit): ?>
-                                        <a href="anotacoes.php" class="btn btn-outline-secondary">
-                                            <i class="fas fa-times me-1"></i>Cancelar
-                                        </a>
-                                    <?php endif; ?>
+                                
+                                <div class="mb-3">
+                                    <label for="conteudo" class="form-label">
+                                        <strong>Conteúdo</strong>
+                                    </label>
+                                    <textarea 
+                                        class="form-control" 
+                                        id="conteudo" 
+                                        name="conteudo" 
+                                        rows="8" 
+                                        placeholder="Escreva suas anotações aqui..."
+                                    ><?= htmlspecialchars($anotacao_edit ? $anotacao_edit['conteudo'] : $conteudo) ?></textarea>
+                                    <div class="contador-caracteres">
+                                        Caracteres: <span id="contador_conteudo"><?= strlen($anotacao_edit ? $anotacao_edit['conteudo'] : $conteudo) ?></span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <button type="submit" class="btn btn-nova-anotacao">
-                                        <i class="fas fa-save me-1"></i>
-                                        <?= $anotacao_edit ? 'Atualizar Anotação' : 'Salvar Anotação' ?>
-                                    </button>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-4">
+                                    <div>
+                                        <?php if ($anotacao_edit): ?>
+                                            <a href="anotacoes.php" class="btn btn-outline-secondary">
+                                                <i class="fas fa-times me-1"></i>Cancelar
+                                            </a>
+                                        <?php else: ?>
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#collapseFormulario">
+                                                <i class="fas fa-chevron-up me-1"></i>Fechar
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div>
+                                        <button type="submit" class="btn btn-nova-anotacao">
+                                            <i class="fas fa-save me-1"></i>
+                                            <?= $anotacao_edit ? 'Atualizar Anotação' : 'Salvar Anotação' ?>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Lista de anotações existentes -->
                 <div class="caderno-container p-4">
                     <h4 class="mb-4" style="color: #081d40;">
                         <i class="fas fa-book me-2"></i>
@@ -498,7 +533,7 @@ function resumirTexto($texto, $limite = 150) {
                         <div class="sem-anotacoes">
                             <i class="fas fa-book-open"></i>
                             <h5 class="text-muted">Nenhuma anotação encontrada</h5>
-                            <p class="text-muted">Comece criando sua primeira anotação usando o formulário acima!</p>
+                            <p class="text-muted">Clique em "Criar Nova Anotação" para começar!</p>
                         </div>
                     <?php else: ?>
                         <div class="anotacoes-grid">
@@ -529,42 +564,12 @@ function resumirTexto($texto, $limite = 150) {
                                             <i class="fas fa-edit me-1"></i>Editar
                                         </a>
                                         
-                                        <!-- Modal de confirmação para exclusão -->
                                         <button type="button" 
                                                 class="btn btn-excluir" 
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#modalExcluir<?= $anotacao['id'] ?>">
                                             <i class="fas fa-trash me-1"></i>Excluir
                                         </button>
-                                        
-                                        <!-- Modal -->
-                                        <div class="modal fade" id="modalExcluir<?= $anotacao['id'] ?>" tabindex="-1" aria-labelledby="modalExcluirLabel<?= $anotacao['id'] ?>" aria-hidden="true">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="modalExcluirLabel<?= $anotacao['id'] ?>">Confirmar Exclusão</h5>
-                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="alert alert-warning">
-                                                            <i class="fas fa-exclamation-triangle me-2"></i>
-                                                            <strong>Atenção!</strong> Esta ação não pode ser desfeita.
-                                                        </div>
-                                                        <p>Tem certeza que deseja excluir a anotação <strong>"<?= htmlspecialchars($anotacao['titulo']) ?>"</strong>?</p>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                        <form method="POST" action="" style="display: inline;">
-                                                            <input type="hidden" name="acao" value="excluir">
-                                                            <input type="hidden" name="anotacao_id" value="<?= $anotacao['id'] ?>">
-                                                            <button type="submit" class="btn btn-danger">
-                                                                <i class="fas fa-trash me-2"></i> Sim, Excluir
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -574,6 +579,38 @@ function resumirTexto($texto, $limite = 150) {
             </div>
         </div>
     </div>
+
+    <?php if (!empty($anotacoes)): ?>
+        <?php foreach ($anotacoes as $anotacao): ?>
+            <div class="modal fade" id="modalExcluir<?= $anotacao['id'] ?>" tabindex="-1" aria-labelledby="modalExcluirLabel<?= $anotacao['id'] ?>" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalExcluirLabel<?= $anotacao['id'] ?>">Confirmar Exclusão</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+                            </div>
+                            <p>Tem certeza que deseja excluir a anotação <strong>"<?= htmlspecialchars($anotacao['titulo']) ?>"</strong>?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <form method="POST" action="" style="display: inline;">
+                                <input type="hidden" name="acao" value="excluir">
+                                <input type="hidden" name="anotacao_id" value="<?= $anotacao['id'] ?>">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash me-2"></i> Sim, Excluir
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -591,74 +628,32 @@ function resumirTexto($texto, $limite = 150) {
                     contadorConteudo.textContent = this.value.length;
                 });
                 
-                // Auto-salvar após 30 segundos de inatividade (opcional)
+                // Auto-salvar (mantido, mas opcional)
                 let autoSaveTimeout;
                 textareaConteudo.addEventListener('input', function() {
                     clearTimeout(autoSaveTimeout);
                     autoSaveTimeout = setTimeout(function() {
-                        // Se tiver título e conteúdo, pode salvar automaticamente
                         const titulo = document.getElementById('titulo').value;
                         if (titulo && textareaConteudo.value) {
-                            const form = textareaConteudo.closest('form');
-                            if (form) {
-                                const submitBtn = form.querySelector('button[type="submit"]');
-                                if (submitBtn) {
-                                    // Criar notificação de auto-salvamento
-                                    const alertDiv = document.createElement('div');
-                                    alertDiv.className = 'alert alert-info alert-dismissible fade show mt-3';
-                                    alertDiv.innerHTML = `
-                                        <i class="fas fa-sync-alt me-2"></i>
-                                        <strong>Auto-salvando rascunho...</strong>
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                    `;
-                                    
-                                    // Adicionar antes do formulário
-                                    const container = document.querySelector('.form-container');
-                                    if (container) {
-                                        container.appendChild(alertDiv);
-                                        
-                                        // Simular clique no botão salvar (para rascunho automático)
-                                        // Removemos essa parte para evitar salvamento automático sem confirmação
-                                        
-                                        // Remover alerta após 3 segundos
-                                        setTimeout(function() {
-                                            const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
-                                            bsAlert.close();
-                                        }, 3000);
-                                    }
-                                }
-                            }
+                           // Lógica de auto-save aqui se desejar
                         }
                     }, 30000);
                 });
             }
             
-            // Foco automático no título se estiver vazio
-            const tituloInput = document.getElementById('titulo');
-            if (tituloInput && !tituloInput.value.trim()) {
-                tituloInput.focus();
-            }
-            
-            // Foco no formulário se estiver editando
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('editar')) {
-                window.scrollTo(0, 0);
-                if (textareaConteudo) {
-                    textareaConteudo.focus();
+            // Foco automático e rolagem se estiver no modo de edição
+            <?php if ($anotacao_edit): ?>
+                const formCollapse = document.getElementById('collapseFormulario');
+                if (formCollapse) {
+                    formCollapse.addEventListener('shown.bs.collapse', function () {
+                        if (textareaConteudo) textareaConteudo.focus();
+                    });
+                    // Rolar até o formulário
+                    formCollapse.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-            }
-            
-            // Limpar formulário após sucesso (se não estiver editando)
-            <?php if ($mensagem && $tipo_mensagem == 'success' && !$anotacao_edit): ?>
-                document.getElementById('titulo').value = '';
-                document.getElementById('conteudo').value = '';
-                document.getElementById('contador_conteudo').textContent = '0';
-                
-                // Rolar para o topo para ver a mensagem
-                window.scrollTo(0, 0);
             <?php endif; ?>
             
-            // Adicionar sugestões ao placeholder
+            // Sugestões no placeholder
             const suggestions = [
                 "Vocabulário: apple, banana, car...",
                 "Gramática: Present Perfect structure...",
@@ -673,7 +668,6 @@ function resumirTexto($texto, $limite = 150) {
             let currentSuggestion = 0;
             const conteudoTextarea = document.getElementById('conteudo');
             
-            // Rotacionar sugestões a cada 10 segundos (opcional)
             setInterval(function() {
                 if (conteudoTextarea && !conteudoTextarea.value) {
                     conteudoTextarea.placeholder = suggestions[currentSuggestion];
