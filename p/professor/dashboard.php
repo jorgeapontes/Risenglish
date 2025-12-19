@@ -116,6 +116,7 @@ $nomes_meses = [
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../../css/professor/dashboard.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 </head>
 <body>
     <div class="container-fluid">
@@ -154,73 +155,87 @@ $nomes_meses = [
                     </a>
                 </div>
 
-                <div class="calendario">
-                    <?php foreach ($dias_semana as $dia_nome): ?>
-                        <div class="dia-semana"><?= $dia_nome ?></div>
-                    <?php endforeach; ?>
+                <div class="main-content-container p-4">
+    <div class="main-content-container p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 fw-bold" style="color: #081d40;">Sua Agenda</h1>
+            <p class="text-muted small">Arraste as aulas para reagendar horários instantaneamente</p>
+        </div>
+        <button class="btn btn-primary-modern shadow-sm" onclick="window.location.href='gerenciar_aulas.php'">
+            <i class="fas fa-plus me-2"></i>Nova Aula
+        </button>
+    </div>
 
-                    <?php 
-                    $offset = ($primeiro_dia_mes->format('w')); // 'w' retorna 0 (Dom) a 6 (Sáb)
-                    
-                    for ($i = 0; $i < $offset; $i++): ?>
-                        <div class="celula-dia outros-meses"></div>
-                    <?php endfor; ?>
-
-                    <?php for ($dia = 1; $dia <= $num_dias; $dia++): 
-                        $data_completa = "$ano-$mes-" . str_pad($dia, 2, '0', STR_PAD_LEFT);
-                        $is_hoje = ($data_hoje->format('Y-m-d') == $data_completa);
-                        $tem_aulas = isset($aulas_por_dia[$dia]);
-                    ?>
-                        <div class="celula-dia <?= $tem_aulas && count($aulas_por_dia[$dia]) > 3 ? 'muitas-aulas' : '' ?>" 
-                                style="<?= $is_hoje ? 'border: 2px solid #c0392b; background-color: #f0f0f0;' : '' ?>">
-                            <span class="numero-dia"><?= $dia ?></span>
-                            
-                            <?php if ($tem_aulas): ?>
-                                <div class="aulas-container">
-                                    <?php 
-                                    uasort($aulas_por_dia[$dia], function($a, $b) {
-                                        return strcmp($a['hora'], $b['hora']);
-                                    });
-                                    
-                                    foreach ($aulas_por_dia[$dia] as $aula): 
-                                        $texto_exibido = $aula['turma']; 
-                                        
-                                        $url_redirecionamento = "detalhes_aula.php?aula_id=" . $aula['aula_id'];
-                                        
-                                        // Define a cor de fundo com base no dia da semana 
-                                        $dia_da_semana = (new DateTime($data_completa))->format('w');
-                                        $cor_fundo_aula = $dia_da_semana == 0 || $dia_da_semana == 6 ? '#A0A0A0' : '#1a2a3a'; // Cinza no Fim de Semana
-                                    ?>
-                                        <div class="bloco-aula" 
-                                            title="Clique para ver detalhes da Turma <?= htmlspecialchars($aula['turma']) ?>" 
-                                            style="background-color: <?= $cor_fundo_aula ?>;"
-                                            onclick="window.location.href='<?= $url_redirecionamento ?>';">
-                                            <?= $aula['hora'] ?>
-                                            <span><?= htmlspecialchars($texto_exibido) ?></span>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php else: ?>
-                                <div class="aulas-container">
-                                    <!-- Espaço vazio para manter o layout -->
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endfor; ?>
-                    
-                    <?php 
-                    $total_celulas = $offset + $num_dias;
-                    $celulas_faltantes = (7 - ($total_celulas % 7)) % 7;
-                    
-                    for ($i = 0; $i < $celulas_faltantes; $i++): ?>
-                        <div class="celula-dia outros-meses"></div>
-                    <?php endfor; ?>
-                </div>
+    <div class="calendar-card shadow-sm border-0">
+        <div id='calendar'></div>
+    </div>
+</div>
                 
             </div>
         </div>
     </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek', 
+        locale: 'pt-br',
+        timeZone: 'local', // Importante para sincronizar o arrasto com o horário do PC
+        firstDay: 1, 
+        slotMinTime: '06:00:00',
+        slotMaxTime: '24:00:00',
+        allDaySlot: false,
+        height: 'auto',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: {
+            today: 'Hoje', month: 'Mês', week: 'Semana', day: 'Dia'
+        },
+        
+        // Habilita arrastar e redimensionar em qualquer direção
+        editable: true, 
+        droppable: true, 
+        eventDurationEditable: false, // Impede esticar a aula (opcional)
+        
+        eventDisplay: 'block',
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
+        events: 'buscar_aulas.php',
+        
+        eventClick: function(info) {
+            window.location.href = 'detalhes_aula.php?aula_id=' + info.event.id;
+        },
 
+        // Função disparada ao soltar em um novo dia ou horário
+        eventDrop: function(info) {
+            // O FullCalendar já entende se mudou o dia ou a hora aqui
+            fetch('atualizar_aula.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: info.event.id,
+                    novaData: info.event.startStr // Envia a string completa (Ex: 2025-12-20T10:00:00)
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status !== 'success') {
+                    alert('Erro ao salvar alteração.');
+                    info.revert();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                info.revert();
+            });
+        }
+    });
+    calendar.render();
+});
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
