@@ -26,6 +26,7 @@
 * [PHP] (version 7.4 or higher)
 * [MySQL/MariaDB]
 * [Composer]  (To manage PHP dependencies)
-* Servidor Web (Apache or Nginx, or use PHP's built-in server)
+* Web Server (Apache or Nginx, or use PHP's built-in server)
+
 
 
