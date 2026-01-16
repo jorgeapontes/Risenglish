@@ -532,9 +532,10 @@ $turmas_com_alunos = $resultados_filtrados;
                                                 Professor: <?= $nome_professor_display ?>
                                             </small>
                                         </div>
-                                        <span class="aluno-badge">
+                                        <!-- Tirei essa badge pq estava dando problema de css e não era tão importante -->
+                                        <!-- <span class="aluno-badge">
                                             <?= $num_alunos ?> Aluno(s)
-                                        </span>
+                                        </span> -->
                                     </button>
                                     
                                     <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>" class="btn btn-sm btn-gerenciar" title="Gerenciar Turma e Aulas">
