@@ -98,6 +98,7 @@ $mes_referencia_inicio = $filtro_mes . '-01';
 // Buscar todos os alunos com seus pagamentos do mês
 $alunos_pagamentos = [];
 try {
+    // Buscar todos os alunos com LEFT JOIN
     $sql = "SELECT 
                 u.id,
                 u.nome,
@@ -126,7 +127,23 @@ try {
     
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
-    $alunos_pagamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Processar resultados para evitar duplicação
+    $alunos_processados = [];
+    foreach ($resultados as $row) {
+        $aluno_id = $row['id'];
+        
+        // Se já processamos este aluno, pular
+        if (isset($alunos_processados[$aluno_id])) {
+            continue;
+        }
+        
+        // Adicionar aluno processado
+        $alunos_pagamentos[] = $row;
+        $alunos_processados[$aluno_id] = true;
+    }
+    
 } catch (PDOException $e) {
     $mensagem = "Erro ao carregar dados: " . $e->getMessage();
     $tipo_mensagem = 'danger';
@@ -144,20 +161,26 @@ $count_atrasados = 0;
 $hoje = new DateTime();
 foreach ($alunos_pagamentos as &$aluno) {
     // Calcular status
-    if ($aluno['data_pagamento']) {
+    if (!empty($aluno['data_pagamento'])) {
         $aluno['status'] = 'pago';
-        $total_pago += $aluno['valor'];
-        $total_mes += $aluno['valor'];
+        $total_pago += (float)$aluno['valor'];
+        $total_mes += (float)$aluno['valor'];
         $count_pagos++;
     } else {
         // Verificar se está atrasado
-        if ($aluno['dia_vencimento']) {
-            $data_vencimento = new DateTime($filtro_mes . '-' . str_pad($aluno['dia_vencimento'], 2, '0', STR_PAD_LEFT));
-            
-            if ($hoje > $data_vencimento) {
-                $aluno['status'] = 'atrasado';
-                $count_atrasados++;
-            } else {
+        if (!empty($aluno['dia_vencimento'])) {
+            try {
+                $data_vencimento = new DateTime($filtro_mes . '-' . str_pad($aluno['dia_vencimento'], 2, '0', STR_PAD_LEFT));
+                
+                if ($hoje > $data_vencimento) {
+                    $aluno['status'] = 'atrasado';
+                    $count_atrasados++;
+                } else {
+                    $aluno['status'] = 'pendente';
+                    $count_pendentes++;
+                }
+            } catch (Exception $e) {
+                // Data inválida, tratar como pendente
                 $aluno['status'] = 'pendente';
                 $count_pendentes++;
             }
@@ -168,10 +191,13 @@ foreach ($alunos_pagamentos as &$aluno) {
     }
     
     $aluno['data_vencimento_calculada'] = null;
-    if ($aluno['dia_vencimento']) {
+    if (!empty($aluno['dia_vencimento'])) {
         $aluno['data_vencimento_calculada'] = $filtro_mes . '-' . str_pad($aluno['dia_vencimento'], 2, '0', STR_PAD_LEFT);
     }
 }
+
+// Remover referência do último elemento do array
+unset($aluno);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
