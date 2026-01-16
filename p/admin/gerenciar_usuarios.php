@@ -541,13 +541,13 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
 
         <ul class="nav nav-tabs mb-4" id="usuarioTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="alunos-tab" data-bs-toggle="tab" data-bs-target="#alunos" type="button" role="tab" aria-controls="alunos" aria-selected="true">
-                    Alunos <span class="badge bg-secondary ms-1"><?php echo count($alunos); ?></span>
+                <button class="nav-link active" id="professores-tab" data-bs-toggle="tab" data-bs-target="#professores" type="button" role="tab" aria-controls="professores" aria-selected="false">
+                    Professores <span class="badge bg-secondary ms-1"><?php echo count($professores); ?></span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="professores-tab" data-bs-toggle="tab" data-bs-target="#professores" type="button" role="tab" aria-controls="professores" aria-selected="false">
-                    Professores <span class="badge bg-secondary ms-1"><?php echo count($professores); ?></span>
+                <button class="nav-link" id="alunos-tab" data-bs-toggle="tab" data-bs-target="#alunos" type="button" role="tab" aria-controls="alunos" aria-selected="true">
+                    Alunos <span class="badge bg-secondary ms-1"><?php echo count($alunos); ?></span>
                 </button>
             </li>
         </ul>
