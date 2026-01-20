@@ -685,7 +685,7 @@ function formatarData($data) {
                         $sql_alunos = "SELECT 
                             u.id AS aluno_id, 
                             u.nome AS aluno_nome,
-                            COALESCE(p.presente, 0) AS presente
+                            COALESCE(p.presente, 1) AS presente
                         FROM usuarios u
                         INNER JOIN alunos_turmas at ON u.id = at.aluno_id
                         LEFT JOIN presenca_aula p ON u.id = p.aluno_id AND p.aula_id = :aula_id

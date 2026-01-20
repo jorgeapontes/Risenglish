@@ -235,6 +235,7 @@ $sql_aulas_calendario = "
 $stmt_aulas_calendario = $pdo->prepare($sql_aulas_calendario);
 $stmt_aulas_calendario->execute([':turma_id' => $turma_id, ':data_inicio' => $data_inicio_mes, ':data_fim' => $data_fim_mes]);
 $aulas_por_dia = [];
+$aulas_lista = [];
 
 while ($aula = $stmt_aulas_calendario->fetch(PDO::FETCH_ASSOC)) {
     $dia = date('j', strtotime($aula['data_aula'])); // Dia do mês (1 a 31)
@@ -242,7 +243,10 @@ while ($aula = $stmt_aulas_calendario->fetch(PDO::FETCH_ASSOC)) {
         $aulas_por_dia[$dia] = [];
     }
     $aulas_por_dia[$dia][] = $aula;
+    $aulas_lista[] = $aula; // Armazenar lista completa de aulas para referência
 }
+
+
 
 // --- CONSULTA PARA ESTATÍSTICAS DE PRESENÇA DOS ALUNOS (APENAS DO MÊS ATUAL) ---
 $sql_presenca_stats_mes = "
@@ -250,9 +254,9 @@ $sql_presenca_stats_mes = "
         u.id AS aluno_id,
         u.nome AS aluno_nome,
         COUNT(DISTINCT a.id) AS total_aulas_mes,
-        COUNT(DISTINCT CASE WHEN pa.presente = 1 THEN a.id END) AS total_presencas_mes,
+        COUNT(DISTINCT CASE WHEN COALESCE(pa.presente, 1) = 1 THEN a.id END) AS total_presencas_mes,
         COUNT(DISTINCT CASE WHEN pa.presente = 0 THEN a.id END) AS total_faltas_mes,
-        COUNT(DISTINCT CASE WHEN pa.presente IS NULL AND a.data_aula <= CURDATE() THEN a.id END) AS total_aulas_sem_registro_mes
+        COUNT(DISTINCT CASE WHEN pa.id IS NULL AND a.data_aula <= CURDATE() THEN a.id END) AS total_aulas_sem_registro_mes
     FROM 
         usuarios u
     JOIN 
@@ -282,7 +286,7 @@ $presenca_stats_mes = $stmt_presenca_mes->fetchAll(PDO::FETCH_ASSOC);
 $sql_estatisticas_gerais_mes = "
     SELECT 
         COUNT(DISTINCT a.id) AS total_aulas_mes,
-        SUM(CASE WHEN pa.presente = 1 THEN 1 ELSE 0 END) AS total_presencas_geral_mes,
+        SUM(CASE WHEN COALESCE(pa.presente, 1) = 1 THEN 1 ELSE 0 END) AS total_presencas_geral_mes,
         SUM(CASE WHEN pa.presente = 0 THEN 1 ELSE 0 END) AS total_faltas_geral_mes
     FROM 
         aulas a
@@ -759,8 +763,23 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
                 <!-- Seção de Controle de Presença (APENAS DO MÊS ATUAL) -->
                 <div class="presenca-card mt-4">
                     <div class="presenca-header">
-                        <h5 class="mb-0"><i class="fas fa-user-check me-2"></i> Acompanhamento Individual de Presença - <?= $nomes_meses[$mes] ?></h5>
-                        <p class="mb-0 text-muted small">Frequência detalhada de cada aluno da turma no mês atual</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0"><i class="fas fa-user-check me-2"></i> Acompanhamento Individual de Presença - <?= $nomes_meses[$mes] ?></h5>
+                                <p class="mb-0 text-muted small">Frequência detalhada de cada aluno da turma no mês atual</p>
+                            </div>
+                            <div>
+                                <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>&mes=<?= $mes_anterior ?>&ano=<?= $mes_anterior == 12 ? $ano - 1 : $ano ?>" class="btn btn-sm btn-light me-2" title="Mês anterior">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                                <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>&mes=<?= date('n') ?>&ano=<?= date('Y') ?>" class="btn btn-sm btn-light me-2" title="Mês atual">
+                                    <i class="fas fa-calendar-day"></i>
+                                </a>
+                                <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>&mes=<?= $mes_proximo ?>&ano=<?= $mes_proximo == 1 ? $ano + 1 : $ano ?>" class="btn btn-sm btn-light" title="Próximo mês">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                     <div class="presenca-body">
                         <?php if (empty($presenca_stats_mes)): ?>
