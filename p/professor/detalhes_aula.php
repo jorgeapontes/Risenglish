@@ -39,7 +39,7 @@ if(!$detalhes_aula) {
     exit;
 }
 
-// ========== SISTEMA DE ANOTAÇÕES COMPARTILHADAS ==========
+// ========== SISTEMA DE ANOTAÇÕES COMPARTILHADAS COM VISTO ==========
 // Verificar se a tabela de anotações existe
 $sql_check_table = "SHOW TABLES LIKE 'anotacoes_aula'";
 $table_exists = $pdo->query($sql_check_table)->rowCount() > 0;
@@ -52,6 +52,8 @@ if (!$table_exists) {
         aluno_id INT(11) NOT NULL,
         conteudo TEXT NOT NULL,
         comentario_professor TEXT NULL,
+        visto TINYINT(1) NOT NULL DEFAULT 0,
+        data_visto TIMESTAMP NULL DEFAULT NULL,
         data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         data_atualizacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
@@ -67,19 +69,52 @@ if (!$table_exists) {
         // Ignora erros se a tabela já existir
     }
 } else {
-    // Verificar se a coluna comentario_professor existe
-    $sql_check_column = "SHOW COLUMNS FROM anotacoes_aula LIKE 'comentario_professor'";
-    $column_exists = $pdo->query($sql_check_column)->rowCount() > 0;
+    // Verificar se as colunas existem
+    $sql_check_columns = "SHOW COLUMNS FROM anotacoes_aula";
+    $columns = $pdo->query($sql_check_columns)->fetchAll(PDO::FETCH_COLUMN);
     
-    if (!$column_exists) {
-        // Adicionar coluna comentario_professor se não existir
+    if (!in_array('comentario_professor', $columns)) {
         try {
             $sql_add_column = "ALTER TABLE anotacoes_aula ADD COLUMN comentario_professor TEXT NULL AFTER conteudo";
             $pdo->exec($sql_add_column);
-        } catch (PDOException $e) {
-            // Ignora erros se a coluna já existir
-        }
+        } catch (PDOException $e) {}
     }
+    
+    if (!in_array('visto', $columns)) {
+        try {
+            $sql_add_column = "ALTER TABLE anotacoes_aula ADD COLUMN visto TINYINT(1) NOT NULL DEFAULT 0 AFTER comentario_professor";
+            $pdo->exec($sql_add_column);
+        } catch (PDOException $e) {}
+    }
+    
+    if (!in_array('data_visto', $columns)) {
+        try {
+            $sql_add_column = "ALTER TABLE anotacoes_aula ADD COLUMN data_visto TIMESTAMP NULL DEFAULT NULL AFTER visto";
+            $pdo->exec($sql_add_column);
+        } catch (PDOException $e) {}
+    }
+}
+
+// Verificar se a tabela de histórico de visualizações existe
+$sql_check_historico = "SHOW TABLES LIKE 'anotacoes_visualizacoes'";
+$historico_exists = $pdo->query($sql_check_historico)->rowCount() > 0;
+
+if (!$historico_exists) {
+    $sql_create_historico = "CREATE TABLE anotacoes_visualizacoes (
+        id INT(11) NOT NULL AUTO_INCREMENT,
+        anotacao_id INT(11) NOT NULL,
+        professor_id INT(11) NOT NULL,
+        data_visualizacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY anotacao_id (anotacao_id),
+        KEY professor_id (professor_id),
+        CONSTRAINT anotacoes_visualizacoes_ibfk_1 FOREIGN KEY (anotacao_id) REFERENCES anotacoes_aula (id) ON DELETE CASCADE,
+        CONSTRAINT anotacoes_visualizacoes_ibfk_2 FOREIGN KEY (professor_id) REFERENCES usuarios (id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
+    
+    try {
+        $pdo->exec($sql_create_historico);
+    } catch (PDOException $e) {}
 }
 
 // Buscar todos os alunos da turma
@@ -141,7 +176,10 @@ foreach ($alunos_turma as $aluno) {
         aa.id,
         aa.conteudo,
         aa.comentario_professor,
-        aa.data_atualizacao
+        aa.visto,
+        aa.data_visto,
+        aa.data_atualizacao,
+        (SELECT COUNT(*) FROM anotacoes_visualizacoes WHERE anotacao_id = aa.id) AS total_visualizacoes
     FROM anotacoes_aula aa
     WHERE aa.aula_id = :aula_id AND aa.aluno_id = :aluno_id";
     
@@ -155,14 +193,17 @@ foreach ($alunos_turma as $aluno) {
             'id' => null,
             'conteudo' => '',
             'comentario_professor' => '',
-            'data_atualizacao' => null
+            'visto' => 0,
+            'data_visto' => null,
+            'data_atualizacao' => null,
+            'total_visualizacoes' => 0
         ];
     }
     
     // Combinar dados do aluno com a anotação
     $anotacoes_alunos[] = array_merge($aluno, $anotacao);
 }
-// ========== FIM SISTEMA DE ANOTAÇÕES COMPARTILHADAS ==========
+// ========== FIM SISTEMA DE ANOTAÇÕES COMPARTILHADAS COM VISTO ==========
 
 // Buscar todos os temas e suas subpastas
 $sql_temas = "
@@ -427,7 +468,7 @@ function formatarData($data) {
             margin-bottom: 15px;
         }
         
-        /* ========== ESTILOS OTIMIZADOS PARA ANOTAÇÕES ========== */
+        /* ========== ESTILOS OTIMIZADOS PARA ANOTAÇÕES COM VISTO ========== */
         .anotacoes-container {
             max-height: 600px;
             overflow-y: auto;
@@ -490,7 +531,7 @@ function formatarData($data) {
         
         .anotacao-body.expanded {
             padding: 15px;
-            max-height: 500px;
+            max-height: 600px;
             overflow-y: auto;
         }
         
@@ -501,10 +542,6 @@ function formatarData($data) {
             margin-bottom: 15px;
             border-left: 3px solid #28a745;
             font-size: 14px;
-        }
-        
-        .anotacao-conteudo-aluno p {
-            margin-bottom: 0;
         }
         
         .comentario-professor-area {
@@ -553,6 +590,90 @@ function formatarData($data) {
         .btn-salvar-comentario:hover {
             background: #218838;
         }
+        
+        /* ===== NOVOS ESTILOS PARA O SISTEMA DE VISTO ===== */
+        .visto-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .visto-info {
+            flex: 1;
+        }
+        
+        .visto-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        
+        .visto-badge.visto-true {
+            background: #28a745;
+            color: white;
+        }
+        
+        .visto-badge.visto-false {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .visto-badge.visto-true:hover {
+            background: #218838;
+        }
+        
+        .visto-badge.visto-false:hover {
+            background: #dee2e6;
+        }
+        
+        .visto-badge i {
+            font-size: 14px;
+        }
+        
+        .visto-count {
+            font-size: 12px;
+            color: #6c757d;
+            margin-left: 10px;
+        }
+        
+        .data-visto {
+            font-size: 11px;
+            color: #6c757d;
+        }
+        
+        .btn-marcar-visto {
+            background: transparent;
+            border: 1px solid #ced4da;
+            color: #495057;
+            padding: 5px 12px;
+            font-size: 13px;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-marcar-visto:hover {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        
+        .btn-marcar-visto.marcado {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        /* ===== FIM NOVOS ESTILOS ===== */
         
         .data-atualizacao {
             font-size: 11px;
@@ -808,16 +929,29 @@ function formatarData($data) {
                     </div>
                 </div>
                 
-                <!-- ========== CONTAINER DE ANOTAÇÕES OTIMIZADO ========== -->
+                <!-- ========== CONTAINER DE ANOTAÇÕES OTIMIZADO COM SISTEMA DE VISTO ========== -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div>
                             <i class="fas fa-edit me-2"></i>Anotações dos Alunos
                             <small class="text-white ms-2">Clique no nome do aluno para expandir</small>
                         </div>
-                        <span class="badge bg-light text-dark">
-                            <?= count($anotacoes_alunos) ?> alunos
-                        </span>
+                        <div>
+                            <span class="badge bg-light text-dark me-2">
+                                <?= count($anotacoes_alunos) ?> alunos
+                            </span>
+                            <?php 
+                                $alunos_com_anotacoes = array_filter($anotacoes_alunos, function($a) {
+                                    return !empty($a['conteudo']);
+                                });
+                                $alunos_vistos = array_filter($anotacoes_alunos, function($a) {
+                                    return $a['visto'] == 1;
+                                });
+                            ?>
+                            <span class="badge bg-success">
+                                <i class="fas fa-check-circle"></i> <?= count($alunos_vistos) ?>/<?= count($alunos_com_anotacoes) ?> vistos
+                            </span>
+                        </div>
                     </div>
                     
                     <div class="card-body p-3">
@@ -834,8 +968,11 @@ function formatarData($data) {
                                     $temComentario = !empty($anotacao['comentario_professor']);
                                     $statusClass = $temAnotacao ? 'badge-com-anotacao' : 'badge-sem-anotacao';
                                     $statusText = $temAnotacao ? 'Com anotação' : 'Sem anotação';
+                                    $vistoClass = $anotacao['visto'] ? 'visto-true' : 'visto-false';
+                                    $vistoIcon = $anotacao['visto'] ? 'fa-check-circle' : 'fa-circle';
+                                    $vistoText = $anotacao['visto'] ? 'Visto' : 'Marcar como visto';
                                 ?>
-                                    <div class="anotacao-card">
+                                    <div class="anotacao-card" data-anotacao-id="<?= $anotacao['id'] ?>">
                                         <div class="anotacao-header" onclick="toggleAnotacao(<?= $index ?>)">
                                             <div class="aluno-info">
                                                 <div class="aluno-avatar">
@@ -847,9 +984,16 @@ function formatarData($data) {
                                                 </div>
                                             </div>
                                             <div class="d-flex align-items-center gap-2">
+                                                <?php if ($temAnotacao && $anotacao['visto']): ?>
+                                                    <i class="fas fa-check-circle text-success" title="Visto em <?= $anotacao['data_visto'] ? formatarData($anotacao['data_visto']) : '' ?>"></i>
+                                                <?php elseif ($temAnotacao): ?>
+                                                    <i class="fas fa-circle text-warning" title="Não visto"></i>
+                                                <?php endif; ?>
+                                                
                                                 <?php if ($temComentario): ?>
                                                     <i class="fas fa-comment text-primary" title="Você comentou"></i>
                                                 <?php endif; ?>
+                                                
                                                 <span class="badge <?= $statusClass ?>"><?= $statusText ?></span>
                                                 <i class="fas fa-chevron-down" style="transition: transform 0.3s;" id="arrow-<?= $index ?>"></i>
                                             </div>
@@ -873,6 +1017,32 @@ function formatarData($data) {
                                                         <i class="fas fa-comment-dots me-1"></i>Seu comentário atual:
                                                     </small>
                                                     <p class="mb-0"><?= nl2br(htmlspecialchars($anotacao['comentario_professor'])) ?></p>
+                                                </div>
+                                            <?php endif; ?>
+                                            
+                                            <!-- SISTEMA DE VISTO -->
+                                            <?php if ($temAnotacao && $anotacao['id']): ?>
+                                                <div class="visto-container">
+                                                    <div class="visto-info">
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="visto-badge <?= $vistoClass ?>" 
+                                                                  onclick="event.stopPropagation(); marcarVisto(<?= $anotacao['id'] ?>, this)"
+                                                                  title="Clique para alternar">
+                                                                <i class="fas <?= $vistoIcon ?>"></i>
+                                                                <span><?= $vistoText ?></span>
+                                                            </span>
+                                                            <?php if ($anotacao['total_visualizacoes'] > 0): ?>
+                                                                <span class="visto-count">
+                                                                    <i class="fas fa-eye"></i> <?= $anotacao['total_visualizacoes'] ?> visualização(ões)
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <?php if ($anotacao['data_visto']): ?>
+                                                            <div class="data-visto mt-1">
+                                                                <i class="far fa-clock"></i> Última visualização: <?= formatarData($anotacao['data_visto']) ?>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </div>
                                                 </div>
                                             <?php endif; ?>
                                             
@@ -921,18 +1091,15 @@ function formatarData($data) {
                             <div class="col-md-6">
                                 <small class="text-muted">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    <?php 
-                                        $alunos_com_anotacoes = array_filter($anotacoes_alunos, function($a) {
-                                            return !empty($a['conteudo']);
-                                        });
-                                    ?>
                                     <strong><?= count($alunos_com_anotacoes) ?></strong> alunos com anotações
+                                    | <strong><?= count($alunos_vistos) ?></strong> visualizados
                                 </small>
                             </div>
                             <div class="col-md-6 text-end">
                                 <small class="text-muted">
-                                    <i class="fas fa-user-graduate me-1"></i>
-                                    Comentários visíveis para os alunos
+                                    <i class="fas fa-check-circle text-success me-1"></i>
+                                    <i class="fas fa-circle text-warning me-1"></i>
+                                    Visto / Não visto
                                 </small>
                             </div>
                         </div>
@@ -1231,7 +1398,84 @@ function formatarData($data) {
             contador.textContent = `Caracteres: ${textarea.value.length}`;
         }
     }
-    // ========== FIM FUNÇÕES PARA ANOTAÇÕES ==========
+    
+    // ===== NOVA FUNÇÃO PARA MARCAR VISTO =====
+    function marcarVisto(anotacaoId, elemento) {
+        event.stopPropagation();
+        
+        const formData = new FormData();
+        formData.append('anotacao_id', anotacaoId);
+        formData.append('acao', 'toggle');
+        
+        // Salvar texto original para feedback
+        const originalHtml = elemento.innerHTML;
+        elemento.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Processando...</span>';
+        elemento.style.opacity = '0.7';
+        
+        fetch('ajax_marcar_visto.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            elemento.style.opacity = '1';
+            
+            if (data.success) {
+                // Atualizar visual do badge
+                if (data.visto) {
+                    elemento.className = 'visto-badge visto-true';
+                    elemento.innerHTML = '<i class="fas fa-check-circle"></i> <span>Visto</span>';
+                    displayAlert('Anotação marcada como vista', 'success');
+                    
+                    // Atualizar ícone no cabeçalho
+                    const card = elemento.closest('.anotacao-card');
+                    const headerIcon = card.querySelector('.anotacao-header i.fa-circle, .anotacao-header i.fa-check-circle');
+                    if (headerIcon) {
+                        headerIcon.className = 'fas fa-check-circle text-success';
+                        headerIcon.title = 'Visto agora';
+                    }
+                } else {
+                    elemento.className = 'visto-badge visto-false';
+                    elemento.innerHTML = '<i class="fas fa-circle"></i> <span>Marcar como visto</span>';
+                    displayAlert('Anotação marcada como não vista', 'warning');
+                    
+                    // Atualizar ícone no cabeçalho
+                    const card = elemento.closest('.anotacao-card');
+                    const headerIcon = card.querySelector('.anotacao-header i.fa-check-circle, .anotacao-header i.fa-circle');
+                    if (headerIcon) {
+                        headerIcon.className = 'fas fa-circle text-warning';
+                        headerIcon.title = 'Não visto';
+                    }
+                }
+                
+                // Atualizar contador de visualizações se existir
+                const vistoContainer = elemento.closest('.visto-container');
+                const vistoCount = vistoContainer.querySelector('.visto-count');
+                if (vistoCount && data.total_visualizacoes) {
+                    if (data.total_visualizacoes > 0) {
+                        if (!vistoCount) {
+                            const newCount = document.createElement('span');
+                            newCount.className = 'visto-count';
+                            newCount.innerHTML = `<i class="fas fa-eye"></i> ${data.total_visualizacoes} visualização(ões)`;
+                            elemento.parentNode.appendChild(newCount);
+                        } else {
+                            vistoCount.innerHTML = `<i class="fas fa-eye"></i> ${data.total_visualizacoes} visualização(ões)`;
+                        }
+                    }
+                }
+            } else {
+                elemento.innerHTML = originalHtml;
+                displayAlert('Erro: ' + data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            elemento.innerHTML = originalHtml;
+            elemento.style.opacity = '1';
+            console.error('Erro:', error);
+            displayAlert('Erro de comunicação. Tente novamente.', 'danger');
+        });
+    }
+    // ===== FIM NOVA FUNÇÃO =====
 
     document.addEventListener('DOMContentLoaded', function() {
         const listaConteudosContainer = document.getElementById('lista-conteudos-container');
@@ -1243,7 +1487,7 @@ function formatarData($data) {
             container.style.display = 'none';
         });
 
-        // TOGGLES DE SUBPASTAS - SIMPLES E FUNCIONAL
+        // TOGGLES DE SUBPASTAS
         document.querySelectorAll('.subpasta-toggle').forEach(toggle => {
             toggle.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -1293,14 +1537,12 @@ function formatarData($data) {
                 const toggle = document.querySelector(`.subpasta-toggle[data-tema-id="${temaId}"]`);
                 const temaPai = document.querySelector(`.conteudo-item[data-conteudo-id="${temaId}"]`);
 
-                // Se o tema pai está escondido, esconde as subpastas também
                 if (temaPai && temaPai.style.display === 'none') {
                     container.style.display = 'none';
                     if (toggle) toggle.classList.remove('rotated');
                     return;
                 }
 
-                // Se estamos filtrando, mostra apenas containers que têm itens visíveis
                 if (mostrarApenasPlanejados) {
                     const hasVisibleItems = container.querySelector('.conteudo-item[data-planejado="1"]') !== null;
                     if (hasVisibleItems) {
@@ -1334,7 +1576,6 @@ function formatarData($data) {
                 
                 const estadoAnterior = this.checked ? 0 : 1;
 
-                // Feedback visual
                 this.disabled = true;
                 this.classList.add('switch-disabled');
                 statusLabel.textContent = '...';
@@ -1358,7 +1599,6 @@ function formatarData($data) {
                     if (data.success) {
                         displayAlert(data.message, 'success');
                         
-                        // Atualiza o estado no DOM
                         conteudoItem.dataset.planejado = String(novoStatus);
                         
                         if (novoStatus === 1) {
@@ -1371,7 +1611,6 @@ function formatarData($data) {
                             conteudoItem.classList.add('nao-planejado');
                         }
 
-                        // Atualiza a contagem e aplica filtro se necessário
                         atualizarContagemPlanejados();
                         if (filtroSwitch.checked) {
                             aplicarFiltro();
@@ -1380,7 +1619,6 @@ function formatarData($data) {
                     } else {
                         console.error('Erro:', data.message);
                         displayAlert('Erro ao atualizar visibilidade: ' + data.message, 'danger');
-                        // Reverte o estado do switch
                         this.checked = !this.checked;
                         statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
                     }
@@ -1391,7 +1629,6 @@ function formatarData($data) {
                     statusLabel.classList.remove('loading');
                     console.error('Erro de conexão:', error);
                     displayAlert('Erro de comunicação. A visibilidade não foi atualizada.', 'danger');
-                    // Reverte o estado do switch
                     this.checked = !this.checked;
                     statusLabel.textContent = estadoAnterior === 1 ? 'Sim' : 'Não';
                 });
@@ -1453,7 +1690,6 @@ function formatarData($data) {
                             statusBadge.classList.add('bg-danger');
                         }
 
-                        // Atualizar contadores
                         location.reload();
 
                     } else {
@@ -1571,9 +1807,6 @@ function formatarData($data) {
 
         // Inicializar
         atualizarContagemPlanejados();
-        
-        // Expandir primeiro item de anotação por padrão (opcional)
-        // toggleAnotacao(0);
     });
     </script>
 </body>
