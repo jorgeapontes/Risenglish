@@ -58,9 +58,18 @@ if (!$aula) {
     exit;
 }
 
-// ========== SISTEMA DE ANOTAÇÕES ==========
+// ========== SISTEMA DE ANOTAÇÕES COM VISTO ==========
 // Buscar anotação existente para esta aula
-$sql_anotacao = "SELECT id, conteudo, comentario_professor FROM anotacoes_aula WHERE aula_id = :aula_id AND aluno_id = :aluno_id";
+$sql_anotacao = "SELECT 
+    id, 
+    conteudo, 
+    comentario_professor,
+    visto,
+    data_visto,
+    data_atualizacao
+FROM anotacoes_aula 
+WHERE aula_id = :aula_id AND aluno_id = :aluno_id";
+
 $stmt_anotacao = $pdo->prepare($sql_anotacao);
 $stmt_anotacao->execute([':aula_id' => $aula_id, ':aluno_id' => $aluno_id]);
 $anotacao_existente = $stmt_anotacao->fetch(PDO::FETCH_ASSOC);
@@ -68,11 +77,24 @@ $anotacao_existente = $stmt_anotacao->fetch(PDO::FETCH_ASSOC);
 $anotacao_id = null;
 $anotacao_conteudo = '';
 $comentario_professor = '';
+$visto = 0;
+$data_visto = null;
 
 if ($anotacao_existente) {
     $anotacao_id = $anotacao_existente['id'];
     $anotacao_conteudo = $anotacao_existente['conteudo'];
     $comentario_professor = $anotacao_existente['comentario_professor'] ?? '';
+    $visto = $anotacao_existente['visto'] ?? 0;
+    $data_visto = $anotacao_existente['data_visto'] ?? null;
+}
+
+// Buscar total de visualizações para esta anotação
+$total_visualizacoes = 0;
+if ($anotacao_id) {
+    $sql_visualizacoes = "SELECT COUNT(*) FROM anotacoes_visualizacoes WHERE anotacao_id = :anotacao_id";
+    $stmt_visualizacoes = $pdo->prepare($sql_visualizacoes);
+    $stmt_visualizacoes->execute([':anotacao_id' => $anotacao_id]);
+    $total_visualizacoes = $stmt_visualizacoes->fetchColumn();
 }
 
 // Salvar anotação
@@ -103,7 +125,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_anotacao'])) {
     header("Location: detalhes_aula.php?id=" . $aula_id . "&saved=1");
     exit;
 }
-// ========== FIM SISTEMA DE ANOTAÇÕES ==========
+// ========== FIM SISTEMA DE ANOTAÇÕES COM VISTO ==========
+
+// Função para formatar data
+function formatarData($data) {
+    if (empty($data)) return '';
+    $date = new DateTime($data);
+    return $date->format('d/m/Y H:i');
+}
 
 // BUSCAR APENAS CONTEÚDOS EXPLICITAMENTE MARCADOS COMO VISÍVEIS PARA ESTA AULA
 $sql_conteudos_visiveis = "
@@ -441,11 +470,9 @@ function displayConteudo($conteudo, $nivel = 0) {
                 <?php endif; ?>
             <?php else: ?>
                 <?php if ($is_pdf): ?>
-                    <a href="visualizar_pdf.php?file=../<?= urlencode($conteudo['caminho_arquivo']) ?>&titulo=<?= urlencode($conteudo['titulo']) ?>" 
-   target="_blank" 
-   class="btn btn-outline-danger btn-sm mt-2">
-    <i class="fa-solid fa-file-pdf me-1"></i>Visualizar Material
-</a>
+                    <a href="#" onclick="abrirPDFSeguro('../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>', '<?= htmlspecialchars($conteudo['titulo']) ?>'); return false;" class="btn btn-outline-danger btn-sm mt-2">
+                        <i class="fa-solid fa-file-pdf me-1"></i>Visualizar Material
+                    </a>
                 <?php elseif ($is_video): ?>
                     <a href="../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
                         <i class="fas fa-play me-1"></i>Assistir Vídeo
@@ -691,7 +718,7 @@ function displayConteudo($conteudo, $nivel = 0) {
             justify-content: center;
         }
 
-        /* Estilos para o container de anotações - AZUL MARINHO */
+        /* ========== ESTILOS ATUALIZADOS PARA ANOTAÇÕES COM SISTEMA DE VISTO ========== */
         .anotacoes-container {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
@@ -722,7 +749,100 @@ function displayConteudo($conteudo, $nivel = 0) {
             border-radius: 6px;
             margin-top: 20px;
             border-left: 4px solid #007bff;
+            position: relative;
         }
+        
+        /* ===== NOVOS ESTILOS PARA O SISTEMA DE VISTO ===== */
+        .visto-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .visto-badge-aluno {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .visto-badge-aluno.visto-true {
+            background: #28a745;
+            color: white;
+        }
+        
+        .visto-badge-aluno.visto-false {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .visto-badge-aluno i {
+            font-size: 12px;
+        }
+        
+        .data-visto-info {
+            font-size: 11px;
+            color: #6c757d;
+        }
+        
+        .visualizacoes-count {
+            font-size: 11px;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .professor-visto-icon {
+            color: #28a745;
+            font-size: 14px;
+            cursor: help;
+        }
+        
+        .professor-nao-visto-icon {
+            color: #ffc107;
+            font-size: 14px;
+            cursor: help;
+        }
+        
+        .professor-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .professor-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #081d40 0%, #0a2351 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .professor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .comentario-content {
+            margin-top: 10px;
+        }
+        /* ===== FIM NOVOS ESTILOS ===== */
         
         .anotacoes-footer {
             background-color: #f8f9fa;
@@ -809,25 +929,6 @@ function displayConteudo($conteudo, $nivel = 0) {
             text-align: right;
             margin-top: 5px;
         }
-        
-        .professor-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .professor-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #081d40 0%, #0a2351 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 10px;
-        }
 
         @media (max-width: 768px) {
             .sidebar {
@@ -866,7 +967,8 @@ function displayConteudo($conteudo, $nivel = 0) {
         }
     </style>
 </head>
-<body oncontextmenu="return false;"> <div class="container-fluid">
+<body oncontextmenu="return false;">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-2 d-flex flex-column sidebar p-3">
                 <div class="mb-4 text-center">
@@ -942,7 +1044,7 @@ function displayConteudo($conteudo, $nivel = 0) {
                                                 name="conteudo_anotacao" 
                                                 id="conteudo_anotacao" 
                                                 class="anotacoes-textarea" 
-                                                placeholder="Escreva suas anotações aqui... "
+                                                placeholder="Escreva suas anotações aqui..."
                                             ><?= htmlspecialchars($anotacao_conteudo) ?></textarea>
                                             <div class="contador-caracteres mt-2">
                                                 Caracteres: <span id="contador_anotacoes"><?= strlen($anotacao_conteudo) ?></span>
@@ -951,22 +1053,82 @@ function displayConteudo($conteudo, $nivel = 0) {
                                         
                                         <?php if (!empty($comentario_professor)): ?>
                                             <div class="comentario-professor mt-3">
-                                                <div class="professor-info">
-                                                    <div class="professor-avatar">
-                                                        <?= strtoupper(substr($aula['nome_professor'], 0, 1)) ?>
+                                                <div class="professor-header">
+                                                    <div class="professor-info">
+                                                        <div class="professor-avatar">
+                                                            <?= strtoupper(substr($aula['nome_professor'], 0, 1)) ?>
+                                                        </div>
+                                                        <div>
+                                                            <strong><?= htmlspecialchars($aula['nome_professor']) ?></strong>
+                                                            <small class="text-muted d-block">Professor</small>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <strong><?= htmlspecialchars($aula['nome_professor']) ?></strong>
-                                                        <small class="text-muted d-block">Professor</small>
-                                                    </div>
+                                                    
+                                                    <!-- ===== INDICADOR DE VISTO DO PROFESSOR ===== -->
+                                                    <?php if ($visto): ?>
+                                                        <span class="visto-badge-aluno visto-true" 
+                                                              title="Professor visualizou suas anotações em <?= $data_visto ? formatarData($data_visto) : '' ?>">
+                                                            <i class="fas fa-check-circle"></i> Professor viu
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span class="visto-badge-aluno visto-false" 
+                                                              title="Professor ainda não visualizou suas anotações">
+                                                            <i class="fas fa-clock"></i> Aguardando visualização
+                                                        </span>
+                                                    <?php endif; ?>
                                                 </div>
-                                                <strong class="d-block mb-2"><i class="fas fa-comment-dots me-2 text-primary"></i>Comentário do Professor:</strong>
-                                                <p class="mb-0"><?= nl2br(htmlspecialchars($comentario_professor)) ?></p>
+                                                
+                                                <div class="comentario-content">
+                                                    <strong class="d-block mb-2"><i class="fas fa-comment-dots me-2 text-primary"></i>Comentário do Professor:</strong>
+                                                    <p class="mb-0"><?= nl2br(htmlspecialchars($comentario_professor)) ?></p>
+                                                </div>
+                                                
+                                                <!-- Informações adicionais de visualização -->
+                                                <?php if ($visto && $data_visto): ?>
+                                                    <div class="visto-status mt-2">
+                                                        <div class="d-flex align-items-center gap-3">
+                                                            <span class="data-visto-info">
+                                                                <i class="far fa-clock"></i> Visto em: <?= formatarData($data_visto) ?>
+                                                            </span>
+                                                            <?php if ($total_visualizacoes > 0): ?>
+                                                                <span class="visualizacoes-count" title="Número de vezes que o professor visualizou">
+                                                                    <i class="fas fa-eye"></i> <?= $total_visualizacoes ?> visualização(ões)
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
                                             </div>
                                         <?php else: ?>
                                             <div class="alert alert-info mt-3">
                                                 <i class="fas fa-info-circle me-2"></i>
                                                 Seu professor ainda não fez comentários.
+                                                
+                                                <!-- Mesmo sem comentário, mostra o status de visto se existir -->
+                                                <?php if ($visto): ?>
+                                                    <div class="mt-2">
+                                                        <span class="visto-badge-aluno visto-true" 
+                                                              title="Professor visualizou suas anotações em <?= $data_visto ? formatarData($data_visto) : '' ?>">
+                                                            <i class="fas fa-check-circle"></i> O Professor visualizou suas anotações
+                                                        </span>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                        
+                                        <!-- Status de visto para anotações sem comentário -->
+                                        <?php if (empty($comentario_professor) && $visto && !empty($anotacao_conteudo)): ?>
+                                            <div class="visto-status mt-2">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <span class="data-visto-info">
+                                                        <i class="far fa-clock"></i> Professor visualizou em: <?= formatarData($data_visto) ?>
+                                                    </span>
+                                                    <?php if ($total_visualizacoes > 0): ?>
+                                                        <span class="visualizacoes-count">
+                                                            <i class="fas fa-eye"></i> <?= $total_visualizacoes ?> visualização(ões)
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -977,8 +1139,11 @@ function displayConteudo($conteudo, $nivel = 0) {
                                             <i class="fas fa-info-circle text-primary me-1"></i>
                                             <small class="text-muted">
                                                 Suas anotações são salvas automaticamente quando você clica em "Salvar".
-                                                <?php if (!empty($comentario_professor)): ?>
-                                                    <br>Você pode ver o comentário do professor acima.
+                                                <?php if (!empty($anotacao_conteudo)): ?>
+                                                    <br>Status: <span class="<?= $visto ? 'text-success' : 'text-warning' ?>">
+                                                        <i class="fas <?= $visto ? 'fa-check-circle' : 'fa-clock' ?>"></i>
+                                                        <?= $visto ? 'Professor visualizou' : 'Aguardando visualização do professor' ?>
+                                                    </span>
                                                 <?php endif; ?>
                                             </small>
                                         </div>
@@ -989,7 +1154,7 @@ function displayConteudo($conteudo, $nivel = 0) {
                                 </div>
                             </form>
                         </div>
-                        </div>
+                    </div>
                     <div class="col-md-3">
                         <div class="card h-100">
                             <div class="card-header">
@@ -1072,7 +1237,7 @@ function displayConteudo($conteudo, $nivel = 0) {
                 </div>
                 <div class="modal-body p-0" style="background-color: #525659; display: flex; justify-content: center;">
                     <div id="pdf-render-container">
-                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer bg-dark text-white justify-content-center">
                     <small>Risenglish &copy; Material Protegido. O download deste arquivo não é permitido.</small>
