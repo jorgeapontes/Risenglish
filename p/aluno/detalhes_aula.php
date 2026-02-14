@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../includes/conexao.php';
+require_once '../includes/email_config.php';
 
 // Bloqueio de acesso para usuários não-aluno
 if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'aluno') {
@@ -109,6 +110,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_anotacao'])) {
             ':conteudo' => $conteudo,
             ':id' => $anotacao_id
         ]);
+        // Notificar o professor que o aluno atualizou a anotação
+        if (!empty($aula['email_professor'])) {
+            $assunto = "Aluno {$aluno_nome} atualizou uma anotação na aula: {$aula['titulo_aula']}";
+            $excerpt = substr(strip_tags($conteudo), 0, 300);
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            $link = $scheme . '://' . $host . '/Risenglish/p/professor/detalhes_aula.php?id=' . $aula_id;
+                $html = "<p>Olá " . htmlspecialchars($aula['nome_professor']) . ",</p>" .
+                    "<p>O aluno <strong>" . htmlspecialchars($aluno_nome) . "</strong> atualizou uma anotação na aula <strong>" . htmlspecialchars($aula['titulo_aula']) . "</strong>.</p>" .
+                    "<p>Trecho da anotação:</p><blockquote>" . nl2br(htmlspecialchars($excerpt)) . "</blockquote>" .
+                    "<p>Veja em: risenglish.com.br</p>";
+            // enviar sem bloquear fluxo
+            try { enviarEmailSimples($aula['email_professor'], $aula['nome_professor'], $assunto, $html); } catch (Exception $e) { error_log('Erro email anotacao update: '. $e->getMessage()); }
+        }
     } else {
         // Inserir nova anotação
         $sql_insert = "INSERT INTO anotacoes_aula (aula_id, aluno_id, conteudo) VALUES (:aula_id, :aluno_id, :conteudo)";
@@ -119,6 +134,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_anotacao'])) {
             ':conteudo' => $conteudo
         ]);
         $anotacao_id = $pdo->lastInsertId();
+        // Notificar o professor que o aluno criou a anotação
+        if (!empty($aula['email_professor'])) {
+            $assunto = "Aluno {$aluno_nome} salvou uma nova anotação na aula: {$aula['titulo_aula']}";
+            $excerpt = substr(strip_tags($conteudo), 0, 300);
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            $link = $scheme . '://' . $host . '/Risenglish/p/professor/detalhes_aula.php?id=' . $aula_id;
+            $html = "<p>Olá " . htmlspecialchars($aula['nome_professor']) . ",</p>" .
+                    "<p>O aluno <strong>" . htmlspecialchars($aluno_nome) . "</strong> salvou uma nova anotação na aula <strong>" . htmlspecialchars($aula['titulo_aula']) . "</strong>.</p>" .
+                    "<p>Trecho da anotação:</p><blockquote>" . nl2br(htmlspecialchars($excerpt)) . "</blockquote>" .
+                    "<p><a href='" . $link . "'>Ver detalhes da aula e anotação</a></p><p>Atenciosamente,<br>Risenglish</p>";
+            try { enviarEmailSimples($aula['email_professor'], $aula['nome_professor'], $assunto, $html); } catch (Exception $e) { error_log('Erro email anotacao insert: '. $e->getMessage()); }
+        }
     }
     
     // Redirecionar para evitar reenvio do formulário
