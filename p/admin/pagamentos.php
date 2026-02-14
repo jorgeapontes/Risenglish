@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     try {
         if ($action === 'registrar_pagamento') {
+            // AQUI O ID É DO PAGADOR (RESPONSÁVEL)
             $aluno_id = $_POST['aluno_id'] ?? null;
             $mes_referencia = $_POST['mes_referencia'] ?? null;
             $valor = $_POST['valor'] ?? 0;
@@ -34,17 +35,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("Dados obrigatórios faltando.");
             }
 
-            // Verifica se já existe pagamento para este aluno neste mês
+            // Verifica se já existe pagamento para este PAGADOR neste mês
             $stmt_check = $pdo->prepare("SELECT id FROM pagamentos WHERE aluno_id = ? AND mes_referencia = ?");
             $stmt_check->execute([$aluno_id, $mes_referencia . '-01']);
             
             if ($stmt_check->fetch()) {
-                // Atualiza o pagamento existente
                 $stmt = $pdo->prepare("UPDATE pagamentos SET valor = ?, data_pagamento = ?, observacoes = ? WHERE aluno_id = ? AND mes_referencia = ?");
                 $stmt->execute([$valor, $data_pagamento, $observacoes, $aluno_id, $mes_referencia . '-01']);
                 $mensagem = "Pagamento atualizado com sucesso!";
             } else {
-                // Cria novo pagamento
                 $stmt = $pdo->prepare("INSERT INTO pagamentos (aluno_id, mes_referencia, valor, data_pagamento, observacoes) VALUES (?, ?, ?, ?, ?)");
                 $stmt->execute([$aluno_id, $mes_referencia . '-01', $valor, $data_pagamento, $observacoes]);
                 $mensagem = "Pagamento registrado com sucesso!";
@@ -57,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $dia_vencimento = $_POST['dia_vencimento'] ?? null;
 
             if (empty($aluno_id)) {
-                throw new Exception("ID do aluno é obrigatório.");
+                throw new Exception("ID do usuário é obrigatório.");
             }
 
             $stmt = $pdo->prepare("UPDATE usuarios SET dia_vencimento = ? WHERE id = ?");
@@ -87,62 +86,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // ===================================
-// BUSCAR DADOS
+// BUSCAR DADOS (AGRUPADOS POR RESPONSÁVEL)
 // ===================================
 
-// Filtros
 $filtro_mes = $_GET['filtro_mes'] ?? date('Y-m');
 $filtro_busca = $_GET['filtro_busca'] ?? '';
 $mes_referencia_inicio = $filtro_mes . '-01';
 
-// Buscar todos os alunos com seus pagamentos do mês
 $alunos_pagamentos = [];
 try {
-    // Buscar todos os alunos com LEFT JOIN
-    $sql = "SELECT 
-                u.id,
-                u.nome,
-                u.email,
-                u.dia_vencimento,
-                p.id as pagamento_id,
-                p.valor,
-                p.data_pagamento,
-                p.observacoes,
-                p.mes_referencia
-            FROM usuarios u
-            LEFT JOIN pagamentos p ON u.id = p.aluno_id AND p.mes_referencia = ?
-            WHERE u.tipo_usuario = 'aluno'";
+    // ESTA QUERY FOI ALTERADA PARA AGRUPAR POR PAGADOR
+    // Seleciona quem é aluno e paga pra si mesmo OU quem é responsável financeiro por alguém
+    $sql = "
+        SELECT DISTINCT
+            pagador.id,
+            pagador.nome,
+            pagador.email,
+            pagador.dia_vencimento,
+            p.id as pagamento_id,
+            p.valor,
+            p.data_pagamento,
+            p.observacoes,
+            p.mes_referencia,
+            -- Subquery para pegar nomes dos dependentes
+            (SELECT GROUP_CONCAT(u_dep.nome SEPARATOR ', ') 
+             FROM usuarios u_dep 
+             WHERE u_dep.responsavel_financeiro_id = pagador.id) as dependentes
+        FROM usuarios pagador
+        LEFT JOIN pagamentos p ON pagador.id = p.aluno_id AND p.mes_referencia = ?
+        LEFT JOIN usuarios dep ON dep.responsavel_financeiro_id = pagador.id
+        WHERE 
+            -- Regra: Ou é um aluno independente (sem resp) OU é responsável por alguém
+            (pagador.tipo_usuario = 'aluno' AND pagador.responsavel_financeiro_id IS NULL)
+            OR
+            (dep.id IS NOT NULL)
+    ";
     
     $params = [$mes_referencia_inicio];
     
-    // Adicionar filtro de busca
     if (!empty($filtro_busca)) {
-        $sql .= " AND (u.nome LIKE ? OR u.email LIKE ?)";
+        $sql .= " AND (pagador.nome LIKE ? OR pagador.email LIKE ?)";
         $busca_param = '%' . $filtro_busca . '%';
         $params[] = $busca_param;
         $params[] = $busca_param;
     }
     
-    $sql .= " ORDER BY u.nome";
+    $sql .= " GROUP BY pagador.id ORDER BY pagador.nome";
     
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
-    $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Processar resultados para evitar duplicação
-    $alunos_processados = [];
-    foreach ($resultados as $row) {
-        $aluno_id = $row['id'];
-        
-        // Se já processamos este aluno, pular
-        if (isset($alunos_processados[$aluno_id])) {
-            continue;
-        }
-        
-        // Adicionar aluno processado
-        $alunos_pagamentos[] = $row;
-        $alunos_processados[$aluno_id] = true;
-    }
+    $alunos_pagamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
     $mensagem = "Erro ao carregar dados: " . $e->getMessage();
@@ -160,14 +153,12 @@ $count_atrasados = 0;
 
 $hoje = new DateTime();
 foreach ($alunos_pagamentos as &$aluno) {
-    // Calcular status
     if (!empty($aluno['data_pagamento'])) {
         $aluno['status'] = 'pago';
         $total_pago += (float)$aluno['valor'];
         $total_mes += (float)$aluno['valor'];
         $count_pagos++;
     } else {
-        // Verificar se está atrasado
         if (!empty($aluno['dia_vencimento'])) {
             try {
                 $data_vencimento = new DateTime($filtro_mes . '-' . str_pad($aluno['dia_vencimento'], 2, '0', STR_PAD_LEFT));
@@ -180,7 +171,6 @@ foreach ($alunos_pagamentos as &$aluno) {
                     $count_pendentes++;
                 }
             } catch (Exception $e) {
-                // Data inválida, tratar como pendente
                 $aluno['status'] = 'pendente';
                 $count_pendentes++;
             }
@@ -189,14 +179,7 @@ foreach ($alunos_pagamentos as &$aluno) {
             $count_pendentes++;
         }
     }
-    
-    $aluno['data_vencimento_calculada'] = null;
-    if (!empty($aluno['dia_vencimento'])) {
-        $aluno['data_vencimento_calculada'] = $filtro_mes . '-' . str_pad($aluno['dia_vencimento'], 2, '0', STR_PAD_LEFT);
-    }
 }
-
-// Remover referência do último elemento do array
 unset($aluno);
 ?>
 <!DOCTYPE html>
@@ -213,7 +196,6 @@ unset($aluno);
 <body>
 
 <div class="d-flex">
-    <!-- Sidebar -->
     <div class="col-md-2 d-flex flex-column sidebar p-3">
         <div class="mb-4 text-center">
             <h5 class="mt-4"><?php echo htmlspecialchars($nome_usuario); ?></h5>
@@ -232,7 +214,6 @@ unset($aluno);
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content flex-grow-1">
         <h1 class="mb-4">Controle de Pagamentos - PIX</h1>
         
@@ -243,22 +224,21 @@ unset($aluno);
             </div>
         <?php endif; ?>
 
-        <!-- Cards de Estatísticas -->
         <div class="stats-cards">
             <div class="stat-card pago">
                 <h6><i class="fas fa-check-circle"></i> Pagos</h6>
                 <div class="value">R$ <?= number_format($total_pago, 2, ',', '.') ?></div>
-                <div class="count"><?= $count_pagos ?> aluno(s)</div>
+                <div class="count"><?= $count_pagos ?> pagante(s)</div>
             </div>
             <div class="stat-card pendente">
                 <h6><i class="fas fa-clock"></i> Pendentes</h6>
                 <div class="value"><?= $count_pendentes ?></div>
-                <div class="count">aluno(s)</div>
+                <div class="count">pagante(s)</div>
             </div>
             <div class="stat-card atrasado">
                 <h6><i class="fas fa-exclamation-triangle"></i> Atrasados</h6>
                 <div class="value"><?= $count_atrasados ?></div>
-                <div class="count">aluno(s)</div>
+                <div class="count">pagante(s)</div>
             </div>
             <div class="stat-card total">
                 <h6><i class="fas fa-calendar-alt"></i> Total do Mês</h6>
@@ -266,17 +246,16 @@ unset($aluno);
             </div>
         </div>
 
-        <!-- Filtro de Mês e Busca -->
         <div class="filter-section">
             <form method="GET" class="d-flex gap-3 w-100 align-items-end">
                 <div style="flex: 1;">
                     <label class="form-label mb-1">
-                        <i class="fas fa-search"></i> Buscar Aluno
+                        <i class="fas fa-search"></i> Buscar Pagador
                     </label>
                     <input type="text" 
                            name="filtro_busca" 
                            class="form-control" 
-                           placeholder="Digite o nome ou email do aluno..."
+                           placeholder="Digite o nome ou email do responsável..."
                            value="<?= htmlspecialchars($filtro_busca) ?>">
                 </div>
                 <div style="flex: 0 0 250px;">
@@ -308,19 +287,18 @@ unset($aluno);
             <i class="fas fa-info-circle"></i> 
             Mostrando resultados para: <strong>"<?= htmlspecialchars($filtro_busca) ?>"</strong>
             <?php if (empty($alunos_pagamentos)): ?>
-                - Nenhum aluno encontrado.
+                - Nenhum responsável encontrado.
             <?php else: ?>
-                - <?= count($alunos_pagamentos) ?> aluno(s) encontrado(s).
+                - <?= count($alunos_pagamentos) ?> encontrado(s).
             <?php endif; ?>
         </div>
         <?php endif; ?>
 
-        <!-- Tabela de Alunos -->
         <div class="table-responsive">
             <table class="table table-striped align-middle">
                 <thead>
                     <tr>
-                        <th>Aluno</th>
+                        <th>Responsável Financeiro</th>
                         <th>Vencimento</th>
                         <th>Status</th>
                         <th>Data Pagamento</th>
@@ -331,13 +309,19 @@ unset($aluno);
                 </thead>
                 <tbody>
                     <?php if (empty($alunos_pagamentos)): ?>
-                        <tr><td colspan="7" class="text-center">Nenhum aluno cadastrado.</td></tr>
+                        <tr><td colspan="7" class="text-center">Nenhum registro encontrado para este mês.</td></tr>
                     <?php else: ?>
                         <?php foreach ($alunos_pagamentos as $aluno): ?>
                         <tr>
                             <td>
                                 <strong><?= htmlspecialchars($aluno['nome']) ?></strong><br>
                                 <small class="text-muted"><?= htmlspecialchars($aluno['email']) ?></small>
+                                
+                                <?php if (!empty($aluno['dependentes'])): ?>
+                                    <div style="font-size: 0.85em; margin-top: 5px; color: #666;">
+                                        <i class="fas fa-users"></i> Cobre: <?= htmlspecialchars($aluno['dependentes']) ?>
+                                    </div>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <?php if ($aluno['dia_vencimento']): ?>
@@ -417,7 +401,6 @@ unset($aluno);
     </div>
 </div>
 
-<!-- Modal Registrar Pagamento -->
 <div class="modal fade" id="modalRegistrarPagamento" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -432,7 +415,7 @@ unset($aluno);
                     <input type="hidden" name="mes_referencia" id="pagamento_mes_referencia">
                     
                     <div class="mb-3">
-                        <label class="form-label">Aluno</label>
+                        <label class="form-label">Responsável Financeiro</label>
                         <input type="text" class="form-control" id="pagamento_aluno_nome" readonly>
                     </div>
                     
@@ -465,7 +448,6 @@ unset($aluno);
     </div>
 </div>
 
-<!-- Modal Editar Vencimento -->
 <div class="modal fade" id="modalEditarVencimento" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -479,7 +461,7 @@ unset($aluno);
                     <input type="hidden" name="aluno_id" id="vencimento_aluno_id">
                     
                     <div class="mb-3">
-                        <label class="form-label">Aluno</label>
+                        <label class="form-label">Responsável</label>
                         <input type="text" class="form-control" id="vencimento_aluno_nome" readonly>
                     </div>
                     
@@ -503,7 +485,6 @@ unset($aluno);
     </div>
 </div>
 
-<!-- Form oculto para remoção -->
 <form id="formRemover" method="POST" action="pagamentos.php">
     <input type="hidden" name="action" value="remover_pagamento">
     <input type="hidden" name="pagamento_id" id="remover_pagamento_id">

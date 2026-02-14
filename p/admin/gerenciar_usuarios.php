@@ -11,6 +11,16 @@ $mensagem = '';
 $tipo_mensagem = '';
 $termo_pesquisa = '';
 
+// BUSCAR LISTA DE USUÁRIOS PARA O SELECT DE RESPONSÁVEL FINANCEIRO
+// Exibir apenas usuários do tipo 'aluno' (apenas alunos podem ser responsáveis financeiros)
+try {
+    $sql_resp = "SELECT id, nome FROM usuarios WHERE tipo_usuario = 'aluno' ORDER BY nome ASC";
+    $stmt_resp = $pdo->query($sql_resp);
+    $lista_usuarios = $stmt_resp->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $lista_usuarios = [];
+}
+
 // --- LÓGICA DE CRUD DE USUÁRIOS ---
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['acao'] == 'add_usuario' || $_POST['acao'] == 'editar_usuario')) {
     $nome = $_POST['nome'];
@@ -18,11 +28,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
     $senha = $_POST['senha'];
     $tipo = $_POST['tipo_usuario'];
     $informacoes = $_POST['informacoes'] ?? '';
+    // NOVO CAMPO: Responsável Financeiro
+    $responsavel_id = !empty($_POST['responsavel_financeiro_id']) ? $_POST['responsavel_financeiro_id'] : null;
+    
     $usuario_id = $_POST['usuario_id'] ?? null;
     $acao = $_POST['acao'];
 
     try {
         if (empty($nome) || empty($email) || empty($tipo)) throw new Exception("Todos os campos obrigatórios (Nome, Email, Tipo) devem ser preenchidos.");
+
+        // Evitar loop (usuário ser responsável por si mesmo no select, embora logicamente NULL seja o padrão para "paga pra si")
+        if ($acao == 'editar_usuario' && $responsavel_id == $usuario_id) {
+            $responsavel_id = null;
+        }
 
         if ($acao == 'add_usuario') {
             if (empty($senha)) throw new Exception("A senha é obrigatória para novos cadastros.");
@@ -34,14 +52,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
             if ($stmt_check->rowCount() > 0) throw new Exception("O email já está cadastrado.");
 
             $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
-            $sql = "INSERT INTO usuarios (nome, email, senha, tipo_usuario, informacoes) VALUES (:nome, :email, :senha, :tipo_usuario, :informacoes)";
+            // Inserir com responsavel_financeiro_id
+            $sql = "INSERT INTO usuarios (nome, email, senha, tipo_usuario, informacoes, responsavel_financeiro_id) VALUES (:nome, :email, :senha, :tipo_usuario, :informacoes, :resp_id)";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':senha', $senha_hash);
             $stmt->bindParam(':informacoes', $informacoes);
+            $stmt->bindParam(':resp_id', $responsavel_id);
             $mensagem = "Usuário <strong>{$nome}</strong> cadastrado como <strong>{$tipo}</strong> com sucesso!";
 
         } else {
-            $sql_parts = ["nome = :nome", "email = :email", "tipo_usuario = :tipo_usuario", "informacoes = :informacoes"];
+            $sql_parts = ["nome = :nome", "email = :email", "tipo_usuario = :tipo_usuario", "informacoes = :informacoes", "responsavel_financeiro_id = :resp_id"];
             if (!empty($senha)) {
                 $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
                 $sql_parts[] = "senha = :senha";
@@ -50,6 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':usuario_id', $usuario_id);
             $stmt->bindParam(':informacoes', $informacoes);
+            $stmt->bindParam(':resp_id', $responsavel_id);
             if (!empty($senha)) $stmt->bindParam(':senha', $senha_hash);
             $mensagem = "Usuário <strong>{$nome}</strong> atualizado com sucesso!";
         }
@@ -114,8 +135,8 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $termo_pesquisa = trim($_GET['pesquisa']);
     $termo_like = "%" . $termo_pesquisa . "%";
     
-    // --- CONSULTA PARA PESQUISAR PROFESSORES ---
-    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes, status 
+    // CONSULTA PROFESSORES
+    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes, status, responsavel_financeiro_id 
                         FROM usuarios 
                         WHERE tipo_usuario = 'professor' 
                         AND (nome LIKE :termo OR email LIKE :termo OR informacoes LIKE :termo)
@@ -125,8 +146,8 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $stmt_professores->execute();
     $professores = $stmt_professores->fetchAll(PDO::FETCH_ASSOC);
     
-    // --- CONSULTA PARA PESQUISAR ALUNOS ---
-    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status,
+    // CONSULTA ALUNOS (Com Join no Responsável para exibir nome se quiser, mas aqui mantivemos simples)
+    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, u.responsavel_financeiro_id,
                           GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
                    FROM usuarios u
                    LEFT JOIN alunos_turmas at ON u.id = at.aluno_id
@@ -140,11 +161,11 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $stmt_alunos->execute();
     $alunos = $stmt_alunos->fetchAll(PDO::FETCH_ASSOC);
 } else {
-    // --- CONSULTAS SEM PESQUISA (TODOS OS USUÁRIOS) ---
-    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes, status FROM usuarios WHERE tipo_usuario = 'professor' ORDER BY nome";
+    // CONSULTAS SEM PESQUISA
+    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes, status, responsavel_financeiro_id FROM usuarios WHERE tipo_usuario = 'professor' ORDER BY nome";
     $professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
 
-    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
+    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, u.responsavel_financeiro_id, GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
                    FROM usuarios u
                    LEFT JOIN alunos_turmas at ON u.id = at.aluno_id
                    LEFT JOIN turmas t ON at.turma_id = t.id
@@ -498,12 +519,10 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
 
 <div class="d-flex">
     <div class="col-md-2 d-flex flex-column sidebar p-3">
-        <!-- Nome do admin -->
         <div class="mb-4 text-center">
             <h5 class="mt-4"><?php echo $_SESSION['user_nome'] ?? 'Admin'; ?></h5>
         </div>
 
-        <!-- Menu centralizado verticalmente -->
         <div class="d-flex flex-column flex-grow-1 mb-5">
             <a href="dashboard.php" ><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
             <a href="gerenciar_turmas.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;&nbsp;Turmas</a>
@@ -512,7 +531,6 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
             <a href="pagamentos.php" class="rounded"><i class="fas fa-dollar-sign"></i>&nbsp;&nbsp;Pagamentos</a>
         </div>
 
-        <!-- Botão sair no rodapé -->
         <div class="mt-auto">
             <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
         </div>
@@ -521,7 +539,6 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     <div class="main-content flex-grow-1">
         <div class="page-header">
             <h1>Gerenciar Usuários</h1>
-            
         </div>
         
         <?php if ($mensagem): ?>
@@ -531,13 +548,10 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
             </div>
         <?php endif; ?>
 
-        
-
         <button class="btn btn-acao mb-4" data-bs-toggle="modal" data-bs-target="#modalAddUsuario" onclick="resetForm()">
             <i class="fas fa-plus"></i> Cadastrar Novo Usuário (Prof/Aluno)
         </button>
 
-        <!-- Barra de Pesquisa -->
         <div class="search-container">
             <form method="GET" action="" class="mb-0">
                 <div class="search-input-group">
@@ -605,7 +619,6 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                             </thead>
                             <tbody>
                                 <?php foreach ($professores as $professor): 
-                                    // Destacar o termo de pesquisa nos resultados
                                     $nome_professor = htmlspecialchars($professor['nome']);
                                     $email_professor = htmlspecialchars($professor['email']);
                                     $informacoes_professor = htmlspecialchars($professor['informacoes'] ?: 'Sem informações adicionais');
@@ -627,7 +640,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                                     </td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-primary me-2" 
-                                                onclick="openEditUsuarioModal(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['informacoes'] ?? '', ENT_QUOTES) ?>')">
+                                                onclick="openEditUsuarioModal(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['informacoes'] ?? '', ENT_QUOTES) ?>', '<?= $professor['responsavel_financeiro_id'] ?? '' ?>')">
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
 
@@ -680,7 +693,6 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                             </thead>
                             <tbody>
                                 <?php foreach ($alunos as $aluno): 
-                                    // Destacar o termo de pesquisa nos resultados
                                     $nome_aluno = htmlspecialchars($aluno['nome']);
                                     $email_aluno = htmlspecialchars($aluno['email']);
                                     $informacoes_aluno = htmlspecialchars($aluno['informacoes'] ?: 'Sem informações adicionais');
@@ -707,7 +719,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                                     </td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-primary me-2" 
-                                                onclick="openEditUsuarioModal(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['informacoes'] ?? '', ENT_QUOTES) ?>')">
+                                                onclick="openEditUsuarioModal(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['informacoes'] ?? '', ENT_QUOTES) ?>', '<?= $aluno['responsavel_financeiro_id'] ?? '' ?>')">
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
 
@@ -755,6 +767,17 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                     <option value="professor">Professor</option>
                     <option value="aluno">Aluno</option>
                 </select>
+            </div>
+            
+            <div class="mb-3" id="responsavel_group" style="display: none;">
+                <label for="responsavel_financeiro_id" class="form-label">Responsável Financeiro (Opcional)</label>
+                <select class="form-select" id="responsavel_financeiro_id" name="responsavel_financeiro_id">
+                    <option value="">O próprio usuário paga</option>
+                    <?php foreach ($lista_usuarios as $u): ?>
+                        <option value="<?= $u['id'] ?>"><?= htmlspecialchars($u['nome']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="form-text">Selecione quem paga a mensalidade deste usuário (ex: pai/mãe ou marido).</div>
             </div>
             
             <div class="mb-3">
@@ -806,30 +829,52 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         document.getElementById('nome').value = '';
         document.getElementById('email').value = '';
         document.getElementById('tipo_usuario').value = ''; 
+        document.getElementById('responsavel_financeiro_id').value = ''; // Reset
         document.getElementById('informacoes').value = '';
         document.getElementById('senha').value = '';
         document.getElementById('label_senha').innerText = 'Senha (Obrigatória para novo)';
         document.getElementById('btn_salvar_usuario').innerText = 'Salvar Usuário';
         document.getElementById('email').disabled = false;
         
-        document.getElementById('senha').removeAttribute('required');
+        document.getElementById('senha').setAttribute('required', 'required');
+            // Garantir visibilidade correta do responsável após reset
+            toggleResponsavelVisibility();
     }
 
-    function openEditUsuarioModal(id, nome, email, tipo, informacoes) {
+    // ATUALIZADO PARA RECEBER O ID DO RESPONSAVEL
+    function openEditUsuarioModal(id, nome, email, tipo, informacoes, responsavelId) {
         document.getElementById('modalAddUsuarioLabel').innerText = `Editar Usuário: ${nome}`;
         document.getElementById('usuario_acao').value = 'editar_usuario';
         document.getElementById('usuario_id').value = id;
         document.getElementById('nome').value = nome;
         document.getElementById('email').value = email;
         document.getElementById('tipo_usuario').value = tipo;
+        document.getElementById('responsavel_financeiro_id').value = responsavelId || ''; // Set value
         document.getElementById('informacoes').value = informacoes || '';
         document.getElementById('senha').value = '';
         document.getElementById('label_senha').innerText = 'Nova Senha (Deixe vazio para manter a atual)';
         document.getElementById('btn_salvar_usuario').innerText = 'Atualizar Usuário';
         document.getElementById('email').disabled = false;
         
+        document.getElementById('senha').removeAttribute('required'); // Remove required no edit
+            // Ajustar visibilidade do responsável conforme o tipo carregado
+            toggleResponsavelVisibility();
+        
         var myModal = new bootstrap.Modal(document.getElementById('modalAddUsuario'));
         myModal.show();
+    }
+    
+    function toggleResponsavelVisibility() {
+        var tipo = document.getElementById('tipo_usuario').value;
+        var group = document.getElementById('responsavel_group');
+        var select = document.getElementById('responsavel_financeiro_id');
+        if (!group || !select) return;
+        if (tipo === 'aluno') {
+            group.style.display = '';
+        } else {
+            group.style.display = 'none';
+            select.value = '';
+        }
     }
     
     function confirmRemove(id, nome) {
@@ -847,13 +892,18 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         }
     }
     
-    // Auto-focus na barra de pesquisa se houver um termo de pesquisa
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.querySelector('input[name="pesquisa"]');
         if (searchInput && searchInput.value) {
             searchInput.focus();
             searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
         }
+        var tipoSelect = document.getElementById('tipo_usuario');
+        if (tipoSelect) {
+            tipoSelect.addEventListener('change', toggleResponsavelVisibility);
+        }
+        // Ensure visibility is correct on load
+        toggleResponsavelVisibility();
     });
 </script>
 </body>
