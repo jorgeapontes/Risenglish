@@ -16,6 +16,8 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 
 $aluno_id = $_SESSION['user_id'];
 $aluno_nome = $_SESSION['user_nome'] ?? 'Aluno';
+// Recuperar email para a marca d'água
+$aluno_email = $_SESSION['user_email'] ?? ''; 
 $aula_id = $_GET['id'];
 
 // Consulta para obter os detalhes da aula
@@ -180,11 +182,9 @@ foreach ($conteudos_visiveis as $conteudo) {
                 }
             }
             
-            // Buscar arquivos diretamente no tema principal (CORREÇÃO AQUI)
+            // Buscar arquivos diretamente no tema principal
             $arquivos_tema_principal = buscarArquivosPastaVisivel($pdo, $tema['id'], $aula_id);
             if (!empty($arquivos_tema_principal)) {
-                // Se já temos subpastas, adicionar os arquivos ao final
-                // Se não temos subpastas, usar os arquivos como filhos diretos
                 foreach ($arquivos_tema_principal as $arquivo) {
                     $tema['filhos'][] = $arquivo;
                 }
@@ -197,7 +197,7 @@ foreach ($conteudos_visiveis as $conteudo) {
     }
 }
 
-// Também incluir subpastas que são visíveis mas não têm parent (caso raro)
+// Também incluir subpastas que são visíveis mas não têm parent
 foreach ($conteudos_visiveis as $conteudo) {
     if ($conteudo['parent_id'] !== null) {
         $ja_incluido = false;
@@ -213,31 +213,28 @@ foreach ($conteudos_visiveis as $conteudo) {
         }
         
         if (!$ja_incluido && $conteudo['eh_subpasta'] == 1) {
-            // É uma subpasta visível sem tema pai visível (adicionar como item principal)
             $subpasta = $conteudo;
             $subpasta['filhos'] = buscarArquivosPastaVisivel($pdo, $subpasta['id'], $aula_id);
             $estrutura_conteudos[] = $subpasta;
         } elseif (!$ja_incluido && $conteudo['eh_subpasta'] == 0) {
-            // É um arquivo solto visível (adicionar como item principal)
             $estrutura_conteudos[] = $conteudo;
         }
     }
 }
 
-// CORREÇÃO ADICIONAL: Buscar arquivos diretamente nos temas principais que podem não ter sido incluídos
+// CORREÇÃO ADICIONAL: Buscar arquivos diretamente nos temas principais
 foreach ($estrutura_conteudos as &$item) {
     if ($item['parent_id'] === null && 
         ($item['eh_subpasta'] == 1 || empty($item['tipo_arquivo']) || $item['tipo_arquivo'] === 'TEMA') &&
         (!isset($item['filhos']) || empty($item['filhos']))) {
         
-        // Buscar arquivos diretamente no tema principal
         $arquivos_diretos = buscarArquivosPastaVisivel($pdo, $item['id'], $aula_id);
         if (!empty($arquivos_diretos)) {
             $item['filhos'] = $arquivos_diretos;
         }
     }
 }
-unset($item); // Importante: remover a referência
+unset($item);
 
 // Usar a estrutura hierárquica filtrada
 $conteudos = $estrutura_conteudos;
@@ -279,13 +276,11 @@ function get_arquivo_icone($tipo_arquivo, $caminho_arquivo) {
         }
     }
     
-    // Extrair extensão do tipo_arquivo (que pode ser como "application/pdf")
     $extensao = $tipo_arquivo;
     if (strpos($tipo_arquivo, '/') !== false) {
         $parts = explode('/', $tipo_arquivo);
         $extensao = end($parts);
     } else {
-        // Se não tem barra, tentar extrair do caminho do arquivo
         $extensao = pathinfo($caminho_arquivo, PATHINFO_EXTENSION);
     }
 
@@ -356,16 +351,10 @@ function get_arquivo_icone($tipo_arquivo, $caminho_arquivo) {
 
 // FUNÇÃO PARA TRANSFORMAR LINKS EM TEXTO CLICÁVEL
 function transformarLinksClicaveis($texto) {
-    // Padrão para URLs
     $padrao = '/(https?:\/\/[^\s]+)/i';
-    
-    // Substituir URLs por links clicáveis
     $texto_com_links = preg_replace($padrao, '<a href="$1" target="_blank" class="text-primary link-descricao">$1</a>', $texto);
-    
-    // Se houver texto sem http:// ou https://, mas com www.
     $padrao_www = '/(\s|^)(www\.[^\s]+)/i';
     $texto_com_links = preg_replace($padrao_www, '$1<a href="http://$2" target="_blank" class="text-primary link-descricao">$2</a>', $texto_com_links);
-    
     return $texto_com_links;
 }
 
@@ -383,6 +372,10 @@ function displayConteudo($conteudo, $nivel = 0) {
             $youtube_id = get_youtube_id($conteudo['caminho_arquivo']);
         }
         $icone_info = get_arquivo_icone($conteudo['tipo_arquivo'], $conteudo['caminho_arquivo']);
+
+        // Verificação se é PDF para o sistema de proteção
+        $extensao = pathinfo($conteudo['caminho_arquivo'], PATHINFO_EXTENSION);
+        $is_pdf = (strtolower($extensao) === 'pdf' || $conteudo['tipo_arquivo'] === 'application/pdf');
     }
     ?>
     <div class="conteudo-item" style="margin-left: <?= $margem ?>px; border-bottom: 1px solid #eee; padding: 15px 0;">
@@ -431,7 +424,6 @@ function displayConteudo($conteudo, $nivel = 0) {
             <p class="card-text text-muted small mb-2"><?= htmlspecialchars($conteudo['descricao']) ?></p>
         <?php endif; ?>
         
-        <!-- Botões para arquivos (não pastas) -->
         <?php if (!$ePasta && !empty($conteudo['caminho_arquivo'])): ?>
             <?php if ($conteudo['tipo_arquivo'] === 'URL'): ?>
                 <?php if ($is_video && $youtube_id): ?>
@@ -448,7 +440,13 @@ function displayConteudo($conteudo, $nivel = 0) {
                     </a>
                 <?php endif; ?>
             <?php else: ?>
-                <?php if ($is_video): ?>
+                <?php if ($is_pdf): ?>
+                    <a href="visualizar_pdf.php?file=../<?= urlencode($conteudo['caminho_arquivo']) ?>&titulo=<?= urlencode($conteudo['titulo']) ?>" 
+   target="_blank" 
+   class="btn btn-outline-danger btn-sm mt-2">
+    <i class="fa-solid fa-file-pdf me-1"></i>Visualizar Material
+</a>
+                <?php elseif ($is_video): ?>
                     <a href="../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
                         <i class="fas fa-play me-1"></i>Assistir Vídeo
                     </a>
@@ -460,7 +458,6 @@ function displayConteudo($conteudo, $nivel = 0) {
             <?php endif; ?>
         <?php endif; ?>
 
-        <!-- Conteúdos filhos (para pastas) -->
         <?php if ($ePasta && $temFilhos): ?>
             <div class="mt-3">
                 <div class="collapse" id="conteudos-<?= $conteudo['id'] ?>">
@@ -486,6 +483,11 @@ function displayConteudo($conteudo, $nivel = 0) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    </script>
+
     <style>
         body {
             background-color: #FAF9F6;
@@ -844,19 +846,33 @@ function displayConteudo($conteudo, $nivel = 0) {
                 margin: 10px auto;
             }
         }
+        
+        /* --- CSS NOVO APENAS PARA O VISUALIZADOR PDF (SEM AFETAR O RESTO) --- */
+        #pdf-render-container {
+            background-color: #525659;
+            text-align: center;
+            overflow-y: auto;
+            max-height: 85vh;
+            position: relative;
+            padding: 20px;
+        }
+        .pdf-page-canvas {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            max-width: 100%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
     </style>
 </head>
-<body>
-    <div class="container-fluid">
+<body oncontextmenu="return false;"> <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar -->
             <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <!-- Nome do aluno -->
                 <div class="mb-4 text-center">
                     <h5 class="mt-4"><?php echo htmlspecialchars($aluno_nome); ?></h5>
                 </div>
 
-                <!-- Menu centralizado verticalmente -->
                 <div class="d-flex flex-column flex-grow-1 mb-5">
                     <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                     <a href="minhas_aulas.php" class="rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
@@ -864,13 +880,11 @@ function displayConteudo($conteudo, $nivel = 0) {
                     <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
                 </div>
 
-                <!-- Botão sair no rodapé -->
                 <div class="mt-auto">
                     <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
                 </div>
             </div>
 
-            <!-- Conteúdo principal -->
             <div class="col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
@@ -881,7 +895,6 @@ function displayConteudo($conteudo, $nivel = 0) {
                     </div>
                 </div>
 
-                <!-- Mensagem de sucesso -->
                 <?php if (isset($_GET['saved'])): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="fas fa-check-circle me-2"></i>
@@ -891,7 +904,6 @@ function displayConteudo($conteudo, $nivel = 0) {
                 <?php endif; ?>
                 
                 <div class="row">
-                    <!-- Conteúdos da Aula -->
                     <div class="col-md-9">
                         <div class="card mb-4">
                             <div class="card-header">
@@ -913,7 +925,6 @@ function displayConteudo($conteudo, $nivel = 0) {
                             </div>
                         </div>
                         
-                        <!-- ========== CONTAINER DE ANOTAÇÕES ========== -->
                         <div class="card mb-4">
                             <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Minhas Anotações</h5>
@@ -922,7 +933,6 @@ function displayConteudo($conteudo, $nivel = 0) {
                             <form method="POST" action="">
                                 <div class="card-body">
                                     <div class="anotacao-aluno">
-                                        <!-- Minhas Anotações -->
                                         <div class="minhas-anotacoes">
                                             <strong class="d-block mb-2">
                                                 <i class="fas fa-sticky-note me-2 text-success"></i>
@@ -939,7 +949,6 @@ function displayConteudo($conteudo, $nivel = 0) {
                                             </div>
                                         </div>
                                         
-                                        <!-- Comentário do Professor (se existir) -->
                                         <?php if (!empty($comentario_professor)): ?>
                                             <div class="comentario-professor mt-3">
                                                 <div class="professor-info">
@@ -980,16 +989,13 @@ function displayConteudo($conteudo, $nivel = 0) {
                                 </div>
                             </form>
                         </div>
-                        <!-- ========== FIM CONTAINER DE ANOTAÇÕES ========== -->
-                    </div>
-                    <!-- Informações da Aula -->
+                        </div>
                     <div class="col-md-3">
                         <div class="card h-100">
                             <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações da Aula</h5>
                             </div>
                             <div class="card-body">
-                                <!-- LINK DA AULA - AGORA EM PRIMEIRO LUGAR -->
                                 <div class="mb-3">
                                     <strong><i class="fas fa-video me-2 text-primary"></i>Link da Aula:</strong>
                                     <?php if (!empty($aula['link_aula'])): ?>
@@ -1020,7 +1026,6 @@ function displayConteudo($conteudo, $nivel = 0) {
                                     <p class="mb-0"><?= htmlspecialchars($aula['nome_professor']) ?></p>
                                     <small class="text-muted"><?= htmlspecialchars($aula['email_professor']) ?></small>
                                 </div>
-                                <!-- DESCRIÇÃO DA AULA -->
                                 <div class="mb-3">
                                     <strong><i class="fas fa-file-alt me-2 text-primary"></i>Descrição da Aula:</strong>
                                     <?php if (!empty($aula['descricao'])): ?>
@@ -1039,7 +1044,6 @@ function displayConteudo($conteudo, $nivel = 0) {
         </div>
     </div>
 
-    <!-- Modal para YouTube -->
     <div class="modal fade modal-youtube" id="modalYouTube" tabindex="-1" aria-labelledby="modalYouTubeLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -1051,6 +1055,27 @@ function displayConteudo($conteudo, $nivel = 0) {
                     <div class="ratio ratio-16x9">
                         <iframe id="youtubePlayer" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalPDFViewer" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title" id="pdfModalTitle">Visualização Protegida</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="progress" style="height: 4px; border-radius: 0;">
+                    <div id="pdf-loading-bar" class="progress-bar bg-danger" role="progressbar" style="width: 0%"></div>
+                </div>
+                <div class="modal-body p-0" style="background-color: #525659; display: flex; justify-content: center;">
+                    <div id="pdf-render-container">
+                        </div>
+                </div>
+                <div class="modal-footer bg-dark text-white justify-content-center">
+                    <small>Risenglish &copy; Material Protegido. O download deste arquivo não é permitido.</small>
                 </div>
             </div>
         </div>
@@ -1138,12 +1163,11 @@ function displayConteudo($conteudo, $nivel = 0) {
                     contadorAnotacoes.textContent = this.value.length;
                 });
                 
-                // Auto-salvar após 10 segundos de inatividade (opcional)
+                // Auto-salvar após 10 segundos de inatividade
                 var autoSaveTimeout;
                 textareaAnotacao.addEventListener('input', function() {
                     clearTimeout(autoSaveTimeout);
                     autoSaveTimeout = setTimeout(function() {
-                        // Mostrar notificação de auto-salvamento
                         var alertDiv = document.createElement('div');
                         alertDiv.className = 'alert alert-info alert-dismissible fade show';
                         alertDiv.innerHTML = `
@@ -1152,12 +1176,9 @@ function displayConteudo($conteudo, $nivel = 0) {
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         `;
                         
-                        // Adicionar antes do formulário
                         var form = textareaAnotacao.closest('form');
                         if (form) {
                             form.parentNode.insertBefore(alertDiv, form);
-                            
-                            // Remover após 3 segundos
                             setTimeout(function() {
                                 var bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
                                 bsAlert.close();
@@ -1185,13 +1206,130 @@ function displayConteudo($conteudo, $nivel = 0) {
                     </div>
                 `;
                 document.body.appendChild(toast);
-                
-                // Remover toast após 3 segundos
-                setTimeout(function() {
-                    toast.remove();
-                }, 3000);
+                setTimeout(function() { toast.remove(); }, 3000);
             }
-            // ========== FIM SISTEMA DE ANOTAÇÕES ==========
+        });
+
+        // ==========================================
+        // SCRIPT DE PROTEÇÃO E MARCA D'ÁGUA PDF (NOVO)
+        // ==========================================
+        
+        // Variáveis globais para o PDF
+        let pdfDoc = null;
+        let pdfContainer = document.getElementById('pdf-render-container');
+        let loadingBar = document.getElementById('pdf-loading-bar');
+        
+        // Dados do aluno para marca d'agua (vindo do PHP)
+        const studentInfo = {
+            name: "<?= htmlspecialchars($aluno_nome) ?>",
+            email: "<?= htmlspecialchars($aluno_email) ?>",
+            school: "RISENGLISH"
+        };
+
+        // Carregar logo da Risenglish
+        const logoImg = new Image();
+        logoImg.src = '../../LogoRisenglish.png'; 
+
+        async function abrirPDFSeguro(url, titulo) {
+            // Limpar container anterior
+            pdfContainer.innerHTML = '<div class="text-white mt-5"><i class="fas fa-spinner fa-spin fa-3x"></i><br>Carregando material seguro...</div>';
+            document.getElementById('pdfModalTitle').textContent = titulo;
+            loadingBar.style.width = '10%';
+            
+            // Abrir Modal
+            var myModal = new bootstrap.Modal(document.getElementById('modalPDFViewer'));
+            myModal.show();
+
+            try {
+                // Carregar documento
+                const loadingTask = pdfjsLib.getDocument(url);
+                loadingTask.onProgress = function(p) {
+                    if (p.total > 0) {
+                        const percent = (p.loaded / p.total) * 100;
+                        loadingBar.style.width = percent + '%';
+                    }
+                };
+
+                pdfDoc = await loadingTask.promise;
+                pdfContainer.innerHTML = ''; // Limpar loading
+                
+                // Renderizar todas as páginas
+                for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+                    await renderPage(pageNum);
+                }
+                loadingBar.style.width = '0%';
+            } catch (error) {
+                console.error('Erro ao carregar PDF:', error);
+                pdfContainer.innerHTML = '<div class="alert alert-danger">Erro ao carregar documento protegido.</div>';
+            }
+        }
+
+        async function renderPage(num) {
+            const page = await pdfDoc.getPage(num);
+            
+            // Configurar escala (qualidade)
+            const scale = 1.5; 
+            const viewport = page.getViewport({scale: scale});
+
+            // Criar Canvas
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            canvas.className = 'pdf-page-canvas';
+            
+            // Adicionar ao DOM
+            pdfContainer.appendChild(canvas);
+
+            // Renderizar PDF no Canvas
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+            
+            await page.render(renderContext).promise;
+
+            // ==========================================
+            // APLICAR MARCA D'ÁGUA (OVERLAY)
+            // ==========================================
+            ctx.save();
+            
+            // 1. Marca d'água de Texto (Repetida na diagonal)
+            ctx.font = "bold 24px Arial";
+            ctx.fillStyle = "rgba(200, 0, 0, 0.15)"; // Vermelho transparente
+            ctx.rotate(-45 * Math.PI / 180); // Rotacionar
+            
+           const text = "RISENGLISH - MATERIAL PROTEGIDO";
+
+            // Loop para preencher a página com o texto repetido
+        for (let x = -canvas.height; x < canvas.width; x += 500) {
+            for (let y = -canvas.height; y < canvas.height * 2; y += 200) {
+        ctx.fillText(text, x, y);
+            }
+        }
+            ctx.restore(); // Restaurar rotação para desenhar o logo normal
+
+            // 2. Marca d'água do Logo (Centro ou Canto)
+            if (logoImg.complete) {
+                const logoWidth = 150; // Largura do logo
+                const logoHeight = (logoImg.height / logoImg.width) * logoWidth;
+                
+                ctx.globalAlpha = 0.2; // Bem transparente
+                // Desenhar no canto inferior direito
+                ctx.drawImage(logoImg, canvas.width - logoWidth - 50, canvas.height - logoHeight - 50, logoWidth, logoHeight);
+                // Desenhar no topo esquerdo também
+                ctx.drawImage(logoImg, 50, 50, logoWidth, logoHeight);
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        // Impedir atalhos de teclado comuns para salvar
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+S, Ctrl+P, Ctrl+U (Source)
+            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'p' || e.key === 'u')) {
+                e.preventDefault();
+                alert('Função desabilitada para proteção de direitos autorais Risenglish.');
+            }
         });
     </script>
 </body>
