@@ -83,13 +83,39 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
     }
 }
 
+// --- LÓGICA PARA ATIVAR / DESATIVAR USUÁRIO ---
+elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST['acao'] == 'toggle_status') {
+    $id_usuario = $_POST['id_usuario_toggle'];
+
+    try {
+        $sql = "SELECT status FROM usuarios WHERE id = :id_usuario";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':id_usuario', $id_usuario);
+        $stmt->execute();
+        $current = $stmt->fetchColumn();
+        $novo = ($current === 'ativo') ? 'desativado' : 'ativo';
+
+        $sql = "UPDATE usuarios SET status = :novo WHERE id = :id_usuario";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':novo', $novo);
+        $stmt->bindParam(':id_usuario', $id_usuario);
+        $stmt->execute();
+
+        $mensagem = "Usuário " . ($novo == 'ativo' ? 'ativado' : 'desativado') . " com sucesso!";
+        $tipo_mensagem = 'success';
+    } catch (Exception $e) {
+        $mensagem = "Erro ao atualizar status: " . $e->getMessage();
+        $tipo_mensagem = 'danger';
+    }
+}
+
 // --- VERIFICAR SE HÁ PESQUISA ---
 if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $termo_pesquisa = trim($_GET['pesquisa']);
     $termo_like = "%" . $termo_pesquisa . "%";
     
     // --- CONSULTA PARA PESQUISAR PROFESSORES ---
-    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes 
+    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes, status 
                         FROM usuarios 
                         WHERE tipo_usuario = 'professor' 
                         AND (nome LIKE :termo OR email LIKE :termo OR informacoes LIKE :termo)
@@ -100,7 +126,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $professores = $stmt_professores->fetchAll(PDO::FETCH_ASSOC);
     
     // --- CONSULTA PARA PESQUISAR ALUNOS ---
-    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, 
+    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status,
                           GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
                    FROM usuarios u
                    LEFT JOIN alunos_turmas at ON u.id = at.aluno_id
@@ -115,10 +141,10 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $alunos = $stmt_alunos->fetchAll(PDO::FETCH_ASSOC);
 } else {
     // --- CONSULTAS SEM PESQUISA (TODOS OS USUÁRIOS) ---
-    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes FROM usuarios WHERE tipo_usuario = 'professor' ORDER BY nome";
+    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes, status FROM usuarios WHERE tipo_usuario = 'professor' ORDER BY nome";
     $professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
 
-    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
+    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
                    FROM usuarios u
                    LEFT JOIN alunos_turmas at ON u.id = at.aluno_id
                    LEFT JOIN turmas t ON at.turma_id = t.id
@@ -604,6 +630,16 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                                                 onclick="openEditUsuarioModal(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['informacoes'] ?? '', ENT_QUOTES) ?>')">
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
+
+                                        <button class="btn btn-sm btn-outline-dark me-2" 
+                                                onclick="confirmToggle(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>', '<?= $professor['status'] ?>')">
+                                            <?php if ($professor['status'] == 'ativo'): ?>
+                                                <i class="fas fa-user-slash"></i> Desativar
+                                            <?php else: ?>
+                                                <i class="fas fa-user-check"></i> Ativar
+                                            <?php endif; ?>
+                                        </button>
+
                                         <button class="btn btn-sm btn-outline-danger" 
                                                 onclick="confirmRemove(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>')">
                                             <i class="fas fa-trash-alt"></i> Remover
@@ -674,6 +710,16 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                                                 onclick="openEditUsuarioModal(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['informacoes'] ?? '', ENT_QUOTES) ?>')">
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
+
+                                        <button class="btn btn-sm btn-outline-dark me-2" 
+                                                onclick="confirmToggle(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>', '<?= $aluno['status'] ?>')">
+                                            <?php if ($aluno['status'] == 'ativo'): ?>
+                                                <i class="fas fa-user-slash"></i> Desativar
+                                            <?php else: ?>
+                                                <i class="fas fa-user-check"></i> Ativar
+                                            <?php endif; ?>
+                                        </button>
+
                                         <button class="btn btn-sm btn-outline-danger" 
                                                 onclick="confirmRemove(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>')">
                                             <i class="fas fa-trash-alt"></i> Remover
@@ -745,6 +791,11 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     <input type="hidden" name="id_usuario" id="remover_id_usuario">
 </form>
 
+<form id="formToggleStatus" method="POST" action="gerenciar_usuarios.php">
+    <input type="hidden" name="acao" value="toggle_status">
+    <input type="hidden" name="id_usuario_toggle" id="id_usuario_toggle">
+</form>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -785,6 +836,14 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         if (confirm(`Tem certeza que deseja remover o usuário "${nome}"? Esta ação é irreversível e removerá todas as associações (turmas/aulas).`)) {
             document.getElementById('remover_id_usuario').value = id;
             document.getElementById('formRemover').submit();
+        }
+    }
+    
+    function confirmToggle(id, nome, status) {
+        var acaoText = (status === 'ativo') ? 'desativar' : 'ativar';
+        if (confirm(`Deseja realmente ${acaoText} o usuário "${nome}"?`)) {
+            document.getElementById('id_usuario_toggle').value = id;
+            document.getElementById('formToggleStatus').submit();
         }
     }
     

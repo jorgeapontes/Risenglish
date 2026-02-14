@@ -12,8 +12,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $email = $_POST['email'] ?? ''; // Esta é a linha 10 que estava com erro.
   $senha = $_POST['senha'] ?? '';
 
-  // 1. Prepara a consulta para buscar o usuário pelo email
-  $sql = "SELECT id, nome, senha, tipo_usuario FROM usuarios WHERE email = :email";
+  // 1. Prepara a consulta para buscar o usuário pelo email (inclui status)
+  $sql = "SELECT id, nome, senha, tipo_usuario, status FROM usuarios WHERE email = :email";
   $stmt = $pdo->prepare($sql);
   $stmt->bindParam(':email', $email);
   $stmt->execute();
@@ -21,31 +21,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   // 2. Verifica se o usuário existe e se a senha está correta
   if ($usuario && password_verify($senha, $usuario['senha'])) {
-    // Login bem-sucedido
+    // Verifica se conta está desativada
+    if (isset($usuario['status']) && $usuario['status'] === 'desativado') {
+      $erro = "Conta desativada. Contate o administrador para reativação.";
+    } else {
+      // Login bem-sucedido
+      // 3. Armazena os dados do usuário na sessão
+      $_SESSION['user_id'] = $usuario['id'];
+      $_SESSION['user_nome'] = $usuario['nome'];
+      $_SESSION['user_tipo'] = $usuario['tipo_usuario']; // 'admin', 'professor' ou 'aluno'
 
-    // 3. Armazena os dados do usuário na sessão
-    $_SESSION['user_id'] = $usuario['id'];
-    $_SESSION['user_nome'] = $usuario['nome'];
-    $_SESSION['user_tipo'] = $usuario['tipo_usuario']; // 'admin', 'professor' ou 'aluno'
-
-    // 4. Redireciona de acordo com o tipo de usuário
-    switch ($_SESSION['user_tipo']) {
-      case 'admin':
-        header("Location: admin/dashboard.php");
-        break;
-      case 'professor':
-        header("Location: professor/dashboard.php");
-        break;
-      case 'aluno':
-        header("Location: aluno/dashboard.php");
-        break;
-      default:
-        // Se o tipo for desconhecido, destrói a sessão e volta para o login
-        session_unset();
-        session_destroy();
-        header("Location: login.php?erro=tipo_invalido");
+      // 4. Redireciona de acordo com o tipo de usuário
+      switch ($_SESSION['user_tipo']) {
+        case 'admin':
+          header("Location: admin/dashboard.php");
+          break;
+        case 'professor':
+          header("Location: professor/dashboard.php");
+          break;
+        case 'aluno':
+          header("Location: aluno/dashboard.php");
+          break;
+        default:
+          // Se o tipo for desconhecido, destrói a sessão e volta para o login
+          session_unset();
+          session_destroy();
+          header("Location: login.php?erro=tipo_invalido");
+      }
+      exit;
     }
-    exit;
   } else {
     // Credenciais inválidas
     $erro = "Email ou senha incorretos.";
