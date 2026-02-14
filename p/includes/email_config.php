@@ -13,6 +13,19 @@ require_once __DIR__ . '/../../vendor/PHPMailer/src/PHPMailer.php';
 require_once __DIR__ . '/../../vendor/PHPMailer/src/SMTP.php';
 // =======================================================================================
 
+// Load environment variables (from project root .env)
+require_once __DIR__ . '/env.php';
+
+// SMTP config from environment with fallbacks
+$smtp_host = getenv('SMTP_HOST') ?: 'smtp.hostinger.com.br';
+$smtp_user = getenv('SMTP_USER') ?: 'contato@risenglish.com.br';
+$smtp_pass = getenv('SMTP_PASS') ?: '@Lauraelucas371';
+$smtp_port = getenv('SMTP_PORT') ? (int)getenv('SMTP_PORT') : 465;
+$smtp_secure = getenv('SMTP_SECURE') ?: 'ssl'; // 'ssl' or 'tls'
+$smtp_from = getenv('SMTP_FROM') ?: $smtp_user;
+$smtp_from_name = getenv('SMTP_FROM_NAME') ?: 'Risenglish';
+
+
 /**
  * Função que configura e envia o e-mail de redefinição de senha.
  * @param string $destinatario O email do usuário que solicitou a redefinição.
@@ -21,27 +34,30 @@ require_once __DIR__ . '/../../vendor/PHPMailer/src/SMTP.php';
  * @return bool Retorna true se o envio foi bem-sucedido, false caso contrário.
  */
 function enviarEmailReset($destinatario, $nomeDestinatario, $linkReset) {
+    // Import SMTP config defined in file scope
+    global $smtp_host, $smtp_user, $smtp_pass, $smtp_port, $smtp_secure, $smtp_from, $smtp_from_name;
     // Passar 'true' habilita exceções para tratamento de erros
     $mail = new PHPMailer(true); 
 
     try {
-        // Configurações do Servidor SMTP da Hostinger
+        // Configurações do Servidor SMTP (lidas do .env)
         $mail->isSMTP();
-        $mail->Host       = 'smtp.hostinger.com.br'; // Servidor SMTP da Hostinger
+        $mail->Host       = $smtp_host;
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'contato@risenglish.com.br'; // SEU NOVO E-MAIL
-        
-        // !!! ATENÇÃO: SUBSTITUA PELA SENHA REAL DO E-MAIL contato@risenglish.com.br !!!
-        $mail->Password   = '@Lauraelucas371';      
-        
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // Criptografia SSL (recomendada)
-        $mail->Port       = 465;                        // Porta Padrão para SSL
+        $mail->Username   = $smtp_user;
+        $mail->Password   = $smtp_pass;
+        if (strtolower($smtp_secure) === 'tls') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        } else {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        }
+        $mail->Port       = $smtp_port;
 
         // Define o charset para evitar problemas com acentuação
         $mail->CharSet = 'UTF-8';
 
         // Configurações de Remetente
-        $mail->setFrom('contato@risenglish.com.br', 'Risenglish - Redefinir Senha');
+        $mail->setFrom($smtp_from, $smtp_from_name . ' - Redefinir Senha');
         $mail->addAddress($destinatario, $nomeDestinatario);
 
         // Conteúdo do E-mail (HTML estilizado)
@@ -104,18 +120,25 @@ function enviarEmailReset($destinatario, $nomeDestinatario, $linkReset) {
  * @return bool
  */
 function enviarEmailSimples($destinatario, $nomeDestinatario, $assunto, $mensagemHtml, $mensagemAlt = '') {
+    // Import SMTP config defined in file scope
+    global $smtp_host, $smtp_user, $smtp_pass, $smtp_port, $smtp_secure, $smtp_from, $smtp_from_name;
     $mail = new PHPMailer(true);
     try {
+        // Reuse SMTP config from environment
         $mail->isSMTP();
-        $mail->Host       = 'smtp.hostinger.com.br';
+        $mail->Host       = $smtp_host;
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'contato@risenglish.com.br';
-        $mail->Password   = '@Lauraelucas371';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-        $mail->Port       = 465;
+        $mail->Username   = $smtp_user;
+        $mail->Password   = $smtp_pass;
+        if (strtolower($smtp_secure) === 'tls') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        } else {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        }
+        $mail->Port       = $smtp_port;
         $mail->CharSet = 'UTF-8';
 
-        $mail->setFrom('contato@risenglish.com.br', 'Risenglish');
+        $mail->setFrom($smtp_from, $smtp_from_name);
         $mail->addAddress($destinatario, $nomeDestinatario);
 
         $mail->isHTML(true);
