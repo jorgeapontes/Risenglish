@@ -7,9 +7,10 @@ use PHPMailer\PHPMailer\SMTP;
 // =======================================================================================
 // !!! CAMINHOS AJUSTADOS: voltando uma pasta (de 'includes' para 'php/') e entrando em 'vendor' !!!
 // =======================================================================================
-require '../vendor/PHPMailer/src/Exception.php'; 
-require '../vendor/PHPMailer/src/PHPMailer.php'; 
-require '../vendor/PHPMailer/src/SMTP.php';      
+// Ajustar caminhos usando __DIR__ para localizar a pasta vendor no root do projeto
+require_once __DIR__ . '/../../vendor/PHPMailer/src/Exception.php';
+require_once __DIR__ . '/../../vendor/PHPMailer/src/PHPMailer.php';
+require_once __DIR__ . '/../../vendor/PHPMailer/src/SMTP.php';
 // =======================================================================================
 
 /**
@@ -89,6 +90,43 @@ function enviarEmailReset($destinatario, $nomeDestinatario, $linkReset) {
     } catch (Exception $e) {
         // Loga o erro em vez de mostrar diretamente ao usuário
         error_log("Erro ao enviar e-mail de reset: " . $mail->ErrorInfo);
+        return false;
+    }
+}
+
+/**
+ * Envia um e-mail simples reutilizando as mesmas configurações SMTP.
+ * @param string $destinatario
+ * @param string $nomeDestinatario
+ * @param string $assunto
+ * @param string $mensagemHtml
+ * @param string $mensagemAlt
+ * @return bool
+ */
+function enviarEmailSimples($destinatario, $nomeDestinatario, $assunto, $mensagemHtml, $mensagemAlt = '') {
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.hostinger.com.br';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'contato@risenglish.com.br';
+        $mail->Password   = '@Lauraelucas371';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port       = 465;
+        $mail->CharSet = 'UTF-8';
+
+        $mail->setFrom('contato@risenglish.com.br', 'Risenglish');
+        $mail->addAddress($destinatario, $nomeDestinatario);
+
+        $mail->isHTML(true);
+        $mail->Subject = $assunto;
+        $mail->Body = $mensagemHtml;
+        $mail->AltBody = $mensagemAlt ?: strip_tags($mensagemHtml);
+
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        error_log('Erro ao enviar e-mail: ' . $mail->ErrorInfo);
         return false;
     }
 }
