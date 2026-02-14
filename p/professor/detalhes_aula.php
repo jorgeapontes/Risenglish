@@ -427,101 +427,104 @@ function formatarData($data) {
             margin-bottom: 15px;
         }
         
-        /* Estilos para o container de anotações - AZUL MARINHO */
+        /* ========== ESTILOS OTIMIZADOS PARA ANOTAÇÕES ========== */
         .anotacoes-container {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 5px;
         }
         
-        .anotacoes-header {
-            background: linear-gradient(135deg, #081d40 0%, #0a2351 100%);
-            border-radius: 8px 8px 0 0;
-            color: white;
-            padding: 15px;
-        }
-        
-        .anotacoes-body {
-            padding: 20px;
-            overflow-y: visible;
-            max-height: none;
-        }
-        
-        .anotacao-aluno {
+        .anotacao-card {
             background: white;
             border: 1px solid #dee2e6;
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
         }
         
-        .aluno-info {
-            border-bottom: 1px solid #e9ecef;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+        .anotacao-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
-        .anotacao-conteudo {
+        .anotacao-header {
             background: #f8f9fa;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            border-left: 4px solid #28a745;
+            padding: 10px 15px;
+            border-bottom: 1px solid #dee2e6;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        .comentario-professor {
-            background: #e8f4fd;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            border-left: 4px solid #007bff;
+        .anotacao-header .aluno-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        .anotacoes-footer {
-            background-color: #f8f9fa;
-            border-top: 1px solid #dee2e6;
-            padding: 15px;
-            border-radius: 0 0 8px 8px;
-        }
-        
-        .btn-salvar-comentario {
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-            border: none;
+        .anotacao-header .aluno-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #28a745;
             color: white;
-            padding: 8px 20px;
-            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
         }
         
-        .btn-salvar-comentario:hover {
-            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
-            transform: translateY(-2px);
+        .anotacao-header .badge-status {
+            font-size: 11px;
+            padding: 3px 8px;
         }
         
-        .data-atualizacao {
-            font-size: 12px;
-            color: #666;
-            text-align: right;
+        .anotacao-body {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.2s ease;
         }
         
-        .sem-anotacoes {
-            text-align: center;
-            padding: 40px 20px;
-            color: #666;
+        .anotacao-body.expanded {
+            padding: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .anotacao-conteudo-aluno {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 3px solid #28a745;
+            font-size: 14px;
+        }
+        
+        .anotacao-conteudo-aluno p {
+            margin-bottom: 0;
+        }
+        
+        .comentario-professor-area {
+            background: #e8f4fd;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #007bff;
+            margin-bottom: 12px;
+            font-size: 14px;
         }
         
         .comentario-textarea {
-            background: white;
+            width: 100%;
+            padding: 10px;
             border: 1px solid #ced4da;
             border-radius: 6px;
             font-size: 14px;
-            line-height: 1.5;
-            min-height: 120px;
-            padding: 12px;
             resize: vertical;
-            transition: all 0.3s ease;
-            width: 100%;
+            min-height: 80px;
+            transition: all 0.2s ease;
         }
         
         .comentario-textarea:focus {
@@ -530,40 +533,80 @@ function formatarData($data) {
             outline: none;
         }
         
-        .badge-aluno {
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-            color: white;
-        }
-        
-        .badge-professor {
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white;
-        }
-        
-        .aluno-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-            color: white;
+        .anotacao-footer {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 10px;
+            margin-top: 10px;
         }
         
-        .avatar-container {
-            display: flex;
-            align-items: center;
+        .btn-salvar-comentario {
+            background: #28a745;
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            font-size: 13px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-salvar-comentario:hover {
+            background: #218838;
+        }
+        
+        .data-atualizacao {
+            font-size: 11px;
+            color: #6c757d;
+        }
+        
+        .sem-anotacoes {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+        }
+        
+        .sem-anotacoes i {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #dee2e6;
+        }
+        
+        .badge-com-anotacao {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .badge-sem-anotacao {
+            background-color: #ffc107;
+            color: #212529;
         }
         
         .contador-caracteres {
-            font-size: 12px;
+            font-size: 11px;
             color: #6c757d;
             text-align: right;
-            margin-top: 5px;
+            margin-top: 3px;
         }
+        
+        /* Scrollbar personalizada */
+        .anotacoes-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .anotacoes-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .anotacoes-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        .anotacoes-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        /* ========== FIM ESTILOS OTIMIZADOS ========== */
         
         @media (max-width: 768px) {
             .sidebar {
@@ -575,19 +618,6 @@ function formatarData($data) {
             .main-content {
                 margin-left: 0;
                 width: 100%;
-            }
-            
-            .anotacao-aluno {
-                padding: 15px;
-            }
-            
-            .avatar-container {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .aluno-avatar {
-                margin-bottom: 10px;
             }
         }
     </style>
@@ -778,118 +808,137 @@ function formatarData($data) {
                     </div>
                 </div>
                 
-                <!-- ========== CONTAINER DE ANOTAÇÕES DOS ALUNOS ========== -->
+                <!-- ========== CONTAINER DE ANOTAÇÕES OTIMIZADO ========== -->
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Anotações dos Alunos</h5>
-                        <small class="text-white">Veja as anotações dos alunos e adicione seus comentários e correções. Você pode comentar mesmo que o aluno não tenha feito anotações.</small>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-edit me-2"></i>Anotações dos Alunos
+                            <small class="text-white ms-2">Clique no nome do aluno para expandir</small>
+                        </div>
+                        <span class="badge bg-light text-dark">
+                            <?= count($anotacoes_alunos) ?> alunos
+                        </span>
                     </div>
                     
-                    <div class="card-body">
+                    <div class="card-body p-3">
                         <?php if (empty($anotacoes_alunos)): ?>
                             <div class="sem-anotacoes">
-                                <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
-                                <h6 class="text-muted">Nenhum aluno nesta turma</h6>
-                                <p class="text-muted small">Não há alunos matriculados para esta aula.</p>
+                                <i class="fas fa-book-open"></i>
+                                <h6 class="mt-2">Nenhum aluno nesta turma</h6>
+                                <p class="small">Não há alunos matriculados para esta aula.</p>
                             </div>
                         <?php else: ?>
-                            <?php foreach ($anotacoes_alunos as $anotacao): ?>
-                                <div class="anotacao-aluno">
-                                    <div class="aluno-info d-flex justify-content-between align-items-center">
-                                        <div class="avatar-container">
-                                            <div class="aluno-avatar">
-                                                <?= strtoupper(substr($anotacao['aluno_nome'], 0, 1)) ?>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-0"><?= htmlspecialchars($anotacao['aluno_nome']) ?></h6>
-                                                <small class="text-muted"><?= htmlspecialchars($anotacao['aluno_email']) ?></small>
-                                            </div>
-                                        </div>
-                                        <span class="badge badge-aluno">Aluno</span>
-                                    </div>
-                                    
-                                    <?php if (!empty($anotacao['conteudo'])): ?>
-                                        <div class="anotacao-conteudo mt-3">
-                                            <strong class="d-block mb-2"><i class="fas fa-sticky-note me-2 text-success"></i>Anotações do Aluno:</strong>
-                                            <p class="mb-0"><?= nl2br(htmlspecialchars($anotacao['conteudo'])) ?></p>
-                                        </div>
-                                    <?php else: ?>
-                                        <div class="alert alert-warning mt-3">
-                                            <i class="fas fa-exclamation-circle me-2"></i>
-                                            Este aluno ainda não fez anotações para esta aula.
-                                        </div>
-                                    <?php endif; ?>
-                                    
-                                    <form method="POST" action="" class="mt-3">
-                                        <input type="hidden" name="aluno_id" value="<?= $anotacao['aluno_id'] ?>">
-                                        
-                                        <div class="comentario-professor mb-2">
-                                            <strong class="d-block mb-2"><i class="fas fa-comment-dots me-2 text-primary"></i>Seu Comentário:</strong>
-                                            <?php if (!empty($anotacao['comentario_professor'])): ?>
-                                                <p class="mb-2"><?= nl2br(htmlspecialchars($anotacao['comentario_professor'])) ?></p>
-                                            <?php else: ?>
-                                                <p class="text-muted mb-2"><i>Nenhum comentário ainda. Adicione um comentário para o aluno.</i></p>
-                                            <?php endif; ?>
-                                        </div>
-                                        
-                                        <div class="mb-3">
-                                            <label for="comentario_<?= $anotacao['aluno_id'] ?>" class="form-label"><small><i class="fas fa-edit me-1"></i> Editar comentário:</small></label>
-                                            <textarea 
-                                                name="comentario_professor" 
-                                                id="comentario_<?= $anotacao['aluno_id'] ?>" 
-                                                class="comentario-textarea" 
-                                                placeholder="Digite seu comentário, correção ou feedback para o aluno aqui..."
-                                            ><?= htmlspecialchars($anotacao['comentario_professor'] ?? '') ?></textarea>
-                                            <div class="contador-caracteres">
-                                                Caracteres: <span id="contador_<?= $anotacao['aluno_id'] ?>"><?= strlen($anotacao['comentario_professor'] ?? '') ?></span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <?php if (!empty($anotacao['data_atualizacao'])): ?>
-                                                <div class="data-atualizacao">
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-clock me-1"></i>
-                                                        Última atualização: <?= formatarData($anotacao['data_atualizacao']) ?>
-                                                    </small>
+                            <div class="anotacoes-container">
+                                <?php foreach ($anotacoes_alunos as $index => $anotacao): 
+                                    $temAnotacao = !empty($anotacao['conteudo']);
+                                    $temComentario = !empty($anotacao['comentario_professor']);
+                                    $statusClass = $temAnotacao ? 'badge-com-anotacao' : 'badge-sem-anotacao';
+                                    $statusText = $temAnotacao ? 'Com anotação' : 'Sem anotação';
+                                ?>
+                                    <div class="anotacao-card">
+                                        <div class="anotacao-header" onclick="toggleAnotacao(<?= $index ?>)">
+                                            <div class="aluno-info">
+                                                <div class="aluno-avatar">
+                                                    <?= strtoupper(substr($anotacao['aluno_nome'], 0, 1)) ?>
                                                 </div>
-                                            <?php else: ?>
-                                                <div></div>
-                                            <?php endif; ?>
-                                            <button type="submit" name="salvar_comentario" class="btn btn-salvar-comentario">
-                                                <i class="fas fa-save me-1"></i>Salvar Comentário
-                                            </button>
+                                                <div>
+                                                    <strong class="d-block"><?= htmlspecialchars($anotacao['aluno_nome']) ?></strong>
+                                                    <small class="text-muted"><?= htmlspecialchars($anotacao['aluno_email']) ?></small>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <?php if ($temComentario): ?>
+                                                    <i class="fas fa-comment text-primary" title="Você comentou"></i>
+                                                <?php endif; ?>
+                                                <span class="badge <?= $statusClass ?>"><?= $statusText ?></span>
+                                                <i class="fas fa-chevron-down" style="transition: transform 0.3s;" id="arrow-<?= $index ?>"></i>
+                                            </div>
                                         </div>
-                                    </form>
-                                </div>
-                            <?php endforeach; ?>
+                                        
+                                        <div class="anotacao-body" id="anotacao-<?= $index ?>">
+                                            <!-- Anotações do aluno -->
+                                            <?php if ($temAnotacao): ?>
+                                                <div class="anotacao-conteudo-aluno">
+                                                    <small class="text-success fw-bold d-block mb-1">
+                                                        <i class="fas fa-sticky-note me-1"></i>Anotações do aluno:
+                                                    </small>
+                                                    <p class="mb-0"><?= nl2br(htmlspecialchars($anotacao['conteudo'])) ?></p>
+                                                </div>
+                                            <?php endif; ?>
+                                            
+                                            <!-- Comentário atual do professor -->
+                                            <?php if ($temComentario): ?>
+                                                <div class="comentario-professor-area">
+                                                    <small class="text-primary fw-bold d-block mb-1">
+                                                        <i class="fas fa-comment-dots me-1"></i>Seu comentário atual:
+                                                    </small>
+                                                    <p class="mb-0"><?= nl2br(htmlspecialchars($anotacao['comentario_professor'])) ?></p>
+                                                </div>
+                                            <?php endif; ?>
+                                            
+                                            <!-- Formulário para adicionar/editar comentário -->
+                                            <form method="POST" action="" class="mt-2">
+                                                <input type="hidden" name="aluno_id" value="<?= $anotacao['aluno_id'] ?>">
+                                                
+                                                <div class="mb-2">
+                                                    <label class="small fw-bold text-muted">
+                                                        <i class="fas fa-edit me-1"></i><?= $temComentario ? 'Editar comentário:' : 'Adicionar comentário:' ?>
+                                                    </label>
+                                                    <textarea 
+                                                        name="comentario_professor" 
+                                                        class="comentario-textarea" 
+                                                        placeholder="Digite seu feedback para o aluno..."
+                                                        oninput="atualizarContador(this, <?= $index ?>)"
+                                                    ><?= htmlspecialchars($anotacao['comentario_professor'] ?? '') ?></textarea>
+                                                    <div class="contador-caracteres" id="contador-<?= $index ?>">
+                                                        Caracteres: <?= strlen($anotacao['comentario_professor'] ?? '') ?>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="anotacao-footer">
+                                                    <?php if (!empty($anotacao['data_atualizacao'])): ?>
+                                                        <span class="data-atualizacao">
+                                                            <i class="far fa-clock"></i> <?= formatarData($anotacao['data_atualizacao']) ?>
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span></span>
+                                                    <?php endif; ?>
+                                                    
+                                                    <button type="submit" name="salvar_comentario" class="btn-salvar-comentario">
+                                                        <i class="fas fa-save me-1"></i>Salvar
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         <?php endif; ?>
                     </div>
                     
-                    <div class="card-footer">
-                        <div class="row">
+                    <div class="card-footer py-2">
+                        <div class="row align-items-center">
                             <div class="col-md-6">
-                                <i class="fas fa-info-circle text-primary me-1"></i>
                                 <small class="text-muted">
-                                    Total de alunos: <strong><?= count($anotacoes_alunos) ?></strong>
+                                    <i class="fas fa-info-circle me-1"></i>
                                     <?php 
                                         $alunos_com_anotacoes = array_filter($anotacoes_alunos, function($a) {
                                             return !empty($a['conteudo']);
                                         });
                                     ?>
-                                    | Com anotações: <strong><?= count($alunos_com_anotacoes) ?></strong>
+                                    <strong><?= count($alunos_com_anotacoes) ?></strong> alunos com anotações
                                 </small>
                             </div>
                             <div class="col-md-6 text-end">
                                 <small class="text-muted">
                                     <i class="fas fa-user-graduate me-1"></i>
-                                    Os alunos podem ver seus comentários em suas telas
+                                    Comentários visíveis para os alunos
                                 </small>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- ========== FIM CONTAINER DE ANOTAÇÕES DOS ALUNOS ========== -->
+                <!-- ========== FIM CONTAINER DE ANOTAÇÕES OTIMIZADO ========== -->
 
                 <div class="card shadow-sm mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -1162,6 +1211,28 @@ function formatarData($data) {
         }, 5000);
     }
 
+    // ========== FUNÇÕES PARA ANOTAÇÕES ==========
+    function toggleAnotacao(index) {
+        const body = document.getElementById(`anotacao-${index}`);
+        const arrow = document.getElementById(`arrow-${index}`);
+        
+        if (body.classList.contains('expanded')) {
+            body.classList.remove('expanded');
+            arrow.style.transform = 'rotate(0deg)';
+        } else {
+            body.classList.add('expanded');
+            arrow.style.transform = 'rotate(180deg)';
+        }
+    }
+    
+    function atualizarContador(textarea, index) {
+        const contador = document.getElementById(`contador-${index}`);
+        if (contador) {
+            contador.textContent = `Caracteres: ${textarea.value.length}`;
+        }
+    }
+    // ========== FIM FUNÇÕES PARA ANOTAÇÕES ==========
+
     document.addEventListener('DOMContentLoaded', function() {
         const listaConteudosContainer = document.getElementById('lista-conteudos-container');
         const filtroSwitch = document.getElementById('filtroPlanejadoSwitch');
@@ -1327,7 +1398,7 @@ function formatarData($data) {
             });
         });
 
-        // Lógica do Controle de Presença (se necessário)
+        // Lógica do Controle de Presença
         document.querySelectorAll('.presenca-switch').forEach(function(switchElement) {
             switchElement.addEventListener('change', function() {
                 const aulaId = this.dataset.aulaId;
@@ -1498,54 +1569,11 @@ function formatarData($data) {
             });
         });
 
-        // ========== FUNCIONALIDADES DAS ANOTAÇÕES ==========
-        // Contador de caracteres para os textareas de comentário
-        document.querySelectorAll('.comentario-textarea').forEach(function(textarea) {
-            const alunoId = textarea.id.replace('comentario_', '');
-            const contador = document.getElementById('contador_' + alunoId);
-            
-            if (contador) {
-                // Atualizar contador inicial
-                contador.textContent = textarea.value.length;
-                
-                textarea.addEventListener('input', function() {
-                    contador.textContent = this.value.length;
-                });
-            }
-        });
-        
-        // Auto-salvar depois de 30 segundos de inatividade (opcional)
-        document.querySelectorAll('.comentario-textarea').forEach(function(textarea) {
-            let timeout;
-            
-            textarea.addEventListener('input', function() {
-                clearTimeout(timeout);
-                timeout = setTimeout(function() {
-                    const form = textarea.closest('form');
-                    if (form) {
-                        const submitBtn = form.querySelector('button[type="submit"]');
-                        if (submitBtn) {
-                            // Mostrar feedback visual
-                            const originalText = submitBtn.innerHTML;
-                            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Auto-salvando...';
-                            submitBtn.disabled = true;
-                            
-                            submitBtn.click();
-                            
-                            // Restaurar após 2 segundos
-                            setTimeout(() => {
-                                submitBtn.innerHTML = originalText;
-                                submitBtn.disabled = false;
-                            }, 2000);
-                        }
-                    }
-                }, 30000);
-            });
-        });
-        // ========== FIM FUNCIONALIDADES DAS ANOTAÇÕES ==========
-
         // Inicializar
         atualizarContagemPlanejados();
+        
+        // Expandir primeiro item de anotação por padrão (opcional)
+        // toggleAnotacao(0);
     });
     </script>
 </body>
