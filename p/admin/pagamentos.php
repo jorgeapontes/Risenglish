@@ -117,9 +117,11 @@ try {
         LEFT JOIN usuarios dep ON dep.responsavel_financeiro_id = pagador.id
         WHERE 
             -- Regra: Ou é um aluno independente (sem resp) OU é responsável por alguém
-            (pagador.tipo_usuario = 'aluno' AND pagador.responsavel_financeiro_id IS NULL)
-            OR
-            (dep.id IS NOT NULL)
+            (
+                (pagador.tipo_usuario = 'aluno' AND pagador.responsavel_financeiro_id IS NULL)
+                OR
+                (dep.id IS NOT NULL)
+            )
     ";
     
     $params = [$mes_referencia_inicio];
