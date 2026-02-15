@@ -89,6 +89,32 @@ if ($anotacao_existente) {
     $data_visto = $anotacao_existente['data_visto'] ?? null;
 }
 
+// Garantir que a tabela de itens exista (múltiplas anotações)
+$sql_check_itens = "SHOW TABLES LIKE 'anotacoes_itens'";
+$itens_exists = $pdo->query($sql_check_itens)->rowCount() > 0;
+if (!$itens_exists) {
+    $sql_create_itens = "CREATE TABLE anotacoes_itens (
+        id INT(11) NOT NULL AUTO_INCREMENT,
+        anotacao_id INT(11) NOT NULL,
+        autor VARCHAR(50) NOT NULL,
+        conteudo TEXT NOT NULL,
+        data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY anotacao_id (anotacao_id),
+        CONSTRAINT anotacoes_itens_ibfk_1 FOREIGN KEY (anotacao_id) REFERENCES anotacoes_aula (id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
+    try { $pdo->exec($sql_create_itens); } catch (PDOException $e) {}
+}
+
+// Buscar itens existentes para exibir (se houver)
+$anotacao_itens = [];
+if ($anotacao_id) {
+    $sql_itens = "SELECT id, autor, conteudo, data_criacao FROM anotacoes_itens WHERE anotacao_id = :anotacao_id ORDER BY data_criacao ASC";
+    $stmt_itens = $pdo->prepare($sql_itens);
+    $stmt_itens->execute([':anotacao_id' => $anotacao_id]);
+    $anotacao_itens = $stmt_itens->fetchAll(PDO::FETCH_ASSOC);
+}
+
 // Buscar total de visualizações para esta anotação
 $total_visualizacoes = 0;
 if ($anotacao_id) {
@@ -98,43 +124,31 @@ if ($anotacao_id) {
     $total_visualizacoes = $stmt_visualizacoes->fetchColumn();
 }
 
-// Salvar anotação
+// Salvar anotação (criar novo item em vez de sobrescrever)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_anotacao'])) {
-    $conteudo = $_POST['conteudo_anotacao'] ?? '';
-    
-    if ($anotacao_existente) {
-        // Atualizar anotação existente
-        $sql_update = "UPDATE anotacoes_aula SET conteudo = :conteudo WHERE id = :id";
-        $stmt_update = $pdo->prepare($sql_update);
-        $stmt_update->execute([
-            ':conteudo' => $conteudo,
-            ':id' => $anotacao_id
-        ]);
-        // Notificar o professor que o aluno atualizou a anotação
-        if (!empty($aula['email_professor'])) {
-            $assunto = "Aluno {$aluno_nome} atualizou uma anotação na aula: {$aula['titulo_aula']}";
-            $excerpt = substr(strip_tags($conteudo), 0, 300);
-            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            $link = $scheme . '://' . $host . '/Risenglish/p/professor/detalhes_aula.php?id=' . $aula_id;
-                $html = "<p>Olá " . htmlspecialchars($aula['nome_professor']) . ",</p>" .
-                    "<p>O aluno <strong>" . htmlspecialchars($aluno_nome) . "</strong> atualizou uma anotação na aula <strong>" . htmlspecialchars($aula['titulo_aula']) . "</strong>.</p>" .
-                    "<p>Trecho da anotação:</p><blockquote>" . nl2br(htmlspecialchars($excerpt)) . "</blockquote>" .
-                    "<p>Veja em: risenglish.com.br</p>";
-            // enviar sem bloquear fluxo
-            try { enviarEmailSimples($aula['email_professor'], $aula['nome_professor'], $assunto, $html); } catch (Exception $e) { error_log('Erro email anotacao update: '. $e->getMessage()); }
+    $conteudo = trim($_POST['conteudo_anotacao'] ?? '');
+    if ($conteudo !== '') {
+        // garantir thread
+        if ($anotacao_existente) {
+            $thread_id = $anotacao_id;
+        } else {
+            $sql_create_thread = "INSERT INTO anotacoes_aula (aula_id, aluno_id, conteudo) VALUES (:aula_id, :aluno_id, '')";
+            $stmt_ct = $pdo->prepare($sql_create_thread);
+            $stmt_ct->execute([':aula_id' => $aula_id, ':aluno_id' => $aluno_id]);
+            $thread_id = $pdo->lastInsertId();
         }
-    } else {
-        // Inserir nova anotação
-        $sql_insert = "INSERT INTO anotacoes_aula (aula_id, aluno_id, conteudo) VALUES (:aula_id, :aluno_id, :conteudo)";
-        $stmt_insert = $pdo->prepare($sql_insert);
-        $stmt_insert->execute([
-            ':aula_id' => $aula_id,
-            ':aluno_id' => $aluno_id,
-            ':conteudo' => $conteudo
-        ]);
-        $anotacao_id = $pdo->lastInsertId();
-        // Notificar o professor que o aluno criou a anotação
+
+        // inserir novo item de aluno
+        $sql_item = "INSERT INTO anotacoes_itens (anotacao_id, autor, conteudo) VALUES (:anotacao_id, 'aluno', :conteudo)";
+        $stmt_item = $pdo->prepare($sql_item);
+        $stmt_item->execute([':anotacao_id' => $thread_id, ':conteudo' => $conteudo]);
+
+        // marcar thread como não visto e atualizar timestamp
+        $sql_update_thread = "UPDATE anotacoes_aula SET visto = 0, data_visto = NULL, data_atualizacao = NOW() WHERE id = :id";
+        $stmt_up = $pdo->prepare($sql_update_thread);
+        $stmt_up->execute([':id' => $thread_id]);
+
+        // Notificar o professor
         if (!empty($aula['email_professor'])) {
             $assunto = "Aluno {$aluno_nome} salvou uma nova anotação na aula: {$aula['titulo_aula']}";
             $excerpt = substr(strip_tags($conteudo), 0, 300);
@@ -142,13 +156,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_anotacao'])) {
             $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
             $link = $scheme . '://' . $host . '/Risenglish/p/professor/detalhes_aula.php?id=' . $aula_id;
             $html = "<p>Olá " . htmlspecialchars($aula['nome_professor']) . ",</p>" .
-                    "<p>O aluno <strong>" . htmlspecialchars($aluno_nome) . "</strong> salvou uma nova anotação na aula <strong>" . htmlspecialchars($aula['titulo_aula']) . "</strong>.</p>" .
+                    "<p>O aluno <strong>" . htmlspecialchars($aluno_nome) . "</strong> adicionou uma anotação na aula <strong>" . htmlspecialchars($aula['titulo_aula']) . "</strong>.</p>" .
                     "<p>Trecho da anotação:</p><blockquote>" . nl2br(htmlspecialchars($excerpt)) . "</blockquote>" .
-                    "<p><a href='" . $link . "'>Ver detalhes da aula e anotação</a></p><p>Atenciosamente,<br>Risenglish</p>";
+                    "<p><a href='" . $link . "'>Ver detalhes da aula e anotações</a></p><p>Atenciosamente,<br>Risenglish</p>";
             try { enviarEmailSimples($aula['email_professor'], $aula['nome_professor'], $assunto, $html); } catch (Exception $e) { error_log('Erro email anotacao insert: '. $e->getMessage()); }
         }
     }
-    
     // Redirecionar para evitar reenvio do formulário
     header("Location: detalhes_aula.php?id=" . $aula_id . "&saved=1");
     exit;
@@ -779,6 +792,14 @@ function displayConteudo($conteudo, $nivel = 0) {
             border-left: 4px solid #007bff;
             position: relative;
         }
+
+        /* visual para itens que são comentários do professor na lista do aluno */
+        .anotacao-de-professor {
+            background: #e8f4fd;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+        }
         
         /* ===== NOVOS ESTILOS PARA O SISTEMA DE VISTO ===== */
         .visto-status {
@@ -910,7 +931,7 @@ function displayConteudo($conteudo, $nivel = 0) {
             border-radius: 6px;
             font-size: 16px;
             line-height: 1.6;
-            min-height: 250px;
+            min-height: 120px;
             padding: 15px;
             resize: vertical;
             transition: all 0.3s ease;
@@ -1068,15 +1089,48 @@ function displayConteudo($conteudo, $nivel = 0) {
                                                 <i class="fas fa-sticky-note me-2 text-success"></i>
                                                 Suas Anotações:
                                             </strong>
-                                            <textarea 
-                                                name="conteudo_anotacao" 
-                                                id="conteudo_anotacao" 
-                                                class="anotacoes-textarea" 
-                                                placeholder="Escreva suas anotações aqui..."
-                                            ><?= htmlspecialchars($anotacao_conteudo) ?></textarea>
-                                            <div class="contador-caracteres mt-2">
-                                                Caracteres: <span id="contador_anotacoes"><?= strlen($anotacao_conteudo) ?></span>
-                                            </div>
+                                                <?php if (!empty($anotacao_itens)): ?>
+                                                    <div class="lista-minhas-anotacoes mb-3" id="lista-anotacoes">
+                                                        <?php foreach ($anotacao_itens as $item): ?>
+                                                            <?php $isAlunoItem = (isset($item['autor']) && $item['autor'] === 'aluno'); ?>
+                                                            <div class="minha-anotacao-item mb-2 <?= $isAlunoItem ? '' : 'anotacao-de-professor' ?>" data-item-id="<?= $item['id'] ?>">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <small class="text-success small d-block">
+                                                                            <?= isset($item['data_criacao']) ? formatarData($item['data_criacao']) : '' ?>
+                                                                        </small>
+                                                                        <small class="text-muted small ms-2">
+                                                                            <?php if (isset($item['autor']) && $item['autor'] === 'professor'): ?>
+                                                                                <span class="badge bg-primary">Professor</span>
+                                                                            <?php else: ?>
+                                                                                <span class="badge bg-success">Você</span>
+                                                                            <?php endif; ?>
+                                                                        </small>
+                                                                    </div>
+                                                                    <p class="mb-0 item-conteudo"><?= nl2br(htmlspecialchars($item['conteudo'])) ?></p>
+                                                                    <div class="mt-1">
+                                                                        <?php if ($isAlunoItem): ?>
+                                                                            <button type="button" class="btn btn-sm btn-outline-secondary btn-edit-item" data-item-id="<?= $item['id'] ?>">Editar</button>
+                                                                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete-item" data-item-id="<?= $item['id'] ?>">Apagar</button>
+                                                                        <?php endif; ?>
+                                                                    </div>
+                                                                </div>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="lista-minhas-anotacoes mb-3" id="lista-anotacoes"></div>
+                                                <?php endif; ?>
+                                                <textarea 
+                                                    name="conteudo_anotacao" 
+                                                    id="conteudo_anotacao" 
+                                                    class="anotacoes-textarea" 
+                                                    placeholder="Adicione uma nova anotação..."
+                                                ></textarea>
+                                                <div class="contador-caracteres mt-2">
+                                                    Caracteres: <span id="contador_anotacoes">0</span>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <button type="button" id="btn-salvar-anotacao" class="btn btn-primary">Salvar anotação</button>
+                                                </div>
                                         </div>
                                         
                                         <?php if (!empty($comentario_professor)): ?>
@@ -1175,9 +1229,6 @@ function displayConteudo($conteudo, $nivel = 0) {
                                                 <?php endif; ?>
                                             </small>
                                         </div>
-                                        <button type="submit" name="salvar_anotacao" class="btn btn-salvar-anotacao">
-                                            <i class="fas fa-save me-1"></i>Salvar Anotações
-                                        </button>
                                     </div>
                                 </div>
                             </form>
@@ -1354,6 +1405,121 @@ function displayConteudo($conteudo, $nivel = 0) {
                 // Atualizar contador quando o usuário digitar
                 textareaAnotacao.addEventListener('input', function() {
                     contadorAnotacoes.textContent = this.value.length;
+                });
+
+                // salvar via AJAX
+                var btnSalvar = document.getElementById('btn-salvar-anotacao');
+                if (btnSalvar) {
+                    btnSalvar.addEventListener('click', function() {
+                        var conteudo = textareaAnotacao.value.trim();
+                        if (conteudo === '') return;
+                        btnSalvar.disabled = true;
+                        btnSalvar.textContent = 'Salvando...';
+
+                        var formData = new FormData();
+                        formData.append('acao', 'create');
+                        formData.append('aula_id', '<?= $aula_id ?>');
+                        formData.append('conteudo', conteudo);
+
+                        fetch('../ajax_anotacoes_item.php', {
+                            method: 'POST',
+                            body: formData
+                        }).then(res => res.json()).then(data => {
+                            btnSalvar.disabled = false;
+                            btnSalvar.textContent = 'Salvar anotação';
+                            if (data.success) {
+                                // adicionar item na lista (mostra badge Você e botões somente para próprio aluno)
+                                var lista = document.getElementById('lista-anotacoes');
+                                var div = document.createElement('div');
+                                div.className = 'minha-anotacao-item mb-2';
+                                div.setAttribute('data-item-id', data.item.id);
+                                div.innerHTML = '<div class="d-flex justify-content-between align-items-start"><small class="text-success small d-block">' + (data.item.data_criacao ? data.item.data_criacao : '') + '</small><small class="text-muted small ms-2"><span class="badge bg-success">Você</span></small></div>' +
+                                        '<p class="mb-0 item-conteudo">' + (data.item.conteudo.replace(/\n/g, '<br>')) + '</p>' +
+                                        '<div class="mt-1"><button type="button" class="btn btn-sm btn-outline-secondary btn-edit-item" data-item-id="' + data.item.id + '">Editar</button> <button type="button" class="btn btn-sm btn-outline-danger btn-delete-item" data-item-id="' + data.item.id + '">Apagar</button></div>';
+                                lista.appendChild(div);
+                                // limpar textarea
+                                textareaAnotacao.value = '';
+                                textareaAnotacao.dispatchEvent(new Event('input', { bubbles: true }));
+                                contadorAnotacoes.textContent = '0';
+                            } else {
+                                alert(data.error || 'Erro ao salvar');
+                            }
+                        }).catch(err => { btnSalvar.disabled = false; btnSalvar.textContent = 'Salvar anotação'; alert('Erro de conexão'); });
+                    });
+                }
+
+                // delegação para editar/apagar (uso closest e checagens para evitar erros)
+                document.addEventListener('click', function(e) {
+                    var deleteBtn = e.target.closest ? e.target.closest('.btn-delete-item') : null;
+                    if (deleteBtn) {
+                        var itemId = deleteBtn.getAttribute('data-item-id');
+                        if (!confirm('Confirma apagar esta anotação?')) return;
+                        fetch('../ajax_anotacoes_item.php', {
+                            method: 'POST',
+                            body: new URLSearchParams({acao: 'delete', item_id: itemId})
+                        }).then(r => r.json()).then(d => {
+                            if (d.success) {
+                                var el = document.querySelector('[data-item-id="' + itemId + '"]');
+                                if (el) el.remove();
+                            } else alert(d.error || 'Erro');
+                        });
+                        return;
+                    }
+
+                    var editBtn = e.target.closest ? e.target.closest('.btn-edit-item') : null;
+                    if (editBtn) {
+                        var itemId = editBtn.getAttribute('data-item-id');
+                        var container = document.querySelector('[data-item-id="' + itemId + '"]');
+                        if (!container) return;
+                        var conteudoEl = container.querySelector('.item-conteudo');
+                        var original = conteudoEl ? conteudoEl.innerText : '';
+                        // substituir por textarea
+                        var ta = document.createElement('textarea');
+                        ta.className = 'form-control mb-1';
+                        ta.value = original;
+                        var saveBtn = document.createElement('button');
+                        saveBtn.className = 'btn btn-sm btn-primary me-1';
+                        saveBtn.textContent = 'Salvar';
+                        var cancelBtn = document.createElement('button');
+                        cancelBtn.className = 'btn btn-sm btn-secondary';
+                        cancelBtn.textContent = 'Cancelar';
+
+                        // ocultar conteúdo atual
+                        if (conteudoEl) conteudoEl.style.display = 'none';
+                        var insertion = container.querySelector('.mt-1') || container.lastElementChild;
+                        container.insertBefore(ta, insertion);
+                        var btnArea = container.querySelector('.mt-1');
+                        if (btnArea) btnArea.style.display = 'none';
+                        var editActions = document.createElement('div');
+                        editActions.className = 'mt-1';
+                        editActions.appendChild(saveBtn);
+                        editActions.appendChild(cancelBtn);
+                        container.appendChild(editActions);
+
+                        cancelBtn.addEventListener('click', function() {
+                            ta.remove(); editActions.remove(); if (conteudoEl) conteudoEl.style.display = '';
+                            if (btnArea) btnArea.style.display = '';
+                        });
+
+                        saveBtn.addEventListener('click', function() {
+                            var novo = ta.value.trim();
+                            if (novo === '') return alert('Conteúdo vazio');
+                            saveBtn.disabled = true; saveBtn.textContent = 'Salvando...';
+                            fetch('../ajax_anotacoes_item.php', {
+                                method: 'POST',
+                                body: new URLSearchParams({acao: 'edit', item_id: itemId, conteudo: novo})
+                            }).then(r => r.json()).then(d => {
+                                saveBtn.disabled = false; saveBtn.textContent = 'Salvar';
+                                if (d.success) {
+                                    if (conteudoEl) { conteudoEl.innerHTML = d.item.conteudo.replace(/\n/g, '<br>'); conteudoEl.style.display = ''; }
+                                    ta.remove(); editActions.remove(); if (btnArea) btnArea.style.display = '';
+                                } else {
+                                    alert(d.error || 'Erro');
+                                }
+                            }).catch(() => { saveBtn.disabled = false; saveBtn.textContent = 'Salvar'; alert('Erro de conexão'); });
+                        });
+                        return;
+                    }
                 });
                 
                 // Auto-salvar após 10 segundos de inatividade
