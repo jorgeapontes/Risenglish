@@ -95,6 +95,23 @@ if (!$table_exists) {
     }
 }
 
+// Criar tabela de itens (cada anotação separada)
+$sql_check_itens = "SHOW TABLES LIKE 'anotacoes_itens'";
+$itens_exists = $pdo->query($sql_check_itens)->rowCount() > 0;
+if (!$itens_exists) {
+    $sql_create_itens = "CREATE TABLE anotacoes_itens (
+        id INT(11) NOT NULL AUTO_INCREMENT,
+        anotacao_id INT(11) NOT NULL,
+        autor VARCHAR(50) NOT NULL,
+        conteudo TEXT NOT NULL,
+        data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY anotacao_id (anotacao_id),
+        CONSTRAINT anotacoes_itens_ibfk_1 FOREIGN KEY (anotacao_id) REFERENCES anotacoes_aula (id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
+    try { $pdo->exec($sql_create_itens); } catch (PDOException $e) {}
+}
+
 // Verificar se a tabela de histórico de visualizações existe
 $sql_check_historico = "SHOW TABLES LIKE 'anotacoes_visualizacoes'";
 $historico_exists = $pdo->query($sql_check_historico)->rowCount() > 0;
@@ -132,35 +149,40 @@ $stmt_alunos_turma = $pdo->prepare($sql_alunos_turma);
 $stmt_alunos_turma->execute([':turma_id' => $detalhes_aula['turma_id']]);
 $alunos_turma = $stmt_alunos_turma->fetchAll(PDO::FETCH_ASSOC);
 
-// Processar salvamento do comentário do professor
+// Processar salvamento do comentário do professor (BACKUP PHP STANDARD)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_comentario'])) {
     $aluno_id = $_POST['aluno_id'] ?? null;
     $comentario = $_POST['comentario_professor'] ?? '';
     
     if ($aluno_id) {
-        // Verificar se já existe uma anotação para este aluno nesta aula
+        // Verificar se já existe uma anotação (thread) para este aluno nesta aula
         $sql_check = "SELECT id FROM anotacoes_aula WHERE aula_id = :aula_id AND aluno_id = :aluno_id";
         $stmt_check = $pdo->prepare($sql_check);
         $stmt_check->execute([':aula_id' => $aula_id, ':aluno_id' => $aluno_id]);
         $anotacao_existente = $stmt_check->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($anotacao_existente) {
-            // Atualizar comentário do professor
-            $sql_update = "UPDATE anotacoes_aula SET comentario_professor = :comentario WHERE id = :id";
-            $stmt_update = $pdo->prepare($sql_update);
-            $stmt_update->execute([
-                ':comentario' => $comentario,
-                ':id' => $anotacao_existente['id']
-            ]);
+            $thread_id = $anotacao_existente['id'];
+            // Inserir novo item de anotação com autor professor
+            $sql_item = "INSERT INTO anotacoes_itens (anotacao_id, autor, conteudo) VALUES (:anotacao_id, 'professor', :conteudo)";
+            $stmt_item = $pdo->prepare($sql_item);
+            $stmt_item->execute([':anotacao_id' => $thread_id, ':conteudo' => $comentario]);
+            // Atualizar timestamp da thread e marcar para visto=0 (nova atividade)
+            $sql_update_thread = "UPDATE anotacoes_aula SET data_atualizacao = NOW(), visto = 0, data_visto = NULL WHERE id = :id";
+            $stmt_up = $pdo->prepare($sql_update_thread);
+            $stmt_up->execute([':id' => $thread_id]);
         } else {
-            // Criar novo registro com apenas o comentário do professor
-            $sql_insert = "INSERT INTO anotacoes_aula (aula_id, aluno_id, conteudo, comentario_professor) VALUES (:aula_id, :aluno_id, '', :comentario)";
+            // Criar thread e inserir o item
+            $sql_insert = "INSERT INTO anotacoes_aula (aula_id, aluno_id, conteudo, comentario_professor) VALUES (:aula_id, :aluno_id, '', '')";
             $stmt_insert = $pdo->prepare($sql_insert);
             $stmt_insert->execute([
                 ':aula_id' => $aula_id,
-                ':aluno_id' => $aluno_id,
-                ':comentario' => $comentario
+                ':aluno_id' => $aluno_id
             ]);
+            $thread_id = $pdo->lastInsertId();
+            $sql_item = "INSERT INTO anotacoes_itens (anotacao_id, autor, conteudo) VALUES (:anotacao_id, 'professor', :conteudo)";
+            $stmt_item = $pdo->prepare($sql_item);
+            $stmt_item->execute([':anotacao_id' => $thread_id, ':conteudo' => $comentario]);
         }
         
         // Redirecionar para evitar reenvio do formulário
@@ -198,6 +220,15 @@ foreach ($alunos_turma as $aluno) {
             'data_atualizacao' => null,
             'total_visualizacoes' => 0
         ];
+    }
+    // Buscar itens de anotações (múltiplas entradas)
+    $anotacao['itens'] = [];
+    if (!empty($anotacao['id'])) {
+        $sql_itens = "SELECT id, autor, conteudo, data_criacao FROM anotacoes_itens WHERE anotacao_id = :anotacao_id ORDER BY data_criacao ASC";
+        $stmt_itens = $pdo->prepare($sql_itens);
+        $stmt_itens->execute([':anotacao_id' => $anotacao['id']]);
+        $itens = $stmt_itens->fetchAll(PDO::FETCH_ASSOC);
+        if ($itens) $anotacao['itens'] = $itens;
     }
     
     // Combinar dados do aluno com a anotação
@@ -470,8 +501,9 @@ function formatarData($data) {
         
         /* ========== ESTILOS OTIMIZADOS PARA ANOTAÇÕES COM VISTO ========== */
         .anotacoes-container {
-            max-height: 600px;
-            overflow-y: auto;
+            /* Remover scroll interno para que o modal/página role por completo */
+            max-height: none;
+            overflow-y: visible;
             padding-right: 5px;
         }
         
@@ -531,8 +563,9 @@ function formatarData($data) {
         
         .anotacao-body.expanded {
             padding: 15px;
-            max-height: 600px;
-            overflow-y: auto;
+            /* permitir que o conteúdo expanda naturalmente para evitar scroll interno */
+            max-height: none;
+            overflow-y: visible;
         }
         
         .anotacao-conteudo-aluno {
@@ -779,7 +812,6 @@ function formatarData($data) {
                 
                 <div id="ajax-message-container"></div>
                 
-                <!-- Mensagem de sucesso -->
                 <?php if (isset($_GET['saved'])): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="fas fa-check-circle me-2"></i>
@@ -929,7 +961,6 @@ function formatarData($data) {
                     </div>
                 </div>
                 
-                <!-- ========== CONTAINER DE ANOTAÇÕES OTIMIZADO COM SISTEMA DE VISTO ========== -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div>
@@ -964,8 +995,25 @@ function formatarData($data) {
                         <?php else: ?>
                             <div class="anotacoes-container">
                                 <?php foreach ($anotacoes_alunos as $index => $anotacao): 
-                                    $temAnotacao = !empty($anotacao['conteudo']);
-                                    $temComentario = !empty($anotacao['comentario_professor']);
+                                    // determinar se existem itens de aluno ou professor
+                                    $temAnotacao = false;
+                                    $temComentario = false;
+                                    if (!empty($anotacao['itens'])) {
+                                        foreach ($anotacao['itens'] as $it) {
+                                            if (isset($it['autor']) && $it['autor'] === 'aluno' && trim($it['conteudo']) !== '') $temAnotacao = true;
+                                            if (isset($it['autor']) && $it['autor'] === 'professor' && trim($it['conteudo']) !== '') $temComentario = true;
+                                        }
+                                    }
+                                    // obter último comentário do professor (se houver)
+                                    $ultimoComentarioProf = '';
+                                    if (!empty($anotacao['itens'])) {
+                                        foreach (array_reverse($anotacao['itens']) as $itrev) {
+                                            if (isset($itrev['autor']) && $itrev['autor'] === 'professor' && trim($itrev['conteudo']) !== '') {
+                                                $ultimoComentarioProf = $itrev['conteudo'];
+                                                break;
+                                            }
+                                        }
+                                    }
                                     $statusClass = $temAnotacao ? 'badge-com-anotacao' : 'badge-sem-anotacao';
                                     $statusText = $temAnotacao ? 'Com anotação' : 'Sem anotação';
                                     $vistoClass = $anotacao['visto'] ? 'visto-true' : 'visto-false';
@@ -1000,27 +1048,34 @@ function formatarData($data) {
                                         </div>
                                         
                                         <div class="anotacao-body" id="anotacao-<?= $index ?>">
-                                            <!-- Anotações do aluno -->
-                                            <?php if ($temAnotacao): ?>
-                                                <div class="anotacao-conteudo-aluno">
-                                                    <small class="text-success fw-bold d-block mb-1">
-                                                        <i class="fas fa-sticky-note me-1"></i>Anotações do aluno:
-                                                    </small>
-                                                    <p class="mb-0"><?= nl2br(htmlspecialchars($anotacao['conteudo'])) ?></p>
+                                            <?php if (!empty($anotacao['itens'])): ?>
+                                                <div class="itens-list" id="itens-<?= $anotacao['id'] ?>">
+                                                <?php foreach ($anotacao['itens'] as $item): ?>
+                                                    <?php if ($item['autor'] === 'aluno'): ?>
+                                                        <div class="anotacao-conteudo-aluno mb-2" data-item-id="<?= $item['id'] ?>">
+                                                            <small class="text-success fw-bold d-block mb-1">
+                                                                <i class="fas fa-sticky-note me-1"></i>Anotação do aluno
+                                                                <span class="text-muted small"> - <?= isset($item['data_criacao']) ? formatarData($item['data_criacao']) : '' ?></span>
+                                                            </small>
+                                                            <p class="mb-0 item-conteudo"><?= nl2br(htmlspecialchars($item['conteudo'])) ?></p>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <div class="comentario-professor-area mb-2" data-item-id="<?= $item['id'] ?>">
+                                                            <small class="text-primary fw-bold d-block mb-1">
+                                                                <i class="fas fa-comment-dots me-1"></i>Comentário do professor
+                                                                <span class="text-muted small"> - <?= isset($item['data_criacao']) ? formatarData($item['data_criacao']) : '' ?></span>
+                                                            </small>
+                                                            <p class="mb-0 item-conteudo"><?= nl2br(htmlspecialchars($item['conteudo'])) ?></p>
+                                                            <div class="mt-1">
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary btn-edit-item" data-item-id="<?= $item['id'] ?>">Editar</button>
+                                                                <button type="button" class="btn btn-sm btn-outline-danger btn-delete-item" data-item-id="<?= $item['id'] ?>">Apagar</button>
+                                                            </div>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                <?php endforeach; ?>
                                                 </div>
                                             <?php endif; ?>
                                             
-                                            <!-- Comentário atual do professor -->
-                                            <?php if ($temComentario): ?>
-                                                <div class="comentario-professor-area">
-                                                    <small class="text-primary fw-bold d-block mb-1">
-                                                        <i class="fas fa-comment-dots me-1"></i>Seu comentário atual:
-                                                    </small>
-                                                    <p class="mb-0"><?= nl2br(htmlspecialchars($anotacao['comentario_professor'])) ?></p>
-                                                </div>
-                                            <?php endif; ?>
-                                            
-                                            <!-- SISTEMA DE VISTO -->
                                             <?php if ($temAnotacao && $anotacao['id']): ?>
                                                 <div class="visto-container">
                                                     <div class="visto-info">
@@ -1046,8 +1101,7 @@ function formatarData($data) {
                                                 </div>
                                             <?php endif; ?>
                                             
-                                            <!-- Formulário para adicionar/editar comentário -->
-                                            <form method="POST" action="" class="mt-2">
+                                            <form method="POST" action="" class="mt-2 form-comentario" data-index="<?= $index ?>" data-aluno-id="<?= $anotacao['aluno_id'] ?>">
                                                 <input type="hidden" name="aluno_id" value="<?= $anotacao['aluno_id'] ?>">
                                                 
                                                 <div class="mb-2">
@@ -1059,9 +1113,9 @@ function formatarData($data) {
                                                         class="comentario-textarea" 
                                                         placeholder="Digite seu feedback para o aluno..."
                                                         oninput="atualizarContador(this, <?= $index ?>)"
-                                                    ><?= htmlspecialchars($anotacao['comentario_professor'] ?? '') ?></textarea>
+                                                    ></textarea>
                                                     <div class="contador-caracteres" id="contador-<?= $index ?>">
-                                                        Caracteres: <?= strlen($anotacao['comentario_professor'] ?? '') ?>
+                                                        Caracteres: 0
                                                     </div>
                                                 </div>
                                                 
@@ -1105,8 +1159,6 @@ function formatarData($data) {
                         </div>
                     </div>
                 </div>
-                <!-- ========== FIM CONTAINER DE ANOTAÇÕES OTIMIZADO ========== -->
-
                 <div class="card shadow-sm mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span>Conteúdo da Aula - Controle de Visibilidade</span>
@@ -1256,7 +1308,6 @@ function formatarData($data) {
         </div>
     </div>
 
-    <!-- Modal Editar Aula -->
     <div class="modal fade" id="editarAulaModal" tabindex="-1" aria-labelledby="editarAulaModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -1303,7 +1354,6 @@ function formatarData($data) {
         </div>
     </div>
 
-    <!-- Modal Excluir Aula -->
     <div class="modal fade" id="excluirAulaModal" tabindex="-1" aria-labelledby="excluirAulaModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -1507,6 +1557,140 @@ function formatarData($data) {
                         this.classList.remove('rotated');
                     }
                 }
+            });
+        });
+
+        // ================= AJAX: criar/editar/apagar itens de anotações ================
+        // Este listener agora está corretamente posicionado no escopo principal do DOMContentLoaded
+        document.addEventListener('click', function(e) {
+            // deletar item (usa closest para tratar cliques em ícones dentro do botão)
+            var deleteBtn = e.target.closest ? e.target.closest('.btn-delete-item') : null;
+            if (deleteBtn) {
+                var itemId = deleteBtn.getAttribute('data-item-id');
+                if (!confirm('Confirma apagar este item?')) return;
+                fetch('../ajax_anotacoes_item.php', {
+                    method: 'POST',
+                    body: new URLSearchParams({acao: 'delete', item_id: itemId})
+                }).then(r => r.json()).then(d => {
+                    if (d.success) {
+                        var el = document.querySelector('[data-item-id="' + itemId + '"]');
+                        if (el) el.remove();
+                        displayAlert('Item apagado', 'success');
+                    } else displayAlert(d.error || 'Erro', 'danger');
+                }).catch(() => displayAlert('Erro de conexão', 'danger'));
+                return;
+            }
+
+            // editar item (apenas para itens de professor) - usa closest
+            var editBtn = e.target.closest ? e.target.closest('.btn-edit-item') : null;
+            if (editBtn) {
+                var itemId = editBtn.getAttribute('data-item-id');
+                var container = document.querySelector('[data-item-id="' + itemId + '"]');
+                if (!container) return;
+                var conteudoEl = container.querySelector('.item-conteudo');
+                var original = conteudoEl ? conteudoEl.innerText : '';
+                var ta = document.createElement('textarea');
+                ta.className = 'form-control mb-1';
+                ta.value = original.replace(/\r?\n/g, '\n');
+                var saveBtn = document.createElement('button');
+                saveBtn.className = 'btn btn-sm btn-primary me-1';
+                saveBtn.textContent = 'Salvar';
+                var cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn btn-sm btn-secondary';
+                cancelBtn.textContent = 'Cancelar';
+
+                if (conteudoEl) conteudoEl.style.display = 'none';
+                var insertionPoint = container.querySelector('.mt-1') || container.lastElementChild;
+                container.insertBefore(ta, insertionPoint);
+                var btnArea = container.querySelector('.mt-1');
+                if (btnArea) btnArea.style.display = 'none';
+                var editActions = document.createElement('div');
+                editActions.className = 'mt-1';
+                editActions.appendChild(saveBtn);
+                editActions.appendChild(cancelBtn);
+                container.appendChild(editActions);
+
+                cancelBtn.addEventListener('click', function() {
+                    ta.remove(); editActions.remove(); if (conteudoEl) conteudoEl.style.display = '';
+                    if (btnArea) btnArea.style.display = '';
+                });
+
+                saveBtn.addEventListener('click', function() {
+                    var novo = ta.value.trim();
+                    if (novo === '') return alert('Conteúdo vazio');
+                    saveBtn.disabled = true; saveBtn.textContent = 'Salvando...';
+                    fetch('../ajax_anotacoes_item.php', {
+                        method: 'POST',
+                        body: new URLSearchParams({acao: 'edit', item_id: itemId, conteudo: novo})
+                    }).then(r => r.json()).then(d => {
+                        saveBtn.disabled = false; saveBtn.textContent = 'Salvar';
+                        if (d.success) {
+                            if (conteudoEl) { conteudoEl.innerHTML = d.item.conteudo.replace(/\n/g, '<br>'); conteudoEl.style.display = ''; }
+                            ta.remove(); editActions.remove(); if (btnArea) btnArea.style.display = '';
+                            displayAlert('Item atualizado', 'success');
+                        } else {
+                            alert(d.error || 'Erro');
+                        }
+                    }).catch(() => { saveBtn.disabled = false; saveBtn.textContent = 'Salvar'; alert('Erro de conexão'); });
+                });
+                return;
+            }
+        });
+
+        // interceptar envio do formulário do professor e usar AJAX para criar item
+        document.querySelectorAll('.form-comentario').forEach(function(form) {
+            form.addEventListener('submit', function(ev) {
+                ev.preventDefault();
+                var textarea = form.querySelector('textarea[name="comentario_professor"]');
+                if (!textarea) return;
+                var conteudo = textarea.value.trim();
+                if (conteudo === '') return;
+                var alunoId = form.getAttribute('data-aluno-id');
+                var btn = form.querySelector('button[type="submit"]');
+                if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Salvando...'; }
+
+                var formData = new URLSearchParams();
+                formData.append('acao', 'create');
+                formData.append('aula_id', '<?= $detalhes_aula['aula_id'] ?>');
+                formData.append('aluno_id', alunoId);
+                formData.append('conteudo', conteudo);
+
+                fetch('../ajax_anotacoes_item.php', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(d => {
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-1"></i>Salvar'; }
+                    if (d.success) {
+                        // adicionar item na lista
+                        var lista = document.getElementById('itens-' + d.thread_id);
+                        if (!lista) {
+                            // criar container
+                            var body = form.closest('.anotacao-body');
+                            lista = document.createElement('div'); lista.id = 'itens-' + d.thread_id; lista.className = 'itens-list';
+                            body.insertBefore(lista, form);
+                        }
+                        var div = document.createElement('div');
+                        div.className = 'comentario-professor-area mb-2';
+                        div.setAttribute('data-item-id', d.item.id);
+                        div.innerHTML = '<small class="text-primary fw-bold d-block mb-1"><i class="fas fa-comment-dots me-1"></i>Comentário do professor <span class="text-muted small"> - ' + (d.item.data_criacao ? d.item.data_criacao : '') + '</span></small>' +
+                                        '<p class="mb-0 item-conteudo">' + d.item.conteudo.replace(/\n/g, '<br>') + '</p>' +
+                                        '<div class="mt-1"><button type="button" class="btn btn-sm btn-outline-secondary btn-edit-item" data-item-id="' + d.item.id + '">Editar</button> <button type="button" class="btn btn-sm btn-outline-danger btn-delete-item" data-item-id="' + d.item.id + '">Apagar</button></div>';
+                        lista.appendChild(div);
+                        // limpar textarea (garantido) e atualizar contador
+                        try {
+                            textarea.value = '';
+                            textarea.innerHTML = '';
+                            textarea.textContent = '';
+                            // disparar evento input para atualizar contadores ligados
+                            var ev = new Event('input', { bubbles: true });
+                            textarea.dispatchEvent(ev);
+                        } catch (e) {}
+                        var contador = form.querySelector('.contador-caracteres');
+                        if (contador) contador.textContent = 'Caracteres: 0';
+                        displayAlert('Comentário salvo', 'success');
+                    } else {
+                        displayAlert(d.error || 'Erro ao salvar', 'danger');
+                    }
+                }).catch(() => { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-1"></i>Salvar'; } displayAlert('Erro de conexão', 'danger'); });
             });
         });
 
