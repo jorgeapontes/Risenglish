@@ -236,8 +236,14 @@ foreach ($alunos_turma as $aluno) {
 }
 // ========== FIM SISTEMA DE ANOTAÇÕES COMPARTILHADAS COM VISTO ==========
 
-// Buscar todos os temas e suas subpastas
-$sql_temas = "
+// BUSCAR GRUPOS DO PROFESSOR
+$sql_grupos = "SELECT * FROM grupos_conteudos WHERE professor_id = :professor_id ORDER BY ordem ASC, nome ASC";
+$stmt_grupos = $pdo->prepare($sql_grupos);
+$stmt_grupos->execute([':professor_id' => $professor_id]);
+$grupos = $stmt_grupos->fetchAll(PDO::FETCH_ASSOC);
+
+// BUSCAR TEMAS SEM GRUPO (não agrupados)
+$sql_temas_sem_grupo = "
     SELECT 
         c.id AS tema_id, 
         c.titulo, 
@@ -253,17 +259,53 @@ $sql_temas = "
     WHERE 
         c.parent_id IS NULL
         AND c.professor_id = :professor_id
+        AND c.grupo_id IS NULL
     ORDER BY 
         c.titulo ASC
 ";
 
-$stmt_temas = $pdo->prepare($sql_temas);
-$stmt_temas->execute([':aula_id' => $aula_id, ':professor_id' => $professor_id]);
-$temas = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
+$stmt_temas_sem_grupo = $pdo->prepare($sql_temas_sem_grupo);
+$stmt_temas_sem_grupo->execute([':aula_id' => $aula_id, ':professor_id' => $professor_id]);
+$temas_sem_grupo = $stmt_temas_sem_grupo->fetchAll(PDO::FETCH_ASSOC);
+
+// BUSCAR TEMAS POR GRUPO
+$temas_por_grupo = [];
+foreach ($grupos as $grupo) {
+    $sql_temas_grupo = "
+        SELECT 
+            c.id AS tema_id, 
+            c.titulo, 
+            c.descricao, 
+            u.nome AS autor_tema,
+            COALESCE(ac.planejado, 0) AS planejado 
+        FROM 
+            conteudos c
+        JOIN
+            usuarios u ON c.professor_id = u.id 
+        LEFT JOIN 
+            aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
+        WHERE 
+            c.parent_id IS NULL
+            AND c.professor_id = :professor_id
+            AND c.grupo_id = :grupo_id
+        ORDER BY 
+            c.titulo ASC
+    ";
+    
+    $stmt_temas_grupo = $pdo->prepare($sql_temas_grupo);
+    $stmt_temas_grupo->execute([
+        ':aula_id' => $aula_id, 
+        ':professor_id' => $professor_id,
+        ':grupo_id' => $grupo['id']
+    ]);
+    $temas_por_grupo[$grupo['id']] = $stmt_temas_grupo->fetchAll(PDO::FETCH_ASSOC);
+}
 
 // Buscar subpastas para cada tema
 $subpastas_por_tema = [];
-foreach ($temas as $tema) {
+
+// Para temas sem grupo
+foreach ($temas_sem_grupo as $tema) {
     $sql_subpastas = "
         SELECT 
             c.id AS subpasta_id,
@@ -290,13 +332,53 @@ foreach ($temas as $tema) {
     $subpastas_por_tema[$tema['tema_id']] = $stmt_subpastas->fetchAll(PDO::FETCH_ASSOC);
 }
 
+// Para temas em grupos
+foreach ($grupos as $grupo) {
+    foreach ($temas_por_grupo[$grupo['id']] as $tema) {
+        $sql_subpastas = "
+            SELECT 
+                c.id AS subpasta_id,
+                c.titulo AS subpasta_titulo,
+                c.descricao AS subpasta_descricao,
+                COALESCE(ac.planejado, 0) AS planejado,
+                (SELECT COUNT(*) FROM conteudos WHERE parent_id = c.id AND eh_subpasta = 0) AS total_arquivos
+            FROM 
+                conteudos c
+            LEFT JOIN 
+                aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
+            WHERE 
+                c.parent_id = :tema_id 
+                AND c.eh_subpasta = 1
+            ORDER BY 
+                c.titulo ASC
+        ";
+        
+        $stmt_subpastas = $pdo->prepare($sql_subpastas);
+        $stmt_subpastas->execute([
+            ':aula_id' => $aula_id,
+            ':tema_id' => $tema['tema_id']
+        ]);
+        $subpastas_por_tema[$tema['tema_id']] = $stmt_subpastas->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
 // Contar total de itens planejados
 $count_planejados = 0;
-foreach ($temas as $tema) {
+foreach ($temas_sem_grupo as $tema) {
     if ($tema['planejado'] == 1) $count_planejados++;
     if (isset($subpastas_por_tema[$tema['tema_id']])) {
         foreach ($subpastas_por_tema[$tema['tema_id']] as $subpasta) {
             if ($subpasta['planejado'] == 1) $count_planejados++;
+        }
+    }
+}
+foreach ($grupos as $grupo) {
+    foreach ($temas_por_grupo[$grupo['id']] as $tema) {
+        if ($tema['planejado'] == 1) $count_planejados++;
+        if (isset($subpastas_por_tema[$tema['tema_id']])) {
+            foreach ($subpastas_por_tema[$tema['tema_id']] as $subpasta) {
+                if ($subpasta['planejado'] == 1) $count_planejados++;
+            }
         }
     }
 }
@@ -501,7 +583,6 @@ function formatarData($data) {
         
         /* ========== ESTILOS OTIMIZADOS PARA ANOTAÇÕES COM VISTO ========== */
         .anotacoes-container {
-            /* Remover scroll interno para que o modal/página role por completo */
             max-height: none;
             overflow-y: visible;
             padding-right: 5px;
@@ -563,7 +644,6 @@ function formatarData($data) {
         
         .anotacao-body.expanded {
             padding: 15px;
-            /* permitir que o conteúdo expanda naturalmente para evitar scroll interno */
             max-height: none;
             overflow-y: visible;
         }
@@ -741,6 +821,73 @@ function formatarData($data) {
             text-align: right;
             margin-top: 3px;
         }
+        
+        /* ESTILOS PARA GRUPOS */
+        .grupo-item {
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            background: white;
+        }
+        
+        .grupo-header {
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 2px solid #081d40;
+            transition: background-color 0.2s;
+        }
+        
+        .grupo-header:hover {
+            background-color: #e9ecef;
+        }
+        
+        .grupo-titulo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .grupo-icone {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .grupo-conteudo {
+            background-color: #ffffff;
+            padding: 10px;
+        }
+        
+        .badge-count {
+            background-color: #6c757d;
+            color: white;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 0.8em;
+        }
+        
+        .sem-grupo-section {
+            margin-top: 20px;
+            opacity: 0.9;
+        }
+        
+        .rotate-icon {
+            transition: transform 0.3s;
+        }
+        .rotate-icon.expanded {
+            transform: rotate(90deg);
+        }
+        /* FIM ESTILOS PARA GRUPOS */
         
         /* Scrollbar personalizada */
         .anotacoes-container::-webkit-scrollbar {
@@ -1159,6 +1306,7 @@ function formatarData($data) {
                         </div>
                     </div>
                 </div>
+                
                 <div class="card shadow-sm mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span>Conteúdo da Aula - Controle de Visibilidade</span>
@@ -1172,7 +1320,7 @@ function formatarData($data) {
                     </div>
                     
                     <div class="card-body">
-                        <?php if (empty($temas)): ?>
+                        <?php if (empty($grupos) && empty($temas_sem_grupo)): ?>
                             <p class="text-center text-muted">Não há temas cadastrados.</p>
                         <?php else: ?>
                             
@@ -1184,122 +1332,300 @@ function formatarData($data) {
                             </div>
                             
                             <div id="lista-conteudos-container">
-                                <?php foreach ($temas as $tema): ?>
-                                    <?php 
-                                        $is_planejado = $tema['planejado'] == 1;
-                                        $planejado_class = $is_planejado ? 'planejado' : 'nao-planejado';
-                                        $tem_subpastas = !empty($subpastas_por_tema[$tema['tema_id']]);
-                                        $total_subpastas = count($subpastas_por_tema[$tema['tema_id']] ?? []);
-                                    ?>
-                                    
-                                    <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>" 
-                                        data-conteudo-id="<?= $tema['tema_id'] ?>" 
-                                        data-planejado="<?= $tema['planejado'] ?>" 
-                                        data-tipo="tema">
-                                        
-                                        <div class="col-1 text-center">
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input planejado-switch" 
-                                                    type="checkbox" 
-                                                    role="switch" 
-                                                    id="switch_<?= $tema['tema_id'] ?>" 
-                                                    data-aula-id="<?= $detalhes_aula['aula_id'] ?>" 
-                                                    data-conteudo-id="<?= $tema['tema_id'] ?>" 
-                                                    data-tipo="tema" 
-                                                    <?= $is_planejado ? 'checked' : '' ?>>
-                                                <label class="form-check-label small status-label" for="switch_<?= $tema['tema_id'] ?>">
-                                                    <?= $is_planejado ? 'Sim' : 'Não' ?>
-                                                </label>
+                                
+                                <!-- GRUPOS -->
+                                <?php foreach ($grupos as $grupo): 
+                                    $temas_do_grupo = $temas_por_grupo[$grupo['id']] ?? [];
+                                    $total_temas = count($temas_do_grupo);
+                                ?>
+                                    <div class="grupo-item" data-grupo-id="<?= $grupo['id'] ?>">
+                                        <div class="grupo-header" onclick="toggleGrupo(<?= $grupo['id'] ?>)">
+                                            <div class="grupo-titulo">
+                                                <div class="grupo-icone" style="background-color: <?= $grupo['cor'] ?>">
+                                                    <i class="<?= $grupo['icone'] ?>"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0"><?= htmlspecialchars($grupo['nome']) ?></h6>
+                                                    <?php if ($grupo['descricao']): ?>
+                                                        <small class="text-muted"><?= htmlspecialchars($grupo['descricao']) ?></small>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <span class="badge-count"><?= $total_temas ?> temas</span>
+                                                <i class="fas fa-chevron-right rotate-icon" id="icone-grupo-<?= $grupo['id'] ?>"></i>
                                             </div>
                                         </div>
                                         
-                                        <div class="col-5">
-                                            <div class="d-flex align-items-center">
-                                                <?php if ($tem_subpastas): ?>
-                                                    <i class="fas fa-chevron-right subpasta-toggle me-2" data-tema-id="<?= $tema['tema_id'] ?>" style="cursor: pointer;"></i>
-                                                <?php else: ?>
-                                                    <i class="fas fa-folder me-2 text-primary"></i>
-                                                <?php endif; ?>
-                                                <a href="gerenciar_arquivos_tema.php?tema_id=<?= $tema['tema_id'] ?>" class="link-tema">
-                                                    <strong><?= htmlspecialchars($tema['titulo']) ?></strong>
-                                                </a>
-                                            </div>
-                                            <?php if (!empty($tema['descricao'])): ?>
-                                                <small class="text-muted d-block ms-4">
-                                                    <?= htmlspecialchars($tema['descricao']) ?>
-                                                </small>
+                                        <div class="grupo-conteudo" id="grupo-<?= $grupo['id'] ?>" style="display: none;">
+                                            <?php if (empty($temas_do_grupo)): ?>
+                                                <p class="text-center text-muted py-3 mb-0">
+                                                    <i class="fas fa-folder-open me-2"></i>
+                                                    Nenhum tema neste grupo.
+                                                </p>
+                                            <?php else: ?>
+                                                <?php foreach ($temas_do_grupo as $tema): ?>
+                                                    <?php 
+                                                        $is_planejado = $tema['planejado'] == 1;
+                                                        $planejado_class = $is_planejado ? 'planejado' : 'nao-planejado';
+                                                        $tem_subpastas = !empty($subpastas_por_tema[$tema['tema_id']]);
+                                                        $total_subpastas = count($subpastas_por_tema[$tema['tema_id']] ?? []);
+                                                    ?>
+                                                    
+                                                    <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>" 
+                                                        data-conteudo-id="<?= $tema['tema_id'] ?>" 
+                                                        data-planejado="<?= $tema['planejado'] ?>" 
+                                                        data-tipo="tema">
+                                                        
+                                                        <div class="col-1 text-center">
+                                                            <div class="form-check form-switch">
+                                                                <input class="form-check-input planejado-switch" 
+                                                                    type="checkbox" 
+                                                                    role="switch" 
+                                                                    id="switch_<?= $tema['tema_id'] ?>" 
+                                                                    data-aula-id="<?= $detalhes_aula['aula_id'] ?>" 
+                                                                    data-conteudo-id="<?= $tema['tema_id'] ?>" 
+                                                                    data-tipo="tema" 
+                                                                    <?= $is_planejado ? 'checked' : '' ?>>
+                                                                <label class="form-check-label small status-label" for="switch_<?= $tema['tema_id'] ?>">
+                                                                    <?= $is_planejado ? 'Sim' : 'Não' ?>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="col-5">
+                                                            <div class="d-flex align-items-center">
+                                                                <?php if ($tem_subpastas): ?>
+                                                                    <i class="fas fa-chevron-right subpasta-toggle me-2" data-tema-id="<?= $tema['tema_id'] ?>" style="cursor: pointer;"></i>
+                                                                <?php else: ?>
+                                                                    <i class="fas fa-folder me-2 text-primary"></i>
+                                                                <?php endif; ?>
+                                                                <a href="gerenciar_arquivos_tema.php?tema_id=<?= $tema['tema_id'] ?>" class="link-tema">
+                                                                    <strong><?= htmlspecialchars($tema['titulo']) ?></strong>
+                                                                </a>
+                                                            </div>
+                                                            <?php if (!empty($tema['descricao'])): ?>
+                                                                <small class="text-muted d-block ms-4">
+                                                                    <?= htmlspecialchars($tema['descricao']) ?>
+                                                                </small>
+                                                            <?php endif; ?>
+                                                        </div>
+
+                                                        <div class="col-4">
+                                                            <span class="badge bg-primary ms-2" title="Criado por">
+                                                                <i class="fas fa-user me-1"></i> <?= htmlspecialchars($tema['autor_tema']) ?>
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <div class="col-2 text-center">
+                                                            <span class="badge bg-secondary arquivo-count">
+                                                                <?= $total_subpastas ?> subpasta(s)
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <?php if ($tem_subpastas): ?>
+                                                        <div class="subpastas-container" id="subpastas-<?= $tema['tema_id'] ?>">
+                                                            <?php foreach ($subpastas_por_tema[$tema['tema_id']] as $subpasta): ?>
+                                                                <?php 
+                                                                    $is_subpasta_planejada = $subpasta['planejado'] == 1;
+                                                                    $subpasta_planejado_class = $is_subpasta_planejada ? 'planejado' : 'nao-planejado';
+                                                                ?>
+                                                                <div class="conteudo-item subpasta-item row mx-0 align-items-center <?= $subpasta_planejado_class ?>" 
+                                                                    data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
+                                                                    data-planejado="<?= $subpasta['planejado'] ?>" 
+                                                                    data-tipo="subpasta">
+                                                                    
+                                                                    <div class="col-1 text-center">
+                                                                        <div class="form-check form-switch">
+                                                                            <input class="form-check-input planejado-switch" 
+                                                                                type="checkbox" 
+                                                                                role="switch" 
+                                                                                id="switch_<?= $subpasta['subpasta_id'] ?>" 
+                                                                                data-aula-id="<?= $detalhes_aula['aula_id'] ?>" 
+                                                                                data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
+                                                                                data-tipo="subpasta" 
+                                                                                <?= $is_subpasta_planejada ? 'checked' : '' ?>>
+                                                                            <label class="form-check-label small status-label" for="switch_<?= $subpasta['subpasta_id'] ?>">
+                                                                                <?= $is_subpasta_planejada ? 'Sim' : 'Não' ?>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div class="col-5">
+                                                                        <div class="d-flex align-items-center">
+                                                                            <i class="fas fa-folder me-2 text-primary" style="margin-left: 20px;"></i>
+                                                                            <span><strong><?= htmlspecialchars($subpasta['subpasta_titulo']) ?></strong></span>
+                                                                        </div>
+                                                                        <?php if (!empty($subpasta['subpasta_descricao'])): ?>
+                                                                            <small class="text-muted d-block" style="margin-left: 40px;">
+                                                                                <?= htmlspecialchars($subpasta['subpasta_descricao']) ?>
+                                                                            </small>
+                                                                        <?php endif; ?>
+                                                                    </div>
+
+                                                                    <div class="col-4">
+                                                                        <span class="badge bg-light text-dark">
+                                                                            <i class="fas fa-folder-open me-1"></i> Subpasta
+                                                                        </span>
+                                                                    </div>
+                                                                    
+                                                                    <div class="col-2 text-center">
+                                                                        <span class="badge badge-subpasta arquivo-count">
+                                                                            <?= $subpasta['total_arquivos'] ?> arquivo(s)
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                <?php endforeach; ?>
                                             <?php endif; ?>
                                         </div>
-
-                                        <div class="col-4">
-                                            <span class="badge bg-primary ms-2" title="Criado por">
-                                                <i class="fas fa-user me-1"></i> <?= htmlspecialchars($tema['autor_tema']) ?>
-                                            </span>
-                                        </div>
-                                        
-                                        <div class="col-2 text-center">
-                                            <span class="badge bg-secondary arquivo-count">
-                                                <?= $total_subpastas ?> subpasta(s)
-                                            </span>
-                                        </div>
                                     </div>
+                                <?php endforeach; ?>
 
-                                    <?php if ($tem_subpastas): ?>
-                                        <div class="subpastas-container" id="subpastas-<?= $tema['tema_id'] ?>">
-                                            <?php foreach ($subpastas_por_tema[$tema['tema_id']] as $subpasta): ?>
-                                                <?php 
-                                                    $is_subpasta_planejada = $subpasta['planejado'] == 1;
-                                                    $subpasta_planejado_class = $is_subpasta_planejada ? 'planejado' : 'nao-planejado';
-                                                ?>
-                                                <div class="conteudo-item subpasta-item row mx-0 align-items-center <?= $subpasta_planejado_class ?>" 
-                                                    data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
-                                                    data-planejado="<?= $subpasta['planejado'] ?>" 
-                                                    data-tipo="subpasta">
-                                                    
-                                                    <div class="col-1 text-center">
-                                                        <div class="form-check form-switch">
-                                                            <input class="form-check-input planejado-switch" 
-                                                                type="checkbox" 
-                                                                role="switch" 
-                                                                id="switch_<?= $subpasta['subpasta_id'] ?>" 
-                                                                data-aula-id="<?= $detalhes_aula['aula_id'] ?>" 
-                                                                data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
-                                                                data-tipo="subpasta" 
-                                                                <?= $is_subpasta_planejada ? 'checked' : '' ?>>
-                                                            <label class="form-check-label small status-label" for="switch_<?= $subpasta['subpasta_id'] ?>">
-                                                                <?= $is_subpasta_planejada ? 'Sim' : 'Não' ?>
-                                                            </label>
-                                                        </div>
+                                <!-- TEMAS SEM GRUPO -->
+                                <?php if (!empty($temas_sem_grupo)): ?>
+                                    <div class="sem-grupo-section">
+                                        <div class="grupo-item">
+                                            <div class="grupo-header" onclick="toggleGrupo('sem-grupo')">
+                                                <div class="grupo-titulo">
+                                                    <div class="grupo-icone" style="background-color: #6c757d">
+                                                        <i class="fas fa-folder"></i>
                                                     </div>
-                                                    
-                                                    <div class="col-5">
-                                                        <div class="d-flex align-items-center">
-                                                            <i class="fas fa-folder me-2 text-primary" style="margin-left: 20px;"></i>
-                                                            <span><strong><?= htmlspecialchars($subpasta['subpasta_titulo']) ?></strong></span>
-                                                        </div>
-                                                        <?php if (!empty($subpasta['subpasta_descricao'])): ?>
-                                                            <small class="text-muted d-block" style="margin-left: 40px;">
-                                                                <?= htmlspecialchars($subpasta['subpasta_descricao']) ?>
-                                                            </small>
-                                                        <?php endif; ?>
-                                                    </div>
-
-                                                    <div class="col-4">
-                                                        <span class="badge bg-light text-dark">
-                                                            <i class="fas fa-folder-open me-1"></i> Subpasta
-                                                        </span>
-                                                    </div>
-                                                    
-                                                    <div class="col-2 text-center">
-                                                        <span class="badge badge-subpasta arquivo-count">
-                                                            <?= $subpasta['total_arquivos'] ?> arquivo(s)
-                                                        </span>
+                                                    <div>
+                                                        <h6 class="mb-0">Sem Grupo</h6>
+                                                        <small class="text-muted">Temas não organizados</small>
                                                     </div>
                                                 </div>
-                                            <?php endforeach; ?>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <span class="badge-count"><?= count($temas_sem_grupo) ?> temas</span>
+                                                    <i class="fas fa-chevron-right rotate-icon" id="icone-grupo-sem-grupo"></i>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="grupo-conteudo" id="grupo-sem-grupo" style="display: none;">
+                                                <?php foreach ($temas_sem_grupo as $tema): ?>
+                                                    <?php 
+                                                        $is_planejado = $tema['planejado'] == 1;
+                                                        $planejado_class = $is_planejado ? 'planejado' : 'nao-planejado';
+                                                        $tem_subpastas = !empty($subpastas_por_tema[$tema['tema_id']]);
+                                                        $total_subpastas = count($subpastas_por_tema[$tema['tema_id']] ?? []);
+                                                    ?>
+                                                    
+                                                    <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>" 
+                                                        data-conteudo-id="<?= $tema['tema_id'] ?>" 
+                                                        data-planejado="<?= $tema['planejado'] ?>" 
+                                                        data-tipo="tema">
+                                                        
+                                                        <div class="col-1 text-center">
+                                                            <div class="form-check form-switch">
+                                                                <input class="form-check-input planejado-switch" 
+                                                                    type="checkbox" 
+                                                                    role="switch" 
+                                                                    id="switch_<?= $tema['tema_id'] ?>" 
+                                                                    data-aula-id="<?= $detalhes_aula['aula_id'] ?>" 
+                                                                    data-conteudo-id="<?= $tema['tema_id'] ?>" 
+                                                                    data-tipo="tema" 
+                                                                    <?= $is_planejado ? 'checked' : '' ?>>
+                                                                <label class="form-check-label small status-label" for="switch_<?= $tema['tema_id'] ?>">
+                                                                    <?= $is_planejado ? 'Sim' : 'Não' ?>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="col-5">
+                                                            <div class="d-flex align-items-center">
+                                                                <?php if ($tem_subpastas): ?>
+                                                                    <i class="fas fa-chevron-right subpasta-toggle me-2" data-tema-id="<?= $tema['tema_id'] ?>" style="cursor: pointer;"></i>
+                                                                <?php else: ?>
+                                                                    <i class="fas fa-folder me-2 text-primary"></i>
+                                                                <?php endif; ?>
+                                                                <a href="gerenciar_arquivos_tema.php?tema_id=<?= $tema['tema_id'] ?>" class="link-tema">
+                                                                    <strong><?= htmlspecialchars($tema['titulo']) ?></strong>
+                                                                </a>
+                                                            </div>
+                                                            <?php if (!empty($tema['descricao'])): ?>
+                                                                <small class="text-muted d-block ms-4">
+                                                                    <?= htmlspecialchars($tema['descricao']) ?>
+                                                                </small>
+                                                            <?php endif; ?>
+                                                        </div>
+
+                                                        <div class="col-4">
+                                                            <span class="badge bg-primary ms-2" title="Criado por">
+                                                                <i class="fas fa-user me-1"></i> <?= htmlspecialchars($tema['autor_tema']) ?>
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <div class="col-2 text-center">
+                                                            <span class="badge bg-secondary arquivo-count">
+                                                                <?= $total_subpastas ?> subpasta(s)
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <?php if ($tem_subpastas): ?>
+                                                        <div class="subpastas-container" id="subpastas-<?= $tema['tema_id'] ?>">
+                                                            <?php foreach ($subpastas_por_tema[$tema['tema_id']] as $subpasta): ?>
+                                                                <?php 
+                                                                    $is_subpasta_planejada = $subpasta['planejado'] == 1;
+                                                                    $subpasta_planejado_class = $is_subpasta_planejada ? 'planejado' : 'nao-planejado';
+                                                                ?>
+                                                                <div class="conteudo-item subpasta-item row mx-0 align-items-center <?= $subpasta_planejado_class ?>" 
+                                                                    data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
+                                                                    data-planejado="<?= $subpasta['planejado'] ?>" 
+                                                                    data-tipo="subpasta">
+                                                                    
+                                                                    <div class="col-1 text-center">
+                                                                        <div class="form-check form-switch">
+                                                                            <input class="form-check-input planejado-switch" 
+                                                                                type="checkbox" 
+                                                                                role="switch" 
+                                                                                id="switch_<?= $subpasta['subpasta_id'] ?>" 
+                                                                                data-aula-id="<?= $detalhes_aula['aula_id'] ?>" 
+                                                                                data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
+                                                                                data-tipo="subpasta" 
+                                                                                <?= $is_subpasta_planejada ? 'checked' : '' ?>>
+                                                                            <label class="form-check-label small status-label" for="switch_<?= $subpasta['subpasta_id'] ?>">
+                                                                                <?= $is_subpasta_planejada ? 'Sim' : 'Não' ?>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div class="col-5">
+                                                                        <div class="d-flex align-items-center">
+                                                                            <i class="fas fa-folder me-2 text-primary" style="margin-left: 20px;"></i>
+                                                                            <span><strong><?= htmlspecialchars($subpasta['subpasta_titulo']) ?></strong></span>
+                                                                        </div>
+                                                                        <?php if (!empty($subpasta['subpasta_descricao'])): ?>
+                                                                            <small class="text-muted d-block" style="margin-left: 40px;">
+                                                                                <?= htmlspecialchars($subpasta['subpasta_descricao']) ?>
+                                                                            </small>
+                                                                        <?php endif; ?>
+                                                                    </div>
+
+                                                                    <div class="col-4">
+                                                                        <span class="badge bg-light text-dark">
+                                                                            <i class="fas fa-folder-open me-1"></i> Subpasta
+                                                                        </span>
+                                                                    </div>
+                                                                    
+                                                                    <div class="col-2 text-center">
+                                                                        <span class="badge badge-subpasta arquivo-count">
+                                                                            <?= $subpasta['total_arquivos'] ?> arquivo(s)
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                <?php endforeach; ?>
+                                            </div>
                                         </div>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -1390,6 +1716,9 @@ function formatarData($data) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+    // Estado dos grupos (expandido/recolhido)
+    let gruposExpandidos = JSON.parse(localStorage.getItem('gruposExpandidosDetalhes')) || {};
+    
     function displayAlert(message, type) {
         const container = document.getElementById('ajax-message-container');
         const alertHtml = `
@@ -1449,7 +1778,7 @@ function formatarData($data) {
         }
     }
     
-    // ===== NOVA FUNÇÃO PARA MARCAR VISTO =====
+    // ===== FUNÇÃO PARA MARCAR VISTO =====
     function marcarVisto(anotacaoId, elemento) {
         event.stopPropagation();
         
@@ -1525,7 +1854,24 @@ function formatarData($data) {
             displayAlert('Erro de comunicação. Tente novamente.', 'danger');
         });
     }
-    // ===== FIM NOVA FUNÇÃO =====
+    
+    // ===== FUNÇÕES PARA GRUPOS =====
+    function toggleGrupo(grupoId) {
+        const grupoDiv = document.getElementById('grupo-' + grupoId);
+        const icone = document.getElementById('icone-grupo-' + grupoId);
+        
+        if (grupoDiv.style.display === 'none' || grupoDiv.style.display === '') {
+            grupoDiv.style.display = 'block';
+            if (icone) icone.classList.add('expanded');
+            gruposExpandidos[grupoId] = true;
+        } else {
+            grupoDiv.style.display = 'none';
+            if (icone) icone.classList.remove('expanded');
+            gruposExpandidos[grupoId] = false;
+        }
+        
+        localStorage.setItem('gruposExpandidosDetalhes', JSON.stringify(gruposExpandidos));
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
         const listaConteudosContainer = document.getElementById('lista-conteudos-container');
@@ -1536,6 +1882,24 @@ function formatarData($data) {
         document.querySelectorAll('.subpastas-container').forEach(container => {
             container.style.display = 'none';
         });
+
+        // INICIALIZAÇÃO: Restaurar estado dos grupos
+        <?php foreach ($grupos as $grupo): ?>
+            if (gruposExpandidos[<?= $grupo['id'] ?>]) {
+                document.getElementById('grupo-<?= $grupo['id'] ?>').style.display = 'block';
+                const icone = document.getElementById('icone-grupo-<?= $grupo['id'] ?>');
+                if (icone) icone.classList.add('expanded');
+            }
+        <?php endforeach; ?>
+        
+        if (gruposExpandidos['sem-grupo']) {
+            const grupoDiv = document.getElementById('grupo-sem-grupo');
+            if (grupoDiv) {
+                grupoDiv.style.display = 'block';
+                const icone = document.getElementById('icone-grupo-sem-grupo');
+                if (icone) icone.classList.add('expanded');
+            }
+        }
 
         // TOGGLES DE SUBPASTAS
         document.querySelectorAll('.subpasta-toggle').forEach(toggle => {
@@ -1561,7 +1925,6 @@ function formatarData($data) {
         });
 
         // ================= AJAX: criar/editar/apagar itens de anotações ================
-        // Este listener agora está corretamente posicionado no escopo principal do DOMContentLoaded
         document.addEventListener('click', function(e) {
             // deletar item (usa closest para tratar cliques em ícones dentro do botão)
             var deleteBtn = e.target.closest ? e.target.closest('.btn-delete-item') : null;
@@ -1696,7 +2059,7 @@ function formatarData($data) {
 
         // Atualizar contagem de itens visíveis
         function atualizarContagemPlanejados() {
-            const count = listaConteudosContainer.querySelectorAll('.conteudo-item[data-planejado="1"]').length;
+            const count = document.querySelectorAll('.conteudo-item[data-planejado="1"]').length;
             filtroLabel.innerHTML = `Mostrar Apenas Itens Visíveis (${count})`;
             return count;
         }
@@ -1705,7 +2068,7 @@ function formatarData($data) {
         function aplicarFiltro() {
             const mostrarApenasPlanejados = filtroSwitch.checked;
             
-            listaConteudosContainer.querySelectorAll('.conteudo-item').forEach(item => {
+            document.querySelectorAll('.conteudo-item').forEach(item => {
                 const isPlanejado = item.dataset.planejado === '1';
                 
                 if (mostrarApenasPlanejados && !isPlanejado) {
