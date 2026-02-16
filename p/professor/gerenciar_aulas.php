@@ -2,6 +2,9 @@
 session_start();
 require_once '../includes/conexao.php';
 
+// Definir fuso horário do Brasil
+date_default_timezone_set('America/Sao_Paulo');
+
 // Bloqueio de acesso para usuários não-professor
 if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
     header("Location: ../login.php");
@@ -16,6 +19,7 @@ $sucesso = false;
 function gerarDatasRecorrentes($data_inicio, $dia_semana, $quantidade_semanas = 4) {
     $datas = [];
     $data_atual = new DateTime($data_inicio);
+    $data_atual->setTime(0, 0, 0); // Zerar hora para evitar problemas
     
     // Encontrar a primeira ocorrência do dia da semana
     $data_atual->modify('next ' . $dia_semana);
@@ -83,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
     $descricao = trim($_POST['descricao']);
     $dia_semana = $_POST['dia_semana'];
     $horario = $_POST['horario'];
-    $quantidade_semanas = $_POST['quantidade_semanas'];
+    $quantidade_semanas = (int)$_POST['quantidade_semanas'];
     
     // Busca o nome da turma para o título automático
     $sql_turma = "SELECT nome_turma FROM turmas WHERE id = :turma_id AND professor_id = :professor_id";
@@ -187,7 +191,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
 
 // --- CONSULTAS DE LEITURA (READ) ---
 
-// A. Lista de Aulas
+// Obtém a data e hora atual no fuso brasileiro
+$agora = date('Y-m-d H:i:s');
+$data_atual = date('Y-m-d');
+$hora_atual = date('H:i:s');
+
+// A. Lista de Aulas - CORREÇÃO DO PROBLEMA DE FUSO HORÁRIO
 $sql_aulas = "
     SELECT 
         a.id, a.titulo_aula, a.data_aula, a.horario, a.descricao, t.nome_turma 
@@ -197,12 +206,17 @@ $sql_aulas = "
         turmas t ON a.turma_id = t.id
     WHERE 
         a.professor_id = :professor_id
-        AND CONCAT(a.data_aula, ' ', a.horario) >= NOW()
+        AND (
+            a.data_aula > :data_atual
+            OR (a.data_aula = :data_atual AND a.horario >= :hora_atual)
+        )
     ORDER BY 
         a.data_aula ASC, a.horario ASC
 ";
 $stmt_aulas = $pdo->prepare($sql_aulas);
 $stmt_aulas->bindParam(':professor_id', $professor_id);
+$stmt_aulas->bindParam(':data_atual', $data_atual);
+$stmt_aulas->bindParam(':hora_atual', $hora_atual);
 $stmt_aulas->execute();
 $lista_aulas = $stmt_aulas->fetchAll(PDO::FETCH_ASSOC);
 
@@ -394,6 +408,16 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
         .btn-group-agendar .btn {
             margin-right: 10px;
         }
+        
+        .preview-datas {
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -529,7 +553,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
 
                     <div class="mb-3">
                         <label for="titulo_aula_unica" class="form-label">Título da Aula <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="titulo_aula_unica" name="titulo_aula" >
+                        <input type="text" class="form-control" id="titulo_aula_unica" name="titulo_aula" required>
                     </div>
 
                     <div class="row">
@@ -539,7 +563,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
                                     value="<?= date('Y-m-d') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Horário</label>
+                            <label class="form-label">Horário <span class="text-danger">*</span></label>
                             <?php renderTimePicker('unica', '09:00'); ?>
                         </div>
                     </div>
@@ -604,13 +628,13 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
                         </div>
                         
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Horário</label>
-                             <?php renderTimePicker('recorrente', '09:00'); ?>
-                        
-                        
+                            <label class="form-label">Horário <span class="text-danger">*</span></label>
+                            <?php renderTimePicker('recorrente', '09:00'); ?>
+                        </div>
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
                             <label for="quantidade_semanas" class="form-label">Número de Semanas <span class="text-danger">*</span></label>
                             <select class="form-select" id="quantidade_semanas" name="quantidade_semanas" required>
                                 <option value="2">2 semanas</option>
@@ -621,7 +645,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Próximas Datas</label>
-                            <div id="preview_datas" class="form-control" style="background-color: #f8f9fa; height: auto; min-height: 38px; font-size: 0.9em;">
+                            <div id="preview_datas" class="preview-datas">
                                 Selecione o dia da semana para visualizar as datas
                             </div>
                         </div>
@@ -649,7 +673,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
     </div>
 </div>
 
-<!-- Modal Edição (usando o mesmo estilo do modal de aula única) -->
+<!-- Modal Edição -->
 <div class="modal fade" id="modalEdicao" tabindex="-1" aria-labelledby="modalEdicaoLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -688,7 +712,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
                                     value="<?= htmlspecialchars($aula_para_editar['data_aula'] ?? '') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Horário</label>
+                            <label class="form-label">Horário <span class="text-danger">*</span></label>
                             <?php renderTimePicker('editar', substr($aula_para_editar['horario'] ?? '09:00', 0, 5)); ?>
                         </div>
                     </div>
@@ -710,7 +734,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
     </div>
 </div>
 
-<!-- Modal Excluir (mantido igual) -->
+<!-- Modal Excluir -->
 <div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -764,14 +788,14 @@ $(document).ready(function() {
 
     function atualizarPreviewDatas() {
         var diaSemana = $('#dia_semana').val();
-        var quantidadeSemanas = $('#quantidade_semanas').val();
+        var quantidadeSemanas = parseInt($('#quantidade_semanas').val());
         
         if (!diaSemana) {
             $('#preview_datas').html('Selecione o dia da semana para visualizar as datas');
             return;
         }
 
-        // Simulação das próximas datas (em uma implementação real, você pode usar uma função PHP via AJAX)
+        // Mapeamento dos dias em português
         var dias = {
             'monday': 'Segunda',
             'tuesday': 'Terça', 
@@ -782,7 +806,40 @@ $(document).ready(function() {
             'sunday': 'Domingo'
         };
         
-        $('#preview_datas').html('<small>Serão agendadas ' + quantidadeSemanas + ' aulas às ' + dias[diaSemana] + 's-feiras</small>');
+        // Gerar preview das datas
+        var hoje = new Date();
+        var datasPreview = [];
+        var diaSemanaMap = {
+            'monday': 1,
+            'tuesday': 2,
+            'wednesday': 3,
+            'thursday': 4,
+            'friday': 5,
+            'saturday': 6,
+            'sunday': 0
+        };
+        
+        var diaAlvo = diaSemanaMap[diaSemana];
+        var diasAteProximo = (diaAlvo - hoje.getDay() + 7) % 7;
+        if (diasAteProximo === 0) diasAteProximo = 7; // Próxima semana
+        
+        var primeiraData = new Date(hoje);
+        primeiraData.setDate(hoje.getDate() + diasAteProximo);
+        
+        for (var i = 0; i < quantidadeSemanas; i++) {
+            var data = new Date(primeiraData);
+            data.setDate(primeiraData.getDate() + (i * 7));
+            var dia = data.getDate().toString().padStart(2, '0');
+            var mes = (data.getMonth() + 1).toString().padStart(2, '0');
+            var ano = data.getFullYear();
+            datasPreview.push(dia + '/' + mes + '/' + ano);
+        }
+        
+        var html = '<small><strong>' + quantidadeSemanas + ' aulas às ' + dias[diaSemana] + 's-feiras:</strong><br>';
+        html += datasPreview.join('<br>');
+        html += '</small>';
+        
+        $('#preview_datas').html(html);
     }
 
     // Atualizar quantidade de aulas no texto informativo
@@ -792,18 +849,16 @@ $(document).ready(function() {
 
     // Sincroniza os selects de Hora/Minuto com o input oculto que o PHP lê
     $('.time-hour, .time-minute').on('change', function() {
-    var prefix = $(this).data('prefix');
-    var h = $('.time-hour[data-prefix="'+prefix+'"]').val();
-    var m = $('.time-minute[data-prefix="'+prefix+'"]').val();
-    $('#real_time_' + prefix).val(h + ':' + m);
+        var prefix = $(this).data('prefix');
+        var h = $('.time-hour[data-prefix="'+prefix+'"]').val();
+        var m = $('.time-minute[data-prefix="'+prefix+'"]').val();
+        $('#real_time_' + prefix).val(h + ':' + m);
     });
 
     // Abrir modal de edição automaticamente se necessário
     <?php if ($abrir_modal_edicao): ?>
-        $(document).ready(function() {
-            var modalEdicao = new bootstrap.Modal(document.getElementById('modalEdicao'));
-            modalEdicao.show();
-        });
+        var modalEdicao = new bootstrap.Modal(document.getElementById('modalEdicao'));
+        modalEdicao.show();
     <?php endif; ?>
 });
 </script>
