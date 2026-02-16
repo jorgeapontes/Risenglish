@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Tempo de geração: 14/02/2026 às 14:57
+-- Tempo de geração: 16/02/2026 às 14:40
 -- Versão do servidor: 11.8.3-MariaDB-log
 -- Versão do PHP: 7.2.34
 
@@ -147,7 +147,7 @@ INSERT INTO `anotacoes_aula` (`id`, `aula_id`, `aluno_id`, `conteudo`, `comentar
 (49, 199, 26, '', 'excuse\r\nto see\r\nto talk\r\nbroke up\r\nconfidence\r\nI know him for 3 years\r\nimproved / rose\r\nhe has\r\ngot better\r\nfor / since \r\nfor x years\r\nsince 2023\r\nfor almost\r\n\r\nYou 11:39\r\nspeak\r\nlaugh\r\n\r\nYou 12:15\r\nage group\r\nage range', 0, NULL, '2026-02-05 15:31:14', '2026-02-05 15:31:14'),
 (50, 213, 26, '', 'uncharted\r\n\r\nYou 15:08\r\nas you choose\r\nas you make your choices\r\ndepending\r\nsafe - seguro\r\nsave\r\nsorry to interrupt\r\n\r\nYou 15:59\r\ntag\r\n\r\nBruna 16:01\r\ntadhg', 0, NULL, '2026-02-05 19:03:54', '2026-02-05 19:03:54'),
 (51, 480, 45, '', 'I delayed\r\nfired\r\ntuesday\r\nthrusday\r\nwe would be fired\r\nthe owner of the company\r\nhe sent me a message and he told \r\nhe would talk to my coworker\r\n\r\nYou 18:08\r\nfarewell\r\nbefore firing him\r\nneeded to pretend\r\nthat I didnt know\r\nso far- até então\r\nlooking for/ searching\r\nthere arent people for the vacancy\r\nthey didnt choose\r\n\r\nYou 18:14\r\nneeded\r\nto be able to work\r\nfor them\r\nhistorical\r\nit wasnt\r\nfair\r\n\r\nYou 18:19\r\nhe likes to cut corners \r\n\r\nanxious\r\ncriticized\r\nburocratic\r\ntelling/ saying\r\nboring\r\nI feel bored using it\r\n\r\nYou 18:24\r\nupdated\r\nI\'m used to use\r\nperfectionist\r\nI get annoyed\r\ncharged\r\n\r\nYou 18:29\r\nnext episodes\r\nhe needs to do\r\nreliable person/worker\r\nHR\r\nhuman resources\r\n\r\nYou 18:39\r\nfield / area\r\nbranche\r\narchaic\r\noutdated\r\nexceeded\r\ncourse\r\n\r\nYou 18:46\r\nSystems Analysis and Development\r\nas mine\r\ndegree certification\r\n\r\nYou 18:52\r\ndelivery/ hand in: entregar\r\nit doesnt/ didnt work\r\nlazy\r\ntip/ suggestion\r\nmajor course\r\nstrategy\r\n\r\nprove\r\nit\'s used\r\nit\'s Worth it', 0, NULL, '2026-02-05 22:01:54', '2026-02-05 22:01:54'),
-(52, 343, 35, 'My words: ordered, confirmed, reported, rejected\r\nWell, this week I studied and worked a lot, because of and my qualification. Then, my boss ordered me to do the datas analysis of my experiments. So, yesterday I did this task and confirmed my hypothesis about chronic kidney disease about I reported on my preview research. Now I send to my boss and I hope to not rejected my datas and my ideas on the discussion about this topic.', 'Great job, Pi! ', 0, NULL, '2026-02-06 17:30:19', '2026-02-08 23:37:55'),
+(52, 343, 35, 'My words: ordered, confirmed, reported, rejected\r\nWell, this week I studied and worked a lot, because of and my qualification. Then, my boss ordered me to do the datas analysis of my experiments. So, yesterday I did this task and confirmed my hypothesis about chronic kidney disease about I reported on my preview research. Now I send to my boss and I hope to not rejected my datas and my ideas on the discussion about this topic.', 'Great job, Pi! ', 1, '2026-02-14 18:02:48', '2026-02-06 17:30:19', '2026-02-14 18:02:48'),
 (53, 519, 54, 'Homework:\r\n1)	I wake up at 9:00\r\n2)	I have coffee at 10:00 a.m.\r\n3)	I take a shower at 11:00 a.m.\r\n4)	I brush my teeth at 11:00 a.m.\r\n5)	I go to work at 6:00 a.m.\r\n6)	I have dinner at 8:00 p.m.\r\n7)	I study at 8:00 a.m.\r\n8)	I have lunch at 12 p.m.\r\n9)	I go to sleep at 11 p.m.\r\n10)	I get up at 6:00 a.m.\r\n\r\n', NULL, 0, NULL, '2026-02-07 13:23:13', '2026-02-07 13:23:13'),
 (54, 201, 26, '', 'it gives much work\r\nI got proud of\r\nshe told me\r\nshe said\r\nthat I\'ll change\r\nNicky\'s docs\r\n\r\nYou 15:09\r\nto my own house\r\n1600\r\nhe\'s out of his mind\r\nhe\'s insane\r\npack\r\npacking\r\nboxing\r\nmore expensive\r\na bit more\r\napplied\r\n\r\nYou 15:14\r\ngets right\r\nrock the boats\r\nappliences\r\nchest of drawers\r\nthere are somethings\r\nwardrobe\r\n\r\nYou 15:22\r\nwe\'re not scared/nervous\r\ni dont want\r\nin last case\r\nis the deadline\r\nghosted -desapareceu\r\n\r\nYou 15:28\r\nshopaholic\r\ndish washer\r\ndish/dishes - louça\r\nfrom tap\r\ntapped water\r\nhe gave\r\n\r\nYou 15:46\r\nfancy\r\nelegant\r\ngrapes juice\r\n\r\nYou 16:00\r\nthe house has\r\nthere is\r\nmattress', 0, NULL, '2026-02-10 19:01:03', '2026-02-10 19:01:03'),
 (55, 185, 39, '', 'in the weekend\r\nrested\r\nLet me pick/grab/take a glass of water\r\nmother\'s house\r\ncame\r\nmaster\'s thesis committee\r\nmaster\'s thesis defense\r\nwe\'re all in the same boat\r\n\r\nEliana Chubaci 11:15\r\nTiny- minusculo\r\n\r\nYou 11:29\r\ndelivery\r\n\r\nYou 11:35\r\nadministrators\r\nbusinesspeople\r\nentrepreneurs', 0, NULL, '2026-02-11 15:02:56', '2026-02-11 15:02:56'),
@@ -163,6 +163,91 @@ INSERT INTO `anotacoes_aula` (`id`, `aula_id`, `aluno_id`, `conteudo`, `comentar
 -- --------------------------------------------------------
 
 --
+-- Estrutura para tabela `anotacoes_itens`
+--
+
+CREATE TABLE `anotacoes_itens` (
+  `id` int(11) NOT NULL,
+  `anotacao_id` int(11) NOT NULL,
+  `autor` varchar(50) NOT NULL,
+  `conteudo` text NOT NULL,
+  `data_criacao` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `anotacoes_itens`
+--
+
+INSERT INTO `anotacoes_itens` (`id`, `anotacao_id`, `autor`, `conteudo`, `data_criacao`) VALUES
+(1, 1, 'aluno', 'teste', '2025-12-19 10:23:58'),
+(2, 3, 'aluno', 'fireworks\r\non the sidewalk\r\ncurb\r\nshort way\r\nshe crashed\r\nthirty-one / thirty-first\r\nmy aunt /ent/\r\n\r\n\r\n1st first\r\ntwenty-first\r\ntwenty-second\r\nthird\r\nfourth - tenth\r\nninth\r\n29 twenty-ninth\r\nfourth\r\nsixth\r\n2025\r\nnew / released\r\nfor who\r\nBruna asked\r\nall channels\r\nHistory channel\r\n\r\nsecond last\r\nreferee - juiz\r\nrefe RÍ\r\neach time - cada tempo\r\nbreaks', '2026-01-13 17:57:15'),
+(3, 4, 'aluno', 'lose Weight\r\non my cellphone\r\nend of the year\r\nHolidays\r\nreceiving visits\r\n\r\nTeacher Laura 18:11\r\nuseless\r\ndid you go to the beach?\r\ncheap\r\n\r\nTeacher Laura 18:17\r\nsea /si/ = see\r\nsave Money\r\nfor the entrance\r\ncozy\r\ncan be bought - pode ser comprada\r\ncan be sold\r\nminimum\r\nwastes-\r\n\r\nTeacher Laura 18:22\r\nthere are other wastes / it can be other wastes\r\nneeds to pass\r\nthrough\r\na test / a car test\r\nneeded to go to \r\nto fix/repair the car\r\nto pay\r\n\r\nTeacher Laura 18:27\r\naccomplish \r\nachievement \r\nfeeling- sensação\r\ndown on Earth\r\nmain - principal\r\nmain goals/ main street\r\n\r\nTeacher Laura 18:32\r\nwork for this\r\npractice/ develop/ improve\r\ndownloaded\r\nphysical job\r\njob historical\r\nstate house\r\n\r\nTeacher Laura 18:38\r\nbid - dar lance\r\nwhat helps\r\nguarantor\r\nwill be my\r\naunt /ents/\r\nchasing\r\nmy legs hurt\r\nmy legs still hurt but when I\'m stand up for long time\r\nbut that deep hurt\r\nintolerable /ɪn\'tɒlərəbəl/\r\n\r\nTeacher Laura 18:43\r\nno disposition/ no energy\r\n12\r\nin my house/ at home\r\n66\r\nheight\r\nmaximum \r\noveweight\r\nWeight scale\r\n\r\nTeacher Laura 18:54\r\nbrainwashing\r\ntour option', '2026-01-14 00:58:57'),
+(4, 10, 'aluno', 'sweating\r\nplay\r\nhis\r\nhonestly\r\ntell you\r\nsleepyover party\r\nsunbath\r\n\r\nYou 9:47\r\nthere werent\r\ntext / speech\r\nfrom the bottom\r\nStart all over:\r\nMake a fresh start:\r\nthat kids like\r\n\r\nYou 9:52\r\nthere are\r\nthat I sang all my life\r\nthis series has\r\nfrom the 80s\r\nthe kids watch with their father\r\nspoke\r\nnice/friendly / outgoing\r\nsimpatic\r\nlikable\r\n\r\nYou 10:06\r\nscheduled day\r\nI got why you didnt\r\nI understood\r\n\r\nYou 10:11\r\nchill/ calm /easygoing\r\nbrother\'s girlfriend = sister-in-law\r\nin SP \r\nreturned to\r\nI gave to\r\nring\r\nfrom all the family\r\n\r\nYou 10:20\r\ncrowded - lotado', '2026-01-16 13:43:13'),
+(5, 16, 'aluno', 'his sister\r\nrude, strict, demand\r\nto solve\r\nfuel\r\npower/ energy\r\nit will be a diferente\r\ndifferent*\r\nquit\r\nresign\r\n\r\nYou 13:38\r\nwill not = wont > não irei\r\n2005\r\n\r\nYou 13:46\r\nShe\'s very shy to speak\r\n2x = twice\r\n\r\nYou 13:57\r\nall the people', '2026-01-20 17:01:36'),
+(6, 19, 'aluno', 'onsite\r\nthere is a nice site here\r\n\r\nnearby\r\n\r\nAlice Guilhoto 8:52\r\nwe welcomed one over a main client\r\nfirst time an office\r\n\r\nYou 8:56\r\nmeet - met\r\n\r\nAlice Guilhoto 8:57\r\nat met them\r\ncoffe and water\r\nthen a gave\r\nwe had a meeting\r\n\r\nYou 8:59\r\nafter that\r\n\r\nAlice Guilhoto 8:59\r\nto discuss\r\nour going projects\r\n\r\nYou 9:00\r\nongoing - em andamento', '2026-01-21 12:03:47'),
+(7, 21, 'aluno', 'What are you going to call your invention?\r\nR: NailBot\r\n\r\nHow is it going to work?\r\nR: It is going to use sensors to detect the size and shape of the nails. You just need to place your hand inside the device, and a small, safe rotary blade is going to cut your nails automatically in seconds.\r\n\r\nWhat problem is it going to solve?\r\nR:It is going to solve two main problems: it saves time for busy people and helps people who dosent like using manual clippers.\r\n\r\nHow much is it going to cost?\r\nR: It is going to cost about R$120,00\r\n\r\nWho is going to buy it?\r\nR: Busy professionals, parents who struggle to cut their children\'s nails, and elderly people are going to buy it.', '2026-01-22 17:29:15'),
+(8, 38, 'aluno', 'Duble = duas vezes ex: 99 > duble nine \r\nbirthday = berf day \r\nLast name = Ultimo sobrenome\r\nI will be= futuro  ex: I wil be 19 march \r\nI was = passado ex: I was 2 thausand 7 \r\n Thausand= mil \r\nhusdred= cem \r\nhobby= ing ex: reanding books \r\n', '2026-01-31 14:17:14'),
+(9, 46, 'aluno', 'House = casa  lugar\r\nHome lar\r\n\r\n\r\nso so \r\nmore or less', '2026-02-04 14:49:27'),
+(10, 52, 'aluno', 'My words: ordered, confirmed, reported, rejected\r\nWell, this week I studied and worked a lot, because of and my qualification. Then, my boss ordered me to do the datas analysis of my experiments. So, yesterday I did this task and confirmed my hypothesis about chronic kidney disease about I reported on my preview research. Now I send to my boss and I hope to not rejected my datas and my ideas on the discussion about this topic.', '2026-02-14 18:02:48'),
+(11, 53, 'aluno', 'Homework:\r\n1)	I wake up at 9:00\r\n2)	I have coffee at 10:00 a.m.\r\n3)	I take a shower at 11:00 a.m.\r\n4)	I brush my teeth at 11:00 a.m.\r\n5)	I go to work at 6:00 a.m.\r\n6)	I have dinner at 8:00 p.m.\r\n7)	I study at 8:00 a.m.\r\n8)	I have lunch at 12 p.m.\r\n9)	I go to sleep at 11 p.m.\r\n10)	I get up at 6:00 a.m.\r\n\r\n', '2026-02-07 13:23:13'),
+(12, 62, 'aluno', 'put colocar\r\nput on - vestir/por\r\nput here\r\nput there please\r\nput on your shoes\r\ntake off\r\ntake off - tirar\r\nsee - ver / saw - viu\r\n\r\nlook here/ there\r\nstretch - esticar/ alongar ', '2026-02-13 23:32:05'),
+(16, 2, 'professor', 'Bru, dont forget to enjoy the holidays', '2025-12-19 18:14:46'),
+(17, 4, 'professor', 'imobiliária = real estate (not state house> sorry)', '2026-01-14 00:58:57'),
+(18, 5, 'professor', 'to compete\r\nchange\r\nchange the prices\r\nto show/ to post\r\nto sell\r\n\r\nYou 14:15\r\nstinking / stain\r\n\r\ncheaper than BR\r\n\r\npassed\r\ndid in advance\r\ncar workshop\r\n\r\nturkey', '2026-01-14 18:03:11'),
+(19, 6, 'professor', 'passion fruit\r\nis facing\r\nthe back\r\nof the builing\r\npan/ pot\r\npans\r\nowner\r\nit\'s ahead- mais pra frente\r\n\r\nYou 8:47\r\nknew\r\nlet / released\r\n\r\nYou 8:54\r\nto spend the New Year\'s Eve\r\nbet', '2026-01-15 12:03:01'),
+(20, 7, 'professor', 'https://www.speaklanguages.com/english/phrases/more-common-expressions ', '2026-01-15 17:40:42'),
+(21, 8, 'professor', 'recovered\r\nwas\r\nit was supposed to\r\npro active\r\nconfidente\r\n\r\nBruna 15:17\r\nkhan academy kids\r\n\r\nYou 15:20\r\nsutitles\r\nsubtitles\r\nspelling\r\nI can understand / recognize\r\nit\'s fresh / it\'s in my mind\r\nproxy\r\n\r\nYou 15:53\r\nhe\'s shy\r\n\r\nYou 16:01\r\ntrust confiar', '2026-01-15 19:09:37'),
+(22, 9, 'professor', 'from: de > partida > ponto de origem \r\nto: para > direção > ir para algum lugar\r\nanswer key\r\n\r\nDiego Pilatti 8:45\r\nPerfect English Grammar\r\n\r\nYou 8:52\r\ngot/had/took great grade\r\n6/7 people\r\npeople are more interested\r\n\r\nYou 8:57\r\nsummary - resumo\r\n\r\nYou 9:07\r\nI\'ll not forget\r\n\r\nYou 9:15\r\nruined/ spoiled\r\nbuoy / bu:i/\r\n\r\nwas drowning - se afogando\r\nhoover\r\nhope', '2026-01-16 12:34:15'),
+(23, 11, 'professor', 'came back home to solve the problem\r\nfast / quickly\r\nspeed - velocidade\r\nproposes\r\nmuch news\r\n\r\nYou 13:13\r\nalone\r\nhe helped me to\r\nsave Money\r\nme with the Money\r\nmy boss will give me\r\ntours\r\nconfidente\r\nconfident\r\n\r\nYou 13:19\r\nencouraged\r\nMay 1st\r\n\r\nYou 13:30\r\nhow was = como foi\r\nI was drunk/ I drank a lot\r\ncaban\r\n\r\nYou 13:36\r\nnative speakers\r\nmany people from the world \r\nmany/a lot = muitas\r\ngold opportunity\r\n\r\nlack of - falta de\r\npriorities\r\nthe after never comes', '2026-01-16 17:01:40'),
+(24, 12, 'professor', 'dubbing\r\ncop\r\n\r\nYou 15:10\r\nshowed him\r\n\r\nYou 15:23\r\nphrases\r\npra mim você voltou\r\n\r\nYou 15:36\r\nouch\r\n\r\nYou 15:46\r\nat all- sequer/ de nenhuma maneira', '2026-01-16 19:07:53'),
+(25, 13, 'professor', 'school supplies\r\nitems\r\n\r\nYou 18:19\r\nas soon as you check\r\nas lower the price will be\r\n17.000\r\n12.000\r\ndivide/split\r\nshare\r\n5km lenght\r\n\r\nYou 18:32\r\nempty / less crowded\r\nneeded to go\r\nrating\r\n\r\nYou 18:38\r\nIf I were you\r\nNew Year\'s Eve\r\nthe summer\r\n\r\nYou 18:46\r\nthere isnt parking\r\n6 classes\r\n2 classes\r\n600 6 hundred', '2026-01-19 21:55:40'),
+(26, 14, 'professor', 'to make it up > pra compensar isso\r\nchill\r\nweed\r\ntry / tried\r\ndidnt work\r\nsmell\r\n\r\nYou 20:44\r\nprohibited\r\nlegal/ is free\r\nget back = volta \r\nput off = tirar roupa\r\nfelt a little pain in my legs\r\n\r\nYou 20:51\r\npatient\r\ntied\r\n\r\nLucas 21:01\r\n991451416\r\n\r\nPietra Seibt 21:03\r\n09087424957\r\n\r\nLucas 21:03\r\n82410200\r\n\r\nPietra Seibt 21:04\r\n665\r\n\r\nYou 21:10\r\nearn', '2026-01-20 00:35:47'),
+(27, 15, 'professor', 'yesterday, we welcomed one over main clients\r\nfor a onsite visit. It was they first time at our  office. I met them at the reception and offered coffee and water.\r\nThen, a gave them a short tour around the space  in introduce then to the team.\r\nAfter that, we had a meeting in the conference room to discuss are ongoing projects.\r\nThey asked a few questions and shared positive feedback on the last delivery.\r\nLater, we had lunch together and at restaurant nearby. \r\nOverall, the visit went very well.\r\nProfessional, friendly and productive.', '2026-01-20 12:02:19'),
+(28, 17, 'professor', 'did / do / will do', '2026-01-20 18:01:11'),
+(29, 18, 'professor', 'dare\r\naddicted to\r\nfilling\r\n\r\nYou 15:16\r\nI felt very bad\r\nknees - joelhos\r\nniece\r\n30\r\nwhat will be your plans?\r\nhow will you do?\r\n\r\nYou 15:22\r\nI miss eating \r\nI\'m missing eating\r\nher house was rented\r\nshe put her house to rente\r\n\r\nYou 15:29\r\nrised/ increaed\r\ngrew\r\nincreased\r\nread / red/\r\n\r\nYou 15:35\r\ni feel useless\r\nfault\r\nguilty\r\n\r\nYou 15:41\r\ntrial', '2026-01-20 19:02:37'),
+(30, 20, 'professor', 'I\'m still organizing \r\nyet> negative\r\nat the moment\r\ncame / got\r\nI\'ve just arrived\r\nof / from the gym\r\nas I said / as I told you\r\n\r\n\r\nAs far as I\'m concerned\r\nI would argue that…\r\nNot only that, but…\r\nLet’s not forget that…\r\nNevertheless,... > contudo\r\nEven so,... > mesmo assim\r\nI strongly believe that\r\nWithout a doubt,…\r\n\r\nYou 18:29\r\nhow many stars and planets > Always plural \r\nother lives // lifes\r\nET\r\npyramids\r\nwas built - foi construída\r\ntools - ferramentas\r\nstones\r\nabove each other\r\nrestricted zone\r\n\r\nrobots\r\nthemselves\r\nall the night / all night long\r\n\r\non Earth\r\nWhat I mean\r\nbia/ biased \r\nI was 20 years old\r\npeople were happier\r\nchildhood\r\n\r\nI\'d try to live\r\ntheme /topic\r\nbia/ biased', '2026-01-21 21:56:36'),
+(31, 22, 'professor', 'https://test-english.com/grammar-points/a1/past-simple-negatives-questions/ homework', '2026-01-22 19:02:08'),
+(32, 23, 'professor', 'It\'s Queen\'s song which it\'s called\r\nwhole\r\n\r\nTathiane S 9:50\r\nwhole\r\n\r\nYou 9:50\r\n/rol/\r\n\r\nTathiane S 9:51\r\nlaughed\r\n\r\nYou 9:51\r\nlaughed /léft/\r\nlaugh\r\nsafe\r\nforecast\r\nit seems\r\nI learned\r\n\r\nTathiane S 9:55\r\nstill\r\n\r\nYou 9:55\r\nyet > negative\r\nare you still here?\r\nhave you finished the house yet?\r\ncleaning\r\nsong / music\r\nmusics > nowadays musics\r\nsongs\r\ntracks\r\n\r\nYou 10:01\r\nget down to business\r\n20 07 \r\n20 oh seven \r\n2 Thousand 7\r\nmainly - princiaplmente\r\nfar away places\r\nwe took', '2026-01-23 13:44:05'),
+(33, 24, 'professor', 'cable car\r\nthe waiting is\r\ncrowded\r\namusement park\r\nrides\r\nshe\'s afraid\r\nit will be\r\n\r\nYou 13:39\r\nLet\'s get down to business\r\n\r\nYou 13:59\r\nwho whom', '2026-01-23 17:04:28'),
+(34, 25, 'professor', 'board games\r\nbuild - construir\r\nI won\r\n\r\nYou 14:13\r\ndeck of cards\r\nluck or reversal\r\n\r\nYou 14:25\r\nwith one card\r\nfor each player\r\nforehead\r\nsecond round\r\nit\'s go on\r\nwhat you said\r\nyou lose/ get lost\r\nscrews up\r\nget screwed\r\nscroll\r\ntaught her - ensinei\r\ntaught > teach\r\n\r\nYou 14:31\r\nget sick\r\nget full - se enche\r\nachieve\r\nget\r\n\r\nYou 14:42\r\nshe doesnt work\r\ndaily routine', '2026-01-26 18:06:42'),
+(35, 26, 'professor', 'On Friday pedro and I went to the beach, on saturday in the morning pedro and I saw the sunrise after i ran and went to thhe beach why my mom and my mother in law and my father and pedro saw the guaratuba bridge the build and in the afternoon i ate a ice cream and on sunday we returned to curitiba and we got a long traffic but ok, and you teacher what did you do in your weekend?\r\n\r\nLucas 20:39\r\nwell, This was my last weekend in vacation at school, and I enjoy to rest a lot and play and watch a lot too. On sunday I went to play soccer , but the field was terrible because this I felt a litlle pain in my anckles and my knees, for my this is so sad because i like so much the team but I think i will can play more in this field\r\n\r\nYou 20:42\r\nknown\r\nit\'s known in\r\neach scoop\r\nholes\r\n\r\nYou 20:49\r\nsummarize\r\nspeech/speak/talk\r\n\r\nLucas 20:49\r\nThis weekend your boyfriend birthday 30 years, and there is a festival in your city, you enjoeyd a very delicious barbecue, and the weekend was very fun\r\n\r\nPietra 20:50\r\nwas my lucas birthday an dnow its 30 lucas family came to jundiai arrived friday night there is a festival here and saturday very nice and we made a barbecue it was pretty cool and lucas and cousin play for many times 5 or 6 hours play too much and on sunday family comeback to curitiba and clean the house and in the afternoon we went to festival again\r\n\r\nYou 20:53\r\nthere were 2\r\ntalks\r\nlectures\r\nI hope\r\ntimetable\r\n\r\nYou 21:03\r\ntwo weeks delayed\r\nI could get\r\n\r\nYou 21:13\r\nfell / hit\r\ndiscuss/argue/fight\r\n\r\nYou 21:18\r\nmain - principal\r\n\r\nYou 21:24\r\ngive in / give way\r\nsubject\r\nbury - enterrar\r\nI would be judged by\r\n\r\nYou 21:31\r\ngot on tie\r\nscored the winner goal', '2026-01-27 00:33:14'),
+(36, 27, 'professor', 'Hi \r\nI\'m having a trouble\r\nacessing the CIM plataform\r\nEvery time I try to log in\r\nI get in air message saying:\r\naccess denied.Invalid credentials\r\nI\'ve already tried resetting my password\r\nbut the issue persists.\r\nI\'m using google chrome on the windows\r\n11 laptop.\r\nThis started happening this morning\r\naround 9:00am \r\nCould you please help me check watch \r\nmight be wrong?\r\nThank you very much.', '2026-01-27 12:01:12'),
+(37, 28, 'professor', 'they do a party\r\nwent to a rest. to have lunch > ate / had lunch\r\nthere are rare cars\r\nreleased\r\nwas killed\r\nferris wheel\r\nrode - já andei\r\nride\r\n\r\nYou 13:39\r\nfreezing\r\ntranquil, easy, chill, easygoing\r\nthe view\r\nI\'m used to it\r\nnicer / more adventurous \r\ncrowd > multidão // crowded > cheio de gente\r\n\r\nYou 13:45\r\ngo on tours\r\ndays are more\r\nI will not be here\r\n\r\nYou 13:51\r\ndidnt pause\r\nbusier - mais agitado\r\nsuppliers\r\nworkers\r\nprofessionals\r\nbudget - orçamento\r\nconcreting the slab\r\n\r\nYou 13:56\r\ninterrupt / disturb/ bother\r\nworktime\r\nI\'ve already solved\r\nmove on', '2026-01-27 17:00:33'),
+(38, 29, 'professor', 'I\'m sick\r\nnot too much\r\ntoo much\r\na lot of work\r\nrecovering\r\ndidnt have\r\n\r\nYou 20:27\r\nsome things\r\n\r\nYou 20:38\r\nI\'m not in the mood\r\n\r\nYou 20:49\r\nnearby - por perto\r\nbuy - bye- by\r\nwelcomed\r\nmain client \r\nmain - principal\r\nonsite\r\nI met them\r\nmeet > met\r\n\r\nYou 20:54\r\nshort tour\r\nintroduce ... to\r\ndiscuss\r\nongoing - em andamento\r\n\r\nYou 20:59\r\nasked\r\nask/t/\r\nshared\r\npositive\r\non the last delivery', '2026-01-28 00:03:14'),
+(39, 30, 'professor', 'spent her birthday\r\nsend flowers to her\r\nwill be\r\ncalmed me\r\nmy leaving\r\nsince July\r\nneeds to be judged\r\n\r\nYou 13:39\r\nI didnt apply for it\r\nwithout the need of going to\r\npossible = possível \r\npossibility = possibilidade\r\nwe\'re late in 60 days\r\nin the previewed cost\r\n\r\nYou 13:45\r\nI have already followed\r\nI\'ve followed\r\neach brick\r\ndont lose - não perde\r\ncertain / sure\r\ngrow/rise/inscrease\r\nproperties\r\nsimilarities\r\ngoal / aim / target / objective\r\nbreak this - quebrar isso \r\nbroke this - quebrou isso\r\nachieve / conquer / realize\r\n\r\nYou 13:54\r\nclay - barro\r\nsubfloor\r\nslab - laje\r\nbefore traveling/ coming here\r\nmainly - principalmente\r\nearthwork\r\n\r\nYou 13:59\r\ndrilling - perfuração\r\nloss', '2026-01-28 17:01:21'),
+(40, 31, 'professor', 'https://test-english.com/grammar-points/a1/past-simple-regular-irregular/2/ > homework', '2026-01-28 18:16:52'),
+(41, 32, 'professor', 'lecture / talks\r\nwere kidding/joking\r\nseem\r\nseemed\r\nwhile I was there\r\nuntil I was there\r\nunderstood\r\nhow the education helps\r\nmean\r\n\r\nLucas 20:39\r\nmeanig\r\n\r\nYou 20:39\r\nmeaning\r\n\r\nYou 20:42\r\ndizzle\r\n\r\nYou 20:42\r\ndrizzle\r\n\r\nYou 20:42\r\nlight rain\r\nlighting\r\nseaside\r\nNews\r\na News\r\nhips\r\nwith it\r\n\r\nYou 20:47\r\nafter the running\r\nstretch\r\nget down to business\r\n\r\nYou 21:03\r\nchoice - escolha\r\nchoose / chose / chosen\r\n\r\nYou 21:15\r\nassign tasks: atribuir\r\n\r\nLucas 21:22\r\nLet´s stop the talks and let´s get the ball rolling\r\n\r\nPietra 21:22\r\ntoday my boss tell me the get the ball rolling on the next experiment\r\ntold me*\r\n\r\nLucas 21:24\r\nOk we now he did a mistake and the pass but let´s give soemone the benefit of the doubt this time\r\n\r\nPietra 21:24\r\nthe doctor said about the inflammation its easy and i give someone the benefit of the doubt\r\nnow I need to go the extra mile if I want to pass the next public exam\r\n\r\nLucas 21:26\r\nWe need go  the extra mile for allthings finish today.\r\n\r\nYou 21:26\r\nneed to\r\n\r\nPietra 21:27\r\nwhen I explain a concept for my students i try to hit the nail on the head in the class\r\n\r\nYou 21:27\r\nbe done / be finished\r\n\r\nLucas 21:27\r\nWe need to go the extra mile for be finished today\r\n\r\nPietra 21:28\r\ni always cry in the heat of the moment in the discussion\r\nduring the class\r\nwhen I explain a concept for my students i try to hit the nail on the head during the class\r\ni always cry in the heat of the moment during the discussion\r\n\r\nLucas 21:30\r\nMy children hit the nail on the head the name about the exercise\r\n\r\nPietra 21:30\r\nwe turned friends in our first class it was a piece of cake for me\r\n\r\nYou 21:31\r\nbecome - became\r\n\r\nLucas 21:31\r\nSorry for that in the last week I did in the heat of the moment\r\n\r\nPietra 21:31\r\nwe became friends in our first class it was a piece of cake for me', '2026-01-29 00:33:11'),
+(42, 33, 'professor', 'Subject: VPN access - access denied\r\n\r\nDear Support IT team,\r\n\r\nI\'m having a trouble with VPN access because\r\nit is saying \"Access denied\". I used the VPN normally\r\nyesterday.\r\n\r\nI use the VPN to access the client environment. \r\n\r\nI attached the screenshot with the error message.\r\n\r\nCould you might help me check my credencials?\r\n\r\nThank you,\r\nFabiane', '2026-01-29 12:02:20'),
+(43, 34, 'professor', 'Nicky> homework\r\nWrite about your weekend: put everything in the past', '2026-01-29 18:03:28'),
+(44, 35, 'professor', 'I\'m bored to stay\r\nthere was a tornado/ wind\r\nblowing\r\nunder the weather - meio doente\r\n12\r\n\r\nYou 15:13\r\nshe\'s pregnant \r\npregnancy\r\nbelly\r\ngrowing\r\nstuffed\r\nstew - estufada\r\nwill be the Godparents\r\nmad - louca \r\nson / daughter / kids=children\r\nas long as she\r\n\r\nYou 15:19\r\nbig child / she\'s 9\r\nspoiling\r\nis better to have a baby\r\ncheaper\r\n\r\nYou 15:27\r\nGoddaughter\r\n\r\nYou 15:36\r\nher husband\r\nhas\r\n3 children\r\nshe wanna get pregnant\r\n\r\nYou 15:53\r\ntheater\r\ntheatre\r\n\r\nYou 15:58\r\nthose boots there too', '2026-01-29 19:04:35'),
+(45, 36, 'professor', 'I\'m not sure\r\nwas\r\nwas 8 months ago\r\nthe tours are crowded\r\nhear me?\r\n\r\nthiago.zattoni 13:38\r\nyes\r\n\r\nYou 13:40\r\norder/sequence\r\ncheck the weather\r\nforecast\r\nhotter\r\nthese days are\r\nless crowded\r\nfrom Wed\r\non Mon, on Wed\r\nI already went\r\nthere are left\r\nleft those tours\r\nnear BC\r\nmaybe\r\n\r\nYou 13:47\r\nwith hurry\r\nconcrete\r\ninner pool\r\ninside the house\r\nisnt heated or covered\r\nwe didnt have\r\nsolve\r\nplumber\r\n\r\nYou 13:52\r\ncontracted/ hired\r\nthat I drew\r\nincompetent, inept, unqualified\r\ndidnt do the correct draw\r\nin a certain way\r\nassumed\r\nlate at night\r\nit passes/ passed\r\nin her land\r\nhavent used \r\ndidnt use\r\nat least\r\nspace/place\r\nroom\r\nturn on\r\n\r\nYou 13:59\r\nbackyard / garden\r\nwould lose\r\nI\'ll lose inside \r\nI lost inside > past\r\nduties', '2026-01-30 17:04:07'),
+(46, 37, 'professor', 'https://test-english.com/vocabulary/a2/words-with-prepositions-a2-english-vocabulary/ homework', '2026-01-30 19:03:46'),
+(47, 39, 'professor', 'went off\r\nInflatable toy: Termo geral para qualquer brinquedo inflável.\r\nBouncy castle: O clássico pula-pula inflável.\r\nBounce house / Inflatable bouncer: Termos comuns para estruturas infláveis de pular.\r\nInflatable slide: Escorregador inflável.\r\n\r\nYou 9:22\r\n2 packs\r\ntea spoon\r\n\r\nYou 9:48\r\nIf you ask me…\r\nIt seems to me that…\r\nNot only that, but...\r\nWhat’s more,...\r\n\r\nYou 9:54\r\nbeings - seres \r\nbe-ser\r\ndemons', '2026-02-02 13:00:58'),
+(48, 40, 'professor', 'will pass fast\r\nforest / woods\r\nwe were\r\nwe could climb\r\nwe were able to climb\r\neveryone have climbed\r\nthe person stays\r\ngets very tired\r\n\r\nYou 18:13\r\nuphill - subida\r\nget at the top\r\nview/ landscape\r\nwalks more slowly\r\n\r\nYou 18:19\r\nwe were able \r\nexpand / spend\r\nJog / Jogging:\r\nhe\'s younger\r\npeople that were born\r\nin\r\nthe life knowledge\r\npassed through\r\nsigns\r\n\r\nYou 18:25\r\nspecialist\r\nLeo\r\nPiscis\r\npisces*\r\nshe prefered\r\nshe will prefer a trip\r\nmake a trip = travel \r\ntrip = viagem\r\ntravel = viajar\r\nchose/ prefered\r\n\r\nYou 18:34\r\nget this day off\r\nbirthday - nascimento\r\nanniversary\r\nwe were able \r\nexpand / spend\r\ndeadline : prazo\r\n\r\nYou 18:51\r\nput together / join\r\nthese two things\r\ni was able/ we were able \r\nexpand / spend\r\nexpanded\r\nspent more time\r\n\r\nYou 18:58\r\nwill wear more relaxed/informal/casual clothes', '2026-02-02 22:02:17'),
+(49, 41, 'professor', 'long time friend\r\ncomplain\r\nbeginning of the year\r\n45 of the second half\r\nget down to business\r\n\r\nYou 19:40\r\ncharacter\r\ntook pill for my\r\ntake/took\r\n\r\nMurilo Marins - MOTIVA 20:00\r\nGiovanna Malerba Del Passo Silva\r\n\r\nYou 20:01\r\nput off/ took off\r\ntook to\r\nregristy office\r\ntook the paper to registry\r\n\r\nYou 20:31\r\nsleep\r\ntake a nap', '2026-02-02 23:32:41'),
+(50, 42, 'professor', 'Lucas, check those pronunciation \r\nofficials - əˈfɪʃəlz \r\nconfusion - kənˈfjuʒən\r\nrejected - rɪˈʤɛktɪd \r\nresist - rɪˈzɪst\r\ncheck - ʧɛk  ', '2026-02-04 18:41:12'),
+(51, 43, 'professor', 'odos os dias, fazendeiros precisam aplicar diferentes técnicas no campo.\r\nEles adicionam fertilizantes no solo e consertam maquinas quando não estão funcionando bem.\r\ndurante a época de plantio, eles semeiam as sementes e depois cultivam as culturas com cuidado.\r\n\r\nLeandro Hipolito 18:32\r\nquando as plantas crescem demais, eles aparam e removem as partes danificadas.\r\nantes da colheita, produtores geralmente tratam as plantas e protegem contra as doenças.\r\nem alguns casos, eles aplicam calcário no solo para aumentar a fertilidade do solo.\r\ndepois disso, eles rotulam os containers e repetem o processo em outras áreas.\r\n\r\nLeandro Hipolito 18:37\r\nEssas ações fazem parte da gestão diária da fazeda e ajudam aumentar a produtividade e qualidade das culturas.', '2026-02-03 21:58:01'),
+(52, 44, 'professor', 'na fazenda tem muitas culturas diferentes crescem juntas.\r\nsoja,milho e trigo são muitos comuns em grandes campos my friend\r\nfazendeiros também plantam vegetais  como: alface, espinafre,tomate e pepino.\r\n\r\nuser 18:46\r\nem menores áreas,  eles cultivam cenoura,cebola, alho e quiabo.\r\nalgumas fazendas produzem aboboras e mandiocas e leva no mercado local(feirinha)\r\ncada  planta precisa  de solo corrigido, agua e cuidado.\r\n\r\nuser 18:53\r\ndurante essa etapa, fazendeiros checam as plantas todo dia para ver se estão saudáveis.\r\nessas culturas são importante para alimentação e para a rconomia local.\r\nbons manejos ajudam os fazendeiros para obter melhores resultados  e plantas fortes.', '2026-02-03 21:58:14'),
+(53, 45, 'professor', 'sand\r\nallow\r\nallowed\r\nallow/ deny\r\nget down to business\r\n\r\nYou 20:10\r\nwindow shopping\r\n\r\nYou 20:16\r\nprocess yield\r\n\r\nMari 20:48\r\nTrouble\r\n\r\nMariele Fernandes 20:48\r\nTrouble\r\n\r\nMari 20:49\r\nAcsessing\r\n\r\nMariele Fernandes 20:49\r\nacsessing\r\n\r\nYou 20:49\r\naccessing\r\n\r\nMariele Fernandes 20:49\r\nalmost\r\naccess\r\nSRM\r\n\r\nYou 20:50\r\nCRM\r\nlog in\r\nlogin\r\n\r\nMariele Fernandes 20:54\r\nSeeing\r\n\r\nMari 20:54\r\nAir mensagem saying\r\n\r\nYou 20:54\r\nsaying\r\n\r\nMari 20:55\r\nAccess denyed\r\n\r\nYou 20:55\r\naccess denied\r\n\r\nMariele Fernandes 20:55\r\ninvalid credencials\r\n\r\nYou 20:56\r\nI\'ve already tried\r\n\r\nMariele Fernandes 20:57\r\nreseting\r\n\r\nYou 20:57\r\nresetting\r\n\r\nMariele Fernandes 20:57\r\npassword\r\n\r\nMari 20:58\r\nPassword\r\n\r\nYou 20:58\r\nbut the issue\r\npersists\r\non\r\nstarted happening\r\n\r\nMariele Fernandes 21:00\r\nhappening\r\n\r\nYou 21:02\r\nhelp me\r\nmight\r\nbe wrong\r\nwhat might be wrong\r\nmight - pode/possivelmente', '2026-02-04 00:04:34'),
+(54, 47, 'professor', 'Pi, check the pronunciation\r\nordered - confirmed \r\nreported - rejected \r\nˈɔrdərd - kənˈfɜrmd\r\nˌriˈpɔrtəd - rɪˈʤɛktɪd', '2026-02-04 18:54:02'),
+(55, 48, 'professor', 'complained\r\nsimulatrs\r\nis better than\r\n\r\nYou 8:39\r\nIf you ask me…\r\nIt seems to me that \r\nAs far as I\'m concerned\r\nLet’s not forget that\r\nIt’s also worth mentioning that\r\nrained\r\n\r\nYou 8:44\r\nthose hours/ that time\r\nDespite that\r\nEven so,\r\nWithout a doubt,… \r\nIt’s undeniable that', '2026-02-05 12:02:22'),
+(56, 49, 'professor', 'excuse\r\nto see\r\nto talk\r\nbroke up\r\nconfidence\r\nI know him for 3 years\r\nimproved / rose\r\nhe has\r\ngot better\r\nfor / since \r\nfor x years\r\nsince 2023\r\nfor almost\r\n\r\nYou 11:39\r\nspeak\r\nlaugh\r\n\r\nYou 12:15\r\nage group\r\nage range', '2026-02-05 15:31:14'),
+(57, 50, 'professor', 'uncharted\r\n\r\nYou 15:08\r\nas you choose\r\nas you make your choices\r\ndepending\r\nsafe - seguro\r\nsave\r\nsorry to interrupt\r\n\r\nYou 15:59\r\ntag\r\n\r\nBruna 16:01\r\ntadhg', '2026-02-05 19:03:54'),
+(58, 51, 'professor', 'I delayed\r\nfired\r\ntuesday\r\nthrusday\r\nwe would be fired\r\nthe owner of the company\r\nhe sent me a message and he told \r\nhe would talk to my coworker\r\n\r\nYou 18:08\r\nfarewell\r\nbefore firing him\r\nneeded to pretend\r\nthat I didnt know\r\nso far- até então\r\nlooking for/ searching\r\nthere arent people for the vacancy\r\nthey didnt choose\r\n\r\nYou 18:14\r\nneeded\r\nto be able to work\r\nfor them\r\nhistorical\r\nit wasnt\r\nfair\r\n\r\nYou 18:19\r\nhe likes to cut corners \r\n\r\nanxious\r\ncriticized\r\nburocratic\r\ntelling/ saying\r\nboring\r\nI feel bored using it\r\n\r\nYou 18:24\r\nupdated\r\nI\'m used to use\r\nperfectionist\r\nI get annoyed\r\ncharged\r\n\r\nYou 18:29\r\nnext episodes\r\nhe needs to do\r\nreliable person/worker\r\nHR\r\nhuman resources\r\n\r\nYou 18:39\r\nfield / area\r\nbranche\r\narchaic\r\noutdated\r\nexceeded\r\ncourse\r\n\r\nYou 18:46\r\nSystems Analysis and Development\r\nas mine\r\ndegree certification\r\n\r\nYou 18:52\r\ndelivery/ hand in: entregar\r\nit doesnt/ didnt work\r\nlazy\r\ntip/ suggestion\r\nmajor course\r\nstrategy\r\n\r\nprove\r\nit\'s used\r\nit\'s Worth it', '2026-02-05 22:01:54'),
+(59, 52, 'professor', 'Great job, Pi! ', '2026-02-14 18:02:48'),
+(60, 54, 'professor', 'it gives much work\r\nI got proud of\r\nshe told me\r\nshe said\r\nthat I\'ll change\r\nNicky\'s docs\r\n\r\nYou 15:09\r\nto my own house\r\n1600\r\nhe\'s out of his mind\r\nhe\'s insane\r\npack\r\npacking\r\nboxing\r\nmore expensive\r\na bit more\r\napplied\r\n\r\nYou 15:14\r\ngets right\r\nrock the boats\r\nappliences\r\nchest of drawers\r\nthere are somethings\r\nwardrobe\r\n\r\nYou 15:22\r\nwe\'re not scared/nervous\r\ni dont want\r\nin last case\r\nis the deadline\r\nghosted -desapareceu\r\n\r\nYou 15:28\r\nshopaholic\r\ndish washer\r\ndish/dishes - louça\r\nfrom tap\r\ntapped water\r\nhe gave\r\n\r\nYou 15:46\r\nfancy\r\nelegant\r\ngrapes juice\r\n\r\nYou 16:00\r\nthe house has\r\nthere is\r\nmattress', '2026-02-10 19:01:03'),
+(61, 55, 'professor', 'in the weekend\r\nrested\r\nLet me pick/grab/take a glass of water\r\nmother\'s house\r\ncame\r\nmaster\'s thesis committee\r\nmaster\'s thesis defense\r\nwe\'re all in the same boat\r\n\r\nEliana Chubaci 11:15\r\nTiny- minusculo\r\n\r\nYou 11:29\r\ndelivery\r\n\r\nYou 11:35\r\nadministrators\r\nbusinesspeople\r\nentrepreneurs', '2026-02-11 15:02:56'),
+(62, 56, 'professor', 'in the weekend\r\nrested\r\nLet me pick/grab/take a glass of water\r\nmother\'s house\r\ncame\r\nmaster\'s thesis committee\r\nmaster\'s thesis defense\r\nwe\'re all in the same boat\r\n\r\nEliana Chubaci 11:15\r\nTiny- minusculo\r\n\r\nYou 11:29\r\ndelivery\r\n\r\nYou 11:35\r\nadministrators\r\nbusinesspeople\r\nentrepreneurs', '2026-02-11 15:03:05'),
+(63, 57, 'professor', 'I had\r\ncried\r\nget used\r\nshy\r\nthat - que\r\naway from\r\n\r\nYou 13:38\r\nwho cried more\r\nduring/in the break\r\ncomfort\r\nthe nearest\r\n\r\nYou 13:44\r\nrested\r\nfor this reason\r\ntaht\'s why\r\nbecause of it\r\nI liked\r\nhottest day in the week\r\nget a shadow\r\nyou got cold\r\naltitude\r\nslab\r\n\r\nYou 13:49\r\nseemed\r\nbig/bigger / large\r\ngarage/ machine house/\r\nperception\r\ntook 3 years\r\nto be finished - pra ser terminado\r\ntook my family there / to know there\r\ndiscussed\r\nmade the best\r\nis getting\r\nis becoming\r\nshe\'s calling, I need to answer\r\n\r\nYou 13:54\r\nare seeing\r\nall Worth it\r\nworth - valer\r\nowe - dever\r\nwould be - seria \r\nwill be - será\r\nmiddle-size', '2026-02-11 16:58:41'),
+(64, 58, 'professor', 'I was waiting\r\nalmost fell asleep\r\nfall asleep\r\nwe got the house\r\nin the bags\r\ndaily clothes\r\ntalked to Nicky - conversei com ele\r\n\r\nYou 15:12\r\nhis mother\r\nwardrobe\r\nwhen it got it\r\nreal estate\r\nestate agency\r\ncalled me to say\r\nin those sit\r\nthat we see\r\nthat we\'re\r\ngrowing\r\nimproving\r\npersonal growth\r\n\r\nYou 15:17\r\nI\'m not stressed\r\nhit the sack\r\nsleep heavy\r\nI would be happier \r\nif it was my own house\r\ndont give problems\r\nowner\r\nextend the contract\r\n\r\nYou 15:23\r\n4 streets away\r\nI didnt take/get\r\nit was raining\r\n\r\nYou 15:31\r\nit succeeded', '2026-02-12 19:03:13'),
+(65, 59, 'professor', 'migraine\r\nsome times\r\nI get/am sick too\r\nget/catch\r\nexit\r\n\r\nYou 18:07\r\nschedule/ plan \r\nI get\r\nafraid\r\nhe saw a news\r\nwastewater system\r\nis throw\r\nin the water of the sea\r\nin the sea water\r\n\r\nYou 18:14\r\nfarther\r\ntake sunbath\r\nsunscreen / sunblock\r\nskin - pele\r\nlow season\r\n\r\nYou 18:20\r\ntwenty-third/three\r\nspend ... days\r\nreally enjoy\r\ninappropriate water\r\ntouching, hitting\r\njellyfish - água viva\r\n\r\nYou 18:26\r\nI have fear \r\nI\'m afraid\r\nof\r\nthere is a lot of water\r\nneeds\r\ndo their needs\r\nmuch worse\r\n\r\nYou 18:31\r\nget into\r\ncousin\r\nher wife\r\ncouple\r\n\r\nYou 18:41\r\nshow off \r\ncompetences\r\nwants to charge more\r\nwants to demand more\r\nconflict\r\namong them\r\nbetween them\r\n\r\nYou 18:50\r\naffected\r\nhe\'s suing\r\nmad\r\nlabor market\r\ncompetitors\r\n\r\nYou 18:57\r\nidentified myself', '2026-02-12 22:01:25'),
+(66, 60, 'professor', 'didnt take a toy\r\ndidnt want to take\r\nintroduced/ integrated\r\nlet\r\ngot off\r\nreplaced by\r\n\r\nYou 13:41\r\ngetting in order\r\nwill get in order\r\nthings are getting order\r\nmake it up\r\nagree/ deal\r\nin advance\r\n\r\nYou 13:46\r\nschedule\r\nI had\r\nit was ok \r\nI had excuse to speed up\r\nlunchbreak / lunchtime\r\nI didnt have\r\ndrink a glass/cup of milk\r\n\r\nYou 13:52\r\nI police more\r\n\'big deal\'\r\nI went to a very good restaurant\r\nfine dining / high gastronomy\r\ncost-benefit\r\nfor her\r\nI think/ I guess/ I Suppose\r\nlobster - lagosta \r\nsea food\r\n\r\nYou 13:58\r\nonce per year - 1x por ano\r\n1x once \r\n2x twice', '2026-02-13 17:00:23'),
+(67, 61, 'professor', 'Manufacturing Engineering // Production Engineering\r\n\r\nnice Holiday', '2026-02-13 22:04:44'),
+(68, 63, 'professor', 'like that ', '2026-02-14 14:46:20');
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura para tabela `anotacoes_visualizacoes`
 --
 
@@ -172,6 +257,13 @@ CREATE TABLE `anotacoes_visualizacoes` (
   `professor_id` int(11) NOT NULL,
   `data_visualizacao` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `anotacoes_visualizacoes`
+--
+
+INSERT INTO `anotacoes_visualizacoes` (`id`, `anotacao_id`, `professor_id`, `data_visualizacao`) VALUES
+(1, 52, 22, '2026-02-14 18:02:48');
 
 -- --------------------------------------------------------
 
@@ -687,7 +779,8 @@ INSERT INTO `aulas` (`id`, `titulo_aula`, `descricao`, `data_aula`, `horario`, `
 (539, 'Aulas Boss Ladies Club', '', '2026-03-31', '20:00:00', 24, 22, 1, 'tuesday'),
 (540, 'Aulas Boss Ladies Club', '', '2026-04-07', '20:00:00', 24, 22, 1, 'tuesday'),
 (541, 'Aula Ana', 'https://www.youtube.com/watch?v=X1FAm22hKe0 // https://docs.google.com/document/d/1oUWaBvP7EiOP_eI33HYD3kZqVe7Wtd7URuNTQzdVVQE/edit?usp=drive_link', '2026-02-14', '10:00:00', 38, 22, 0, NULL),
-(542, 'Aula Emily', '', '2026-02-13', '17:00:00', 32, 22, 0, NULL);
+(542, 'Aula Emily', '', '2026-02-13', '17:00:00', 32, 22, 0, NULL),
+(544, 'AULA TESTE HORÁRIO', '', '2026-02-16', '12:00:00', 11, 22, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -982,6 +1075,7 @@ CREATE TABLE `conteudos` (
   `id` int(11) NOT NULL,
   `professor_id` int(11) NOT NULL,
   `parent_id` int(11) DEFAULT NULL,
+  `grupo_id` int(11) DEFAULT NULL,
   `titulo` varchar(255) NOT NULL,
   `descricao` text DEFAULT NULL,
   `tipo_arquivo` varchar(50) NOT NULL,
@@ -994,76 +1088,93 @@ CREATE TABLE `conteudos` (
 -- Despejando dados para a tabela `conteudos`
 --
 
-INSERT INTO `conteudos` (`id`, `professor_id`, `parent_id`, `titulo`, `descricao`, `tipo_arquivo`, `caminho_arquivo`, `data_upload`, `eh_subpasta`) VALUES
-(65, 22, NULL, 'Travel', '', 'TEMA', '', '2025-10-20 01:26:50', 0),
-(67, 22, 65, 'Describing cities - level B', 'Describing cities - level B (Link: www.esolcourses.com)', 'URL', 'https://www.esolcourses.com/content/exercises/grammar/adjectives/places/words-for-describing-places.html', '2025-10-20 01:41:42', 0),
-(68, 22, 65, 'Intermediário', '', 'SUBPASTA', '', '2025-10-20 01:44:56', 1),
-(69, 22, 68, 'Top 10 Most Beautiful City to live in USA', 'Top 10 Most Beautiful City to live in USA (Link: www.youtube.com)', 'URL', 'https://www.youtube.com/watch?v=Zu_S2wLqMXM', '2025-10-20 01:45:49', 0),
-(70, 22, NULL, 'Welcome Class', '', 'TEMA', '', '2025-11-29 01:24:08', 0),
-(72, 22, 70, 'Apresentação Risenglish', 'Apresentação Risenglish (Arquivo: Presentation Rise English .pdf)', 'application/pdf', 'uploads/conteudos/1764542381_692cc7ada4f30.pdf', '2025-11-30 22:39:41', 0),
-(73, 22, NULL, 'Aula experimental', '', 'TEMA', '', '2026-01-05 18:48:30', 0),
-(74, 22, 73, 'Interview Test', 'Interview Test (Arquivo: Interview test .pdf)', 'application/pdf', 'uploads/conteudos/1767638958_695c07ae1f70e.pdf', '2026-01-05 18:49:18', 0),
-(75, 22, NULL, '1st classes', '', 'TEMA', '', '2026-01-12 23:23:01', 0),
-(77, 22, NULL, 'Tongue twisters', '', 'TEMA', '', '2026-01-13 00:59:39', 0),
-(78, 22, 77, 'Tongue twisters', 'Tongue twisters (Arquivo: TONGUE TWISTERS.pdf)', 'application/pdf', 'uploads/conteudos/1768265997_6965990d81faf.pdf', '2026-01-13 00:59:57', 0),
-(79, 22, 75, 'Bucket list', 'Bucket list (Arquivo: My bucket list.pdf)', 'application/pdf', 'uploads/conteudos/1768267653_69659f85300c4.pdf', '2026-01-13 01:27:33', 0),
-(80, 22, 75, 'Reading bucket meaning', 'Reading bucket meaning (Link: med.stanford.edu)', 'URL', 'https://med.stanford.edu/letter/bucket-list/what-is-bucket-list.html', '2026-01-14 18:05:17', 0),
-(81, 22, 75, 'The bucket list trailer', 'The bucket list trailer (Link: www.youtube.com)', 'URL', 'https://www.youtube.com/watch?v=UvdTpywTmQg', '2026-01-14 18:05:34', 0),
-(82, 22, 75, 'Bucket list ideas', 'Bucket list ideas (Link: bucketlistjourney.net)', 'URL', 'https://bucketlistjourney.net/my-bucket-list/', '2026-01-15 00:43:12', 0),
-(84, 22, NULL, 'Communication', '', 'TEMA', '', '2026-01-15 20:56:41', 0),
-(85, 22, 84, 'Communication sentences', 'Communication sentences (Arquivo: Communication.pdf)', 'application/pdf', 'uploads/conteudos/1768510616_69695498a442a.pdf', '2026-01-15 20:56:56', 0),
-(86, 22, NULL, 'Numbers', '', 'TEMA', '', '2026-01-16 20:53:18', 0),
-(88, 22, NULL, 'Pronouns', '', 'TEMA', '', '2026-01-16 20:54:32', 0),
-(89, 22, NULL, 'Conversation', '', 'TEMA', '', '2026-01-16 20:54:41', 0),
-(92, 22, 75, 'Conversação After Holidays', 'Conversação After Holidays (Arquivo: After holidays conversation.pdf)', 'application/pdf', 'uploads/conteudos/1768819998_696e0d1eb05d4.pdf', '2026-01-19 10:53:18', 0),
-(94, 22, 88, 'Pronomes básicos', 'Pronomes básicos (Arquivo: Pronouns.pdf)', 'application/pdf', 'uploads/conteudos/1768820056_696e0d58837e4.pdf', '2026-01-19 10:54:16', 0),
-(95, 22, 89, 'Conversation - general', 'Conversation - general (Arquivo: Conversation Rise English materiais.pdf)', 'application/pdf', 'uploads/conteudos/1768820089_696e0d79ad772.pdf', '2026-01-19 10:54:49', 0),
-(96, 22, NULL, 'Possessive \'s', '', 'TEMA', '', '2026-01-19 10:55:08', 0),
-(97, 22, 96, 'Possessive \'s', 'Possessive \'s (Arquivo: Possessive \'s.pdf)', 'application/pdf', 'uploads/conteudos/1768820124_696e0d9cda406.pdf', '2026-01-19 10:55:24', 0),
-(98, 22, NULL, 'Idioms', '', 'TEMA', '', '2026-01-19 22:15:00', 0),
-(99, 22, 98, 'Idioms - general', 'Idioms - general (Arquivo: Idioms - general.pdf)', 'application/pdf', 'uploads/conteudos/1768861020_696ead5c4f6d8.pdf', '2026-01-19 22:17:00', 0),
-(100, 22, 98, 'Idioms website', 'Idioms website (Link: www.espressoenglish.net)', 'URL', 'https://www.espressoenglish.net/100-idioms-meanings-examples/', '2026-01-20 01:58:13', 0),
-(101, 22, NULL, 'Verbs', '', 'TEMA', '', '2026-01-20 20:34:36', 0),
-(103, 22, NULL, 'Conjunctions', '', 'TEMA', '', '2026-01-20 20:35:34', 0),
-(104, 22, 103, 'Basic Conjunctions', 'Basic Conjunctions (Arquivo: Conjunctions.pdf)', 'application/pdf', 'uploads/conteudos/1768941354_696fe72a01479.pdf', '2026-01-20 20:35:54', 0),
-(105, 22, NULL, 'Speech - My Present Routine', '', 'TEMA', '', '2026-01-20 20:53:44', 0),
-(107, 22, NULL, 'Speech - Myself', '', 'TEMA', '', '2026-01-23 01:31:11', 0),
-(110, 22, 103, 'Conjunctions: and, but, or, so, because', 'Conjunctions: and, but, or, so, because (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/a1/conjunctions_and-but-or-so-because/', '2026-01-23 01:35:22', 0),
-(111, 22, 103, 'However, although, because, so, and time connectors', 'However, although, because, so, and time connectors (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/a2/however-although-time-connectors/', '2026-01-23 01:35:45', 0),
-(112, 22, NULL, 'Introduce yourself', '', 'TEMA', '', '2026-01-29 15:33:19', 0),
-(113, 22, 112, 'How to introduce yourself - business interview', 'How to introduce yourself - business interview (Arquivo: How to introduce yourself.pdf)', 'application/pdf', 'uploads/conteudos/1769700825_697b7dd9562f9.pdf', '2026-01-29 15:33:45', 0),
-(115, 22, 107, 'Myself - basic', 'Myself - basic (Arquivo: Myself Speech.pdf)', 'application/pdf', 'uploads/conteudos/1769824071_697d5f4760494.pdf', '2026-01-31 01:47:51', 0),
-(116, 22, NULL, 'Agribusiness', '', 'TEMA', '', '2026-02-03 19:33:21', 0),
-(117, 22, 116, 'Agribusiness vocabulary - basic', 'Agribusiness vocabulary - basic (Arquivo: Agribusiness vocabulary.pdf)', 'application/pdf', 'uploads/conteudos/1770147225_69824d99bdcb7.pdf', '2026-02-03 19:33:45', 0),
-(118, 22, NULL, 'Speech - My past', '', 'TEMA', '', '2026-02-04 00:53:15', 0),
-(119, 22, 118, 'Lista dos verbos irregulares', 'Lista dos verbos irregulares (Arquivo: lista de verbos irregulares.pdf)', 'application/pdf', 'uploads/conteudos/1770166414_6982988edfa7e.pdf', '2026-02-04 00:53:34', 0),
-(120, 22, NULL, 'Speech - My City', '', 'TEMA', '', '2026-02-04 00:53:59', 0),
-(121, 22, 120, 'My city - basic', 'My city - basic (Arquivo: My city.pdf)', 'application/pdf', 'uploads/conteudos/1770166627_69829963a13a6.pdf', '2026-02-04 00:57:07', 0),
-(123, 22, 86, 'Numbers', 'Numbers (Arquivo: Numbers.pdf)', 'application/pdf', 'uploads/conteudos/1770167422_69829c7eeb868.pdf', '2026-02-04 01:10:22', 0),
-(124, 22, 86, 'Large numbers', 'Large numbers (Link: englishlessonsbrighton.co.uk)', 'URL', 'https://englishlessonsbrighton.co.uk/saying-large-numbers-english/', '2026-02-04 01:10:58', 0),
-(125, 22, NULL, 'Structure', '', 'TEMA', '', '2026-02-04 01:17:45', 0),
-(126, 22, 125, 'Estrutura básica dos tempos verbais', 'Estrutura básica dos tempos verbais (Arquivo: Structure.pdf)', 'application/pdf', 'uploads/conteudos/1770167883_69829e4bda015.pdf', '2026-02-04 01:18:03', 0),
-(127, 22, NULL, 'Modal verbs', '', 'TEMA', '', '2026-02-04 01:25:02', 0),
-(129, 22, 118, 'Pronúncia -ed dos verbos', 'Pronúncia -ed dos verbos (Link: www.englishclub.com)', 'URL', 'https://www.englishclub.com/pronunciation/-ed.php', '2026-02-09 01:08:07', 0),
-(130, 22, 127, 'Modal verbs - basic', 'Modal verbs - basic (Arquivo: Modal Verbs.pdf)', 'application/pdf', 'uploads/conteudos/1770600399_698937cf86c83.pdf', '2026-02-09 01:26:39', 0),
-(131, 22, 127, 'Have to, don’t have to, must, mustn’t', 'Have to, don’t have to, must, mustn’t (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/a2/have-to-dont-have-to-must-mustnt/', '2026-02-09 01:27:31', 0),
-(132, 22, 127, 'Should, shouldn’t', 'Should, shouldn’t (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/a2/should-shouldnt/', '2026-02-09 01:27:52', 0),
-(133, 22, 127, 'Modal verbs of deduction: Must, may, might, could, can’t', 'Modal verbs of deduction: Must, may, might, could, can’t (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/b1/modal-verbs-of-deduction/', '2026-02-09 01:28:26', 0),
-(135, 22, NULL, 'WH words', '', 'TEMA', '', '2026-02-09 01:33:30', 0),
-(136, 22, 135, 'WH words', 'WH words (Arquivo: WH questions.pdf)', 'application/pdf', 'uploads/conteudos/1770600831_6989397fa9387.pdf', '2026-02-09 01:33:51', 0),
-(137, 22, NULL, 'Quantifiers', '', 'TEMA', '', '2026-02-09 01:36:13', 0),
-(138, 22, 137, 'Quantifiers', 'Quantifiers (Arquivo: Quantifiers.pdf)', 'application/pdf', 'uploads/conteudos/1770600992_69893a2089301.pdf', '2026-02-09 01:36:32', 0),
-(139, 22, 137, 'Much, many, little, few, some, any', 'Much, many, little, few, some, any (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/a2/much-many-little-few-some-any/', '2026-02-09 01:37:12', 0),
-(140, 22, 137, 'Grammar chart', 'Grammar chart (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/b1/much-many-lot-little-no/', '2026-02-09 01:37:45', 0),
-(141, 22, 101, 'Common Verbs', 'Common Verbs (Arquivo: Verbs.pdf)', 'application/pdf', 'uploads/conteudos/1770601824_69893d60f1f60.pdf', '2026-02-09 01:50:24', 0),
-(142, 22, 101, 'Daily routine', 'Daily routine (Link: test-english.com)', 'URL', 'https://test-english.com/vocabulary/a1/daily-routines-a1-english-vocabulary/', '2026-02-09 01:50:51', 0),
-(143, 22, 101, 'Common phrasal verbs', 'Common phrasal verbs (Link: test-english.com)', 'URL', 'https://test-english.com/vocabulary/a2/common-phrasal-verbs-a2-english-vocabulary/', '2026-02-09 01:51:33', 0),
-(144, 22, NULL, 'Speech - Business', '', 'TEMA', '', '2026-02-09 01:53:40', 0),
-(145, 22, 144, 'Business - basic', 'Business - basic (Arquivo: Business speech.pdf)', 'application/pdf', 'uploads/conteudos/1770602038_69893e3656b0d.pdf', '2026-02-09 01:53:58', 0),
-(146, 22, NULL, 'Speech - My House', '', 'TEMA', '', '2026-02-09 01:55:26', 0),
-(147, 22, 146, 'My house', 'My house (Arquivo: My house speech.pdf)', 'application/pdf', 'uploads/conteudos/1770602138_69893e9adce0f.pdf', '2026-02-09 01:55:38', 0),
-(148, 22, 146, 'The House: Rooms, Parts, and Things', 'The House: Rooms, Parts, and Things (Link: test-english.com)', 'URL', 'https://test-english.com/vocabulary/a1/the-house-rooms-parts-and-things-a1-english-vocabulary/', '2026-02-09 01:56:08', 0),
-(149, 22, 105, 'Present - 1st person', 'Present - 1st person (Arquivo: Present speech - 1st person.pdf)', 'application/pdf', 'uploads/conteudos/1770665392_698a35b06ddb8.pdf', '2026-02-09 19:29:52', 0);
+INSERT INTO `conteudos` (`id`, `professor_id`, `parent_id`, `grupo_id`, `titulo`, `descricao`, `tipo_arquivo`, `caminho_arquivo`, `data_upload`, `eh_subpasta`) VALUES
+(65, 22, NULL, NULL, 'Travel', '', 'TEMA', '', '2025-10-20 01:26:50', 0),
+(67, 22, 65, NULL, 'Describing cities - level B', 'Describing cities - level B (Link: www.esolcourses.com)', 'URL', 'https://www.esolcourses.com/content/exercises/grammar/adjectives/places/words-for-describing-places.html', '2025-10-20 01:41:42', 0),
+(68, 22, 65, NULL, 'Intermediário', '', 'SUBPASTA', '', '2025-10-20 01:44:56', 1),
+(69, 22, 68, NULL, 'Top 10 Most Beautiful City to live in USA', 'Top 10 Most Beautiful City to live in USA (Link: www.youtube.com)', 'URL', 'https://www.youtube.com/watch?v=Zu_S2wLqMXM', '2025-10-20 01:45:49', 0),
+(70, 22, NULL, NULL, 'Welcome Class', '', 'TEMA', '', '2025-11-29 01:24:08', 0),
+(72, 22, 70, NULL, 'Apresentação Risenglish', 'Apresentação Risenglish (Arquivo: Presentation Rise English .pdf)', 'application/pdf', 'uploads/conteudos/1764542381_692cc7ada4f30.pdf', '2025-11-30 22:39:41', 0),
+(73, 22, NULL, NULL, 'Aula experimental', '', 'TEMA', '', '2026-01-05 18:48:30', 0),
+(74, 22, 73, NULL, 'Interview Test', 'Interview Test (Arquivo: Interview test .pdf)', 'application/pdf', 'uploads/conteudos/1767638958_695c07ae1f70e.pdf', '2026-01-05 18:49:18', 0),
+(75, 22, NULL, NULL, '1st classes', '', 'TEMA', '', '2026-01-12 23:23:01', 0),
+(77, 22, NULL, NULL, 'Tongue twisters', '', 'TEMA', '', '2026-01-13 00:59:39', 0),
+(78, 22, 77, NULL, 'Tongue twisters', 'Tongue twisters (Arquivo: TONGUE TWISTERS.pdf)', 'application/pdf', 'uploads/conteudos/1768265997_6965990d81faf.pdf', '2026-01-13 00:59:57', 0),
+(79, 22, 75, NULL, 'Bucket list', 'Bucket list (Arquivo: My bucket list.pdf)', 'application/pdf', 'uploads/conteudos/1768267653_69659f85300c4.pdf', '2026-01-13 01:27:33', 0),
+(80, 22, 75, NULL, 'Reading bucket meaning', 'Reading bucket meaning (Link: med.stanford.edu)', 'URL', 'https://med.stanford.edu/letter/bucket-list/what-is-bucket-list.html', '2026-01-14 18:05:17', 0),
+(81, 22, 75, NULL, 'The bucket list trailer', 'The bucket list trailer (Link: www.youtube.com)', 'URL', 'https://www.youtube.com/watch?v=UvdTpywTmQg', '2026-01-14 18:05:34', 0),
+(82, 22, 75, NULL, 'Bucket list ideas', 'Bucket list ideas (Link: bucketlistjourney.net)', 'URL', 'https://bucketlistjourney.net/my-bucket-list/', '2026-01-15 00:43:12', 0),
+(84, 22, NULL, NULL, 'Communication', '', 'TEMA', '', '2026-01-15 20:56:41', 0),
+(85, 22, 84, NULL, 'Communication sentences', 'Communication sentences (Arquivo: Communication.pdf)', 'application/pdf', 'uploads/conteudos/1768510616_69695498a442a.pdf', '2026-01-15 20:56:56', 0),
+(86, 22, NULL, NULL, 'Numbers', '', 'TEMA', '', '2026-01-16 20:53:18', 0),
+(88, 22, NULL, NULL, 'Pronouns', '', 'TEMA', '', '2026-01-16 20:54:32', 0),
+(89, 22, NULL, NULL, 'Conversation', '', 'TEMA', '', '2026-01-16 20:54:41', 0),
+(92, 22, 75, NULL, 'Conversação After Holidays', 'Conversação After Holidays (Arquivo: After holidays conversation.pdf)', 'application/pdf', 'uploads/conteudos/1768819998_696e0d1eb05d4.pdf', '2026-01-19 10:53:18', 0),
+(94, 22, 88, NULL, 'Pronomes básicos', 'Pronomes básicos (Arquivo: Pronouns.pdf)', 'application/pdf', 'uploads/conteudos/1768820056_696e0d58837e4.pdf', '2026-01-19 10:54:16', 0),
+(95, 22, 89, NULL, 'Conversation - general', 'Conversation - general (Arquivo: Conversation Rise English materiais.pdf)', 'application/pdf', 'uploads/conteudos/1768820089_696e0d79ad772.pdf', '2026-01-19 10:54:49', 0),
+(96, 22, NULL, NULL, 'Possessive \'s', '', 'TEMA', '', '2026-01-19 10:55:08', 0),
+(97, 22, 96, NULL, 'Possessive \'s', 'Possessive \'s (Arquivo: Possessive \'s.pdf)', 'application/pdf', 'uploads/conteudos/1768820124_696e0d9cda406.pdf', '2026-01-19 10:55:24', 0),
+(98, 22, NULL, NULL, 'Idioms', '', 'TEMA', '', '2026-01-19 22:15:00', 0),
+(99, 22, 98, NULL, 'Idioms - general', 'Idioms - general (Arquivo: Idioms - general.pdf)', 'application/pdf', 'uploads/conteudos/1768861020_696ead5c4f6d8.pdf', '2026-01-19 22:17:00', 0),
+(100, 22, 98, NULL, 'Idioms website', 'Idioms website (Link: www.espressoenglish.net)', 'URL', 'https://www.espressoenglish.net/100-idioms-meanings-examples/', '2026-01-20 01:58:13', 0),
+(101, 22, NULL, NULL, 'Verbs', '', 'TEMA', '', '2026-01-20 20:34:36', 0),
+(103, 22, NULL, NULL, 'Conjunctions', '', 'TEMA', '', '2026-01-20 20:35:34', 0),
+(104, 22, 103, NULL, 'Basic Conjunctions', 'Basic Conjunctions (Arquivo: Conjunctions.pdf)', 'application/pdf', 'uploads/conteudos/1768941354_696fe72a01479.pdf', '2026-01-20 20:35:54', 0),
+(105, 22, NULL, NULL, 'Speech - My Present Routine', '', 'TEMA', '', '2026-01-20 20:53:44', 0),
+(107, 22, NULL, NULL, 'Speech - Myself', '', 'TEMA', '', '2026-01-23 01:31:11', 0),
+(110, 22, 103, NULL, 'Conjunctions: and, but, or, so, because', 'Conjunctions: and, but, or, so, because (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/a1/conjunctions_and-but-or-so-because/', '2026-01-23 01:35:22', 0),
+(111, 22, 103, NULL, 'However, although, because, so, and time connectors', 'However, although, because, so, and time connectors (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/a2/however-although-time-connectors/', '2026-01-23 01:35:45', 0),
+(112, 22, NULL, NULL, 'Introduce yourself', '', 'TEMA', '', '2026-01-29 15:33:19', 0),
+(113, 22, 112, NULL, 'How to introduce yourself - business interview', 'How to introduce yourself - business interview (Arquivo: How to introduce yourself.pdf)', 'application/pdf', 'uploads/conteudos/1769700825_697b7dd9562f9.pdf', '2026-01-29 15:33:45', 0),
+(115, 22, 107, NULL, 'Myself - basic', 'Myself - basic (Arquivo: Myself Speech.pdf)', 'application/pdf', 'uploads/conteudos/1769824071_697d5f4760494.pdf', '2026-01-31 01:47:51', 0),
+(116, 22, NULL, NULL, 'Agribusiness', '', 'TEMA', '', '2026-02-03 19:33:21', 0),
+(117, 22, 116, NULL, 'Agribusiness vocabulary - basic', 'Agribusiness vocabulary - basic (Arquivo: Agribusiness vocabulary.pdf)', 'application/pdf', 'uploads/conteudos/1770147225_69824d99bdcb7.pdf', '2026-02-03 19:33:45', 0),
+(118, 22, NULL, NULL, 'Speech - My past', '', 'TEMA', '', '2026-02-04 00:53:15', 0),
+(119, 22, 118, NULL, 'Lista dos verbos irregulares', 'Lista dos verbos irregulares (Arquivo: lista de verbos irregulares.pdf)', 'application/pdf', 'uploads/conteudos/1770166414_6982988edfa7e.pdf', '2026-02-04 00:53:34', 0),
+(120, 22, NULL, NULL, 'Speech - My City', '', 'TEMA', '', '2026-02-04 00:53:59', 0),
+(121, 22, 120, NULL, 'My city - basic', 'My city - basic (Arquivo: My city.pdf)', 'application/pdf', 'uploads/conteudos/1770166627_69829963a13a6.pdf', '2026-02-04 00:57:07', 0),
+(123, 22, 86, NULL, 'Numbers', 'Numbers (Arquivo: Numbers.pdf)', 'application/pdf', 'uploads/conteudos/1770167422_69829c7eeb868.pdf', '2026-02-04 01:10:22', 0),
+(124, 22, 86, NULL, 'Large numbers', 'Large numbers (Link: englishlessonsbrighton.co.uk)', 'URL', 'https://englishlessonsbrighton.co.uk/saying-large-numbers-english/', '2026-02-04 01:10:58', 0),
+(125, 22, NULL, NULL, 'Structure', '', 'TEMA', '', '2026-02-04 01:17:45', 0),
+(126, 22, 125, NULL, 'Estrutura básica dos tempos verbais', 'Estrutura básica dos tempos verbais (Arquivo: Structure.pdf)', 'application/pdf', 'uploads/conteudos/1770167883_69829e4bda015.pdf', '2026-02-04 01:18:03', 0),
+(127, 22, NULL, NULL, 'Modal verbs', '', 'TEMA', '', '2026-02-04 01:25:02', 0),
+(129, 22, 118, NULL, 'Pronúncia -ed dos verbos', 'Pronúncia -ed dos verbos (Link: www.englishclub.com)', 'URL', 'https://www.englishclub.com/pronunciation/-ed.php', '2026-02-09 01:08:07', 0),
+(130, 22, 127, NULL, 'Modal verbs - basic', 'Modal verbs - basic (Arquivo: Modal Verbs.pdf)', 'application/pdf', 'uploads/conteudos/1770600399_698937cf86c83.pdf', '2026-02-09 01:26:39', 0),
+(131, 22, 127, NULL, 'Have to, don’t have to, must, mustn’t', 'Have to, don’t have to, must, mustn’t (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/a2/have-to-dont-have-to-must-mustnt/', '2026-02-09 01:27:31', 0),
+(132, 22, 127, NULL, 'Should, shouldn’t', 'Should, shouldn’t (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/a2/should-shouldnt/', '2026-02-09 01:27:52', 0),
+(133, 22, 127, NULL, 'Modal verbs of deduction: Must, may, might, could, can’t', 'Modal verbs of deduction: Must, may, might, could, can’t (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/b1/modal-verbs-of-deduction/', '2026-02-09 01:28:26', 0),
+(135, 22, NULL, NULL, 'WH words', '', 'TEMA', '', '2026-02-09 01:33:30', 0),
+(136, 22, 135, NULL, 'WH words', 'WH words (Arquivo: WH questions.pdf)', 'application/pdf', 'uploads/conteudos/1770600831_6989397fa9387.pdf', '2026-02-09 01:33:51', 0),
+(137, 22, NULL, NULL, 'Quantifiers', '', 'TEMA', '', '2026-02-09 01:36:13', 0),
+(138, 22, 137, NULL, 'Quantifiers', 'Quantifiers (Arquivo: Quantifiers.pdf)', 'application/pdf', 'uploads/conteudos/1770600992_69893a2089301.pdf', '2026-02-09 01:36:32', 0),
+(139, 22, 137, NULL, 'Much, many, little, few, some, any', 'Much, many, little, few, some, any (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/a2/much-many-little-few-some-any/', '2026-02-09 01:37:12', 0),
+(140, 22, 137, NULL, 'Grammar chart', 'Grammar chart (Link: test-english.com)', 'URL', 'https://test-english.com/grammar-points/b1/much-many-lot-little-no/', '2026-02-09 01:37:45', 0),
+(141, 22, 101, NULL, 'Common Verbs', 'Common Verbs (Arquivo: Verbs.pdf)', 'application/pdf', 'uploads/conteudos/1770601824_69893d60f1f60.pdf', '2026-02-09 01:50:24', 0),
+(142, 22, 101, NULL, 'Daily routine', 'Daily routine (Link: test-english.com)', 'URL', 'https://test-english.com/vocabulary/a1/daily-routines-a1-english-vocabulary/', '2026-02-09 01:50:51', 0),
+(143, 22, 101, NULL, 'Common phrasal verbs', 'Common phrasal verbs (Link: test-english.com)', 'URL', 'https://test-english.com/vocabulary/a2/common-phrasal-verbs-a2-english-vocabulary/', '2026-02-09 01:51:33', 0),
+(144, 22, NULL, NULL, 'Speech - Business', '', 'TEMA', '', '2026-02-09 01:53:40', 0),
+(145, 22, 144, NULL, 'Business - basic', 'Business - basic (Arquivo: Business speech.pdf)', 'application/pdf', 'uploads/conteudos/1770602038_69893e3656b0d.pdf', '2026-02-09 01:53:58', 0),
+(146, 22, NULL, NULL, 'Speech - My House', '', 'TEMA', '', '2026-02-09 01:55:26', 0),
+(147, 22, 146, NULL, 'My house', 'My house (Arquivo: My house speech.pdf)', 'application/pdf', 'uploads/conteudos/1770602138_69893e9adce0f.pdf', '2026-02-09 01:55:38', 0),
+(148, 22, 146, NULL, 'The House: Rooms, Parts, and Things', 'The House: Rooms, Parts, and Things (Link: test-english.com)', 'URL', 'https://test-english.com/vocabulary/a1/the-house-rooms-parts-and-things-a1-english-vocabulary/', '2026-02-09 01:56:08', 0),
+(149, 22, 105, NULL, 'Present - 1st person', 'Present - 1st person (Arquivo: Present speech - 1st person.pdf)', 'application/pdf', 'uploads/conteudos/1770665392_698a35b06ddb8.pdf', '2026-02-09 19:29:52', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `grupos_conteudos`
+--
+
+CREATE TABLE `grupos_conteudos` (
+  `id` int(11) NOT NULL,
+  `professor_id` int(11) NOT NULL,
+  `nome` varchar(100) NOT NULL,
+  `descricao` text DEFAULT NULL,
+  `cor` varchar(20) DEFAULT '#081d40',
+  `icone` varchar(50) DEFAULT 'fas fa-layer-group',
+  `ordem` int(11) DEFAULT 0,
+  `data_criacao` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -1132,7 +1243,8 @@ INSERT INTO `pagamentos` (`id`, `aluno_id`, `mes_referencia`, `valor`, `data_pag
 (43, 36, '2026-02-01', 260.00, '2026-02-06', '', '2026-02-07 19:30:42', '2026-02-07 19:30:42'),
 (44, 37, '2026-02-01', 280.00, '2026-02-09', '', '2026-02-09 18:29:42', '2026-02-09 18:29:42'),
 (45, 45, '2026-02-01', 280.00, '2026-02-10', '', '2026-02-10 17:17:38', '2026-02-10 17:17:38'),
-(46, 28, '2026-02-01', 0.00, '2026-02-10', '', '2026-02-10 17:17:52', '2026-02-10 17:17:52');
+(46, 28, '2026-02-01', 0.00, '2026-02-10', '', '2026-02-10 17:17:52', '2026-02-10 17:17:52'),
+(47, 47, '2026-02-01', 400.00, '2026-02-13', '', '2026-02-14 18:01:31', '2026-02-14 18:01:31');
 
 -- --------------------------------------------------------
 
@@ -1319,50 +1431,51 @@ CREATE TABLE `usuarios` (
   `reset_token` varchar(64) DEFAULT NULL,
   `token_expira_em` datetime DEFAULT NULL,
   `dia_vencimento` int(2) DEFAULT NULL COMMENT 'Dia do mês para vencimento (1-31)',
-  `status` enum('ativo','desativado') NOT NULL DEFAULT 'ativo'
+  `status` enum('ativo','desativado') NOT NULL DEFAULT 'ativo',
+  `responsavel_financeiro_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Despejando dados para a tabela `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`, `informacoes`, `reset_token`, `token_expira_em`, `dia_vencimento`, `status`) VALUES
-(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$hrBdfKT3yhNJXaajbwZ.B.v4463iiA0r3W8eRfwrcTk614iAI15Ga', 'admin', NULL, NULL, NULL, NULL, 'ativo'),
-(18, 'Jorge Pontes', 'jorgeappontes13@gmail.com', '$2y$10$vxLOFkZRQPYQ.lEiRcdME.NdN7/D0krqWDsPmf6KyV/JlR4aQCtEu', 'aluno', '', '45095f753627328b67c0f2825f767562288e8d096da38df756765cab72e03fb7', '2025-12-01 18:58:02', 15, 'ativo'),
-(22, 'Laura Barszcz Antero', 'teacherlauraantero@gmail.com', '$2y$10$s5e7DpC7sUizHVvFjTGSzu0G1sVij8zBXs3Xe5HgpbcMhmKjeooJy', 'professor', '', NULL, NULL, NULL, 'ativo'),
-(23, 'Caio Henrique Bernal Dela Marta', 'caiobernaldelamarta@hotmail.com', '$2y$10$CWhd3VJ9z0lwd2PPcOPNQunENxRhoPNzk9E//Tt3aoxTwEGueLY6W', 'aluno', '', NULL, NULL, 19, 'ativo'),
-(24, 'Lucas Pegoraro Guimarães', 'lucasosspeg@hotmail.com', '$2y$10$69aLE6UeOvl1WiErcbVSVeJTZSmxDqwfZPwI8B0XUerH9.hErVYeC', 'aluno', '', NULL, NULL, NULL, 'ativo'),
-(25, 'Lucas Carreira', 'lucasbcarreira@yahoo.com.br', '$2y$10$KMKoYBE3G0j7gxngI/FSLeBa1BZ9NcWMVYmaStddVoxyF3AsiXedi', 'aluno', '', NULL, NULL, NULL, 'ativo'),
-(26, 'Bruna Carolina Cestari', 'brunacarolinacestari@gmail.com', '$2y$10$f93Ckg.NZMnGnVKybcGw7OL.s9fysVW9jbz/so8DgUnhNMtooY/qS', 'aluno', '', NULL, NULL, 8, 'ativo'),
-(27, 'Murilo Marins', 'murilommarins@gmail.com', '$2y$10$j97TvOk5c56ftbfQC/ajEuONx2I0PYbnXKbvJlRFA0cdkmn.sQ.1K', 'aluno', '', NULL, NULL, 10, 'ativo'),
-(28, 'Giovanna Malerba', 'giovannamalerba1105@gmail.com', '$2y$10$SCOUDQb7U.DT/6Lc3g/gjejaqtINl4ZZ9MnMw90JSAj5UOKRHivsa', 'aluno', '', NULL, NULL, 10, 'ativo'),
-(29, 'Kleber Viana', 'vianak10@gmail.com', '$2y$10$YPGNvhlfhOw4WWYwEklbDuHKl4NxtdAmkpW51FtsZazHWolIkf7kq', 'aluno', '', NULL, NULL, 15, 'ativo'),
-(30, 'Alice Guilhoto', 'alice_guilhoto@hotmail.com', '$2y$10$UFrM8BLjfRQQutX2vI6P.eLJ3uMFUPO43cN8eZgz8X4R0.UopIdzu', 'aluno', '', NULL, NULL, 1, 'ativo'),
-(31, 'Fabiane Coelho', 'fabiannearaujo@yahoo.com.br', '$2y$10$8hZ1Qoc0WMTWgjCqWgoY6Oa.872wLQtfb6FZlMJkHuXK6G3DONC5e', 'aluno', '', NULL, NULL, 1, 'ativo'),
-(32, 'Ariane Perussi', 'arianeperussi@icloud.com', '$2y$10$GavnrcWeFbp5L.1akrZz7OUm4droRG9SscjcimfzYDjDwGe4gIKZ2', 'aluno', '', NULL, NULL, 7, 'ativo'),
-(33, 'Mariana Monezi Borzi', 'mmborzi@gmail.com', '$2y$10$7bMH1iS6lTsuiIneTXCPZ.GClHs9gCSS8oNGOLyHPeqkJjlGR6kie', 'aluno', '', NULL, NULL, 7, 'ativo'),
-(34, 'Mariele Alves Fernandes', 'marielevi2@icloud.com', '$2y$10$QJA9ltGpjoLmTJuwiAF6reuTmcBmoY6x4JcfU3n/lMRjRTkRyWxK6', 'aluno', '', NULL, NULL, 7, 'ativo'),
-(35, 'Pietra Seibt', 'pietraseibt@gmail.com', '$2y$10$U5z0AQVMizeuoxcVay9NxOokx37I1fVDdJ5g0xKRqmBHo/uyF9/nC', 'aluno', '', NULL, NULL, 10, 'ativo'),
-(36, 'Lucas Ferreira', 'lucas.personat@hotmail.com', '$2y$10$eH7dpatIUM.M21YfTBFQXub5GDgJgWheuaMdPfFLjbmjApAkHloem', 'aluno', '', NULL, NULL, 10, 'ativo'),
-(37, 'Yasmin Marmo', 'marmoyasmin13@gmail.com', '$2y$10$cI/qdvTXEHvSXXSRR11noehwBPhPH.pAY5BY7lx2L6iUWt9O7xcwO', 'aluno', '', NULL, NULL, 7, 'ativo'),
-(38, 'Beatriz Gadia', 'biagadia@gmail.com', '$2y$10$DWvjNCIlXq/vlyoCCanEAezW3R5VToOXK5puVMFup1suNKAw8i31O', 'aluno', '', NULL, NULL, 15, 'ativo'),
-(39, 'Eliana Chubaci', 'li_chubaci@hotmail.com', '$2y$10$aOQOMRDlpoZzCD3Ia8/d9eYIrdfeYs9llZQroQh2ktH9siC2zKQSW', 'aluno', '', NULL, NULL, 15, 'ativo'),
-(40, 'Priscila Meira de Oliveira', 'priscila_meira@yahoo.com.br', '$2y$10$15eSMYWdytHHBpt/rRAwCueR0gR3yMk5nwSrdeUkxkS2ZeT8zFp/W', 'aluno', '', NULL, NULL, NULL, 'ativo'),
-(41, 'Tathiane Saraiva', 'tathisaraiva@hotmail.com', '$2y$10$tgMbN0OUDdD/LDY02IzSS.MqBAuHY2zSGp.34rPzdpEUZlos20JZu', 'aluno', '', NULL, NULL, NULL, 'ativo'),
-(42, 'Isabela Rossa', 'contatoisaat@gmail.com', '$2y$10$PhG6.se7V5NU4lmL/hD0yeZtfRoT./63QaGqh8noQPDhFQ1Ioe4S.', 'aluno', '', NULL, NULL, 2, 'ativo'),
-(43, 'Leandro Hipólito', 'leandrohipolitosilva@hotmail.com', '$2y$10$6aRB8iTQ7PsxHONoBRqtdejbpWv2oZABqKcs2u/5Q045hxbKAv2I2', 'aluno', '', NULL, NULL, 10, 'ativo'),
-(44, 'Daniel Maler', 'malerdaniel791@gmail.com', '$2y$10$p.DH/7jjMI1nA2oToqztb.EIHqzLfB1pNhE/L7UZI7GGPfOy7oDVi', 'aluno', '', NULL, NULL, 10, 'ativo'),
-(45, 'Bruna Muraro', 'murarobruna@gmail.com', '$2y$10$QoEoAechhIO3C7M2lEtYj.vfk7OE30makPojmId.vTMo7Ku8BKygu', 'aluno', '', NULL, NULL, 10, 'ativo'),
-(46, 'Nicky Bryan Lemos', 'nicky.bryanlemes@icloud.com', '$2y$10$wS4iVV37TbHk.eKOdCMpH.ehED6PkoB1vbTFgqwLDtp2TZD6X6cqK', 'aluno', '', NULL, NULL, 8, 'ativo'),
-(47, 'Larissa Eduarda Angelico', 'larieduarda8@gmail.com', '$2y$10$PjS2F80HFcPxo5MlntLWTuTHVhmvwzpfjO8V3P2JTCICmjWvWS53G', 'aluno', '', NULL, NULL, 13, 'ativo'),
-(48, 'Diego Pilatti', 'diegopilatti@gmail.com', '$2y$10$a/G9Kymc/jqsuPuOm93unO44YgXswigr5hgPi9.JX8zWl5ldx5XgK', 'aluno', '', NULL, NULL, 25, 'ativo'),
-(49, 'Ana Paitach', 'anapaitach@generallis.com.br', '$2y$10$NKRwBW/JQ93uE44XT999guXMukoG0QxXtK7oZQNjQWrijAKewSNAK', 'aluno', '', NULL, NULL, 25, 'ativo'),
-(52, 'Thiago Luiz Zattoni', 'thiagolzattoni@gmail.com', '$2y$10$1xmL1l2aoXi.OW7QUTH8Y.qxIZ6NSb/SmRG17OQn5x6mjqVMrFApG', 'aluno', '', NULL, NULL, 20, 'ativo'),
-(53, 'Rafael Gogola', 'gogola93@hotmail.com', '$2y$10$6XEhuDs9eZu1E81/0xHSoOqwkGcCxMy64UKOMxklgj2fmNL/dOXGK', 'aluno', '', NULL, NULL, 30, 'ativo'),
-(54, 'Gabrielly Rosa de Lima', 'gaby.r.lima07@gmail.com', '$2y$10$bwUOFANj0jZzR193gfQ3H.vwNxaFg.Ynaz3/7I51KOcA4aT2Aj7pa', 'aluno', '', NULL, NULL, 7, 'ativo'),
-(55, 'Sônia Oliveira', 'soniaoliv@gmail.com', '$2y$10$mjTcjlfJGzni6iGjhng2O.ARjtVlItwfEU3lNkLrsdDgt6yrHoGNC', 'aluno', '', NULL, NULL, 15, 'ativo'),
-(56, 'Guilherme Fabiano Batista do Prado', 'gfprado@hotmail.com', '$2y$10$rdzF4xOnQm2a4CWC9yB8PuLuO/51paH0fCZwf7XF/TRHQYzn4jzUq', 'aluno', '', NULL, NULL, NULL, 'ativo'),
-(57, 'Ana Clara Nazaret Antônio', 'anaclaranazaret@hotmail.com', '$2y$10$YPMRUqGNuAPh.3ZFNAb7ueJKR0lehDz2CEeQZi/kcomh7b.XcIFwi', 'aluno', '', NULL, NULL, 6, 'ativo');
+INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`, `informacoes`, `reset_token`, `token_expira_em`, `dia_vencimento`, `status`, `responsavel_financeiro_id`) VALUES
+(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$hrBdfKT3yhNJXaajbwZ.B.v4463iiA0r3W8eRfwrcTk614iAI15Ga', 'admin', NULL, NULL, NULL, NULL, 'ativo', NULL),
+(18, 'Jorge Pontes', 'jorgeappontes13@gmail.com', '$2y$10$vxLOFkZRQPYQ.lEiRcdME.NdN7/D0krqWDsPmf6KyV/JlR4aQCtEu', 'aluno', '', '45095f753627328b67c0f2825f767562288e8d096da38df756765cab72e03fb7', '2025-12-01 18:58:02', 15, 'ativo', NULL),
+(22, 'Laura Barszcz Antero', 'teacherlauraantero@gmail.com', '$2y$10$s5e7DpC7sUizHVvFjTGSzu0G1sVij8zBXs3Xe5HgpbcMhmKjeooJy', 'professor', '', NULL, NULL, NULL, 'ativo', NULL),
+(23, 'Caio Henrique Bernal Dela Marta', 'caiobernaldelamarta@hotmail.com', '$2y$10$CWhd3VJ9z0lwd2PPcOPNQunENxRhoPNzk9E//Tt3aoxTwEGueLY6W', 'aluno', '', NULL, NULL, 19, 'ativo', NULL),
+(24, 'Lucas Pegoraro Guimarães', 'lucasosspeg@hotmail.com', '$2y$10$69aLE6UeOvl1WiErcbVSVeJTZSmxDqwfZPwI8B0XUerH9.hErVYeC', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL),
+(25, 'Lucas Carreira', 'lucasbcarreira@yahoo.com.br', '$2y$10$KMKoYBE3G0j7gxngI/FSLeBa1BZ9NcWMVYmaStddVoxyF3AsiXedi', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL),
+(26, 'Bruna Carolina Cestari', 'brunacarolinacestari@gmail.com', '$2y$10$f93Ckg.NZMnGnVKybcGw7OL.s9fysVW9jbz/so8DgUnhNMtooY/qS', 'aluno', '', NULL, NULL, 8, 'ativo', NULL),
+(27, 'Murilo Marins', 'murilommarins@gmail.com', '$2y$10$j97TvOk5c56ftbfQC/ajEuONx2I0PYbnXKbvJlRFA0cdkmn.sQ.1K', 'aluno', '', NULL, NULL, 10, 'ativo', NULL),
+(28, 'Giovanna Malerba', 'giovannamalerba1105@gmail.com', '$2y$10$SCOUDQb7U.DT/6Lc3g/gjejaqtINl4ZZ9MnMw90JSAj5UOKRHivsa', 'aluno', '', NULL, NULL, 10, 'ativo', 27),
+(29, 'Kleber Viana', 'vianak10@gmail.com', '$2y$10$YPGNvhlfhOw4WWYwEklbDuHKl4NxtdAmkpW51FtsZazHWolIkf7kq', 'aluno', '', NULL, NULL, 15, 'ativo', NULL),
+(30, 'Alice Guilhoto', 'alice_guilhoto@hotmail.com', '$2y$10$UFrM8BLjfRQQutX2vI6P.eLJ3uMFUPO43cN8eZgz8X4R0.UopIdzu', 'aluno', '', NULL, NULL, 1, 'ativo', NULL),
+(31, 'Fabiane Coelho', 'fabiannearaujo@yahoo.com.br', '$2y$10$8hZ1Qoc0WMTWgjCqWgoY6Oa.872wLQtfb6FZlMJkHuXK6G3DONC5e', 'aluno', '', NULL, NULL, 1, 'ativo', NULL),
+(32, 'Ariane Perussi', 'arianeperussi@icloud.com', '$2y$10$GavnrcWeFbp5L.1akrZz7OUm4droRG9SscjcimfzYDjDwGe4gIKZ2', 'aluno', '', NULL, NULL, 7, 'ativo', NULL),
+(33, 'Mariana Monezi Borzi', 'mmborzi@gmail.com', '$2y$10$7bMH1iS6lTsuiIneTXCPZ.GClHs9gCSS8oNGOLyHPeqkJjlGR6kie', 'aluno', '', NULL, NULL, 7, 'ativo', NULL),
+(34, 'Mariele Alves Fernandes', 'marielevi2@icloud.com', '$2y$10$QJA9ltGpjoLmTJuwiAF6reuTmcBmoY6x4JcfU3n/lMRjRTkRyWxK6', 'aluno', '', NULL, NULL, 7, 'ativo', NULL),
+(35, 'Pietra Seibt', 'pietraseibt@gmail.com', '$2y$10$U5z0AQVMizeuoxcVay9NxOokx37I1fVDdJ5g0xKRqmBHo/uyF9/nC', 'aluno', '', NULL, NULL, 10, 'ativo', NULL),
+(36, 'Lucas Ferreira', 'lucas.personat@hotmail.com', '$2y$10$eH7dpatIUM.M21YfTBFQXub5GDgJgWheuaMdPfFLjbmjApAkHloem', 'aluno', '', NULL, NULL, 10, 'ativo', NULL),
+(37, 'Yasmin Marmo', 'marmoyasmin13@gmail.com', '$2y$10$cI/qdvTXEHvSXXSRR11noehwBPhPH.pAY5BY7lx2L6iUWt9O7xcwO', 'aluno', '', NULL, NULL, 7, 'ativo', NULL),
+(38, 'Beatriz Gadia', 'biagadia@gmail.com', '$2y$10$DWvjNCIlXq/vlyoCCanEAezW3R5VToOXK5puVMFup1suNKAw8i31O', 'aluno', '', NULL, NULL, 15, 'ativo', NULL),
+(39, 'Eliana Chubaci', 'li_chubaci@hotmail.com', '$2y$10$aOQOMRDlpoZzCD3Ia8/d9eYIrdfeYs9llZQroQh2ktH9siC2zKQSW', 'aluno', '', NULL, NULL, 15, 'ativo', NULL),
+(40, 'Priscila Meira de Oliveira', 'priscila_meira@yahoo.com.br', '$2y$10$15eSMYWdytHHBpt/rRAwCueR0gR3yMk5nwSrdeUkxkS2ZeT8zFp/W', 'aluno', '', NULL, NULL, NULL, 'desativado', NULL),
+(41, 'Tathiane Saraiva', 'tathisaraiva@hotmail.com', '$2y$10$tgMbN0OUDdD/LDY02IzSS.MqBAuHY2zSGp.34rPzdpEUZlos20JZu', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL),
+(42, 'Isabela Rossa', 'contatoisaat@gmail.com', '$2y$10$PhG6.se7V5NU4lmL/hD0yeZtfRoT./63QaGqh8noQPDhFQ1Ioe4S.', 'aluno', '', NULL, NULL, 2, 'ativo', NULL),
+(43, 'Leandro Hipólito', 'leandrohipolitosilva@hotmail.com', '$2y$10$6aRB8iTQ7PsxHONoBRqtdejbpWv2oZABqKcs2u/5Q045hxbKAv2I2', 'aluno', '', NULL, NULL, 10, 'ativo', NULL),
+(44, 'Daniel Maler', 'malerdaniel791@gmail.com', '$2y$10$p.DH/7jjMI1nA2oToqztb.EIHqzLfB1pNhE/L7UZI7GGPfOy7oDVi', 'aluno', '', NULL, NULL, 10, 'ativo', NULL),
+(45, 'Bruna Muraro', 'murarobruna@gmail.com', '$2y$10$QoEoAechhIO3C7M2lEtYj.vfk7OE30makPojmId.vTMo7Ku8BKygu', 'aluno', '', NULL, NULL, 10, 'ativo', NULL),
+(46, 'Nicky Bryan Lemos', 'nicky.bryanlemes@icloud.com', '$2y$10$wS4iVV37TbHk.eKOdCMpH.ehED6PkoB1vbTFgqwLDtp2TZD6X6cqK', 'aluno', '', NULL, NULL, 8, 'ativo', NULL),
+(47, 'Larissa Eduarda Angelico', 'larieduarda8@gmail.com', '$2y$10$PjS2F80HFcPxo5MlntLWTuTHVhmvwzpfjO8V3P2JTCICmjWvWS53G', 'aluno', '', NULL, NULL, 13, 'ativo', NULL),
+(48, 'Diego Pilatti', 'diegopilatti@gmail.com', '$2y$10$a/G9Kymc/jqsuPuOm93unO44YgXswigr5hgPi9.JX8zWl5ldx5XgK', 'aluno', '', NULL, NULL, 25, 'ativo', NULL),
+(49, 'Ana Paitach', 'anapaitach@generallis.com.br', '$2y$10$NKRwBW/JQ93uE44XT999guXMukoG0QxXtK7oZQNjQWrijAKewSNAK', 'aluno', '', NULL, NULL, 25, 'ativo', NULL),
+(52, 'Thiago Luiz Zattoni', 'thiagolzattoni@gmail.com', '$2y$10$1xmL1l2aoXi.OW7QUTH8Y.qxIZ6NSb/SmRG17OQn5x6mjqVMrFApG', 'aluno', '', NULL, NULL, 20, 'ativo', NULL),
+(53, 'Rafael Gogola', 'gogola93@hotmail.com', '$2y$10$6XEhuDs9eZu1E81/0xHSoOqwkGcCxMy64UKOMxklgj2fmNL/dOXGK', 'aluno', '', NULL, NULL, 30, 'ativo', NULL),
+(54, 'Gabrielly Rosa de Lima', 'gaby.r.lima07@gmail.com', '$2y$10$bwUOFANj0jZzR193gfQ3H.vwNxaFg.Ynaz3/7I51KOcA4aT2Aj7pa', 'aluno', '', NULL, NULL, 7, 'ativo', NULL),
+(55, 'Sônia Oliveira', 'soniaoliv@gmail.com', '$2y$10$mjTcjlfJGzni6iGjhng2O.ARjtVlItwfEU3lNkLrsdDgt6yrHoGNC', 'aluno', '', NULL, NULL, 15, 'ativo', NULL),
+(56, 'Guilherme Fabiano Batista do Prado', 'gfprado@hotmail.com', '$2y$10$rdzF4xOnQm2a4CWC9yB8PuLuO/51paH0fCZwf7XF/TRHQYzn4jzUq', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL),
+(57, 'Ana Clara Nazaret Antônio', 'anaclaranazaret@hotmail.com', '$2y$10$YPMRUqGNuAPh.3ZFNAb7ueJKR0lehDz2CEeQZi/kcomh7b.XcIFwi', 'aluno', '', NULL, NULL, 6, 'ativo', NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -1383,6 +1496,13 @@ ALTER TABLE `anotacoes_aula`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `aula_aluno_unique` (`aula_id`,`aluno_id`),
   ADD KEY `aluno_id` (`aluno_id`);
+
+--
+-- Índices de tabela `anotacoes_itens`
+--
+ALTER TABLE `anotacoes_itens`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `anotacao_id` (`anotacao_id`);
 
 --
 -- Índices de tabela `anotacoes_visualizacoes`
@@ -1429,6 +1549,14 @@ ALTER TABLE `caderno_anotacoes`
 --
 ALTER TABLE `conteudos`
   ADD PRIMARY KEY (`id`),
+  ADD KEY `professor_id` (`professor_id`),
+  ADD KEY `conteudos_ibfk_2` (`grupo_id`);
+
+--
+-- Índices de tabela `grupos_conteudos`
+--
+ALTER TABLE `grupos_conteudos`
+  ADD PRIMARY KEY (`id`),
   ADD KEY `professor_id` (`professor_id`);
 
 --
@@ -1467,7 +1595,8 @@ ALTER TABLE `turmas`
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
-  ADD KEY `idx_reset_token` (`reset_token`);
+  ADD KEY `idx_reset_token` (`reset_token`),
+  ADD KEY `fk_responsavel` (`responsavel_financeiro_id`);
 
 --
 -- AUTO_INCREMENT para tabelas despejadas
@@ -1483,13 +1612,19 @@ ALTER TABLE `alunos_turmas`
 -- AUTO_INCREMENT de tabela `anotacoes_aula`
 --
 ALTER TABLE `anotacoes_aula`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
+
+--
+-- AUTO_INCREMENT de tabela `anotacoes_itens`
+--
+ALTER TABLE `anotacoes_itens`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
 
 --
 -- AUTO_INCREMENT de tabela `anotacoes_visualizacoes`
 --
 ALTER TABLE `anotacoes_visualizacoes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `arquivos_visiveis`
@@ -1501,13 +1636,13 @@ ALTER TABLE `arquivos_visiveis`
 -- AUTO_INCREMENT de tabela `aulas`
 --
 ALTER TABLE `aulas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=543;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=545;
 
 --
 -- AUTO_INCREMENT de tabela `aulas_conteudos`
 --
 ALTER TABLE `aulas_conteudos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=426;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=427;
 
 --
 -- AUTO_INCREMENT de tabela `caderno_anotacoes`
@@ -1522,10 +1657,16 @@ ALTER TABLE `conteudos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=150;
 
 --
+-- AUTO_INCREMENT de tabela `grupos_conteudos`
+--
+ALTER TABLE `grupos_conteudos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT de tabela `pagamentos`
 --
 ALTER TABLE `pagamentos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT de tabela `presenca_aula`
@@ -1570,6 +1711,12 @@ ALTER TABLE `anotacoes_aula`
   ADD CONSTRAINT `anotacoes_aula_ibfk_2` FOREIGN KEY (`aluno_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
+-- Restrições para tabelas `anotacoes_itens`
+--
+ALTER TABLE `anotacoes_itens`
+  ADD CONSTRAINT `anotacoes_itens_ibfk_1` FOREIGN KEY (`anotacao_id`) REFERENCES `anotacoes_aula` (`id`) ON DELETE CASCADE;
+
+--
 -- Restrições para tabelas `anotacoes_visualizacoes`
 --
 ALTER TABLE `anotacoes_visualizacoes`
@@ -1608,7 +1755,14 @@ ALTER TABLE `caderno_anotacoes`
 -- Restrições para tabelas `conteudos`
 --
 ALTER TABLE `conteudos`
-  ADD CONSTRAINT `conteudos_ibfk_1` FOREIGN KEY (`professor_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `conteudos_ibfk_1` FOREIGN KEY (`professor_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `conteudos_ibfk_2` FOREIGN KEY (`grupo_id`) REFERENCES `grupos_conteudos` (`id`) ON DELETE SET NULL;
+
+--
+-- Restrições para tabelas `grupos_conteudos`
+--
+ALTER TABLE `grupos_conteudos`
+  ADD CONSTRAINT `grupos_conteudos_ibfk_1` FOREIGN KEY (`professor_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
 -- Restrições para tabelas `pagamentos`
@@ -1628,6 +1782,12 @@ ALTER TABLE `presenca_aula`
 --
 ALTER TABLE `turmas`
   ADD CONSTRAINT `turmas_ibfk_1` FOREIGN KEY (`professor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL;
+
+--
+-- Restrições para tabelas `usuarios`
+--
+ALTER TABLE `usuarios`
+  ADD CONSTRAINT `fk_responsavel` FOREIGN KEY (`responsavel_financeiro_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
