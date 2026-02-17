@@ -16,6 +16,18 @@ $acao = $_POST['acao'] ?? $_GET['acao'] ?? '';
 
 try {
     if ($acao === 'create') {
+        // Debug: registrar chamadas create para análise (apenas append)
+        try {
+            $debugData = [
+                'time' => date('c'),
+                'user_id' => $user_id,
+                'user_tipo' => $user_tipo,
+                'post' => $_POST,
+                'get' => $_GET,
+                'remote' => $_SERVER['REMOTE_ADDR'] ?? null
+            ];
+            @file_put_contents(__DIR__ . '/debug_anotacoes.log', json_encode($debugData) . PHP_EOL, FILE_APPEND | LOCK_EX);
+        } catch (Exception $e) {}
         $aula_id = $_POST['aula_id'] ?? null;
         $conteudo = trim($_POST['conteudo'] ?? '');
         if (!$aula_id || $conteudo === '') throw new Exception('Dados inválidos');
@@ -103,28 +115,26 @@ if ($user_tipo === 'aluno') {
 // Se for professor comentando, notificar o aluno
 if ($user_tipo === 'professor' && isset($aluno_id)) {
     $excerpt = substr(strip_tags($conteudo), 0, 100) . (strlen($conteudo) > 100 ? '...' : '');
-    
+
     $sql_notificacao = "INSERT INTO notificacoes 
-                        (usuario_id, tipo, titulo, mensagem, link, icone, cor) 
+                        (usuario_id, tipo, titulo, mensagem, link, icone, cor, aula_id) 
                         VALUES 
-                        (:aluno_id, 'comentario_professor', :titulo, :mensagem, :link, 'fas fa-chalkboard-teacher', '#007bff')";
-    
+                        (:aluno_id, 'comentario_professor', :titulo, :mensagem, :link, 'fas fa-chalkboard-teacher', '#007bff', :aula_id)";
+
     // Link direto para a página da aula com a anotação em destaque
-    // CORREÇÃO: Removido /Risenglish/ do início, pois o caminho já é relativo
     $link_notificacao = "detalhes_aula.php?id=" . $aula_id . "#anotacoes";
-    
+
     $titulo_notif = "Professor respondeu sua anotação";
     $mensagem_notif = "O professor " . htmlspecialchars($user_nome) . " respondeu à sua anotação na aula \"" . 
                       htmlspecialchars($titulo_aula) . "\".\n\n" .
                       "Resposta: \"" . $excerpt . "\"";
-    
+
     $stmt_notif = $pdo->prepare($sql_notificacao);
     $stmt_notif->execute([
         ':aluno_id' => $aluno_id,
         ':titulo' => $titulo_notif,
         ':mensagem' => $mensagem_notif,
-        ':link' => $link_notificacao
-    ,
+        ':link' => $link_notificacao,
         ':aula_id' => $aula_id
     ]);
 }
