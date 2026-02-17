@@ -11,6 +11,17 @@ $mensagem = '';
 $tipo_mensagem = '';
 $termo_pesquisa = '';
 
+// Garantir que a coluna 'nao_pagante' exista (criação automática se necessário)
+try {
+    $colCheck = $pdo->prepare("SHOW COLUMNS FROM usuarios LIKE 'nao_pagante'");
+    $colCheck->execute();
+    if ($colCheck->rowCount() === 0) {
+        $pdo->exec("ALTER TABLE usuarios ADD COLUMN nao_pagante TINYINT(1) NOT NULL DEFAULT 0");
+    }
+} catch (Exception $e) {
+    // Não interromper o fluxo se não for possível alterar a tabela aqui
+}
+
 // BUSCAR LISTA DE USUÁRIOS PARA O SELECT DE RESPONSÁVEL FINANCEIRO
 // Exibir apenas usuários do tipo 'aluno' (apenas alunos podem ser responsáveis financeiros)
 try {
@@ -29,7 +40,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
     $tipo = $_POST['tipo_usuario'];
     $informacoes = $_POST['informacoes'] ?? '';
     // NOVO CAMPO: Responsável Financeiro
-    $responsavel_id = !empty($_POST['responsavel_financeiro_id']) ? $_POST['responsavel_financeiro_id'] : null;
+    $responsavel_id = $_POST['responsavel_financeiro_id'] ?? null;
+    // Se o select enviar 'nao_pagante', armazenamos isso em uma flag e não em responsavel_financeiro_id
+    $nao_pagante_flag = 0;
+    if ($responsavel_id === 'nao_pagante') {
+        $nao_pagante_flag = 1;
+        $responsavel_id = null;
+    } else {
+        // normalizar: tratar string vazia como null
+        if ($responsavel_id === '') $responsavel_id = null;
+    }
     
     $usuario_id = $_POST['usuario_id'] ?? null;
     $acao = $_POST['acao'];
@@ -53,15 +73,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
 
             $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
             // Inserir com responsavel_financeiro_id
-            $sql = "INSERT INTO usuarios (nome, email, senha, tipo_usuario, informacoes, responsavel_financeiro_id) VALUES (:nome, :email, :senha, :tipo_usuario, :informacoes, :resp_id)";
+            $sql = "INSERT INTO usuarios (nome, email, senha, tipo_usuario, informacoes, responsavel_financeiro_id, nao_pagante) VALUES (:nome, :email, :senha, :tipo_usuario, :informacoes, :resp_id, :nao_pagante)";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':senha', $senha_hash);
             $stmt->bindParam(':informacoes', $informacoes);
             $stmt->bindParam(':resp_id', $responsavel_id);
+            $stmt->bindParam(':nao_pagante', $nao_pagante_flag, PDO::PARAM_INT);
             $mensagem = "Usuário <strong>{$nome}</strong> cadastrado como <strong>{$tipo}</strong> com sucesso!";
 
         } else {
-            $sql_parts = ["nome = :nome", "email = :email", "tipo_usuario = :tipo_usuario", "informacoes = :informacoes", "responsavel_financeiro_id = :resp_id"];
+            $sql_parts = ["nome = :nome", "email = :email", "tipo_usuario = :tipo_usuario", "informacoes = :informacoes", "responsavel_financeiro_id = :resp_id", "nao_pagante = :nao_pagante"];
             if (!empty($senha)) {
                 $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
                 $sql_parts[] = "senha = :senha";
@@ -71,6 +92,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
             $stmt->bindParam(':usuario_id', $usuario_id);
             $stmt->bindParam(':informacoes', $informacoes);
             $stmt->bindParam(':resp_id', $responsavel_id);
+            $stmt->bindParam(':nao_pagante', $nao_pagante_flag, PDO::PARAM_INT);
             if (!empty($senha)) $stmt->bindParam(':senha', $senha_hash);
             $mensagem = "Usuário <strong>{$nome}</strong> atualizado com sucesso!";
         }
@@ -774,6 +796,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                 <label for="responsavel_financeiro_id" class="form-label">Responsável Financeiro (Opcional)</label>
                 <select class="form-select" id="responsavel_financeiro_id" name="responsavel_financeiro_id">
                     <option value="">O próprio usuário paga</option>
+                    <option value="nao_pagante">Não Pagante</option>
                     <?php foreach ($lista_usuarios as $u): ?>
                         <option value="<?= $u['id'] ?>"><?= htmlspecialchars($u['nome']) ?></option>
                     <?php endforeach; ?>
