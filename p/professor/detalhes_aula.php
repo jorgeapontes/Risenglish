@@ -2,6 +2,10 @@
 session_start();
 require_once '../includes/conexao.php';
 
+// ADICIONE ESTAS LINHAS AQUI:
+date_default_timezone_set('America/Sao_Paulo'); // Força o PHP para horário de Brasília
+$pdo->exec("SET time_zone = '-03:00'"); // Força o MySQL para horário de Brasília
+
 // Bloqueio de acesso para usuários não-professor
 if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
     header("Location: ../login.php");
