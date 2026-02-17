@@ -108,16 +108,19 @@ try {
             p.data_pagamento,
             p.observacoes,
             p.mes_referencia,
-            -- Subquery para pegar nomes dos dependentes
-            (SELECT GROUP_CONCAT(u_dep.nome SEPARATOR ', ') 
-             FROM usuarios u_dep 
-             WHERE u_dep.responsavel_financeiro_id = pagador.id) as dependentes
+                        -- Subquery para pegar nomes dos dependentes (somente dependentes pagantes)
+                        (SELECT GROUP_CONCAT(u_dep.nome SEPARATOR ', ') 
+                         FROM usuarios u_dep 
+                         WHERE u_dep.responsavel_financeiro_id = pagador.id
+                             AND IFNULL(u_dep.nao_pagante,0) = 0) as dependentes
         FROM usuarios pagador
-        LEFT JOIN pagamentos p ON pagador.id = p.aluno_id AND p.mes_referencia = ?
-        LEFT JOIN usuarios dep ON dep.responsavel_financeiro_id = pagador.id
-        WHERE 
-            -- Regra: Ou é um aluno independente (sem resp) OU é responsável por alguém
+                LEFT JOIN pagamentos p ON pagador.id = p.aluno_id AND p.mes_referencia = ?
+                LEFT JOIN usuarios dep ON dep.responsavel_financeiro_id = pagador.id AND IFNULL(dep.nao_pagante,0) = 0
+                WHERE 
+                        -- Excluir usuários marcados como não pagantes
+                        IFNULL(pagador.nao_pagante,0) = 0 AND
             (
+                -- Regra: Ou é um aluno independente (sem resp) OU é responsável por alguém (com dependentes pagantes)
                 (pagador.tipo_usuario = 'aluno' AND pagador.responsavel_financeiro_id IS NULL)
                 OR
                 (dep.id IS NOT NULL)
