@@ -166,7 +166,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_anotacao'])) {
     header("Location: detalhes_aula.php?id=" . $aula_id . "&saved=1");
     exit;
 }
-// ========== FIM SISTEMA DE ANOTAÇÕES COM VISTO ==========
 
 // Função para formatar data
 function formatarData($data) {
@@ -317,6 +316,12 @@ $aula_passada = $data_aula < $data_atual;
 // Formatar data e hora
 $data_formatada = $data_aula->format('d/m/Y');
 $hora_formatada = substr($aula['horario'], 0, 5);
+
+// ===== BUSCAR NOTIFICAÇÕES NÃO LIDAS =====
+$sql_notificacoes = "SELECT COUNT(*) as total FROM notificacoes WHERE usuario_id = :aluno_id AND lida = 0";
+$stmt_notif = $pdo->prepare($sql_notificacoes);
+$stmt_notif->execute([':aluno_id' => $aluno_id]);
+$total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
 
 // Função para extrair ID do YouTube
 function get_youtube_id($url) {
@@ -1029,6 +1034,12 @@ function displayConteudo($conteudo, $nivel = 0) {
                     <a href="minhas_aulas.php" class="rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
                     <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
                     <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
+                    <a href="notificacoes.php" class="rounded position-relative">
+                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
+                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
+                        <?php endif; ?>
+                    </a>
                 </div>
 
                 <div class="mt-auto">
@@ -1076,12 +1087,12 @@ function displayConteudo($conteudo, $nivel = 0) {
                             </div>
                         </div>
                         
-                        <div class="card mb-4">
+                        <div class="card mb-4" id="anotacoes">
                             <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Minhas Anotações</h5>
                                 <small class="text-white">Escreva suas anotações, respostas de dever de casa, dúvidas, etc.</small>
                             </div>
-                            <form method="POST" action="">
+                            <form method="POST" action="" id="form-anotacoes">
                                 <div class="card-body">
                                     <div class="anotacao-aluno">
                                         <div class="minhas-anotacoes">
