@@ -14,6 +14,12 @@ date_default_timezone_set('America/Sao_Paulo');
 $aluno_id = $_SESSION['user_id'];
 $aluno_nome = $_SESSION['user_nome'] ?? 'Aluno';
 
+// ===== BUSCAR NOTIFICAÇÕES NÃO LIDAS =====
+$sql_notificacoes = "SELECT COUNT(*) as total FROM notificacoes WHERE usuario_id = :aluno_id AND lida = 0";
+$stmt_notif = $pdo->prepare($sql_notificacoes);
+$stmt_notif->execute([':aluno_id' => $aluno_id]);
+$total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
+
 $data_hoje = new DateTime();
 $mes_atual = $data_hoje->format('m');
 $ano_atual = $data_hoje->format('Y');
@@ -171,6 +177,174 @@ foreach ($aulas_por_dia as $dia => $aulas) {
     .bloco-aula-simples strong {
         color: #fff !important;
     }
+    
+    /* Estilos para o dropdown de notificações */
+    .notificacoes-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .notificacoes-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #c0392b;
+        color: white;
+        border-radius: 50%;
+        padding: 3px 6px;
+        font-size: 10px;
+        min-width: 18px;
+        text-align: center;
+    }
+    
+    .notificacoes-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        width: 350px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        z-index: 1050;
+        display: none;
+        margin-top: 10px;
+    }
+    
+    .notificacoes-dropdown.show {
+        display: block;
+    }
+    
+    .notificacoes-header {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f8f9fa;
+        border-radius: 8px 8px 0 0;
+    }
+    
+    .notificacoes-header h6 {
+        margin: 0;
+        font-weight: 600;
+        color: #081d40;
+    }
+    
+    .notificacoes-body {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .notificacao-item {
+        padding: 12px 15px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    
+    .notificacao-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .notificacao-item.nao-lida {
+        background-color: #fff9f9;
+    }
+    
+    .notificacao-item.nao-lida:hover {
+        background-color: #fff0f0;
+    }
+    
+    .notificacao-icone {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 14px;
+    }
+    
+    .notificacao-titulo {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+        color: #333;
+    }
+    
+    .notificacao-mensagem {
+        font-size: 0.8rem;
+        color: #6c757d;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 250px;
+    }
+    
+    .notificacao-data {
+        font-size: 0.7rem;
+        color: #adb5bd;
+    }
+    
+    .notificacoes-footer {
+        padding: 10px 15px;
+        border-top: 1px solid #eee;
+        text-align: center;
+        background-color: #f8f9fa;
+        border-radius: 0 0 8px 8px;
+    }
+    
+    .notificacoes-footer a {
+        color: #c0392b;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .notificacoes-footer a:hover {
+        text-decoration: underline;
+    }
+    
+    .notificacoes-vazias {
+        padding: 30px;
+        text-align: center;
+        color: #adb5bd;
+    }
+    
+    .notificacoes-vazias i {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        opacity: 0.5;
+    }
+    
+    .btn-notificacoes {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        position: relative;
+        padding: 8px 12px;
+        border-radius: 5px;
+        transition: 0.3s;
+    }
+    
+    .btn-notificacoes:hover {
+        background-color: rgba(255,255,255,0.1);
+    }
+    
+    .btn-notificacoes .badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: #c0392b;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 10px;
+    }
     </style>
 </head>
 <body>
@@ -186,6 +360,14 @@ foreach ($aulas_por_dia as $dia => $aulas) {
                 <i class="fas fa-bars"></i>
             </button>
             <h5 class="mb-0 fw-bold">Minhas Aulas</h5>
+            
+            <!-- Botão de notificações no mobile -->
+            <button class="btn-notificacoes ms-auto" id="btnNotificacoesMobile" title="Notificações" style="color: white;">
+                <i class="fas fa-bell"></i>
+                <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                    <span class="badge"><?= $total_notificacoes_nao_lidas ?></span>
+                <?php endif; ?>
+            </button>
         </header>
         <div class="offcanvas offcanvas-top text-white mobile-offcanvas" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel" style="background-color: var(--cor-primaria); height: 50vh;">
             <div class="offcanvas-header">
@@ -195,6 +377,12 @@ foreach ($aulas_por_dia as $dia => $aulas) {
             <div class="offcanvas-body d-flex flex-column">
                  <!-- Menu centralizado verticalmente -->
                 <div class="d-flex flex-column flex-grow-1 mb-5">
+                    <a href="notificacoes.php" class="rounded position-relative">
+                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
+                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
+                        <?php endif; ?>
+                    </a>
                     <a href="dashboard.php" class="rounded active"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                     <a href="minhas_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
                     <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
@@ -207,8 +395,6 @@ foreach ($aulas_por_dia as $dia => $aulas) {
                 </div>
             </div>
         </div>
-
-
 
         <div class="row g-0">
             <!-- 
@@ -224,15 +410,29 @@ foreach ($aulas_por_dia as $dia => $aulas) {
 
                 <!-- Menu -->
                 <div class="d-flex flex-column flex-grow-1 mb-5">
+                    <a href="notificacoes.php" class="rounded position-relative">
+                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
+                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
+                        <?php endif; ?>
+                    </a>
                     <a href="dashboard.php" class="rounded active"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                     <a href="minhas_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
                     <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
                     <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
                 </div>
 
-                <!-- Botão sair no rodapé -->
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+                <!-- Botão sair no rodapé com notificações -->
+                <div class="mt-auto d-flex align-items-center justify-content-between">
+                    <button class="btn-notificacoes" id="btnNotificacoes" title="Notificações">
+                        <i class="fas fa-bell"></i>
+                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                            <span class="badge"><?= $total_notificacoes_nao_lidas ?></span>
+                        <?php endif; ?>
+                    </button>
+                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Sair
+                    </a>
                 </div>
             </div>
 
@@ -414,6 +614,202 @@ foreach ($aulas_por_dia as $dia => $aulas) {
         </div>
     </div>
 
+    <!-- Dropdown de notificações -->
+    <div class="notificacoes-dropdown" id="notificacoesDropdown">
+        <div class="notificacoes-header">
+            <h6>Notificações</h6>
+            <small class="text-muted" id="notificacoes-total"></small>
+        </div>
+        <div class="notificacoes-body" id="notificacoesBody">
+            <div class="notificacoes-vazias">
+                <i class="fas fa-bell-slash"></i>
+                <p>Carregando notificações...</p>
+            </div>
+        </div>
+        <div class="notificacoes-footer">
+            <a href="notificacoes.php">Ver todas as notificações</a>
+        </div>
+    </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ===== SISTEMA DE NOTIFICAÇÕES =====
+    const btnNotificacoes = document.getElementById('btnNotificacoes');
+    const btnNotificacoesMobile = document.getElementById('btnNotificacoesMobile');
+    const dropdown = document.getElementById('notificacoesDropdown');
+    const notificacoesBody = document.getElementById('notificacoesBody');
+    const notificacoesTotal = document.getElementById('notificacoes-total');
+    
+    // Função para abrir dropdown (usada tanto pelo botão desktop quanto mobile)
+    function abrirDropdown() {
+        dropdown.classList.toggle('show');
+        if (dropdown.classList.contains('show')) {
+            carregarNotificacoes();
+        }
+    }
+    
+    // Adicionar eventos de clique
+    if (btnNotificacoes) {
+        btnNotificacoes.addEventListener('click', function(e) {
+            e.stopPropagation();
+            abrirDropdown();
+        });
+    }
+    
+    if (btnNotificacoesMobile) {
+        btnNotificacoesMobile.addEventListener('click', function(e) {
+            e.stopPropagation();
+            abrirDropdown();
+        });
+    }
+    
+    // Fechar dropdown ao clicar fora
+    document.addEventListener('click', function(e) {
+        if (!dropdown.contains(e.target) && 
+            !(btnNotificacoes && btnNotificacoes.contains(e.target)) && 
+            !(btnNotificacoesMobile && btnNotificacoesMobile.contains(e.target))) {
+            dropdown.classList.remove('show');
+        }
+    });
+    
+    // Carregar notificações via AJAX
+    function carregarNotificacoes() {
+        fetch('ajax_notificacoes.php?acao=buscar_nao_lidas')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.notificacoes.length > 0) {
+                        let html = '';
+                        data.notificacoes.forEach(notif => {
+                            html += `
+                                <a href="${notif.link}" class="notificacao-item nao-lida" onclick="marcarNotificacaoLida(${notif.id})">
+                                    <div class="d-flex">
+                                        <div class="notificacao-icone me-2" style="background-color: ${notif.cor}">
+                                            <i class="${notif.icone}"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="notificacao-titulo">${notif.titulo}</div>
+                                                <small class="notificacao-data">${notif.data_formatada}</small>
+                                            </div>
+                                            <div class="notificacao-mensagem">${notif.mensagem.substring(0, 80)}${notif.mensagem.length > 80 ? '...' : ''}</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            `;
+                        });
+                        notificacoesBody.innerHTML = html;
+                        notificacoesTotal.textContent = `${data.notificacoes.length} não lida${data.notificacoes.length > 1 ? 's' : ''}`;
+                        
+                        // Atualizar badge
+                        atualizarBadgeNotificacoes(data.total_nao_lidas);
+                    } else {
+                        notificacoesBody.innerHTML = `
+                            <div class="notificacoes-vazias">
+                                <i class="fas fa-bell-slash"></i>
+                                <p class="mb-0">Nenhuma notificação</p>
+                                <small class="text-muted">Você está em dia!</small>
+                            </div>
+                        `;
+                        notificacoesTotal.textContent = '0 não lidas';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar notificações:', error);
+                notificacoesBody.innerHTML = `
+                    <div class="notificacoes-vazias">
+                        <i class="fas fa-exclamation-triangle text-danger"></i>
+                        <p>Erro ao carregar</p>
+                    </div>
+                `;
+            });
+    }
+    
+    // Função para marcar notificação como lida (chamada via AJAX antes de redirecionar)
+    window.marcarNotificacaoLida = function(notificacaoId) {
+        fetch('ajax_notificacoes.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'acao=marcar_lida&notificacao_id=' + notificacaoId,
+            keepalive: true
+        }).catch(error => console.error('Erro ao marcar notificação:', error));
+    };
+    
+    // Função para atualizar apenas o contador do badge
+    function carregarContadorNotificacoes() {
+        fetch('ajax_notificacoes.php?acao=buscar_nao_lidas')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    atualizarBadgeNotificacoes(data.total_nao_lidas);
+                }
+            })
+            .catch(error => console.error('Erro ao atualizar contador:', error));
+    }
+    
+    // Função para atualizar o badge na sidebar e no botão
+    function atualizarBadgeNotificacoes(total) {
+        // Atualizar badge na sidebar
+        const sidebarBadge = document.querySelector('.sidebar a[href="notificacoes.php"] .badge');
+        if (total > 0) {
+            if (sidebarBadge) {
+                sidebarBadge.textContent = total;
+            } else {
+                const linkNotificacoes = document.querySelector('.sidebar a[href="notificacoes.php"]');
+                if (linkNotificacoes) {
+                    const span = document.createElement('span');
+                    span.className = 'badge bg-danger ms-2';
+                    span.textContent = total;
+                    linkNotificacoes.appendChild(span);
+                }
+            }
+            
+            // Atualizar badge do botão desktop
+            if (btnNotificacoes) {
+                const btnBadge = btnNotificacoes.querySelector('.badge');
+                if (btnBadge) {
+                    btnBadge.textContent = total;
+                } else {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge';
+                    badge.textContent = total;
+                    btnNotificacoes.appendChild(badge);
+                }
+            }
+            
+            // Atualizar badge do botão mobile
+            if (btnNotificacoesMobile) {
+                const btnMobileBadge = btnNotificacoesMobile.querySelector('.badge');
+                if (btnMobileBadge) {
+                    btnMobileBadge.textContent = total;
+                } else {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge';
+                    badge.textContent = total;
+                    btnNotificacoesMobile.appendChild(badge);
+                }
+            }
+        } else {
+            // Remover badges se total = 0
+            if (sidebarBadge) sidebarBadge.remove();
+            
+            if (btnNotificacoes) {
+                const btnBadge = btnNotificacoes.querySelector('.badge');
+                if (btnBadge) btnBadge.remove();
+            }
+            
+            if (btnNotificacoesMobile) {
+                const btnMobileBadge = btnNotificacoesMobile.querySelector('.badge');
+                if (btnMobileBadge) btnMobileBadge.remove();
+            }
+        }
+    }
+    
+    // Atualizar contador a cada 30 segundos
+    setInterval(carregarContadorNotificacoes, 30000);
+});
+</script>
 </body>
 </html>

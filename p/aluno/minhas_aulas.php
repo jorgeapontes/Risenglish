@@ -101,6 +101,12 @@ uksort($meses_com_futuras, function($a, $b) {
 
 // Ordenar meses com aulas passadas do mais recente para o mais antigo
 krsort($meses_com_passadas);
+
+// ===== BUSCAR NOTIFICAÇÕES NÃO LIDAS =====
+$sql_notificacoes = "SELECT COUNT(*) as total FROM notificacoes WHERE usuario_id = :aluno_id AND lida = 0";
+$stmt_notif = $pdo->prepare($sql_notificacoes);
+$stmt_notif->execute([':aluno_id' => $aluno_id]);
+$total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
 ?>
 
 <!DOCTYPE html>
@@ -316,6 +322,12 @@ krsort($meses_com_passadas);
             <div class="offcanvas-body d-flex flex-column">
                  <!-- Menu centralizado verticalmente -->
                 <div class="d-flex flex-column flex-grow-1 mb-5">
+                    <a href="notificacoes.php" class="rounded position-relative">
+                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
+                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
+                        <?php endif; ?>
+                    </a>
                     <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                     <a href="minhas_aulas.php" class="rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
                     <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
@@ -339,6 +351,12 @@ krsort($meses_com_passadas);
 
                 <!-- Menu -->
                 <div class="d-flex flex-column flex-grow-1 mb-5">
+                    <a href="notificacoes.php" class="rounded position-relative">
+                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
+                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
+                        <?php endif; ?>
+                    </a>
                     <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                     <a href="minhas_aulas.php" class="rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
                     <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
