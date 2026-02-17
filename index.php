@@ -1,3 +1,4 @@
+<?php require 'p/includes/conexao.php'; require 'p/includes/site_settings.php'; ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,7 +7,7 @@
     <title>Risenglish - English Learning</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/index.css">
-    <link rel="shortcut icon" href="LogoRisenglish.png" type="image/x-icon">
+    <link rel="shortcut icon" href="<?php echo htmlspecialchars(get_setting('logo_image','LogoRisenglish.png')); ?>" type="image/x-icon">
     
 </head>
 <body>
@@ -54,17 +55,17 @@
                     <span><i class="fas fa-star"></i> Método Exclusivo</span>
                 </div>
                 <h1 class="hero-title">
-                    <span class="title-line">Fale inglês com confiança.</span>
-                    <span class="title-line accent">Cresça com propósito.</span>
+                    <span class="title-line"><?php echo htmlspecialchars(get_setting('hero_title_line1','Fale inglês com confiança.')); ?></span>
+                    <span class="title-line accent"><?php echo htmlspecialchars(get_setting('hero_title_line2','Cresça com propósito.')); ?></span>
                 </h1>
-                <p class="hero-subtitle">Desbloqueie seu potencial com uma metodologia focada em conversação e escuta ativa! Não é só sobre aprender inglês. É sobre transformar sua comunicação e seu futuro.</p>
+                <p class="hero-subtitle"><?php echo nl2br(htmlspecialchars(get_setting('hero_subtitle','Desbloqueie seu potencial com uma metodologia focada em conversação e escuta ativa! Não é só sobre aprender inglês. É sobre transformar sua comunicação e seu futuro.'))); ?></p>
                 <div class="hero-buttons">
-                    <a href="#methodology" class="btn btn-primary">
-                        <span>Conheça o Método</span>
+                    <a href="<?php echo htmlspecialchars(get_setting('hero_button1_link','#methodology')); ?>" class="btn btn-primary">
+                        <span><?php echo htmlspecialchars(get_setting('hero_button1_text','Conheça o Método')); ?></span>
                         <i class="fas fa-chevron-down"></i>
                     </a>
-                    <a href="#contact" class="btn btn-secondary">
-                        <span>Quero me Inscrever!</span>
+                    <a href="<?php echo htmlspecialchars(get_setting('hero_button2_link','#contact')); ?>" class="btn btn-secondary">
+                        <span><?php echo htmlspecialchars(get_setting('hero_button2_text','Quero me Inscrever!')); ?></span>
                     </a>
                 </div>
                 <div class="hero-features">
@@ -84,7 +85,7 @@
             </div>
             <div class="hero-image">
                 <div class="logo-orbit">
-                    <img src="LogoRisenglish.png" alt="Logo da Escola">
+                    <img src="<?php echo htmlspecialchars(get_setting('hero_image','LogoRisenglish.png')); ?>" alt="Logo da Escola">
                     <span class="orbit-ring"></span>
                 </div>
             </div>
@@ -100,17 +101,13 @@
             <!-- Cabeçalho: Título + Texto + Imagem -->
             <div class="methodology-header">
                 <div class="methodology-content">
-                    <h2 class="section-title">Nossa Metodologia</h2>
-                    <p class="methodology-text">
-                        Você nasceu biologicamente programado para aprender idiomas. Seu cérebro aprende línguas <strong>através de uso real</strong>, não decorando regras isoladas ou listas intermináveis de palavras.
-                    </p>
-                    <p class="methodology-text">
-                        É porque o cérebro <strong>não aprende idioma por memorização</strong>, mas sim por um processo natural baseado em <strong>exposição, prática e ajuste contínuo</strong>.
-                    </p>
+                    <h2 class="section-title"><?php echo htmlspecialchars(get_setting('methodology_title','Nossa Metodologia')); ?></h2>
+                    <p class="methodology-text"><?php echo nl2br(htmlspecialchars(get_setting('methodology_text1','Você nasceu biologicamente programado para aprender idiomas. Seu cérebro aprende línguas <strong>através de uso real</strong>, não decorando regras isoladas ou listas intermináveis de palavras.'))); ?></p>
+                    <p class="methodology-text"><?php echo nl2br(htmlspecialchars(get_setting('methodology_text2','É porque o cérebro <strong>não aprende idioma por memorização</strong>, mas sim por um processo natural baseado em <strong>exposição, prática e ajuste contínuo</strong>.'))); ?></p>
                 </div>
                 <div class="methodology-image">
                     <div class="image-frame">
-                        <img src="Metodologia.png" alt="Metodologia Risenglish">
+                        <img src="<?php echo htmlspecialchars(get_setting('methodology_image','Metodologia.png')); ?>" alt="Metodologia Risenglish">
                     </div>
                 </div>
             </div>
@@ -167,7 +164,7 @@
             <div class="about-container">
                 <div class="about-image">
                     <div class="image-frame">
-                        <img src="php/professora.jpg" alt="Professora Risenglish">
+                        <img src="<?php echo htmlspecialchars(get_setting('about_image','php/professora.jpg')); ?>" alt="Professora Risenglish">
                         <div class="image-overlay">
                             <div class="experience-badge">
                                 <span>+ de 500 alunos</span>
@@ -177,9 +174,7 @@
                 </div>
                 <div class="about-content">
                     <h2 class="section-title">Sobre Mim</h2>
-                    <p class="about-text">
-                        Sou Laura Antero, natural de Ponta Grossa (PR) e atualmente em Jundiaí (SP). Construí minha trajetória lecionando em escolas e descobri, nas aulas particulares, a melhor forma de acompanhar de perto e celebrar cada pequeno progresso dos meus alunos. Sou formada em Letras – Português/Inglês e Literaturas pela UEPG, com láurea acadêmica, e possuo certificação internacional pela ACE English Malta, onde também fiz intercâmbio. Na Rise English, transformo essa experiência em propósito: ajudar alunos a evoluírem com confiança, fluência e propósito, em um ambiente acolhedor e humano. Acredito que aprender é um processo de evolução contínua, e é esse crescimento, em cada história, que me inspira a seguir ensinando com entusiasmo e dedicação todos os dias.
-                    </p>
+                    <p class="about-text"><?php echo nl2br(htmlspecialchars(get_setting('about_text','Sou Laura Antero, natural de Ponta Grossa (PR) e atualmente em Jundiaí (SP). Construí minha trajetória lecionando em escolas e descobri, nas aulas particulares, a melhor forma de acompanhar de perto e celebrar cada pequeno progresso dos meus alunos. Sou formada em Letras – Português/Inglês e Literaturas pela UEPG, com láurea acadêmica, e possuo certificação internacional pela ACE English Malta, onde também fiz intercâmbio. Na Rise English, transformo essa experiência em propósito: ajudar alunos a evoluírem com confiança, fluência e propósito, em um ambiente acolhedor e humano. Acredito que aprender é um processo de evolução contínua, e é esse crescimento, em cada história, que me inspira a seguir ensinando com entusiasmo e dedicação todos os dias.'))); ?></p>
                 </div>
             </div>
         </div>
@@ -217,21 +212,21 @@
                 <h2 class="section-title">Vamos Conversar?</h2>
                 <p class="contact-subtitle">Entre em contato e comece sua jornada no inglês hoje mesmo:</p>
                 <div class="contact-buttons">
-                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSdEDqEX0jYnXMELzBEpa1H-QYoOAyxAFCc_xsPAXOK_PzTPeg/viewform" class="contact-btn forms" target="_blank">
+                    <a href="<?php echo htmlspecialchars(get_setting('contact_form_link','https://docs.google.com/forms/d/e/1FAIpQLSdEDqEX0jYnXMELzBEpa1H-QYoOAyxAFCc_xsPAXOK_PzTPeg/viewform')); ?>" class="contact-btn forms" target="_blank">
                         <i class="fa-brands fa-wpforms"></i>
                         <div class="btn-text">
                             <span>Formulário</span>
                             <small>Inscrição online</small>
                         </div>
                     </a>
-                    <a href="https://wa.me/554197162705?text=Olá! Gostaria de mais informações sobre as aulas" class="contact-btn whatsapp" target="_blank">
+                    <a href="<?php echo htmlspecialchars(get_setting('contact_whatsapp_link','https://wa.me/554197162705?text=Olá! Gostaria de mais informações sobre as aulas')); ?>" class="contact-btn whatsapp" target="_blank">
                         <i class="fab fa-whatsapp"></i>
                         <div class="btn-text">
                             <span>WhatsApp</span>
                             <small>Resposta rápida</small>
                         </div>
                     </a>
-                    <a href="https://www.instagram.com/miss.antero/" class="contact-btn instagram" target="_blank">
+                    <a href="<?php echo htmlspecialchars(get_setting('contact_instagram','https://www.instagram.com/miss.antero/')); ?>" class="contact-btn instagram" target="_blank">
                         <i class="fab fa-instagram"></i>
                         <div class="btn-text">
                             <span>Instagram</span>
@@ -252,7 +247,7 @@
             <div class="footer-content">
                 <div class="footer-brand">
                     <h3 class="footer-logo">RISENGLISH</h3>
-                    <p class="footer-tagline">Transformando vidas através do inglês com metodologia natural e humana.</p>
+                    <p class="footer-tagline"><?php echo htmlspecialchars(get_setting('footer_tagline','Transformando vidas através do inglês com metodologia natural e humana.')); ?></p>
                     <div class="social-links">
                         <a href="https://www.instagram.com/miss.antero/" class="social-link" target="_blank">
                             <i class="fab fa-instagram"></i>

@@ -336,6 +336,7 @@ try {
         <!-- Menu centralizado verticalmente -->
         <div class="d-flex flex-column flex-grow-1 mb-5">
             <a href="dashboard.php" ><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
+            <a href="personalizar_index.php" class="rounded"><i class="fas fa-paint-brush"></i>&nbsp;&nbsp;Personalizar Site</a>
             <a href="gerenciar_turmas.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;&nbsp;Turmas</a>
             <a href="gerenciar_usuarios.php" class="rounded"><i class="fas fa-user"></i>&nbsp;&nbsp;Usuários</a>
             <a href="gerenciar_uteis.php" class="rounded active"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Recomendações</a>
