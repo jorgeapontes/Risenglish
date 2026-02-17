@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1:3306
--- Tempo de geração: 16/02/2026 às 14:40
--- Versão do servidor: 11.8.3-MariaDB-log
--- Versão do PHP: 7.2.34
+-- Host: 127.0.0.1
+-- Tempo de geração: 17/02/2026 às 18:04
+-- Versão do servidor: 10.4.32-MariaDB
+-- Versão do PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Banco de dados: `u569225384_risenglish`
+-- Banco de dados: `risenglish`
 --
 
 -- --------------------------------------------------------
@@ -158,7 +158,8 @@ INSERT INTO `anotacoes_aula` (`id`, `aula_id`, `aluno_id`, `conteudo`, `comentar
 (60, 462, 52, '', 'didnt take a toy\r\ndidnt want to take\r\nintroduced/ integrated\r\nlet\r\ngot off\r\nreplaced by\r\n\r\nYou 13:41\r\ngetting in order\r\nwill get in order\r\nthings are getting order\r\nmake it up\r\nagree/ deal\r\nin advance\r\n\r\nYou 13:46\r\nschedule\r\nI had\r\nit was ok \r\nI had excuse to speed up\r\nlunchbreak / lunchtime\r\nI didnt have\r\ndrink a glass/cup of milk\r\n\r\nYou 13:52\r\nI police more\r\n\'big deal\'\r\nI went to a very good restaurant\r\nfine dining / high gastronomy\r\ncost-benefit\r\nfor her\r\nI think/ I guess/ I Suppose\r\nlobster - lagosta \r\nsea food\r\n\r\nYou 13:58\r\nonce per year - 1x por ano\r\n1x once \r\n2x twice', 0, NULL, '2026-02-13 17:00:23', '2026-02-13 17:00:23'),
 (61, 529, 56, '', 'Manufacturing Engineering // Production Engineering\r\n\r\nnice Holiday', 0, NULL, '2026-02-13 22:04:44', '2026-02-13 22:04:44'),
 (62, 522, 57, 'put colocar\r\nput on - vestir/por\r\nput here\r\nput there please\r\nput on your shoes\r\ntake off\r\ntake off - tirar\r\nsee - ver / saw - viu\r\n\r\nlook here/ there\r\nstretch - esticar/ alongar ', NULL, 0, NULL, '2026-02-13 23:32:05', '2026-02-13 23:32:05'),
-(63, 541, 57, '', 'like that ', 0, NULL, '2026-02-14 14:07:37', '2026-02-14 14:46:20');
+(63, 541, 57, '', 'like that ', 0, NULL, '2026-02-14 14:07:37', '2026-02-14 14:46:20'),
+(65, 315, 18, '', NULL, 0, NULL, '2026-02-17 16:50:27', '2026-02-17 16:50:27');
 
 -- --------------------------------------------------------
 
@@ -243,7 +244,8 @@ INSERT INTO `anotacoes_itens` (`id`, `anotacao_id`, `autor`, `conteudo`, `data_c
 (65, 59, 'professor', 'migraine\r\nsome times\r\nI get/am sick too\r\nget/catch\r\nexit\r\n\r\nYou 18:07\r\nschedule/ plan \r\nI get\r\nafraid\r\nhe saw a news\r\nwastewater system\r\nis throw\r\nin the water of the sea\r\nin the sea water\r\n\r\nYou 18:14\r\nfarther\r\ntake sunbath\r\nsunscreen / sunblock\r\nskin - pele\r\nlow season\r\n\r\nYou 18:20\r\ntwenty-third/three\r\nspend ... days\r\nreally enjoy\r\ninappropriate water\r\ntouching, hitting\r\njellyfish - água viva\r\n\r\nYou 18:26\r\nI have fear \r\nI\'m afraid\r\nof\r\nthere is a lot of water\r\nneeds\r\ndo their needs\r\nmuch worse\r\n\r\nYou 18:31\r\nget into\r\ncousin\r\nher wife\r\ncouple\r\n\r\nYou 18:41\r\nshow off \r\ncompetences\r\nwants to charge more\r\nwants to demand more\r\nconflict\r\namong them\r\nbetween them\r\n\r\nYou 18:50\r\naffected\r\nhe\'s suing\r\nmad\r\nlabor market\r\ncompetitors\r\n\r\nYou 18:57\r\nidentified myself', '2026-02-12 22:01:25'),
 (66, 60, 'professor', 'didnt take a toy\r\ndidnt want to take\r\nintroduced/ integrated\r\nlet\r\ngot off\r\nreplaced by\r\n\r\nYou 13:41\r\ngetting in order\r\nwill get in order\r\nthings are getting order\r\nmake it up\r\nagree/ deal\r\nin advance\r\n\r\nYou 13:46\r\nschedule\r\nI had\r\nit was ok \r\nI had excuse to speed up\r\nlunchbreak / lunchtime\r\nI didnt have\r\ndrink a glass/cup of milk\r\n\r\nYou 13:52\r\nI police more\r\n\'big deal\'\r\nI went to a very good restaurant\r\nfine dining / high gastronomy\r\ncost-benefit\r\nfor her\r\nI think/ I guess/ I Suppose\r\nlobster - lagosta \r\nsea food\r\n\r\nYou 13:58\r\nonce per year - 1x por ano\r\n1x once \r\n2x twice', '2026-02-13 17:00:23'),
 (67, 61, 'professor', 'Manufacturing Engineering // Production Engineering\r\n\r\nnice Holiday', '2026-02-13 22:04:44'),
-(68, 63, 'professor', 'like that ', '2026-02-14 14:46:20');
+(68, 63, 'professor', 'like that ', '2026-02-14 14:46:20'),
+(86, 65, 'aluno', 'teste', '2026-02-17 16:50:27');
 
 -- --------------------------------------------------------
 
@@ -1179,6 +1181,33 @@ CREATE TABLE `grupos_conteudos` (
 -- --------------------------------------------------------
 
 --
+-- Estrutura para tabela `notificacoes`
+--
+
+CREATE TABLE `notificacoes` (
+  `id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL COMMENT 'ID do usuário que receberá a notificação',
+  `tipo` enum('anotacao_aluno','comentario_professor','aula_agendada','pagamento','sistema') NOT NULL DEFAULT 'sistema',
+  `titulo` varchar(255) NOT NULL,
+  `mensagem` text NOT NULL,
+  `link` varchar(500) DEFAULT NULL,
+  `icone` varchar(50) DEFAULT 'fas fa-bell',
+  `cor` varchar(20) DEFAULT '#c0392b',
+  `lida` tinyint(1) NOT NULL DEFAULT 0,
+  `data_criacao` timestamp NOT NULL DEFAULT current_timestamp(),
+  `data_leitura` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `notificacoes`
+--
+
+INSERT INTO `notificacoes` (`id`, `usuario_id`, `tipo`, `titulo`, `mensagem`, `link`, `icone`, `cor`, `lida`, `data_criacao`, `data_leitura`) VALUES
+(1, 22, 'anotacao_aluno', 'Nova anotação de Jorge Pontes', 'O aluno Jorge Pontes adicionou uma anotação na aula \"Aulas Jorge Pontes\" (Turma: Jorge Pontes).\n\nTrecho: \"teste\"', '/Risenglish/p/professor/detalhes_aula.php?id=315', 'fas fa-pen', '#28a745', 0, '2026-02-17 16:50:27', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura para tabela `pagamentos`
 --
 
@@ -1432,50 +1461,52 @@ CREATE TABLE `usuarios` (
   `token_expira_em` datetime DEFAULT NULL,
   `dia_vencimento` int(2) DEFAULT NULL COMMENT 'Dia do mês para vencimento (1-31)',
   `status` enum('ativo','desativado') NOT NULL DEFAULT 'ativo',
-  `responsavel_financeiro_id` int(11) DEFAULT NULL
+  `responsavel_financeiro_id` int(11) DEFAULT NULL,
+  `nao_pagante` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Despejando dados para a tabela `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`, `informacoes`, `reset_token`, `token_expira_em`, `dia_vencimento`, `status`, `responsavel_financeiro_id`) VALUES
-(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$hrBdfKT3yhNJXaajbwZ.B.v4463iiA0r3W8eRfwrcTk614iAI15Ga', 'admin', NULL, NULL, NULL, NULL, 'ativo', NULL),
-(18, 'Jorge Pontes', 'jorgeappontes13@gmail.com', '$2y$10$vxLOFkZRQPYQ.lEiRcdME.NdN7/D0krqWDsPmf6KyV/JlR4aQCtEu', 'aluno', '', '45095f753627328b67c0f2825f767562288e8d096da38df756765cab72e03fb7', '2025-12-01 18:58:02', 15, 'ativo', NULL),
-(22, 'Laura Barszcz Antero', 'teacherlauraantero@gmail.com', '$2y$10$s5e7DpC7sUizHVvFjTGSzu0G1sVij8zBXs3Xe5HgpbcMhmKjeooJy', 'professor', '', NULL, NULL, NULL, 'ativo', NULL),
-(23, 'Caio Henrique Bernal Dela Marta', 'caiobernaldelamarta@hotmail.com', '$2y$10$CWhd3VJ9z0lwd2PPcOPNQunENxRhoPNzk9E//Tt3aoxTwEGueLY6W', 'aluno', '', NULL, NULL, 19, 'ativo', NULL),
-(24, 'Lucas Pegoraro Guimarães', 'lucasosspeg@hotmail.com', '$2y$10$69aLE6UeOvl1WiErcbVSVeJTZSmxDqwfZPwI8B0XUerH9.hErVYeC', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL),
-(25, 'Lucas Carreira', 'lucasbcarreira@yahoo.com.br', '$2y$10$KMKoYBE3G0j7gxngI/FSLeBa1BZ9NcWMVYmaStddVoxyF3AsiXedi', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL),
-(26, 'Bruna Carolina Cestari', 'brunacarolinacestari@gmail.com', '$2y$10$f93Ckg.NZMnGnVKybcGw7OL.s9fysVW9jbz/so8DgUnhNMtooY/qS', 'aluno', '', NULL, NULL, 8, 'ativo', NULL),
-(27, 'Murilo Marins', 'murilommarins@gmail.com', '$2y$10$j97TvOk5c56ftbfQC/ajEuONx2I0PYbnXKbvJlRFA0cdkmn.sQ.1K', 'aluno', '', NULL, NULL, 10, 'ativo', NULL),
-(28, 'Giovanna Malerba', 'giovannamalerba1105@gmail.com', '$2y$10$SCOUDQb7U.DT/6Lc3g/gjejaqtINl4ZZ9MnMw90JSAj5UOKRHivsa', 'aluno', '', NULL, NULL, 10, 'ativo', 27),
-(29, 'Kleber Viana', 'vianak10@gmail.com', '$2y$10$YPGNvhlfhOw4WWYwEklbDuHKl4NxtdAmkpW51FtsZazHWolIkf7kq', 'aluno', '', NULL, NULL, 15, 'ativo', NULL),
-(30, 'Alice Guilhoto', 'alice_guilhoto@hotmail.com', '$2y$10$UFrM8BLjfRQQutX2vI6P.eLJ3uMFUPO43cN8eZgz8X4R0.UopIdzu', 'aluno', '', NULL, NULL, 1, 'ativo', NULL),
-(31, 'Fabiane Coelho', 'fabiannearaujo@yahoo.com.br', '$2y$10$8hZ1Qoc0WMTWgjCqWgoY6Oa.872wLQtfb6FZlMJkHuXK6G3DONC5e', 'aluno', '', NULL, NULL, 1, 'ativo', NULL),
-(32, 'Ariane Perussi', 'arianeperussi@icloud.com', '$2y$10$GavnrcWeFbp5L.1akrZz7OUm4droRG9SscjcimfzYDjDwGe4gIKZ2', 'aluno', '', NULL, NULL, 7, 'ativo', NULL),
-(33, 'Mariana Monezi Borzi', 'mmborzi@gmail.com', '$2y$10$7bMH1iS6lTsuiIneTXCPZ.GClHs9gCSS8oNGOLyHPeqkJjlGR6kie', 'aluno', '', NULL, NULL, 7, 'ativo', NULL),
-(34, 'Mariele Alves Fernandes', 'marielevi2@icloud.com', '$2y$10$QJA9ltGpjoLmTJuwiAF6reuTmcBmoY6x4JcfU3n/lMRjRTkRyWxK6', 'aluno', '', NULL, NULL, 7, 'ativo', NULL),
-(35, 'Pietra Seibt', 'pietraseibt@gmail.com', '$2y$10$U5z0AQVMizeuoxcVay9NxOokx37I1fVDdJ5g0xKRqmBHo/uyF9/nC', 'aluno', '', NULL, NULL, 10, 'ativo', NULL),
-(36, 'Lucas Ferreira', 'lucas.personat@hotmail.com', '$2y$10$eH7dpatIUM.M21YfTBFQXub5GDgJgWheuaMdPfFLjbmjApAkHloem', 'aluno', '', NULL, NULL, 10, 'ativo', NULL),
-(37, 'Yasmin Marmo', 'marmoyasmin13@gmail.com', '$2y$10$cI/qdvTXEHvSXXSRR11noehwBPhPH.pAY5BY7lx2L6iUWt9O7xcwO', 'aluno', '', NULL, NULL, 7, 'ativo', NULL),
-(38, 'Beatriz Gadia', 'biagadia@gmail.com', '$2y$10$DWvjNCIlXq/vlyoCCanEAezW3R5VToOXK5puVMFup1suNKAw8i31O', 'aluno', '', NULL, NULL, 15, 'ativo', NULL),
-(39, 'Eliana Chubaci', 'li_chubaci@hotmail.com', '$2y$10$aOQOMRDlpoZzCD3Ia8/d9eYIrdfeYs9llZQroQh2ktH9siC2zKQSW', 'aluno', '', NULL, NULL, 15, 'ativo', NULL),
-(40, 'Priscila Meira de Oliveira', 'priscila_meira@yahoo.com.br', '$2y$10$15eSMYWdytHHBpt/rRAwCueR0gR3yMk5nwSrdeUkxkS2ZeT8zFp/W', 'aluno', '', NULL, NULL, NULL, 'desativado', NULL),
-(41, 'Tathiane Saraiva', 'tathisaraiva@hotmail.com', '$2y$10$tgMbN0OUDdD/LDY02IzSS.MqBAuHY2zSGp.34rPzdpEUZlos20JZu', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL),
-(42, 'Isabela Rossa', 'contatoisaat@gmail.com', '$2y$10$PhG6.se7V5NU4lmL/hD0yeZtfRoT./63QaGqh8noQPDhFQ1Ioe4S.', 'aluno', '', NULL, NULL, 2, 'ativo', NULL),
-(43, 'Leandro Hipólito', 'leandrohipolitosilva@hotmail.com', '$2y$10$6aRB8iTQ7PsxHONoBRqtdejbpWv2oZABqKcs2u/5Q045hxbKAv2I2', 'aluno', '', NULL, NULL, 10, 'ativo', NULL),
-(44, 'Daniel Maler', 'malerdaniel791@gmail.com', '$2y$10$p.DH/7jjMI1nA2oToqztb.EIHqzLfB1pNhE/L7UZI7GGPfOy7oDVi', 'aluno', '', NULL, NULL, 10, 'ativo', NULL),
-(45, 'Bruna Muraro', 'murarobruna@gmail.com', '$2y$10$QoEoAechhIO3C7M2lEtYj.vfk7OE30makPojmId.vTMo7Ku8BKygu', 'aluno', '', NULL, NULL, 10, 'ativo', NULL),
-(46, 'Nicky Bryan Lemos', 'nicky.bryanlemes@icloud.com', '$2y$10$wS4iVV37TbHk.eKOdCMpH.ehED6PkoB1vbTFgqwLDtp2TZD6X6cqK', 'aluno', '', NULL, NULL, 8, 'ativo', NULL),
-(47, 'Larissa Eduarda Angelico', 'larieduarda8@gmail.com', '$2y$10$PjS2F80HFcPxo5MlntLWTuTHVhmvwzpfjO8V3P2JTCICmjWvWS53G', 'aluno', '', NULL, NULL, 13, 'ativo', NULL),
-(48, 'Diego Pilatti', 'diegopilatti@gmail.com', '$2y$10$a/G9Kymc/jqsuPuOm93unO44YgXswigr5hgPi9.JX8zWl5ldx5XgK', 'aluno', '', NULL, NULL, 25, 'ativo', NULL),
-(49, 'Ana Paitach', 'anapaitach@generallis.com.br', '$2y$10$NKRwBW/JQ93uE44XT999guXMukoG0QxXtK7oZQNjQWrijAKewSNAK', 'aluno', '', NULL, NULL, 25, 'ativo', NULL),
-(52, 'Thiago Luiz Zattoni', 'thiagolzattoni@gmail.com', '$2y$10$1xmL1l2aoXi.OW7QUTH8Y.qxIZ6NSb/SmRG17OQn5x6mjqVMrFApG', 'aluno', '', NULL, NULL, 20, 'ativo', NULL),
-(53, 'Rafael Gogola', 'gogola93@hotmail.com', '$2y$10$6XEhuDs9eZu1E81/0xHSoOqwkGcCxMy64UKOMxklgj2fmNL/dOXGK', 'aluno', '', NULL, NULL, 30, 'ativo', NULL),
-(54, 'Gabrielly Rosa de Lima', 'gaby.r.lima07@gmail.com', '$2y$10$bwUOFANj0jZzR193gfQ3H.vwNxaFg.Ynaz3/7I51KOcA4aT2Aj7pa', 'aluno', '', NULL, NULL, 7, 'ativo', NULL),
-(55, 'Sônia Oliveira', 'soniaoliv@gmail.com', '$2y$10$mjTcjlfJGzni6iGjhng2O.ARjtVlItwfEU3lNkLrsdDgt6yrHoGNC', 'aluno', '', NULL, NULL, 15, 'ativo', NULL),
-(56, 'Guilherme Fabiano Batista do Prado', 'gfprado@hotmail.com', '$2y$10$rdzF4xOnQm2a4CWC9yB8PuLuO/51paH0fCZwf7XF/TRHQYzn4jzUq', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL),
-(57, 'Ana Clara Nazaret Antônio', 'anaclaranazaret@hotmail.com', '$2y$10$YPMRUqGNuAPh.3ZFNAb7ueJKR0lehDz2CEeQZi/kcomh7b.XcIFwi', 'aluno', '', NULL, NULL, 6, 'ativo', NULL);
+INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo_usuario`, `informacoes`, `reset_token`, `token_expira_em`, `dia_vencimento`, `status`, `responsavel_financeiro_id`, `nao_pagante`) VALUES
+(1, 'Admin Risenglish', 'admin@risenglish.com', '$2y$10$hrBdfKT3yhNJXaajbwZ.B.v4463iiA0r3W8eRfwrcTk614iAI15Ga', 'admin', NULL, NULL, NULL, NULL, 'ativo', NULL, 0),
+(18, 'Jorge Pontes', 'jorgeappontes13@gmail.com', '$2y$10$vxLOFkZRQPYQ.lEiRcdME.NdN7/D0krqWDsPmf6KyV/JlR4aQCtEu', 'aluno', '', '45095f753627328b67c0f2825f767562288e8d096da38df756765cab72e03fb7', '2025-12-01 18:58:02', 15, 'ativo', NULL, 0),
+(22, 'Laura Barszcz Antero', 'teacherlauraantero@gmail.com', '$2y$10$s5e7DpC7sUizHVvFjTGSzu0G1sVij8zBXs3Xe5HgpbcMhmKjeooJy', 'professor', '', NULL, NULL, NULL, 'ativo', NULL, 0),
+(23, 'Caio Henrique Bernal Dela Marta', 'caiobernaldelamarta@hotmail.com', '$2y$10$CWhd3VJ9z0lwd2PPcOPNQunENxRhoPNzk9E//Tt3aoxTwEGueLY6W', 'aluno', '', NULL, NULL, 19, 'ativo', NULL, 0),
+(24, 'Lucas Pegoraro Guimarães', 'lucasosspeg@hotmail.com', '$2y$10$69aLE6UeOvl1WiErcbVSVeJTZSmxDqwfZPwI8B0XUerH9.hErVYeC', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL, 0),
+(25, 'Lucas Carreira', 'lucasbcarreira@yahoo.com.br', '$2y$10$KMKoYBE3G0j7gxngI/FSLeBa1BZ9NcWMVYmaStddVoxyF3AsiXedi', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL, 0),
+(26, 'Bruna Carolina Cestari', 'brunacarolinacestari@gmail.com', '$2y$10$f93Ckg.NZMnGnVKybcGw7OL.s9fysVW9jbz/so8DgUnhNMtooY/qS', 'aluno', '', NULL, NULL, 8, 'ativo', NULL, 0),
+(27, 'Murilo Marins', 'murilommarins@gmail.com', '$2y$10$j97TvOk5c56ftbfQC/ajEuONx2I0PYbnXKbvJlRFA0cdkmn.sQ.1K', 'aluno', '', NULL, NULL, 10, 'ativo', NULL, 0),
+(28, 'Giovanna Malerba', 'giovannamalerba1105@gmail.com', '$2y$10$SCOUDQb7U.DT/6Lc3g/gjejaqtINl4ZZ9MnMw90JSAj5UOKRHivsa', 'aluno', '', NULL, NULL, 10, 'ativo', 27, 0),
+(29, 'Kleber Viana', 'vianak10@gmail.com', '$2y$10$YPGNvhlfhOw4WWYwEklbDuHKl4NxtdAmkpW51FtsZazHWolIkf7kq', 'aluno', '', NULL, NULL, 15, 'ativo', NULL, 0),
+(30, 'Alice Guilhoto', 'alice_guilhoto@hotmail.com', '$2y$10$UFrM8BLjfRQQutX2vI6P.eLJ3uMFUPO43cN8eZgz8X4R0.UopIdzu', 'aluno', '', NULL, NULL, 1, 'ativo', NULL, 0),
+(31, 'Fabiane Coelho', 'fabiannearaujo@yahoo.com.br', '$2y$10$8hZ1Qoc0WMTWgjCqWgoY6Oa.872wLQtfb6FZlMJkHuXK6G3DONC5e', 'aluno', '', NULL, NULL, 1, 'ativo', NULL, 0),
+(32, 'Ariane Perussi', 'arianeperussi@icloud.com', '$2y$10$GavnrcWeFbp5L.1akrZz7OUm4droRG9SscjcimfzYDjDwGe4gIKZ2', 'aluno', '', NULL, NULL, 7, 'ativo', NULL, 0),
+(33, 'Mariana Monezi Borzi', 'mmborzi@gmail.com', '$2y$10$7bMH1iS6lTsuiIneTXCPZ.GClHs9gCSS8oNGOLyHPeqkJjlGR6kie', 'aluno', '', NULL, NULL, 7, 'ativo', NULL, 0),
+(34, 'Mariele Alves Fernandes', 'marielevi2@icloud.com', '$2y$10$QJA9ltGpjoLmTJuwiAF6reuTmcBmoY6x4JcfU3n/lMRjRTkRyWxK6', 'aluno', '', NULL, NULL, 7, 'ativo', NULL, 0),
+(35, 'Pietra Seibt', 'pietraseibt@gmail.com', '$2y$10$U5z0AQVMizeuoxcVay9NxOokx37I1fVDdJ5g0xKRqmBHo/uyF9/nC', 'aluno', '', NULL, NULL, 10, 'ativo', NULL, 0),
+(36, 'Lucas Ferreira', 'lucas.personat@hotmail.com', '$2y$10$eH7dpatIUM.M21YfTBFQXub5GDgJgWheuaMdPfFLjbmjApAkHloem', 'aluno', '', NULL, NULL, 10, 'ativo', NULL, 0),
+(37, 'Yasmin Marmo', 'marmoyasmin13@gmail.com', '$2y$10$cI/qdvTXEHvSXXSRR11noehwBPhPH.pAY5BY7lx2L6iUWt9O7xcwO', 'aluno', '', NULL, NULL, 7, 'ativo', NULL, 0),
+(38, 'Beatriz Gadia', 'biagadia@gmail.com', '$2y$10$DWvjNCIlXq/vlyoCCanEAezW3R5VToOXK5puVMFup1suNKAw8i31O', 'aluno', '', NULL, NULL, 15, 'ativo', NULL, 0),
+(39, 'Eliana Chubaci', 'li_chubaci@hotmail.com', '$2y$10$aOQOMRDlpoZzCD3Ia8/d9eYIrdfeYs9llZQroQh2ktH9siC2zKQSW', 'aluno', '', NULL, NULL, 15, 'ativo', NULL, 0),
+(40, 'Priscila Meira de Oliveira', 'priscila_meira@yahoo.com.br', '$2y$10$15eSMYWdytHHBpt/rRAwCueR0gR3yMk5nwSrdeUkxkS2ZeT8zFp/W', 'aluno', '', NULL, NULL, NULL, 'desativado', NULL, 0),
+(41, 'Tathiane Saraiva', 'tathisaraiva@hotmail.com', '$2y$10$tgMbN0OUDdD/LDY02IzSS.MqBAuHY2zSGp.34rPzdpEUZlos20JZu', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL, 0),
+(42, 'Isabela Rossa', 'contatoisaat@gmail.com', '$2y$10$PhG6.se7V5NU4lmL/hD0yeZtfRoT./63QaGqh8noQPDhFQ1Ioe4S.', 'aluno', '', NULL, NULL, 2, 'ativo', NULL, 0),
+(43, 'Leandro Hipólito', 'leandrohipolitosilva@hotmail.com', '$2y$10$6aRB8iTQ7PsxHONoBRqtdejbpWv2oZABqKcs2u/5Q045hxbKAv2I2', 'aluno', '', NULL, NULL, 10, 'ativo', NULL, 0),
+(44, 'Daniel Maler', 'malerdaniel791@gmail.com', '$2y$10$p.DH/7jjMI1nA2oToqztb.EIHqzLfB1pNhE/L7UZI7GGPfOy7oDVi', 'aluno', '', NULL, NULL, 10, 'ativo', NULL, 0),
+(45, 'Bruna Muraro', 'murarobruna@gmail.com', '$2y$10$QoEoAechhIO3C7M2lEtYj.vfk7OE30makPojmId.vTMo7Ku8BKygu', 'aluno', '', NULL, NULL, 10, 'ativo', NULL, 0),
+(46, 'Nicky Bryan Lemos', 'nicky.bryanlemes@icloud.com', '$2y$10$wS4iVV37TbHk.eKOdCMpH.ehED6PkoB1vbTFgqwLDtp2TZD6X6cqK', 'aluno', '', NULL, NULL, 8, 'ativo', NULL, 0),
+(47, 'Larissa Eduarda Angelico', 'larieduarda8@gmail.com', '$2y$10$PjS2F80HFcPxo5MlntLWTuTHVhmvwzpfjO8V3P2JTCICmjWvWS53G', 'aluno', '', NULL, NULL, 13, 'ativo', NULL, 0),
+(48, 'Diego Pilatti', 'diegopilatti@gmail.com', '$2y$10$a/G9Kymc/jqsuPuOm93unO44YgXswigr5hgPi9.JX8zWl5ldx5XgK', 'aluno', '', NULL, NULL, 25, 'ativo', NULL, 0),
+(49, 'Ana Paitach', 'anapaitach@generallis.com.br', '$2y$10$NKRwBW/JQ93uE44XT999guXMukoG0QxXtK7oZQNjQWrijAKewSNAK', 'aluno', '', NULL, NULL, 25, 'ativo', NULL, 0),
+(52, 'Thiago Luiz Zattoni', 'thiagolzattoni@gmail.com', '$2y$10$1xmL1l2aoXi.OW7QUTH8Y.qxIZ6NSb/SmRG17OQn5x6mjqVMrFApG', 'aluno', '', NULL, NULL, 20, 'ativo', NULL, 0),
+(53, 'Rafael Gogola', 'gogola93@hotmail.com', '$2y$10$6XEhuDs9eZu1E81/0xHSoOqwkGcCxMy64UKOMxklgj2fmNL/dOXGK', 'aluno', '', NULL, NULL, 30, 'ativo', NULL, 0),
+(54, 'Gabrielly Rosa de Lima', 'gaby.r.lima07@gmail.com', '$2y$10$bwUOFANj0jZzR193gfQ3H.vwNxaFg.Ynaz3/7I51KOcA4aT2Aj7pa', 'aluno', '', NULL, NULL, 7, 'ativo', NULL, 0),
+(55, 'Sônia Oliveira', 'soniaoliv@gmail.com', '$2y$10$mjTcjlfJGzni6iGjhng2O.ARjtVlItwfEU3lNkLrsdDgt6yrHoGNC', 'aluno', '', NULL, NULL, 15, 'ativo', NULL, 0),
+(56, 'Guilherme Fabiano Batista do Prado', 'gfprado@hotmail.com', '$2y$10$rdzF4xOnQm2a4CWC9yB8PuLuO/51paH0fCZwf7XF/TRHQYzn4jzUq', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL, 0),
+(57, 'Ana Clara Nazaret Antônio', 'anaclaranazaret@hotmail.com', '$2y$10$YPMRUqGNuAPh.3ZFNAb7ueJKR0lehDz2CEeQZi/kcomh7b.XcIFwi', 'aluno', '', NULL, NULL, 6, 'ativo', NULL, 0),
+(58, 'TESTEXXX', 'x@gmail.com', '$2y$10$nMZjtf0jYkX8XesXsdsseewrRrVtUuGpW9fpdjFS9uxB8gV5LAUcy', 'aluno', '', NULL, NULL, NULL, 'ativo', NULL, 1);
 
 --
 -- Índices para tabelas despejadas
@@ -1560,6 +1591,15 @@ ALTER TABLE `grupos_conteudos`
   ADD KEY `professor_id` (`professor_id`);
 
 --
+-- Índices de tabela `notificacoes`
+--
+ALTER TABLE `notificacoes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `usuario_id` (`usuario_id`),
+  ADD KEY `lida` (`lida`),
+  ADD KEY `data_criacao` (`data_criacao`);
+
+--
 -- Índices de tabela `pagamentos`
 --
 ALTER TABLE `pagamentos`
@@ -1612,13 +1652,13 @@ ALTER TABLE `alunos_turmas`
 -- AUTO_INCREMENT de tabela `anotacoes_aula`
 --
 ALTER TABLE `anotacoes_aula`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT de tabela `anotacoes_itens`
 --
 ALTER TABLE `anotacoes_itens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
 
 --
 -- AUTO_INCREMENT de tabela `anotacoes_visualizacoes`
@@ -1663,6 +1703,12 @@ ALTER TABLE `grupos_conteudos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT de tabela `notificacoes`
+--
+ALTER TABLE `notificacoes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT de tabela `pagamentos`
 --
 ALTER TABLE `pagamentos`
@@ -1690,7 +1736,7 @@ ALTER TABLE `turmas`
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
 
 --
 -- Restrições para tabelas despejadas
@@ -1763,6 +1809,12 @@ ALTER TABLE `conteudos`
 --
 ALTER TABLE `grupos_conteudos`
   ADD CONSTRAINT `grupos_conteudos_ibfk_1` FOREIGN KEY (`professor_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
+
+--
+-- Restrições para tabelas `notificacoes`
+--
+ALTER TABLE `notificacoes`
+  ADD CONSTRAINT `notificacoes_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
 -- Restrições para tabelas `pagamentos`

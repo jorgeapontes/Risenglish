@@ -397,6 +397,12 @@ function formatarData($data) {
     $date = new DateTime($data);
     return $date->format('d/m/Y H:i');
 }
+
+// ===== BUSCAR NOTIFICAÇÕES NÃO LIDAS =====
+$sql_notificacoes = "SELECT COUNT(*) as total FROM notificacoes WHERE usuario_id = :professor_id AND lida = 0";
+$stmt_notif = $pdo->prepare($sql_notificacoes);
+$stmt_notif->execute([':professor_id' => $professor_id]);
+$total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
 ?>
 
 <!DOCTYPE html>
@@ -931,6 +937,12 @@ function formatarData($data) {
                     <h5 class="mt-4">Prof. <?= htmlspecialchars($professor_nome) ?></h5>
                 </div>
                 <div class="d-flex flex-column flex-grow-1 mb-5">
+                     <a href="notificacoes.php" class="rounded position-relative">
+                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
+                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
+                        <?php endif; ?>
+                    </a>
                     <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                     <a href="gerenciar_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
                     <a href="gerenciar_conteudos.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
@@ -1108,7 +1120,7 @@ function formatarData($data) {
                     </div>
                 </div>
                 
-                <div class="card shadow-sm mb-4">
+                <div class="card shadow-sm mb-4" id="anotacoes">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div>
                             <i class="fas fa-edit me-2"></i>Anotações dos Alunos

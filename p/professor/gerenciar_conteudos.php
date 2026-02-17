@@ -185,6 +185,12 @@ $stmt_todos_temas = $pdo->prepare($sql_todos_temas);
 $stmt_todos_temas->execute([':professor_id' => $professor_id]);
 $todos_temas = $stmt_todos_temas->fetchAll(PDO::FETCH_ASSOC);
 
+// ===== BUSCAR NOTIFICAÇÕES NÃO LIDAS =====
+$sql_notificacoes = "SELECT COUNT(*) as total FROM notificacoes WHERE usuario_id = :professor_id AND lida = 0";
+$stmt_notif = $pdo->prepare($sql_notificacoes);
+$stmt_notif->execute([':professor_id' => $professor_id]);
+$total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
+
 // Array de ícones disponíveis
 $icones_disponiveis = [
     'fas fa-layer-group' => 'Camadas',
@@ -330,6 +336,12 @@ $icones_disponiveis = [
             <div class="col-md-2 d-flex flex-column sidebar p-3">
                 <div class="mb-4 text-center"><h5 class="mt-4">Prof. <?= $_SESSION['user_nome'] ?></h5></div>
                 <div class="d-flex flex-column flex-grow-1 mb-5">
+                    <a href="notificacoes.php" class="rounded position-relative">
+                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
+                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
+                        <?php endif; ?>
+                    </a>
                     <a href="dashboard.php"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                     <a href="gerenciar_aulas.php"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
                     <a href="gerenciar_conteudos.php" class="active"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
