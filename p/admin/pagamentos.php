@@ -95,7 +95,7 @@ $mes_referencia_inicio = $filtro_mes . '-01';
 
 $alunos_pagamentos = [];
 try {
-    // ESTA QUERY FOI ALTERADA PARA AGRUPAR POR PAGADOR
+    // ESTA QUERY FOI ALTERADA PARA AGRUPAR POR PAGADOR E EXCLUIR USUÁRIOS DESATIVADOS
     // Seleciona quem é aluno e paga pra si mesmo OU quem é responsável financeiro por alguém
     $sql = "
         SELECT DISTINCT
@@ -112,13 +112,16 @@ try {
                         (SELECT GROUP_CONCAT(u_dep.nome SEPARATOR ', ') 
                          FROM usuarios u_dep 
                          WHERE u_dep.responsavel_financeiro_id = pagador.id
-                             AND IFNULL(u_dep.nao_pagante,0) = 0) as dependentes
+                             AND IFNULL(u_dep.nao_pagante,0) = 0
+                             AND u_dep.status != 'desativado') as dependentes
         FROM usuarios pagador
                 LEFT JOIN pagamentos p ON pagador.id = p.aluno_id AND p.mes_referencia = ?
-                LEFT JOIN usuarios dep ON dep.responsavel_financeiro_id = pagador.id AND IFNULL(dep.nao_pagante,0) = 0
+                LEFT JOIN usuarios dep ON dep.responsavel_financeiro_id = pagador.id AND IFNULL(dep.nao_pagante,0) = 0 AND dep.status != 'desativado'
                 WHERE 
                         -- Excluir usuários marcados como não pagantes
                         IFNULL(pagador.nao_pagante,0) = 0 AND
+                        -- Excluir usuários desativados
+                        pagador.status != 'desativado' AND
             (
                 -- Regra: Ou é um aluno independente (sem resp) OU é responsável por alguém (com dependentes pagantes)
                 (pagador.tipo_usuario = 'aluno' AND pagador.responsavel_financeiro_id IS NULL)
