@@ -77,6 +77,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $mensagem = "Pagamento removido com sucesso!";
             $tipo_mensagem = 'success';
+        } elseif ($action === 'reativar_usuario') {
+            $usuario_id = $_POST['usuario_id'] ?? null;
+            
+            if (empty($usuario_id)) {
+                throw new Exception("ID do usuário é obrigatório.");
+            }
+
+            $stmt = $pdo->prepare("UPDATE usuarios SET status = 'ativo' WHERE id = ?");
+            $stmt->execute([$usuario_id]);
+            
+            $mensagem = "Usuário reativado com sucesso!";
+            $tipo_mensagem = 'success';
         }
 
     } catch (Exception $e) {
@@ -91,44 +103,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $filtro_mes = $_GET['filtro_mes'] ?? date('Y-m');
 $filtro_busca = $_GET['filtro_busca'] ?? '';
+$filtro_status = $_GET['filtro_status'] ?? 'todos'; // Novo filtro de status
 $mes_referencia_inicio = $filtro_mes . '-01';
+
+// Determinar se o mês filtrado é passado, atual ou futuro
+$data_filtro = new DateTime($filtro_mes . '-01');
+$data_atual = new DateTime(date('Y-m-01'));
+$mes_ano_filtro = $data_filtro->format('Y-m');
+$mes_ano_atual = $data_atual->format('Y-m');
 
 $alunos_pagamentos = [];
 try {
-    // ESTA QUERY FOI ALTERADA PARA AGRUPAR POR PAGADOR E EXCLUIR USUÁRIOS DESATIVADOS
-    // Seleciona quem é aluno e paga pra si mesmo OU quem é responsável financeiro por alguém
+    // Query ajustada para respeitar o filtro de status em TODOS os meses
     $sql = "
         SELECT DISTINCT
             pagador.id,
             pagador.nome,
             pagador.email,
             pagador.dia_vencimento,
+            pagador.status,
             p.id as pagamento_id,
             p.valor,
             p.data_pagamento,
             p.observacoes,
             p.mes_referencia,
-                        -- Subquery para pegar nomes dos dependentes (somente dependentes pagantes)
-                        (SELECT GROUP_CONCAT(u_dep.nome SEPARATOR ', ') 
-                         FROM usuarios u_dep 
-                         WHERE u_dep.responsavel_financeiro_id = pagador.id
-                             AND IFNULL(u_dep.nao_pagante,0) = 0
-                             AND u_dep.status != 'desativado') as dependentes
+            -- Subquery para pegar nomes dos dependentes (somente dependentes pagantes e ativos)
+            (SELECT GROUP_CONCAT(u_dep.nome SEPARATOR ', ') 
+             FROM usuarios u_dep 
+             WHERE u_dep.responsavel_financeiro_id = pagador.id
+                 AND IFNULL(u_dep.nao_pagante,0) = 0
+                 AND u_dep.status != 'desativado') as dependentes_ativos,
+            -- Subquery para pegar nomes dos dependentes inativos (para informação)
+            (SELECT GROUP_CONCAT(u_dep.nome SEPARATOR ', ') 
+             FROM usuarios u_dep 
+             WHERE u_dep.responsavel_financeiro_id = pagador.id
+                 AND IFNULL(u_dep.nao_pagante,0) = 0
+                 AND u_dep.status = 'desativado') as dependentes_inativos
         FROM usuarios pagador
-                LEFT JOIN pagamentos p ON pagador.id = p.aluno_id AND p.mes_referencia = ?
-                LEFT JOIN usuarios dep ON dep.responsavel_financeiro_id = pagador.id AND IFNULL(dep.nao_pagante,0) = 0 AND dep.status != 'desativado'
-                WHERE 
-                        -- Excluir usuários marcados como não pagantes
-                        IFNULL(pagador.nao_pagante,0) = 0 AND
-            (
-                -- Regra: Ou é um aluno independente (sem resp) OU é responsável por alguém (com dependentes pagantes)
-                (pagador.tipo_usuario = 'aluno' AND pagador.responsavel_financeiro_id IS NULL)
-                OR
-                (dep.id IS NOT NULL)
-            )
+        LEFT JOIN pagamentos p ON pagador.id = p.aluno_id AND p.mes_referencia = ?
+        LEFT JOIN usuarios dep ON dep.responsavel_financeiro_id = pagador.id 
+            AND IFNULL(dep.nao_pagante,0) = 0 
+            AND dep.status != 'desativado'
+        WHERE 
+            -- Excluir usuários marcados como não pagantes
+            IFNULL(pagador.nao_pagante,0) = 0
     ";
     
     $params = [$mes_referencia_inicio];
+    
+    // Aplicar filtro de status baseado na seleção do usuário
+    if ($filtro_status === 'ativos') {
+        $sql .= " AND pagador.status != 'desativado'";
+    } elseif ($filtro_status === 'inativos') {
+        $sql .= " AND pagador.status = 'desativado'";
+    }
+    // Se for 'todos', não adiciona filtro - mostra todos independente do status
+    
+    // Condição para identificar pagadores válidos
+    $sql .= " AND (
+                -- Ou é um aluno independente (sem resp)
+                (pagador.tipo_usuario = 'aluno' AND pagador.responsavel_financeiro_id IS NULL)
+                OR
+                -- Ou é responsável por alguém (com dependentes pagantes)
+                (dep.id IS NOT NULL)
+                OR
+                -- OU tem pagamento registrado neste mês (para casos de alunos com histórico)
+                p.id IS NOT NULL
+            )
+    ";
     
     if (!empty($filtro_busca)) {
         $sql .= " AND (pagador.nome LIKE ? OR pagador.email LIKE ?)";
@@ -156,37 +198,49 @@ $total_atrasado = 0;
 $count_pagos = 0;
 $count_pendentes = 0;
 $count_atrasados = 0;
+$count_inativos = 0;
 
 $hoje = new DateTime();
 foreach ($alunos_pagamentos as &$aluno) {
+    // Verificar se está inativo
+    if ($aluno['status'] === 'desativado') {
+        $count_inativos++;
+    }
+    
     if (!empty($aluno['data_pagamento'])) {
-        $aluno['status'] = 'pago';
+        $aluno['status_pagamento'] = 'pago';
         $total_pago += (float)$aluno['valor'];
         $total_mes += (float)$aluno['valor'];
         $count_pagos++;
     } else {
-        if (!empty($aluno['dia_vencimento'])) {
+        if (!empty($aluno['dia_vencimento']) && $aluno['status'] !== 'desativado') {
             try {
                 $data_vencimento = new DateTime($filtro_mes . '-' . str_pad($aluno['dia_vencimento'], 2, '0', STR_PAD_LEFT));
                 
                 if ($hoje > $data_vencimento) {
-                    $aluno['status'] = 'atrasado';
+                    $aluno['status_pagamento'] = 'atrasado';
                     $count_atrasados++;
                 } else {
-                    $aluno['status'] = 'pendente';
+                    $aluno['status_pagamento'] = 'pendente';
                     $count_pendentes++;
                 }
             } catch (Exception $e) {
-                $aluno['status'] = 'pendente';
+                $aluno['status_pagamento'] = 'pendente';
                 $count_pendentes++;
             }
         } else {
-            $aluno['status'] = 'pendente';
-            $count_pendentes++;
+            $aluno['status_pagamento'] = 'pendente';
+            if ($aluno['status'] !== 'desativado') {
+                $count_pendentes++;
+            }
         }
     }
 }
 unset($aluno);
+
+// Calcular totais adicionais para o alerta
+$total_registros = count($alunos_pagamentos);
+$total_ativos = $total_registros - $count_inativos;
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -198,6 +252,60 @@ unset($aluno);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
     <link rel="stylesheet" href="../../css/admin/pagamentos.css">
+    <style>
+        .badge-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+        .badge-status.ativo {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .badge-status.inativo {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .dependente-info {
+            font-size: 0.85em;
+            margin-top: 5px;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        .dependente-info.ativos {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .dependente-info.inativos {
+            background-color: #ffebee;
+            color: #c62828;
+            margin-top: 2px;
+        }
+        .btn-reativar {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 0.5rem;
+        }
+        .btn-reativar:hover {
+            background-color: #218838;
+        }
+        .info-badge {
+            background-color: #e7f3ff;
+            color: #004085;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #007bff;
+        }
+    </style>
 </head>
 <body>
 
@@ -265,7 +373,7 @@ unset($aluno);
                            placeholder="Digite o nome ou email do responsável..."
                            value="<?= htmlspecialchars($filtro_busca) ?>">
                 </div>
-                <div style="flex: 0 0 250px;">
+                <div style="flex: 0 0 200px;">
                     <label class="form-label mb-1">
                         <i class="fas fa-calendar-alt"></i> Mês de Referência
                     </label>
@@ -274,14 +382,24 @@ unset($aluno);
                            class="form-control" 
                            value="<?= htmlspecialchars($filtro_mes) ?>">
                 </div>
+                <div style="flex: 0 0 180px;">
+                    <label class="form-label mb-1">
+                        <i class="fas fa-filter"></i> Status
+                    </label>
+                    <select name="filtro_status" class="form-select">
+                        <option value="todos" <?= $filtro_status === 'todos' ? 'selected' : '' ?>>Todos</option>
+                        <option value="ativos" <?= $filtro_status === 'ativos' ? 'selected' : '' ?>>Ativos</option>
+                        <option value="inativos" <?= $filtro_status === 'inativos' ? 'selected' : '' ?>>Inativos</option>
+                    </select>
+                </div>
                 <div style="flex: 0 0 auto;">
                     <button type="submit" class="btn btn-registrar">
                         <i class="fas fa-filter"></i> Filtrar
                     </button>
                 </div>
-                <?php if (!empty($filtro_busca)): ?>
+                <?php if (!empty($filtro_busca) || $filtro_status !== 'todos'): ?>
                 <div style="flex: 0 0 auto;">
-                    <a href="?filtro_mes=<?= htmlspecialchars($filtro_mes) ?>" class="btn btn-secondary">
+                    <a href="pagamentos.php" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Limpar
                     </a>
                 </div>
@@ -296,8 +414,22 @@ unset($aluno);
             <?php if (empty($alunos_pagamentos)): ?>
                 - Nenhum responsável encontrado.
             <?php else: ?>
-                - <?= count($alunos_pagamentos) ?> encontrado(s).
+                - <?= count($alunos_pagamentos) ?> encontrado(s) (<?= $total_ativos ?> ativos, <?= $count_inativos ?> inativos).
             <?php endif; ?>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($filtro_status === 'inativos' && $count_inativos === 0): ?>
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> 
+            Nenhum aluno inativo encontrado para o mês <?= date('m/Y', strtotime($filtro_mes)) ?>.
+        </div>
+        <?php endif; ?>
+
+        <?php if ($filtro_status === 'ativos' && $total_ativos === 0): ?>
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> 
+            Nenhum aluno ativo encontrado para o mês <?= date('m/Y', strtotime($filtro_mes)) ?>.
         </div>
         <?php endif; ?>
 
@@ -307,7 +439,7 @@ unset($aluno);
                     <tr>
                         <th>Responsável Financeiro</th>
                         <th>Vencimento</th>
-                        <th>Status</th>
+                        <th>Status Pagamento</th>
                         <th>Data Pagamento</th>
                         <th>Valor Pago</th>
                         <th>Observações</th>
@@ -319,14 +451,27 @@ unset($aluno);
                         <tr><td colspan="7" class="text-center">Nenhum registro encontrado para este mês.</td></tr>
                     <?php else: ?>
                         <?php foreach ($alunos_pagamentos as $aluno): ?>
-                        <tr>
+                        <tr class="<?= $aluno['status'] === 'desativado' ? 'table-secondary' : '' ?>">
                             <td>
-                                <strong><?= htmlspecialchars($aluno['nome']) ?></strong><br>
+                                <div class="d-flex align-items-center">
+                                    <strong><?= htmlspecialchars($aluno['nome']) ?></strong>
+                                    <?php if ($aluno['status'] === 'desativado'): ?>
+                                        <span class="badge-status inativo">Inativo</span>
+                                    <?php else: ?>
+                                        <span class="badge-status ativo">Ativo</span>
+                                    <?php endif; ?>
+                                </div>
                                 <small class="text-muted"><?= htmlspecialchars($aluno['email']) ?></small>
                                 
-                                <?php if (!empty($aluno['dependentes'])): ?>
-                                    <div style="font-size: 0.85em; margin-top: 5px; color: #666;">
-                                        <i class="fas fa-users"></i> Cobre: <?= htmlspecialchars($aluno['dependentes']) ?>
+                                <?php if (!empty($aluno['dependentes_ativos'])): ?>
+                                    <div class="dependente-info ativos">
+                                        <i class="fas fa-users"></i> Dependentes ativos: <?= htmlspecialchars($aluno['dependentes_ativos']) ?>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($aluno['dependentes_inativos'])): ?>
+                                    <div class="dependente-info inativos">
+                                        <i class="fas fa-user-slash"></i> Dependentes inativos: <?= htmlspecialchars($aluno['dependentes_inativos']) ?>
                                     </div>
                                 <?php endif; ?>
                             </td>
@@ -338,22 +483,27 @@ unset($aluno);
                                 <?php else: ?>
                                     <span class="text-muted">Não definido</span>
                                 <?php endif; ?>
-                                <button class="btn btn-vencimento btn-sm ms-1" 
-                                        onclick="editarVencimento(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome']) ?>', <?= $aluno['dia_vencimento'] ?? 'null' ?>)">
-                                    <i class="fas fa-edit"></i>
-                                </button>
+                                
+                                <?php if ($aluno['status'] !== 'desativado'): ?>
+                                    <button class="btn btn-vencimento btn-sm ms-1" 
+                                            onclick="editarVencimento(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome']) ?>', <?= $aluno['dia_vencimento'] ?? 'null' ?>)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                <?php endif; ?>
                             </td>
                             <td>
-                                <span class="badge badge-<?= $aluno['status'] ?>">
-                                    <?php 
-                                        $status_texto = [
-                                            'pago' => 'Pago',
-                                            'pendente' => 'Pendente',
-                                            'atrasado' => 'Atrasado'
-                                        ];
-                                        echo $status_texto[$aluno['status']];
-                                    ?>
-                                </span>
+                                <?php if ($aluno['status_pagamento']): ?>
+                                    <span class="badge badge-<?= $aluno['status_pagamento'] ?>">
+                                        <?php 
+                                            $status_texto = [
+                                                'pago' => 'Pago',
+                                                'pendente' => 'Pendente',
+                                                'atrasado' => 'Atrasado'
+                                            ];
+                                            echo $status_texto[$aluno['status_pagamento']];
+                                        ?>
+                                    </span>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <?php if ($aluno['data_pagamento']): ?>
@@ -379,23 +529,33 @@ unset($aluno);
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <button class="btn btn-registrar btn-sm" 
-                                        onclick='registrarPagamento(<?= json_encode([
-                                            "aluno_id" => $aluno["id"],
-                                            "aluno_nome" => $aluno["nome"],
-                                            "mes_referencia" => $filtro_mes,
-                                            "pagamento_id" => $aluno["pagamento_id"],
-                                            "valor" => $aluno["valor"],
-                                            "data_pagamento" => $aluno["data_pagamento"],
-                                            "observacoes" => $aluno["observacoes"]
-                                        ]) ?>)'>
-                                    <i class="fas fa-<?= $aluno['data_pagamento'] ? 'edit' : 'plus' ?>"></i>
-                                    <?= $aluno['data_pagamento'] ? 'Editar' : 'Registrar' ?>
-                                </button>
+                                <?php if ($aluno['status'] !== 'desativado'): ?>
+                                    <button class="btn btn-registrar btn-sm" 
+                                            onclick='registrarPagamento(<?= json_encode([
+                                                "aluno_id" => $aluno["id"],
+                                                "aluno_nome" => $aluno["nome"],
+                                                "mes_referencia" => $filtro_mes,
+                                                "pagamento_id" => $aluno["pagamento_id"],
+                                                "valor" => $aluno["valor"],
+                                                "data_pagamento" => $aluno["data_pagamento"],
+                                                "observacoes" => $aluno["observacoes"]
+                                            ]) ?>)'>
+                                        <i class="fas fa-<?= $aluno['data_pagamento'] ? 'edit' : 'plus' ?>"></i>
+                                        <?= $aluno['data_pagamento'] ? 'Editar' : 'Registrar' ?>
+                                    </button>
+                                <?php endif; ?>
+                                
                                 <?php if ($aluno['pagamento_id']): ?>
                                     <button class="btn btn-remover btn-sm ms-1" 
                                             onclick="removerPagamento(<?= $aluno['pagamento_id'] ?>, '<?= htmlspecialchars($aluno['nome']) ?>')">
                                         <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                <?php endif; ?>
+                                
+                                <?php if ($aluno['status'] === 'desativado'): ?>
+                                    <button class="btn-reativar btn-sm ms-1" 
+                                            onclick="reativarUsuario(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome']) ?>')">
+                                        <i class="fas fa-user-check"></i> Reativar
                                     </button>
                                 <?php endif; ?>
                             </td>
@@ -497,6 +657,11 @@ unset($aluno);
     <input type="hidden" name="pagamento_id" id="remover_pagamento_id">
 </form>
 
+<form id="formReativar" method="POST" action="pagamentos.php">
+    <input type="hidden" name="action" value="reativar_usuario">
+    <input type="hidden" name="usuario_id" id="reativar_usuario_id">
+</form>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function registrarPagamento(dados) {
@@ -539,6 +704,13 @@ unset($aluno);
         if (confirm(`Tem certeza que deseja remover o pagamento de ${aluno_nome}? Esta ação é irreversível.`)) {
             document.getElementById('remover_pagamento_id').value = pagamento_id;
             document.getElementById('formRemover').submit();
+        }
+    }
+    
+    function reativarUsuario(usuario_id, aluno_nome) {
+        if (confirm(`Deseja reativar o usuário ${aluno_nome}? Ele voltará a aparecer nos meses atuais/futuros.`)) {
+            document.getElementById('reativar_usuario_id').value = usuario_id;
+            document.getElementById('formReativar').submit();
         }
     }
 </script>
