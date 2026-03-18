@@ -120,8 +120,6 @@ try {
                 WHERE 
                         -- Excluir usuários marcados como não pagantes
                         IFNULL(pagador.nao_pagante,0) = 0 AND
-                        -- Excluir usuários desativados
-                        pagador.status != 'desativado' AND
             (
                 -- Regra: Ou é um aluno independente (sem resp) OU é responsável por alguém (com dependentes pagantes)
                 (pagador.tipo_usuario = 'aluno' AND pagador.responsavel_financeiro_id IS NULL)
