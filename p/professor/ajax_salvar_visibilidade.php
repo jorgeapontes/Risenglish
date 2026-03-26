@@ -26,15 +26,15 @@ if (!$conteudo_id || !is_array($visibilidades)) {
 }
 
 try {
-    // Verifica se o conteúdo pertence ao professor
+    // Verifica se o conteúdo existe (compartilhado entre professores)
     $sql_verifica = "SELECT c.id FROM conteudos c 
-                     WHERE c.id = :conteudo_id AND c.professor_id = :professor_id";
+                     WHERE c.id = :conteudo_id";
     $stmt_verifica = $pdo->prepare($sql_verifica);
-    $stmt_verifica->execute([':conteudo_id' => $conteudo_id, ':professor_id' => $professor_id]);
+    $stmt_verifica->execute([':conteudo_id' => $conteudo_id]);
     
     if (!$stmt_verifica->fetch()) {
         header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => 'Conteúdo não encontrado ou acesso negado.']);
+        echo json_encode(['success' => false, 'message' => 'Conteúdo não encontrado.']);
         exit;
     }
 
