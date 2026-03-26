@@ -269,7 +269,7 @@ $sql_temas_sem_grupo = "
 ";
 
 $stmt_temas_sem_grupo = $pdo->prepare($sql_temas_sem_grupo);
-$stmt_temas_sem_grupo->execute([':aula_id' => $aula_id, ':professor_id' => $professor_id]);
+$stmt_temas_sem_grupo->execute([':aula_id' => $aula_id]);
 $temas_sem_grupo = $stmt_temas_sem_grupo->fetchAll(PDO::FETCH_ASSOC);
 
 // BUSCAR TEMAS POR GRUPO
