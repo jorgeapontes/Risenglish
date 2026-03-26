@@ -31,11 +31,11 @@ try {
         exit;
     }
     
-    // Verifica o conteúdo (usa a coluna 'professor_id' da tabela 'conteudos')
-    $stmt_check_conteudo = $pdo->prepare("SELECT COUNT(*) FROM conteudos WHERE id = :conteudo_id AND professor_id = :professor_id");
-    $stmt_check_conteudo->execute([':conteudo_id' => $conteudo_id, ':professor_id' => $professor_id]);
+    // Verifica se o conteúdo existe (permitindo compartilhamento entre professores)
+    $stmt_check_conteudo = $pdo->prepare("SELECT COUNT(*) FROM conteudos WHERE id = :conteudo_id");
+    $stmt_check_conteudo->execute([':conteudo_id' => $conteudo_id]);
     if ($stmt_check_conteudo->fetchColumn() == 0) {
-        echo json_encode(['success' => false, 'message' => 'Permissão negada para este conteúdo.']);
+        echo json_encode(['success' => false, 'message' => 'Conteúdo não encontrado.']);
         exit;
     }
 

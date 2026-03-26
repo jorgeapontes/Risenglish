@@ -240,10 +240,10 @@ foreach ($alunos_turma as $aluno) {
 }
 // ========== FIM SISTEMA DE ANOTAÇÕES COMPARTILHADAS COM VISTO ==========
 
-// BUSCAR GRUPOS DO PROFESSOR
-$sql_grupos = "SELECT * FROM grupos_conteudos WHERE professor_id = :professor_id ORDER BY ordem ASC, nome ASC";
+// BUSCAR GRUPOS (COMPARTILHADO)
+$sql_grupos = "SELECT g.*, u.nome AS autor_grupo FROM grupos_conteudos g JOIN usuarios u ON g.professor_id = u.id ORDER BY g.ordem ASC, g.nome ASC";
 $stmt_grupos = $pdo->prepare($sql_grupos);
-$stmt_grupos->execute([':professor_id' => $professor_id]);
+$stmt_grupos->execute();
 $grupos = $stmt_grupos->fetchAll(PDO::FETCH_ASSOC);
 
 // BUSCAR TEMAS SEM GRUPO (não agrupados)
@@ -252,6 +252,7 @@ $sql_temas_sem_grupo = "
         c.id AS tema_id, 
         c.titulo, 
         c.descricao, 
+        c.professor_id,
         u.nome AS autor_tema,
         COALESCE(ac.planejado, 0) AS planejado 
     FROM 
@@ -262,7 +263,6 @@ $sql_temas_sem_grupo = "
         aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
     WHERE 
         c.parent_id IS NULL
-        AND c.professor_id = :professor_id
         AND c.grupo_id IS NULL
     ORDER BY 
         c.titulo ASC
@@ -290,7 +290,6 @@ foreach ($grupos as $grupo) {
             aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
         WHERE 
             c.parent_id IS NULL
-            AND c.professor_id = :professor_id
             AND c.grupo_id = :grupo_id
         ORDER BY 
             c.titulo ASC
@@ -299,7 +298,6 @@ foreach ($grupos as $grupo) {
     $stmt_temas_grupo = $pdo->prepare($sql_temas_grupo);
     $stmt_temas_grupo->execute([
         ':aula_id' => $aula_id, 
-        ':professor_id' => $professor_id,
         ':grupo_id' => $grupo['id']
     ]);
     $temas_por_grupo[$grupo['id']] = $stmt_temas_grupo->fetchAll(PDO::FETCH_ASSOC);
