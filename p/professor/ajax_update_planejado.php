@@ -33,11 +33,19 @@ try {
         exit;
     }
     
-    // Verifica o conteúdo (confirma que o professor é dono do conteúdo)
-    $stmt_check_conteudo = $pdo->prepare("SELECT COUNT(*) FROM conteudos WHERE id = :conteudo_id AND professor_id = :professor_id");
-    $stmt_check_conteudo->execute([':conteudo_id' => $conteudo_id, ':professor_id' => $professor_id]);
+    // Verifica se o conteúdo existe (compartilhado entre professores)
+    $stmt_check_conteudo = $pdo->prepare("SELECT COUNT(*) FROM conteudos WHERE id = :conteudo_id");
+    $stmt_check_conteudo->execute([':conteudo_id' => $conteudo_id]);
     if ($stmt_check_conteudo->fetchColumn() == 0) {
-        echo json_encode(['success' => false, 'message' => 'Permissão negada: Conteúdo não pertence a este professor.']);
+        echo json_encode(['success' => false, 'message' => 'Conteúdo não encontrado.']);
+        exit;
+    }
+
+    // Verificar se o conteúdo está vinculado à aula
+    $stmt_check_vinculo = $pdo->prepare("SELECT COUNT(*) FROM aulas_conteudos WHERE aula_id = :aula_id AND conteudo_id = :conteudo_id");
+    $stmt_check_vinculo->execute([':aula_id' => $aula_id, ':conteudo_id' => $conteudo_id]);
+    if ($stmt_check_vinculo->fetchColumn() == 0) {
+        echo json_encode(['success' => false, 'message' => 'Conteúdo não vinculado a esta aula.']);
         exit;
     }
 

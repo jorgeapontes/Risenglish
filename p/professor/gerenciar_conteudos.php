@@ -145,10 +145,10 @@ if (isset($_POST['mover_tema'])) {
     }
 }
 
-// --- CONSULTA DOS GRUPOS ---
-$sql_grupos = "SELECT * FROM grupos_conteudos WHERE professor_id = :professor_id ORDER BY ordem ASC, nome ASC";
+// --- CONSULTA DOS GRUPOS (COMPARTILHADO) ---
+$sql_grupos = "SELECT g.*, u.nome AS autor_grupo FROM grupos_conteudos g JOIN usuarios u ON g.professor_id = u.id ORDER BY g.ordem ASC, g.nome ASC";
 $stmt_grupos = $pdo->prepare($sql_grupos);
-$stmt_grupos->execute([':professor_id' => $professor_id]);
+$stmt_grupos->execute();
 $grupos = $stmt_grupos->fetchAll(PDO::FETCH_ASSOC);
 
 // --- CONSULTA DOS TEMAS NÃO AGRUPADOS (sem grupo) ---
@@ -156,10 +156,9 @@ $sql_temas_sem_grupo = "SELECT c.*, u.nome as nome_professor FROM conteudos c
                          JOIN usuarios u ON c.professor_id = u.id 
                          WHERE c.parent_id IS NULL AND c.tipo_arquivo = 'TEMA' 
                          AND c.grupo_id IS NULL 
-                         AND c.professor_id = :professor_id
                          ORDER BY c.titulo ASC";
 $stmt_temas_sem_grupo = $pdo->prepare($sql_temas_sem_grupo);
-$stmt_temas_sem_grupo->execute([':professor_id' => $professor_id]);
+$stmt_temas_sem_grupo->execute();
 $temas_sem_grupo = $stmt_temas_sem_grupo->fetchAll(PDO::FETCH_ASSOC);
 
 // --- CONSULTA DOS TEMAS POR GRUPO ---
@@ -169,20 +168,18 @@ foreach ($grupos as $grupo) {
                   JOIN usuarios u ON c.professor_id = u.id 
                   WHERE c.parent_id IS NULL AND c.tipo_arquivo = 'TEMA' 
                   AND c.grupo_id = :grupo_id
-                  AND c.professor_id = :professor_id
                   ORDER BY c.titulo ASC";
     $stmt_temas = $pdo->prepare($sql_temas);
     $stmt_temas->execute([
-        ':grupo_id' => $grupo['id'],
-        ':professor_id' => $professor_id
+        ':grupo_id' => $grupo['id']
     ]);
     $temas_por_grupo[$grupo['id']] = $stmt_temas->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // --- CONSULTA DE TODOS OS TEMAS (para usar nos selects) ---
-$sql_todos_temas = "SELECT * FROM conteudos WHERE professor_id = :professor_id AND parent_id IS NULL AND tipo_arquivo = 'TEMA' ORDER BY titulo ASC";
+$sql_todos_temas = "SELECT * FROM conteudos WHERE parent_id IS NULL AND tipo_arquivo = 'TEMA' ORDER BY titulo ASC";
 $stmt_todos_temas = $pdo->prepare($sql_todos_temas);
-$stmt_todos_temas->execute([':professor_id' => $professor_id]);
+$stmt_todos_temas->execute();
 $todos_temas = $stmt_todos_temas->fetchAll(PDO::FETCH_ASSOC);
 
 // ===== BUSCAR NOTIFICAÇÕES NÃO LIDAS =====
@@ -464,19 +461,26 @@ $icones_disponiveis = [
                                         <div>
                                             <h5 class="mb-0"><?= htmlspecialchars($grupo['nome']) ?></h5>
                                             <?php if ($grupo['descricao']): ?>
-                                                <small class="text-muted"><?= htmlspecialchars($grupo['descricao']) ?></small>
+                                                <small class="text-muted d-block"><?= htmlspecialchars($grupo['descricao']) ?></small>
                                             <?php endif; ?>
+                                            <small class="text-muted">Criado por: <?= htmlspecialchars($grupo['autor_grupo'] ?? 'Desconhecido') ?></small>
                                         </div>
                                     </div>
                                     <div class="d-flex align-items-center gap-3">
                                         <span class="badge-count"><?= $total_temas ?> temas</span>
                                         <div class="btn-group">
-                                            <button class="btn btn-sm btn-link text-primary" onclick="event.stopPropagation(); editarGrupo(<?= $grupo['id'] ?>, '<?= htmlspecialchars($grupo['nome']) ?>', '<?= htmlspecialchars($grupo['descricao']) ?>', '<?= $grupo['cor'] ?>', '<?= $grupo['icone'] ?>')">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-link text-danger" onclick="event.stopPropagation(); confirmarExclusaoGrupo(<?= $grupo['id'] ?>, '<?= htmlspecialchars($grupo['nome']) ?>')">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
+                                            <?php if ($grupo['professor_id'] == $professor_id): ?>
+                                                <button class="btn btn-sm btn-link text-primary" onclick="event.stopPropagation(); editarGrupo(<?= $grupo['id'] ?>, '<?= htmlspecialchars($grupo['nome']) ?>', '<?= htmlspecialchars($grupo['descricao']) ?>', '<?= $grupo['cor'] ?>', '<?= $grupo['icone'] ?>')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-link text-danger" onclick="event.stopPropagation(); confirmarExclusaoGrupo(<?= $grupo['id'] ?>, '<?= htmlspecialchars($grupo['nome']) ?>')">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            <?php else: ?>
+                                                <button class="btn btn-sm btn-link text-secondary" disabled title="Grupo compartilhado; apenas leitura para você">
+                                                    <i class="fas fa-lock"></i>
+                                                </button>
+                                            <?php endif; ?>
                                             <button class="btn btn-sm btn-link text-dark" onclick="event.stopPropagation();">
                                                 <i class="fas fa-chevron-right rotate-icon" id="icone-grupo-<?= $grupo['id'] ?>"></i>
                                             </button>
@@ -505,15 +509,21 @@ $icones_disponiveis = [
                                                         <small class="text-muted ms-4"><?= htmlspecialchars($tema['descricao'] ?: 'Sem descrição.') ?></small>
                                                     </div>
                                                     <div class="actions d-flex">
-                                                        <button class="btn btn-sm btn-link text-primary me-2" onclick="event.stopPropagation(); editarTema(<?= $tema['id'] ?>, '<?= htmlspecialchars($tema['titulo']) ?>', '<?= htmlspecialchars($tema['descricao']) ?>', <?= $tema['grupo_id'] ?: 'null' ?>)">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-link text-warning me-2" onclick="event.stopPropagation(); abrirModalMover(<?= $tema['id'] ?>, '<?= htmlspecialchars($tema['titulo']) ?>', <?= $tema['grupo_id'] ?: 'null' ?>)">
-                                                            <i class="fas fa-arrows-alt"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-link text-danger" onclick="event.stopPropagation(); confirmarExclusaoTema(<?= $tema['id'] ?>, '<?= htmlspecialchars($tema['titulo']) ?>')">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
+                                                        <?php if ($tema['professor_id'] == $professor_id): ?>
+                                                            <button class="btn btn-sm btn-link text-primary me-2" onclick="event.stopPropagation(); editarTema(<?= $tema['id'] ?>, '<?= htmlspecialchars($tema['titulo']) ?>', '<?= htmlspecialchars($tema['descricao']) ?>', <?= $tema['grupo_id'] ?: 'null' ?>)">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-link text-warning me-2" onclick="event.stopPropagation(); abrirModalMover(<?= $tema['id'] ?>, '<?= htmlspecialchars($tema['titulo']) ?>', <?= $tema['grupo_id'] ?: 'null' ?>)">
+                                                                <i class="fas fa-arrows-alt"></i>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-link text-danger" onclick="event.stopPropagation(); confirmarExclusaoTema(<?= $tema['id'] ?>, '<?= htmlspecialchars($tema['titulo']) ?>')">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        <?php else: ?>
+                                                            <button class="btn btn-sm btn-link text-secondary" disabled title="Tema compartilhado; apenas leitura para você">
+                                                                <i class="fas fa-lock"></i>
+                                                            </button>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </li>
                                             <?php $contador++; endforeach; ?>
@@ -559,15 +569,21 @@ $icones_disponiveis = [
                                                         <small class="text-muted ms-4"><?= htmlspecialchars($tema['descricao'] ?: 'Sem descrição.') ?></small>
                                                     </div>
                                                     <div class="actions d-flex">
-                                                        <button class="btn btn-sm btn-link text-primary me-2" onclick="event.stopPropagation(); editarTema(<?= $tema['id'] ?>, '<?= htmlspecialchars($tema['titulo']) ?>', '<?= htmlspecialchars($tema['descricao']) ?>', <?= $tema['grupo_id'] ?: 'null' ?>)">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-link text-warning me-2" onclick="event.stopPropagation(); abrirModalMover(<?= $tema['id'] ?>, '<?= htmlspecialchars($tema['titulo']) ?>', <?= $tema['grupo_id'] ?: 'null' ?>)">
-                                                            <i class="fas fa-arrows-alt"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-link text-danger" onclick="event.stopPropagation(); confirmarExclusaoTema(<?= $tema['id'] ?>, '<?= htmlspecialchars($tema['titulo']) ?>')">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
+                                                        <?php if ($tema['professor_id'] == $professor_id): ?>
+                                                            <button class="btn btn-sm btn-link text-primary me-2" onclick="event.stopPropagation(); editarTema(<?= $tema['id'] ?>, '<?= htmlspecialchars($tema['titulo']) ?>', '<?= htmlspecialchars($tema['descricao']) ?>', <?= $tema['grupo_id'] ?: 'null' ?>)">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-link text-warning me-2" onclick="event.stopPropagation(); abrirModalMover(<?= $tema['id'] ?>, '<?= htmlspecialchars($tema['titulo']) ?>', <?= $tema['grupo_id'] ?: 'null' ?>)">
+                                                                <i class="fas fa-arrows-alt"></i>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-link text-danger" onclick="event.stopPropagation(); confirmarExclusaoTema(<?= $tema['id'] ?>, '<?= htmlspecialchars($tema['titulo']) ?>')">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        <?php else: ?>
+                                                            <button class="btn btn-sm btn-link text-secondary" disabled title="Tema compartilhado; apenas leitura para você">
+                                                                <i class="fas fa-lock"></i>
+                                                            </button>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </li>
                                             <?php $contador++; endforeach; ?>
