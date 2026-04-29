@@ -47,7 +47,6 @@ try {
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
 
     <style>
-        /* Melhorias no Design do Conteúdo */
         .doc-container {
             background: #fff;
             border-radius: 15px;
@@ -63,6 +62,7 @@ try {
             transition: all 0.2s ease;
             text-decoration: none !important;
             color: inherit;
+            cursor: pointer;
         }
 
         .doc-item:last-child { border-bottom: none; }
@@ -133,7 +133,6 @@ try {
             margin-bottom: 20px;
         }
 
-        /* Ajustes Mobile */
         @media (max-width: 768px) {
             .doc-item { flex-direction: column; text-align: center; }
             .file-icon-wrapper { margin-right: 0; margin-bottom: 15px; }
@@ -160,11 +159,11 @@ try {
         <div class="offcanvas-body d-flex flex-column">
             <nav class="d-flex flex-column gap-2">
                 <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </a>
+                    <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
+                    <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                        <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
+                    <?php endif; ?>
+                </a>
                 <a href="dashboard.php"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                 <a href="minhas_aulas.php"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;Minhas Aulas</a>
                 <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
@@ -185,11 +184,11 @@ try {
             
             <div class="d-flex flex-column flex-grow-1">
                 <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </a>
+                    <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
+                    <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                        <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
+                    <?php endif; ?>
+                </a>
                 <a href="dashboard.php"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                 <a href="minhas_aulas.php"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;Minhas Aulas</a>
                 <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
@@ -219,14 +218,17 @@ try {
                     </div>
                 <?php else: ?>
                     <?php foreach ($documentos as $doc): 
-                        // Lógica simples para mudar o ícone conforme a extensão
                         $ext = pathinfo($doc['nome_arquivo'], PATHINFO_EXTENSION);
                         $icon = 'fa-file-alt';
                         if(in_array($ext, ['pdf'])) $icon = 'fa-file-pdf';
                         if(in_array($ext, ['doc', 'docx'])) $icon = 'fa-file-word';
                         if(in_array($ext, ['jpg', 'png', 'jpeg'])) $icon = 'fa-file-image';
+                        if(in_array($ext, ['txt'])) $icon = 'fa-file-alt';
+                        if(in_array($ext, ['xls', 'xlsx'])) $icon = 'fa-file-excel';
+                        if(in_array($ext, ['ppt', 'pptx'])) $icon = 'fa-file-powerpoint';
+                        if(in_array($ext, ['zip', 'rar'])) $icon = 'fa-file-archive';
                     ?>
-                        <a href="../<?= $doc['caminho_arquivo'] ?>" target="_blank" class="doc-item">
+                        <a href="download.php?id=<?= $doc['id'] ?>" class="doc-item">
                             <div class="file-icon-wrapper">
                                 <i class="far <?= $icon ?>"></i>
                             </div>
@@ -245,7 +247,7 @@ try {
             </div>
 
             <footer class="mt-5 text-center text-muted small">
-                &copy;  Risenglish
+                &copy; Risenglish
             </footer>
         </div>
     </div>
