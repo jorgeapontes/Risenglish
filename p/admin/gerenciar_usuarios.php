@@ -7,6 +7,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'admin') {
     exit;
 }
 
+// --- AJAX PARA BUSCAR ANEXOS DO USUÁRIO ---
+if (isset($_GET['acao']) && $_GET['acao'] === 'buscar_anexos') {
+    header('Content-Type: application/json');
+    $user_id = (int)$_GET['usuario_id'];
+    $stmt = $pdo->prepare("SELECT id, nome_arquivo, caminho_arquivo, DATE_FORMAT(data_upload, '%d/%m/%Y %H:%i') as data_upload FROM usuarios_anexos WHERE usuario_id = ? ORDER BY data_upload DESC");
+    $stmt->execute([$user_id]);
+    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+    exit;
+}
+
 $mensagem = '';
 $tipo_mensagem = '';
 $termo_pesquisa = '';
@@ -23,7 +33,6 @@ try {
 }
 
 // BUSCAR LISTA DE USUÁRIOS PARA O SELECT DE RESPONSÁVEL FINANCEIRO
-// Exibir apenas usuários do tipo 'aluno' (apenas alunos podem ser responsáveis financeiros)
 try {
     $sql_resp = "SELECT id, nome FROM usuarios WHERE tipo_usuario = 'aluno' ORDER BY nome ASC";
     $stmt_resp = $pdo->query($sql_resp);
@@ -39,15 +48,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
     $senha = $_POST['senha'];
     $tipo = $_POST['tipo_usuario'];
     $informacoes = $_POST['informacoes'] ?? '';
-    // NOVO CAMPO: Responsável Financeiro
+    
     $responsavel_id = $_POST['responsavel_financeiro_id'] ?? null;
-    // Se o select enviar 'nao_pagante', armazenamos isso em uma flag e não em responsavel_financeiro_id
     $nao_pagante_flag = 0;
     if ($responsavel_id === 'nao_pagante') {
         $nao_pagante_flag = 1;
         $responsavel_id = null;
     } else {
-        // normalizar: tratar string vazia como null
         if ($responsavel_id === '') $responsavel_id = null;
     }
     
@@ -57,7 +64,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
     try {
         if (empty($nome) || empty($email) || empty($tipo)) throw new Exception("Todos os campos obrigatórios (Nome, Email, Tipo) devem ser preenchidos.");
 
-        // Evitar loop (usuário ser responsável por si mesmo no select, embora logicamente NULL seja o padrão para "paga pra si")
         if ($acao == 'editar_usuario' && $responsavel_id == $usuario_id) {
             $responsavel_id = null;
         }
@@ -72,7 +78,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
             if ($stmt_check->rowCount() > 0) throw new Exception("O email já está cadastrado.");
 
             $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
-            // Inserir com responsavel_financeiro_id
             $sql = "INSERT INTO usuarios (nome, email, senha, tipo_usuario, informacoes, responsavel_financeiro_id, nao_pagante) VALUES (:nome, :email, :senha, :tipo_usuario, :informacoes, :resp_id, :nao_pagante)";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':senha', $senha_hash);
@@ -152,6 +157,76 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
     }
 }
 
+// --- LÓGICA PARA UPLOAD MÚLTIPLO DE ANEXOS ---
+elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST['acao'] == 'upload_anexo') {
+    $usuario_id = $_POST['usuario_id_anexo'];
+    $arquivos = $_FILES['arquivos_anexo'];
+    $total_sucesso = 0;
+    $total_erros = 0;
+
+    if (isset($arquivos['name']) && is_array($arquivos['name']) && !empty($arquivos['name'][0])) {
+        $dir = '../uploads/anexos_usuarios/';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        foreach ($arquivos['name'] as $key => $nome_original) {
+            if ($arquivos['error'][$key] === UPLOAD_ERR_OK) {
+                $ext = strtolower(pathinfo($nome_original, PATHINFO_EXTENSION));
+                $novo_nome_fisico = time() . '_' . uniqid() . '.' . $ext;
+                $caminho_destino = $dir . $novo_nome_fisico;
+                
+                if (move_uploaded_file($arquivos['tmp_name'][$key], $caminho_destino)) {
+                    $caminho_bd = 'uploads/anexos_usuarios/' . $novo_nome_fisico;
+                    $sql = "INSERT INTO usuarios_anexos (usuario_id, nome_arquivo, caminho_arquivo) VALUES (?, ?, ?)";
+                    $pdo->prepare($sql)->execute([$usuario_id, $nome_original, $caminho_bd]);
+                    $total_sucesso++;
+                } else {
+                    $total_erros++;
+                }
+            } else {
+                $total_erros++;
+            }
+        }
+        
+        if ($total_sucesso > 0) {
+            $mensagem = "Upload concluído: $total_sucesso arquivo(s) adicionado(s) com sucesso!" . ($total_erros > 0 ? " Ocorreram $total_erros erro(s)." : "");
+            $tipo_mensagem = 'success';
+        } else {
+            $mensagem = "Nenhum arquivo pôde ser enviado. Verifique se os arquivos são válidos.";
+            $tipo_mensagem = 'danger';
+        }
+    } else {
+        $mensagem = "Nenhum arquivo enviado ou ocorreu um erro no upload.";
+        $tipo_mensagem = 'danger';
+    }
+}
+
+// --- LÓGICA PARA EXCLUIR ANEXO ---
+elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST['acao'] == 'excluir_anexo') {
+    $anexo_id = $_POST['anexo_id_excluir'];
+    
+    try {
+        $stmt = $pdo->prepare("SELECT caminho_arquivo FROM usuarios_anexos WHERE id = ?");
+        $stmt->execute([$anexo_id]);
+        $anexo = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($anexo) {
+            $caminho_completo = '../' . $anexo['caminho_arquivo'];
+            if (file_exists($caminho_completo)) {
+                unlink($caminho_completo);
+            }
+            $pdo->prepare("DELETE FROM usuarios_anexos WHERE id = ?")->execute([$anexo_id]);
+            $mensagem = "Anexo removido com sucesso!";
+            $tipo_mensagem = 'success';
+        }
+    } catch (Exception $e) {
+        $mensagem = "Erro ao excluir anexo: " . $e->getMessage();
+        $tipo_mensagem = 'danger';
+    }
+}
+
+
 // --- VERIFICAR SE HÁ PESQUISA ---
 if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $termo_pesquisa = trim($_GET['pesquisa']);
@@ -168,7 +243,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $stmt_professores->execute();
     $professores = $stmt_professores->fetchAll(PDO::FETCH_ASSOC);
     
-    // CONSULTA ALUNOS (Com Join no Responsável para exibir nome se quiser, mas aqui mantivemos simples)
+    // CONSULTA ALUNOS
     $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, u.responsavel_financeiro_id,
                           GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
                    FROM usuarios u
@@ -239,7 +314,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
             left: 0;
             top: 0;
             height: 100vh;
-            width: 16.666667%; /* Equivale a col-md-2 */
+            width: 16.666667%;
             background-color: #081d40;
             color: #fff;
             z-index: 1000;
@@ -271,7 +346,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         }
 
         .main-content {
-            margin-left: 16.666667%; /* Compensa a largura da sidebar fixa */
+            margin-left: 16.666667%;
             width: 83.333333%;
             animation: fadeIn 0.5s ease;
             padding: 30px;
@@ -296,28 +371,6 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
             background: var(--cor-secundaria);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(146, 23, 27, 0.3);
-            color: white;
-        }
-
-        .btn-outline-primary {
-            border-color: var(--cor-primaria);
-            color: var(--cor-primaria);
-        }
-
-        .btn-outline-primary:hover {
-            background-color: var(--cor-primaria);
-            border-color: var(--cor-primaria);
-            color: white;
-        }
-
-        .btn-outline-danger {
-            border-color: #dc3545;
-            color: #dc3545;
-        }
-
-        .btn-outline-danger:hover {
-            background-color: #dc3545;
-            border-color: #dc3545;
             color: white;
         }
 
@@ -444,10 +497,6 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
             }
         }
 
-        .nav-link.active:hover {
-            background-color: #081d40;
-        }
-
         .informacoes-text {
             max-height: 100px;
             overflow-y: auto;
@@ -455,7 +504,6 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
             line-height: 1.4;
         }
         
-        /* Estilos para a barra de pesquisa */
         .search-container {
             background-color: white;
             border-radius: 8px;
@@ -515,14 +563,12 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
             color: #dee2e6;
         }
         
-        /* Estilo para destacar o termo de pesquisa */
         mark.bg-warning {
             background-color: #ffc107 !important;
             padding: 2px 4px;
             border-radius: 3px;
         }
         
-        /* Estilos para o cabeçalho com pesquisa */
         .page-header {
             display: flex;
             justify-content: space-between;
@@ -592,11 +638,9 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                         <i class="fas fa-info-circle me-1"></i>
                         Pesquisando por: <strong>"<?php echo htmlspecialchars($termo_pesquisa); ?>"</strong>
                         <span class="badge ms-2"><?php echo (count($professores) + count($alunos)); ?> usuário(s) encontrado(s)</span>
-                          <?php if (!empty($termo_pesquisa)): ?>
-                <a href="gerenciar_usuarios.php" class="btn btn-outline-secondary">
-                    <i class="fas fa-times me-1"></i> Limpar Pesquisa
-                </a>
-            <?php endif; ?>
+                        <a href="gerenciar_usuarios.php" class="btn btn-sm btn-outline-secondary ms-2">
+                            <i class="fas fa-times me-1"></i> Limpar Pesquisa
+                        </a>
                     </div>
                 <?php endif; ?>
             </form>
@@ -661,24 +705,33 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                                             <?= $informacoes_professor ?>
                                         </div>
                                     </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary me-2" 
-                                                onclick="openEditUsuarioModal(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['informacoes'] ?? '', ENT_QUOTES) ?>', '<?= $professor['responsavel_financeiro_id'] ?? '' ?>')">
-                                            <i class="fas fa-edit"></i> Editar
+                                    <td style="min-width: 180px;">
+                                        <button class="btn btn-sm btn-outline-info me-1" 
+                                                onclick="openAnexosModal(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>')" 
+                                                title="Gerenciar Anexos">
+                                            <i class="fas fa-paperclip"></i>
                                         </button>
 
-                                        <button class="btn btn-sm btn-outline-dark me-2" 
-                                                onclick="confirmToggle(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>', '<?= $professor['status'] ?>')">
+                                        <button class="btn btn-sm btn-outline-primary me-1" 
+                                                onclick="openEditUsuarioModal(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['informacoes'] ?? '', ENT_QUOTES) ?>', '<?= $professor['responsavel_financeiro_id'] ?? '' ?>')"
+                                                title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+
+                                        <button class="btn btn-sm btn-outline-dark me-1" 
+                                                onclick="confirmToggle(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>', '<?= $professor['status'] ?>')"
+                                                title="<?= $professor['status'] == 'ativo' ? 'Desativar' : 'Ativar' ?>">
                                             <?php if ($professor['status'] == 'ativo'): ?>
-                                                <i class="fas fa-user-slash"></i> Desativar
+                                                <i class="fas fa-user-slash"></i>
                                             <?php else: ?>
-                                                <i class="fas fa-user-check"></i> Ativar
+                                                <i class="fas fa-user-check"></i>
                                             <?php endif; ?>
                                         </button>
 
                                         <button class="btn btn-sm btn-outline-danger" 
-                                                onclick="confirmRemove(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>')">
-                                            <i class="fas fa-trash-alt"></i> Remover
+                                                onclick="confirmRemove(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>')"
+                                                title="Remover">
+                                            <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -740,24 +793,33 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                                     <td>
                                         <span class="badge bg-secondary"><?= $turmas_aluno ?></span>
                                     </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary me-2" 
-                                                onclick="openEditUsuarioModal(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['informacoes'] ?? '', ENT_QUOTES) ?>', '<?= $aluno['responsavel_financeiro_id'] ?? '' ?>')">
-                                            <i class="fas fa-edit"></i> Editar
+                                    <td style="min-width: 180px;">
+                                        <button class="btn btn-sm btn-outline-info me-1" 
+                                                onclick="openAnexosModal(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>')" 
+                                                title="Gerenciar Anexos">
+                                            <i class="fas fa-paperclip"></i>
                                         </button>
 
-                                        <button class="btn btn-sm btn-outline-dark me-2" 
-                                                onclick="confirmToggle(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>', '<?= $aluno['status'] ?>')">
+                                        <button class="btn btn-sm btn-outline-primary me-1" 
+                                                onclick="openEditUsuarioModal(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['informacoes'] ?? '', ENT_QUOTES) ?>', '<?= $aluno['responsavel_financeiro_id'] ?? '' ?>')"
+                                                title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+
+                                        <button class="btn btn-sm btn-outline-dark me-1" 
+                                                onclick="confirmToggle(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>', '<?= $aluno['status'] ?>')"
+                                                title="<?= $aluno['status'] == 'ativo' ? 'Desativar' : 'Ativar' ?>">
                                             <?php if ($aluno['status'] == 'ativo'): ?>
-                                                <i class="fas fa-user-slash"></i> Desativar
+                                                <i class="fas fa-user-slash"></i>
                                             <?php else: ?>
-                                                <i class="fas fa-user-check"></i> Ativar
+                                                <i class="fas fa-user-check"></i>
                                             <?php endif; ?>
                                         </button>
 
                                         <button class="btn btn-sm btn-outline-danger" 
-                                                onclick="confirmRemove(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>')">
-                                            <i class="fas fa-trash-alt"></i> Remover
+                                                onclick="confirmRemove(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>')"
+                                                title="Remover">
+                                            <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -833,6 +895,40 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
   </div>
 </div>
 
+<div class="modal fade" id="modalAnexos" tabindex="-1" aria-labelledby="modalAnexosLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAnexosTitle">Anexos do Usuário</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+        <h6 class="mb-3 text-secondary">Documentos Atuais</h6>
+        <div id="lista_anexos" class="mb-4">
+            <div class="text-center"><div class="spinner-border text-primary" role="status"></div></div>
+        </div>
+
+        <hr>
+
+        <h6 class="mb-3 text-secondary">Adicionar Novo(s) Anexo(s)</h6>
+        <form method="POST" action="gerenciar_usuarios.php" enctype="multipart/form-data">
+            <input type="hidden" name="acao" value="upload_anexo">
+            <input type="hidden" name="usuario_id_anexo" id="usuario_id_anexo">
+            
+            <div class="mb-3">
+                <label class="form-label small">Selecione um ou vários arquivos</label>
+                <input type="file" class="form-control form-control-sm" name="arquivos_anexo[]" multiple required>
+                <div class="form-text" style="font-size: 0.75rem;">O nome original do arquivo será salvo como título.</div>
+            </div>
+            <button type="submit" class="btn btn-sm btn-acao w-100"><i class="fas fa-upload me-1"></i> Fazer Upload</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 <form id="formRemover" method="POST" action="gerenciar_usuarios.php">
     <input type="hidden" name="acao" value="remover_usuario">
     <input type="hidden" name="id_usuario" id="remover_id_usuario">
@@ -843,8 +939,12 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     <input type="hidden" name="id_usuario_toggle" id="id_usuario_toggle">
 </form>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<form id="formExcluirAnexo" method="POST" action="gerenciar_usuarios.php">
+    <input type="hidden" name="acao" value="excluir_anexo">
+    <input type="hidden" name="anexo_id_excluir" id="anexo_id_excluir">
+</form>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function resetForm() {
         document.getElementById('modalAddUsuarioLabel').innerText = 'Cadastrar Novo Usuário';
@@ -853,7 +953,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         document.getElementById('nome').value = '';
         document.getElementById('email').value = '';
         document.getElementById('tipo_usuario').value = ''; 
-        document.getElementById('responsavel_financeiro_id').value = ''; // Reset
+        document.getElementById('responsavel_financeiro_id').value = ''; 
         document.getElementById('informacoes').value = '';
         document.getElementById('senha').value = '';
         document.getElementById('label_senha').innerText = 'Senha (Obrigatória para novo)';
@@ -861,11 +961,9 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         document.getElementById('email').disabled = false;
         
         document.getElementById('senha').setAttribute('required', 'required');
-            // Garantir visibilidade correta do responsável após reset
-            toggleResponsavelVisibility();
+        toggleResponsavelVisibility();
     }
 
-    // ATUALIZADO PARA RECEBER O ID DO RESPONSAVEL
     function openEditUsuarioModal(id, nome, email, tipo, informacoes, responsavelId) {
         document.getElementById('modalAddUsuarioLabel').innerText = `Editar Usuário: ${nome}`;
         document.getElementById('usuario_acao').value = 'editar_usuario';
@@ -873,19 +971,66 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         document.getElementById('nome').value = nome;
         document.getElementById('email').value = email;
         document.getElementById('tipo_usuario').value = tipo;
-        document.getElementById('responsavel_financeiro_id').value = responsavelId || ''; // Set value
+        document.getElementById('responsavel_financeiro_id').value = responsavelId || ''; 
         document.getElementById('informacoes').value = informacoes || '';
         document.getElementById('senha').value = '';
         document.getElementById('label_senha').innerText = 'Nova Senha (Deixe vazio para manter a atual)';
         document.getElementById('btn_salvar_usuario').innerText = 'Atualizar Usuário';
         document.getElementById('email').disabled = false;
         
-        document.getElementById('senha').removeAttribute('required'); // Remove required no edit
-            // Ajustar visibilidade do responsável conforme o tipo carregado
-            toggleResponsavelVisibility();
+        document.getElementById('senha').removeAttribute('required'); 
+        toggleResponsavelVisibility();
         
         var myModal = new bootstrap.Modal(document.getElementById('modalAddUsuario'));
         myModal.show();
+    }
+
+    function openAnexosModal(userId, userName) {
+        document.getElementById('modalAnexosTitle').innerText = `Anexos: ${userName}`;
+        document.getElementById('usuario_id_anexo').value = userId;
+        
+        const lista = document.getElementById('lista_anexos');
+        lista.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"></div></div>';
+        
+        fetch(`gerenciar_usuarios.php?acao=buscar_anexos&usuario_id=${userId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.length === 0) {
+                    lista.innerHTML = '<p class="text-muted small text-center mb-0">Nenhum anexo encontrado.</p>';
+                } else {
+                    let html = '<ul class="list-group">';
+                    data.forEach(anexo => {
+                        html += `
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                <div class="text-truncate me-2">
+                                    <a href="../${anexo.caminho_arquivo}" target="_blank" class="text-decoration-none">
+                                        <i class="fas fa-file-alt text-primary me-2"></i><strong>${anexo.nome_arquivo}</strong>
+                                    </a>
+                                    <br><small class="text-muted" style="font-size: 0.7rem;">Adicionado em: ${anexo.data_upload}</small>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="excluirAnexo(${anexo.id})" title="Excluir">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </li>
+                        `;
+                    });
+                    html += '</ul>';
+                    lista.innerHTML = html;
+                }
+            })
+            .catch(error => {
+                lista.innerHTML = '<p class="text-danger small">Erro ao carregar anexos.</p>';
+            });
+            
+        var myModal = new bootstrap.Modal(document.getElementById('modalAnexos'));
+        myModal.show();
+    }
+
+    function excluirAnexo(id) {
+        if(confirm('Tem certeza que deseja excluir permanentemente este anexo?')) {
+            document.getElementById('anexo_id_excluir').value = id;
+            document.getElementById('formExcluirAnexo').submit();
+        }
     }
     
     function toggleResponsavelVisibility() {
@@ -902,7 +1047,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     }
     
     function confirmRemove(id, nome) {
-        if (confirm(`Tem certeza que deseja remover o usuário "${nome}"? Esta ação é irreversível e removerá todas as associações (turmas/aulas).`)) {
+        if (confirm(`Tem certeza que deseja remover o usuário "${nome}"? Esta ação é irreversível e removerá todas as associações.`)) {
             document.getElementById('remover_id_usuario').value = id;
             document.getElementById('formRemover').submit();
         }
@@ -926,7 +1071,6 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         if (tipoSelect) {
             tipoSelect.addEventListener('change', toggleResponsavelVisibility);
         }
-        // Ensure visibility is correct on load
         toggleResponsavelVisibility();
     });
 </script>
