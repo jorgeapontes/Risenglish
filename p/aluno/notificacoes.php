@@ -256,16 +256,17 @@ $base_dir = ($user_tipo === 'professor') ? 'professor' : 'aluno';
                         <a href="gerenciar_conteudos.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
                         <a href="gerenciar_alunos.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
                     <?php else: ?>
-                        <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                        <a href="minhas_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
-                        <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
-                        <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
-                        <a href="notificacoes.php" class="rounded active">
+                    <a href="notificacoes.php" class="rounded active">
                             <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
                             <?php if ($total_nao_lidas > 0): ?>
                                 <span class="badge bg-danger ms-2"><?= $total_nao_lidas ?></span>
                             <?php endif; ?>
                         </a>
+                        <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
+                        <a href="minhas_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
+                        <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
+                        <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
+                        <a href="documentos.php" class="rounded"><i class="fa-solid fa-box-archive"></i>&nbsp;&nbsp;&nbsp;Documentos</a>
                     <?php endif; ?>
                 </div>
                 
@@ -312,7 +313,7 @@ $base_dir = ($user_tipo === 'professor') ? 'professor' : 'aluno';
                             $data = new DateTime($notif['data_criacao']);
                             // Montar href de forma segura e consistente para o aluno
                             $href = '';
-                            $aluno_root = '/Risenglish/p/aluno/';
+                            $aluno_root = '/p/aluno/';
                             // Preferir campo aula_id (quando presente na tabela)
                             if (!empty($notif['aula_id'])) {
                                 $href = $aluno_root . 'detalhes_aula.php?id=' . intval($notif['aula_id']);
