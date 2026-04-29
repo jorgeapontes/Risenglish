@@ -159,10 +159,17 @@ try {
         </div>
         <div class="offcanvas-body d-flex flex-column">
             <nav class="d-flex flex-column gap-2">
+                <a href="notificacoes.php" class="rounded position-relative">
+                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
+                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
+                        <?php endif; ?>
+                    </a>
                 <a href="dashboard.php"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                 <a href="minhas_aulas.php"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;Minhas Aulas</a>
-                <a href="documentos.php" class="active"><i class="fas fa-file-alt"></i>&nbsp;&nbsp;Meus Documentos</a>
-                <a href="financeiro.php"><i class="fas fa-dollar-sign"></i>&nbsp;&nbsp;Financeiro</a>
+                <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
+                <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
+                <a href="documentos.php" class="active"><i class="fa-solid fa-box-archive"></i>&nbsp;&nbsp;&nbsp;Documentos</a>
             </nav>
             <div class="mt-auto">
                 <a href="../logout.php" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
@@ -177,10 +184,17 @@ try {
             </div>
             
             <div class="d-flex flex-column flex-grow-1">
+                <a href="notificacoes.php" class="rounded position-relative">
+                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
+                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
+                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
+                        <?php endif; ?>
+                    </a>
                 <a href="dashboard.php"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
                 <a href="minhas_aulas.php"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;Minhas Aulas</a>
-                <a href="documentos.php" class="active"><i class="fas fa-file-alt"></i>&nbsp;&nbsp;Meus Documentos</a>
-                <a href="financeiro.php"><i class="fas fa-dollar-sign"></i>&nbsp;&nbsp;Financeiro</a>
+                <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
+                <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
+                <a href="documentos.php" class="active"><i class="fa-solid fa-box-archive"></i>&nbsp;&nbsp;&nbsp;Documentos</a>
             </div>
 
             <div class="mt-auto">
@@ -231,7 +245,7 @@ try {
             </div>
 
             <footer class="mt-5 text-center text-muted small">
-                &copy; <?= date('Y') ?> Risenglish - Learning Management System
+                &copy;  Risenglish
             </footer>
         </div>
     </div>
