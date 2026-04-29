@@ -377,7 +377,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                 initialView: 'timeGridWeek', 
                 locale: 'pt-br',
                 timeZone: 'local',
-                firstDay: 1, 
+                firstDay: 0, // ALTERADO: 0 = Domingo (antes era 1 = Segunda-feira)
                 slotMinTime: '06:00:00',
                 slotMaxTime: '24:00:00',
                 allDaySlot: false,
