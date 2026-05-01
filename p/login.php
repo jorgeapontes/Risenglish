@@ -31,6 +31,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       $_SESSION['user_nome'] = $usuario['nome'];
       $_SESSION['user_tipo'] = $usuario['tipo_usuario']; // 'admin', 'professor' ou 'aluno'
 
+      // NOVO: Registra o acesso no banco de dados
+      $sqlLog = "INSERT INTO logs_acesso (usuario_id) VALUES (:id)";
+      $stmtLog = $pdo->prepare($sqlLog);
+      $stmtLog->bindParam(':id', $usuario['id']);
+      $stmtLog->execute();
+
       // 4. Redireciona de acordo com o tipo de usuário
       switch ($_SESSION['user_tipo']) {
         case 'admin':
