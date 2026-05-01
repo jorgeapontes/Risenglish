@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
     
     try {
         if ($acao == 'add_turma') {
-            $sql = "INSERT INTO turmas (nome_turma, professor_id, inicio_turma, link_aula) VALUES (:nome_turma, :professor_id, :inicio_turma, :link_aula)";
+            $sql = "INSERT INTO turmas (nome_turma, professor_id, inicio_turma, linka_aula) VALUES (:nome_turma, :professor_id, :inicio_turma, :link_aula)";
             $stmt = $pdo->prepare($sql);
             $mensagem = "Turma <strong>{$nome_turma}</strong> criada e associada com sucesso!";
         } else {
@@ -333,7 +333,8 @@ $professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
             <a href="gerenciar_turmas.php" class="rounded active"><i class="fas fa-users"></i>&nbsp;&nbsp;&nbsp;Turmas</a>
             <a href="gerenciar_usuarios.php" class="rounded"><i class="fas fa-user"></i>&nbsp;&nbsp;Usuários</a>
             <a href="gerenciar_uteis.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Recomendações</a>
-        <a href="pagamentos.php" class="rounded"><i class="fas fa-dollar-sign"></i>&nbsp;&nbsp;Pagamentos</a>
+            <a href="pagamentos.php" class="rounded"><i class="fas fa-dollar-sign"></i>&nbsp;&nbsp;Pagamentos</a>
+            <a href="acessos.php" class="rounded"><i class="fas fa-chart-line"></i>&nbsp;&nbsp;Relatório de Acessos</a>
         </div>
 
         <!-- Botão sair no rodapé -->
