@@ -3,16 +3,14 @@
 session_start();
 
 // Inclui o arquivo de conexão com o banco de dados
-// Certifique-se de que o caminho 'includes/conexao.php' está correto.
 require_once 'includes/conexao.php';
 
 // Verifica se o formulário foi submetido
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  // Recebe os dados do POST de forma segura, usando o operador null coalescing (??)
-  $email = $_POST['email'] ?? ''; // Esta é a linha 10 que estava com erro.
+  $email = $_POST['email'] ?? '';
   $senha = $_POST['senha'] ?? '';
 
-  // 1. Prepara a consulta para buscar o usuário pelo email (inclui status)
+  // 1. Prepara a consulta para buscar o usuário pelo email
   $sql = "SELECT id, nome, senha, tipo_usuario, status FROM usuarios WHERE email = :email";
   $stmt = $pdo->prepare($sql);
   $stmt->bindParam(':email', $email);
@@ -21,18 +19,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   // 2. Verifica se o usuário existe e se a senha está correta
   if ($usuario && password_verify($senha, $usuario['senha'])) {
-    // Verifica se conta está desativada
     if (isset($usuario['status']) && $usuario['status'] === 'desativado') {
       $erro = "Conta desativada. Contate o administrador para reativação.";
     } else {
       // Login bem-sucedido
-      // 3. Armazena os dados do usuário na sessão
       $_SESSION['user_id'] = $usuario['id'];
       $_SESSION['user_nome'] = $usuario['nome'];
-      $_SESSION['user_tipo'] = $usuario['tipo_usuario']; // 'admin', 'professor' ou 'aluno'
+      $_SESSION['user_tipo'] = $usuario['tipo_usuario'];
 
-      // NOVO: Registra o acesso no banco de dados
-      $sqlLog = "INSERT INTO logs_acesso (usuario_id) VALUES (:id)";
+      // Registra o acesso com horário de Brasília (UTC-3)
+      // O banco salva em UTC, então convertemos antes de inserir
+      $sqlLog = "INSERT INTO logs_acesso (usuario_id, data_acesso) VALUES (:id, CONVERT_TZ(NOW(), '+00:00', '-03:00'))";
       $stmtLog = $pdo->prepare($sqlLog);
       $stmtLog->bindParam(':id', $usuario['id']);
       $stmtLog->execute();
@@ -49,7 +46,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           header("Location: aluno/dashboard.php");
           break;
         default:
-          // Se o tipo for desconhecido, destrói a sessão e volta para o login
           session_unset();
           session_destroy();
           header("Location: login.php?erro=tipo_invalido");
@@ -57,7 +53,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       exit;
     }
   } else {
-    // Credenciais inválidas
     $erro = "Email ou senha incorretos.";
   }
 }
@@ -96,7 +91,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label for="senha" class="form-label">SENHA</label>
         <input type="password" class="form-control" id="senha" name="senha" placeholder="Digite sua senha" required>
       </div>
-      
 
       <button type="submit" class="btn btn-login">ENTRAR</button>
     </form>

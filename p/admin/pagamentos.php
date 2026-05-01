@@ -322,6 +322,7 @@ $total_ativos = $total_registros - $count_inativos;
             <a href="gerenciar_usuarios.php"><i class="fas fa-user"></i>&nbsp;&nbsp;Usuários</a>
             <a href="gerenciar_uteis.php"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Recomendações</a>
             <a href="pagamentos.php" class="active"><i class="fas fa-dollar-sign"></i>&nbsp;&nbsp;Pagamentos</a>
+            <a href="acessos.php" class="rounded"><i class="fas fa-chart-line"></i>&nbsp;&nbsp;Relatório de Acessos</a>
         </div>
 
         <div class="mt-auto">
