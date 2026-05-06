@@ -395,13 +395,9 @@ $urlBase = '?busca=' . urlencode($busca) . '&tipo_filtro=' . urlencode($tipo_fil
                                 </td>
                                 <td class="align-middle">
                                     <?php if ($usuario['acessos_mes'] > 0): ?>
-                                        <span class="badge bg-info text-dark badge-acesso">
-                                            <i class="fas fa-check-circle me-1"></i><?= $usuario['acessos_mes'] ?> acessos
-                                        </span>
+                                        <span><?= $usuario['acessos_mes'] ?> acessos</span>
                                     <?php else: ?>
-                                        <span class="text-muted fst-italic">
-                                            <i class="fas fa-circle me-1" style="font-size: 0.6rem;"></i>Sem acessos
-                                        </span>
+                                        <span class="text-muted fst-italic">Sem acessos</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="align-middle">
