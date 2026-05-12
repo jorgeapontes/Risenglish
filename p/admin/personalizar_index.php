@@ -113,8 +113,19 @@ function val($k, $d=''){
             transition: 0.3s;
         }
 
-        .sidebar a:hover { background-color: rgba(255,255,255,0.05); transform: translateX(3px); }
-        .sidebar .active { background-color: #c0392b; }
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(3px);
+            transition: 0.3s;
+        }
+
+        .sidebar .active {
+            background-color: #c0392b;
+        }
+
+        .sidebar .active:hover {
+            background-color: #c0392b;
+        }
 
         .main-content { margin-left: 280px; padding: 30px; background-color: white; min-height: 100vh; }
 
@@ -152,10 +163,12 @@ function val($k, $d=''){
         </div>
         <div class="d-flex flex-column flex-grow-1 mb-5">
             <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
+            <a href="leads.php" class="rounded"><i class="fas fa-user-tie"></i>&nbsp;&nbsp;Leads</a>
             <a href="personalizar_index.php" class="rounded active"><i class="fas fa-paint-brush"></i>&nbsp;&nbsp;Personalizar Site</a>
             <a href="gerenciar_turmas.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;&nbsp;Turmas</a>
             <a href="gerenciar_usuarios.php" class="rounded"><i class="fas fa-user"></i>&nbsp;&nbsp;Usuários</a>
             <a href="gerenciar_uteis.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Recomendações</a>
+            <a href="agendas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;Agendas</a>
             <a href="pagamentos.php" class="rounded"><i class="fas fa-dollar-sign"></i>&nbsp;&nbsp;Pagamentos</a>
             <a href="acessos.php" class="rounded"><i class="fas fa-chart-line"></i>&nbsp;&nbsp;Relatório de Acessos</a>
         </div>
