@@ -14,10 +14,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'admin') {
 
 $nome_usuario = $_SESSION['user_nome'];
 
-// Estatísticas do dashboard
+// Seleção do mês para visualização
 $mes_atual = date('Y-m');
-$inicio_mes = date('Y-m-01');
-$fim_mes = date('Y-m-t');
+if (isset($_GET['mes']) && preg_match('/^\d{4}-\d{2}$/', $_GET['mes'])) {
+    $mes_atual = $_GET['mes'];
+}
+$inicio_mes = $mes_atual . '-01';
+$fim_mes = date('Y-m-t', strtotime($inicio_mes));
 
 try {
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM usuarios WHERE tipo_usuario = 'aluno' AND status = 'ativo'");
@@ -435,6 +438,17 @@ try {
 
     <!-- Main Content -->
     <div class="main-content flex-grow-1">
+        <div class="d-flex flex-column flex-md-row align-items-start justify-content-between mb-4 gap-3">
+            <div>
+                <h1>Dashboard</h1>
+                <p class="text-muted mb-0">Mês selecionado: <?php echo date('m/Y', strtotime($inicio_mes)); ?></p>
+            </div>
+            <form method="get" class="d-flex align-items-center gap-2">
+                <label for="mes" class="visually-hidden">Mês</label>
+                <input id="mes" name="mes" type="month" class="form-control" value="<?php echo htmlspecialchars($mes_atual); ?>" onchange="this.form.submit()" />
+            </form>
+        </div>
+
         <div class="row dashboard-summary g-3">
             <div class="col-12 col-md-6 col-xl-4">
                 <div class="summary-card">
