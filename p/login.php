@@ -2,6 +2,33 @@
 // Inicia a sessão para controle do usuário
 session_start();
 
+// =============================================
+// SE O USUÁRIO JÁ ESTIVER LOGADO, REDIRECIONA
+// =============================================
+if (isset($_SESSION['user_id'])) {
+    // Redireciona de acordo com o nível de acesso
+    switch ($_SESSION['user_tipo']) {
+        case 'admin':     header("Location: admin/dashboard.php"); break;
+        case 'professor': header("Location: professor/dashboard.php"); break;
+        case 'aluno':     header("Location: aluno/dashboard.php"); break;
+        default:          header("Location: login.php?erro=sessao_invalida");
+    }
+    exit;
+}
+
+// =============================================
+// CONFIGURAÇÕES DE SEGURANÇA DA SESSÃO
+// =============================================
+ini_set('session.gc_maxlifetime', 1800); // 30 minutos
+session_set_cookie_params([
+    'lifetime' => 1800,
+    'path' => '/',
+    'domain' => $_SERVER['HTTP_HOST'],
+    'secure' => true,      // Só envia cookies via HTTPS
+    'httponly' => true,    // Impede acesso via JavaScript
+    'samesite' => 'Strict' // Protege contra CSRF
+]);
+
 // Inclui o arquivo de conexão com o banco de dados
 require_once 'includes/conexao.php';
 
@@ -9,86 +36,185 @@ require_once 'includes/conexao.php';
 date_default_timezone_set('America/Sao_Paulo');
 
 // Variáveis de Segurança (Configuráveis)
-$MAX_TENTATIVAS = 5;          // Número de erros permitidos
-$TEMPO_BLOQUEIO_MINUTOS = 15; // Tempo de castigo/esquecimento em minutos
+$MAX_TENTATIVAS = 5;          // Número de erros permitidos por usuário
+$TEMPO_BLOQUEIO_MINUTOS = 15; // Tempo de bloqueio em minutos
+$MAX_TENTATIVAS_IP = 20;      // Número máximo de tentativas por IP (evita ataque em massa)
+$TEMPO_BLOQUEIO_IP_MINUTOS = 60; // Bloqueio de IP por 1 hora após excesso
+
+// Obtém o IP real do cliente (considerando proxy)
+function getRealIP() {
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        return $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        return explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+    }
+    return $_SERVER['REMOTE_ADDR'];
+}
+
+$ip_usuario = getRealIP();
+
+// =============================================
+// FUNÇÃO PARA SIMULAR VERIFICAÇÃO DE SENHA (evita timing attack)
+// =============================================
+function simulatePasswordVerify($tempo_original = 0.05) {
+    // Simula o tempo de execução do password_verify
+    // Isso evita que um atacante descubra se o e-mail existe ou não
+    usleep(rand(40000, 60000)); // 40-60ms (similar ao password_verify)
+}
+
+// =============================================
+// 1. VERIFICA BLOQUEIO POR IP (tentativas excessivas)
+// =============================================
+$ip_bloqueado = false;
+$sqlIpBlock = "SELECT tentativas, bloqueado_ate FROM tentativas_ip WHERE ip = :ip";
+$stmtIpBlock = $pdo->prepare($sqlIpBlock);
+$stmtIpBlock->bindParam(':ip', $ip_usuario);
+$stmtIpBlock->execute();
+$ipBlockData = $stmtIpBlock->fetch(PDO::FETCH_ASSOC);
+
+$agora = new DateTime();
+
+if ($ipBlockData) {
+    if ($ipBlockData['tentativas'] >= $MAX_TENTATIVAS_IP && !empty($ipBlockData['bloqueado_ate'])) {
+        $bloqueio_ip = new DateTime($ipBlockData['bloqueado_ate']);
+        if ($agora < $bloqueio_ip) {
+            $ip_bloqueado = true;
+            $diff = $agora->diff($bloqueio_ip);
+            $minutos_restantes = $diff->i + ($diff->h * 60) + 1;
+            $erro = "Muitas tentativas deste endereço IP. Aguarde {$minutos_restantes} minutos.";
+        } else {
+            // Limpa bloqueio expirado
+            $sqlCleanIp = "DELETE FROM tentativas_ip WHERE ip = :ip";
+            $stmtCleanIp = $pdo->prepare($sqlCleanIp);
+            $stmtCleanIp->bindParam(':ip', $ip_usuario);
+            $stmtCleanIp->execute();
+        }
+    }
+}
+
+// =============================================
+// FUNÇÃO PARA REGISTRAR TENTATIVA FALHA POR IP
+// =============================================
+function registerFailedAttemptIP($pdo, $ip, $max_tentativas, $tempo_bloqueio_minutos) {
+    $agora = new DateTime();
+    $futuro = clone $agora;
+    $futuro->modify("+{$tempo_bloqueio_minutos} minutes");
+    $bloqueado_ate = $futuro->format('Y-m-d H:i:s');
+    
+    // Verifica se já existe registro para este IP
+    $sqlCheck = "SELECT id, tentativas FROM tentativas_ip WHERE ip = :ip";
+    $stmtCheck = $pdo->prepare($sqlCheck);
+    $stmtCheck->bindParam(':ip', $ip);
+    $stmtCheck->execute();
+    $existing = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+    
+    if ($existing) {
+        $novas_tentativas = $existing['tentativas'] + 1;
+        $sqlUpdate = "UPDATE tentativas_ip SET tentativas = :tentativas, bloqueado_ate = :bloqueado_ate, ultima_tentativa = NOW() WHERE id = :id";
+        $stmtUpdate = $pdo->prepare($sqlUpdate);
+        $stmtUpdate->bindParam(':tentativas', $novas_tentativas, PDO::PARAM_INT);
+        $stmtUpdate->bindParam(':bloqueado_ate', $bloqueado_ate);
+        $stmtUpdate->bindParam(':id', $existing['id']);
+        $stmtUpdate->execute();
+    } else {
+        $sqlInsert = "INSERT INTO tentativas_ip (ip, tentativas, bloqueado_ate, ultima_tentativa) VALUES (:ip, 1, :bloqueado_ate, NOW())";
+        $stmtInsert = $pdo->prepare($sqlInsert);
+        $stmtInsert->bindParam(':ip', $ip);
+        $stmtInsert->bindParam(':bloqueado_ate', $bloqueado_ate);
+        $stmtInsert->execute();
+    }
+}
 
 // Verifica se o formulário foi submetido
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
     $email = trim($_POST['email'] ?? '');
     $senha = $_POST['senha'] ?? '';
-
-    // 1. Busca o usuário pelo email, trazendo também os dados de bloqueio
+    
+    // Variável para controlar se o usuário foi encontrado
+    $usuario_encontrado = false;
+    $usuario = null;
+    
+    // 2. Busca o usuário pelo email
     $sql = "SELECT id, nome, senha, tipo_usuario, status, tentativas_falhas, bloqueado_ate FROM usuarios WHERE email = :email";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':email', $email);
     $stmt->execute();
     $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-
+    
     if ($usuario) {
-        $agora = new DateTime();
+        $usuario_encontrado = true;
         $bloqueado = false;
-
+        
         // ==========================================================
         // JANELA DE ESQUECIMENTO (ZERAR ERROS POR TEMPO)
         // ==========================================================
         if ($usuario['tentativas_falhas'] > 0 && !empty($usuario['bloqueado_ate'])) {
             $validade_erro = new DateTime($usuario['bloqueado_ate']);
             
-            // Se o usuário NÃO atingiu o limite máximo mas o tempo do último erro já passou, reseta os erros
             if ($usuario['tentativas_falhas'] < $MAX_TENTATIVAS && $agora > $validade_erro) {
                 $sqlResetTempo = "UPDATE usuarios SET tentativas_falhas = 0, bloqueado_ate = NULL WHERE id = :id";
                 $stmtResetTempo = $pdo->prepare($sqlResetTempo);
                 $stmtResetTempo->bindParam(':id', $usuario['id']);
                 $stmtResetTempo->execute();
                 
-                // Atualiza as variáveis locais para o restante do script
                 $usuario['tentativas_falhas'] = 0;
                 $usuario['bloqueado_ate'] = null;
             }
         }
-
-        // 2. Verifica se a conta está atualmente bloqueada (estouro de limite)
+        
+        // 3. Verifica se a conta está atualmente bloqueada
         if ($usuario['tentativas_falhas'] >= $MAX_TENTATIVAS && !empty($usuario['bloqueado_ate'])) {
             $bloqueio = new DateTime($usuario['bloqueado_ate']);
             
             if ($agora < $bloqueio) {
                 $bloqueado = true;
                 $diff = $agora->diff($bloqueio);
-                $minutos_restantes = $diff->i + ($diff->h * 60) + ($diff->days * 24 * 60) + 1; // Arredonda para cima
+                $minutos_restantes = $diff->i + ($diff->h * 60) + 1;
                 $erro = "Por motivos de segurança, sua conta foi temporariamente bloqueada. Tente novamente em {$minutos_restantes} minuto(s).";
             }
         }
-
-        // 3. Se não estiver bloqueado, prossegue com a validação da senha
+        
+        // 4. Se não estiver bloqueado, valida a senha
         if (!$bloqueado) {
-            if (password_verify($senha, $usuario['senha'])) {
-                // ---> SENHA CORRETA <---
+            $senha_correta = password_verify($senha, $usuario['senha']);
+            
+            if ($senha_correta) {
+                // Senha correta
                 if (isset($usuario['status']) && $usuario['status'] === 'desativado') {
                     $erro = "Conta desativada. Contate o administrador para reativação.";
                 } else {
-                    // Reseta os contadores de erro no banco de dados
+                    // Limpa os contadores de erro
                     $sqlReset = "UPDATE usuarios SET tentativas_falhas = 0, bloqueado_ate = NULL WHERE id = :id";
                     $stmtReset = $pdo->prepare($sqlReset);
                     $stmtReset->bindParam(':id', $usuario['id']);
                     $stmtReset->execute();
-
-                    // ==========================================
-                    // PROTEÇÃO CONTRA SESSION HIJACKING/FIXATION
-                    // ==========================================
-                    session_regenerate_id(true); 
-
-                    // Define os dados do login bem-sucedido
+                    
+                    // Limpa tentativas do IP (login bem-sucedido)
+                    $sqlCleanIp = "DELETE FROM tentativas_ip WHERE ip = :ip";
+                    $stmtCleanIp = $pdo->prepare($sqlCleanIp);
+                    $stmtCleanIp->bindParam(':ip', $ip_usuario);
+                    $stmtCleanIp->execute();
+                    
+                    // Regenera a sessão (proteção contra session fixation)
+                    session_regenerate_id(true);
+                    
+                    // =============================================
+                    // ARMAZENA IP E USER AGENT NA SESSÃO (anti-hijacking)
+                    // =============================================
                     $_SESSION['user_id'] = $usuario['id'];
                     $_SESSION['user_nome'] = $usuario['nome'];
                     $_SESSION['user_tipo'] = $usuario['tipo_usuario'];
-
-                    // Registra o acesso com horário de Brasília (UTC-3)
+                    $_SESSION['user_ip'] = $ip_usuario;
+                    $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
+                    $_SESSION['login_time'] = time();
+                    
+                    // Registra o acesso com horário de Brasília
                     $sqlLog = "INSERT INTO logs_acesso (usuario_id, data_acesso) VALUES (:id, CONVERT_TZ(NOW(), '+00:00', '-03:00'))";
                     $stmtLog = $pdo->prepare($sqlLog);
                     $stmtLog->bindParam(':id', $usuario['id']);
                     $stmtLog->execute();
-
-                    // Redireciona de acordo com o nível de acesso
+                    
+                    // Redireciona
                     switch ($_SESSION['user_tipo']) {
                         case 'admin':     header("Location: admin/dashboard.php"); break;
                         case 'professor': header("Location: professor/dashboard.php"); break;
@@ -101,33 +227,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     exit;
                 }
             } else {
-                // ---> SENHA INCORRETA <---
+                // Senha incorreta
                 $tentativas = $usuario['tentativas_falhas'] + 1;
-                
-                // Define a validade desse erro ou do bloqueio (Sempre +15 minutos do horário atual)
                 $futuro = new DateTime();
                 $futuro->modify("+{$TEMPO_BLOQUEIO_MINUTOS} minutes");
                 $bloqueado_ate = $futuro->format('Y-m-d H:i:s');
-
+                
                 if ($tentativas >= $MAX_TENTATIVAS) {
                     $erro = "Muitas tentativas incorretas. Sua conta foi bloqueada por {$TEMPO_BLOQUEIO_MINUTOS} minutos.";
                 } else {
                     $tentativas_restantes = $MAX_TENTATIVAS - $tentativas;
                     $erro = "Email ou senha incorretos. Você tem mais {$tentativas_restantes} tentativa(s).";
                 }
-
-                // Atualiza o registro de falhas no banco
+                
+                // Atualiza falhas no banco
                 $sqlUpdate = "UPDATE usuarios SET tentativas_falhas = :tentativas, bloqueado_ate = :bloqueado_ate WHERE id = :id";
                 $stmtUpdate = $pdo->prepare($sqlUpdate);
                 $stmtUpdate->bindParam(':tentativas', $tentativas, PDO::PARAM_INT);
                 $stmtUpdate->bindParam(':bloqueado_ate', $bloqueado_ate);
                 $stmtUpdate->bindParam(':id', $usuario['id']);
                 $stmtUpdate->execute();
+                
+                // Registra tentativa falha por IP
+                registerFailedAttemptIP($pdo, $ip_usuario, $MAX_TENTATIVAS_IP, $TEMPO_BLOQUEIO_IP_MINUTOS);
             }
         }
-    } else {
-        // Mensagem genérica para segurança (evita mapeamento de e-mails válidos)
+    }
+    
+    // =============================================
+    // PROTEÇÃO CONTRA TIMING ATTACK
+    // Se o usuário NÃO EXISTE, simulamos a verificação
+    // para que o tempo de resposta seja igual
+    // =============================================
+    if (!$usuario_encontrado) {
+        // Simula o tempo de execução do password_verify
+        simulatePasswordVerify();
+        
+        // Mensagem genérica (não revela se o e-mail existe)
         $erro = "Email ou senha incorretos.";
+        
+        // Registra tentativa falha por IP mesmo para e-mail inexistente
+        registerFailedAttemptIP($pdo, $ip_usuario, $MAX_TENTATIVAS_IP, $TEMPO_BLOQUEIO_IP_MINUTOS);
     }
 }
 ?>
@@ -152,7 +292,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <?php if (isset($erro)): ?>
       <div class="alert alert-danger" role="alert">
-        <?= $erro ?>
+        <?= htmlspecialchars($erro) ?>
       </div>
     <?php endif; ?>
 
