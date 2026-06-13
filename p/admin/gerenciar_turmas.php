@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
     
     try {
         if ($acao == 'add_turma') {
-            $sql = "INSERT INTO turmas (nome_turma, professor_id, inicio_turma, linka_aula) VALUES (:nome_turma, :professor_id, :inicio_turma, :link_aula)";
+            $sql = "INSERT INTO turmas (nome_turma, professor_id, inicio_turma, link_aula) VALUES (:nome_turma, :professor_id, :inicio_turma, :link_aula)";
             $stmt = $pdo->prepare($sql);
             $mensagem = "Turma <strong>{$nome_turma}</strong> criada e associada com sucesso!";
         } else {
