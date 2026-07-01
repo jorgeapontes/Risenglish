@@ -1,4 +1,16 @@
 <?php
+// Configurações de sessão antes de iniciar a sessão
+$tempo_sessao = 1800;
+ini_set('session.gc_maxlifetime', $tempo_sessao);
+session_set_cookie_params([
+    'lifetime' => $tempo_sessao,
+    'path' => '/',
+    'domain' => $_SERVER['HTTP_HOST'] ?? '',
+    'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (!empty($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443),
+    'httponly' => true,
+    'samesite' => 'Strict'
+]);
+
 // Inicia a sessão para controle do usuário
 session_start();
 
@@ -15,19 +27,6 @@ if (isset($_SESSION['user_id'])) {
     }
     exit;
 }
-
-// =============================================
-// CONFIGURAÇÕES DE SEGURANÇA DA SESSÃO
-// =============================================
-ini_set('session.gc_maxlifetime', 1800); // 30 minutos
-session_set_cookie_params([
-    'lifetime' => 1800,
-    'path' => '/',
-    'domain' => $_SERVER['HTTP_HOST'],
-    'secure' => true,      // Só envia cookies via HTTPS
-    'httponly' => true,    // Impede acesso via JavaScript
-    'samesite' => 'Strict' // Protege contra CSRF
-]);
 
 // Inclui o arquivo de conexão com o banco de dados
 require_once 'includes/conexao.php';

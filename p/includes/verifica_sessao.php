@@ -1,4 +1,16 @@
 <?php
+// Configurações de sessão antes de iniciar a sessão
+$tempo_sessao = 1800;
+ini_set('session.gc_maxlifetime', $tempo_sessao);
+session_set_cookie_params([
+    'lifetime' => $tempo_sessao,
+    'path' => '/',
+    'domain' => $_SERVER['HTTP_HOST'] ?? '',
+    'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (!empty($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443),
+    'httponly' => true,
+    'samesite' => 'Strict'
+]);
+
 session_start();
 
 // Verifica se o usuário está logado
