@@ -40,14 +40,12 @@ $TEMPO_BLOQUEIO_MINUTOS = 15; // Tempo de bloqueio em minutos
 $MAX_TENTATIVAS_IP = 20;      // Número máximo de tentativas por IP (evita ataque em massa)
 $TEMPO_BLOQUEIO_IP_MINUTOS = 60; // Bloqueio de IP por 1 hora após excesso
 
-// Obtém o IP real do cliente (considerando proxy)
+// Obtém o IP do cliente a partir da conexão direta.
+// Evita confiar em headers como X-Forwarded-For, que podem ser forjados.
 function getRealIP() {
-    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        return $_SERVER['HTTP_CLIENT_IP'];
-    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        return explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
-    }
-    return $_SERVER['REMOTE_ADDR'];
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+
+    return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : '0.0.0.0';
 }
 
 $ip_usuario = getRealIP();
