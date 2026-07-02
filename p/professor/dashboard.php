@@ -1,9 +1,9 @@
 <?php
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 
 // Bloqueio de acesso para usuários não-professor
-if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
+if ($_SESSION['user_tipo'] !== 'professor') {
     header("Location: ../login.php");
     exit;
 }
@@ -17,9 +17,22 @@ $data_hoje = new DateTime();
 $mes_atual = $data_hoje->format('m');
 $ano_atual = $data_hoje->format('Y');
 
-// Opcional: Permitir que o professor navegue por mês (se houver parâmetro na URL)
-$mes = $_GET['mes'] ?? $mes_atual;
-$ano = $_GET['ano'] ?? $ano_atual;
+if (isset($_GET['ano']) && preg_match('/^\d{4}$/', $_GET['ano'])) {
+    $ano_get = (int) $_GET['ano'];
+    if ($ano_get >= 2000 && $ano_get <= 2100) {
+        $ano_atual = (string) $ano_get;
+    }
+}
+
+if (isset($_GET['mes']) && preg_match('/^\d{2}$/', $_GET['mes'])) {
+    $mes_get = (int) $_GET['mes'];
+    if ($mes_get >= 1 && $mes_get <= 12) {
+        $mes_atual = str_pad((string) $mes_get, 2, '0', STR_PAD_LEFT);
+    }
+}
+
+$mes = $mes_atual;
+$ano = $ano_atual;
 
 // Cria o objeto DateTime para o primeiro dia do mês
 $primeiro_dia_mes = new DateTime("$ano-$mes-01");
@@ -450,6 +463,15 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
             });
             
             // Carregar notificações via AJAX
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function carregarNotificacoes() {
     fetch('ajax_notificacoes.php?acao=buscar_nao_lidas')
         .then(response => response.json())
@@ -458,18 +480,26 @@ function carregarNotificacoes() {
                 if (data.notificacoes.length > 0) {
                     let html = '';
                     data.notificacoes.forEach(notif => {
+                        const notifLink = escapeHtml(notif.link);
+                        const notifCor = escapeHtml(notif.cor);
+                        const notifIcone = escapeHtml(notif.icone);
+                        const notifTitulo = escapeHtml(notif.titulo);
+                        const notifData = escapeHtml(notif.data_formatada);
+                        const notifMensagem = escapeHtml(notif.mensagem.substring(0, 80));
+                        const notifId = Number(notif.id) || 0;
+
                         html += `
-                            <a href="${notif.link}" class="notificacao-item nao-lida" onclick="marcarNotificacaoLida(${notif.id})">
+                            <a href="${notifLink}" class="notificacao-item nao-lida" onclick="marcarNotificacaoLida(${notifId})">
                                 <div class="d-flex">
-                                    <div class="notificacao-icone me-2" style="background-color: ${notif.cor}">
-                                        <i class="${notif.icone}"></i>
+                                    <div class="notificacao-icone me-2" style="background-color: ${notifCor}">
+                                        <i class="${notifIcone}"></i>
                                     </div>
                                     <div class="flex-grow-1">
                                         <div class="d-flex justify-content-between align-items-start">
-                                            <div class="notificacao-titulo">${notif.titulo}</div>
-                                            <small class="notificacao-data">${notif.data_formatada}</small>
+                                            <div class="notificacao-titulo">${notifTitulo}</div>
+                                            <small class="notificacao-data">${notifData}</small>
                                         </div>
-                                        <div class="notificacao-mensagem">${notif.mensagem.substring(0, 80)}${notif.mensagem.length > 80 ? '...' : ''}</div>
+                                        <div class="notificacao-mensagem">${notifMensagem}${notif.mensagem.length > 80 ? '...' : ''}</div>
                                     </div>
                                 </div>
                             </a>

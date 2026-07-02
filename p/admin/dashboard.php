@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 
 // Verifica se a conexão PDO existe
@@ -7,7 +7,7 @@ if (!isset($pdo)) {
     die("Erro: Conexão com o banco de dados não estabelecida.");
 }
 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'admin') {
+if ($_SESSION['user_tipo'] !== 'admin') {
     header("Location: ../login.php");
     exit;
 }
@@ -16,7 +16,7 @@ $nome_usuario = $_SESSION['user_nome'];
 
 // Seleção do mês para visualização
 $mes_atual = date('Y-m');
-if (isset($_GET['mes']) && preg_match('/^\d{4}-\d{2}$/', $_GET['mes'])) {
+if (isset($_GET['mes']) && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $_GET['mes'])) {
     $mes_atual = $_GET['mes'];
 }
 $inicio_mes = $mes_atual . '-01';
