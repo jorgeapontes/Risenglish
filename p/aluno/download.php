@@ -1,10 +1,10 @@
 <?php
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 
-// Verifica se usuário está logado e é aluno
-if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'aluno') {
-    header("Location: ../login.php");
+// Garante que apenas aluno acessa esta página
+if ($_SESSION['user_tipo'] !== 'aluno') {
+    header("Location: ../login.php?erro=acesso_negado");
     exit;
 }
 

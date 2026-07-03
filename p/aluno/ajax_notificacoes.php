@@ -1,10 +1,11 @@
 <?php
-session_start();
-header('Content-Type: application/json; charset=utf-8');
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+header('Content-Type: application/json; charset=utf-8');
 
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['error' => 'Não autenticado']);
+// Garante que apenas aluno acessa esta página
+if ($_SESSION['user_tipo'] !== 'aluno') {
+    echo json_encode(['error' => 'Acesso negado']);
     exit;
 }
 
