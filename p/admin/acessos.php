@@ -1,10 +1,10 @@
 <?php
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 
-// Verificação de segurança: apenas admins
-if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'admin') {
-    header("Location: ../login.php");
+// Garante que apenas admin acessa esta página
+if ($_SESSION['user_tipo'] !== 'admin') {
+    header("Location: ../login.php?erro=acesso_negado");
     exit;
 }
 
