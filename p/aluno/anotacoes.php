@@ -1,10 +1,10 @@
 <?php
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 
-// Bloqueio de acesso para usuários não-aluno
-if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'aluno') {
-    header("Location: ../login.php");
+// Garante que apenas aluno acessa esta página
+if ($_SESSION['user_tipo'] !== 'aluno') {
+    header("Location: ../login.php?erro=acesso_negado");
     exit;
 }
 
@@ -434,6 +434,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                     <a href="minhas_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
                     <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
                     <a href="anotacoes.php" class="rounded active"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
+                    <a href="documentos.php" class="rounded"><i class="fa-solid fa-box-archive"></i>&nbsp;&nbsp;&nbsp;Documentos</a>
                 </div>
 
                 <div class="mt-auto">

@@ -1,6 +1,11 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id'])) exit;
+require_once '../includes/verifica_sessao.php';
+require_once '../includes/conexao.php';
+
+// Garante que apenas aluno acessa esta página
+if ($_SESSION['user_tipo'] !== 'aluno') {
+    exit;
+}
 
 $arquivo = $_GET['file'] ?? '';
 $titulo = $_GET['titulo'] ?? 'Material de Aula';
