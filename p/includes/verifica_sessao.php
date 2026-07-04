@@ -1,6 +1,6 @@
 <?php
 // Configurações de sessão antes de iniciar a sessão
-$tempo_sessao = 7200;
+$tempo_sessao = 10800;
 ini_set('session.gc_maxlifetime', $tempo_sessao);
 session_set_cookie_params([
     'lifetime' => $tempo_sessao,
@@ -42,9 +42,9 @@ if ($_SESSION['user_agent'] !== $user_agent_atual) {
 }
 
 // =============================================
-// EXPIRAÇÃO AUTOMÁTICA DA SESSÃO (2 horas)
+// EXPIRAÇÃO AUTOMÁTICA DA SESSÃO (3 horas)
 // =============================================
-$tempo_maximo_sessao = 7200; // 2 horas
+$tempo_maximo_sessao = 10800; // 3 horas
 
 if (isset($_SESSION['login_time']) && (time() - $_SESSION['login_time'] > $tempo_maximo_sessao)) {
     session_unset();
