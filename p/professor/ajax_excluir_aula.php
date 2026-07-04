@@ -1,9 +1,9 @@
 <?php
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 
 // Verificar se é professor
-if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
+if ($_SESSION['user_tipo'] !== 'professor') {
     echo json_encode(['success' => false, 'message' => 'Acesso não autorizado.']);
     exit;
 }

@@ -1,8 +1,15 @@
 <?php
 // Define que o retorno será SEMPRE um JSON (evita que erros de PHP quebrem o JS)
 header('Content-Type: application/json');
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+
+// Garante que apenas professor acessa esta página
+if ($_SESSION['user_tipo'] !== 'professor') {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Acesso negado.']);
+    exit;
+}
 
 try {
     $dados = json_decode(file_get_contents('php://input'), true);
