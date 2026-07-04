@@ -1,9 +1,9 @@
 <?php
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 
-// Bloqueio de acesso
-if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
+// Garante que apenas professor acessa esta página
+if ($_SESSION['user_tipo'] !== 'professor') {
     header("Location: ../login.php");
     exit;
 }

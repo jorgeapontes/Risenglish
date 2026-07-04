@@ -1,9 +1,9 @@
 <?php
 header('Content-Type: application/json');
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 
-if (!isset($_SESSION['user_id']) || !isset($_GET['turma_id'])) exit;
+if ($_SESSION['user_tipo'] !== 'professor' || !isset($_GET['turma_id'])) exit;
 
 $professor_id = $_SESSION['user_id'];
 $turma_id = $_GET['turma_id'];

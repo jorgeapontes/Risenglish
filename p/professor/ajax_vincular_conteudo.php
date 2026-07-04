@@ -1,11 +1,11 @@
 <?php
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 
 header('Content-Type: application/json');
 
 // 1. Verificar autenticação e permissão
-if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
+if ($_SESSION['user_tipo'] !== 'professor') {
     echo json_encode(['success' => false, 'message' => 'Acesso negado.']);
     exit;
 }

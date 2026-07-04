@@ -1,9 +1,9 @@
 <?php
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 
 // Verificar se é uma requisição AJAX válida
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || $_SESSION['user_tipo'] !== 'professor') {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Acesso não autorizado.']);
     exit;

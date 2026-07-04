@@ -1,8 +1,8 @@
 <?php
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 
-if (!isset($_SESSION['user_id'])) exit;
+if ($_SESSION['user_tipo'] !== 'professor') exit;
 
 $professor_id = $_SESSION['user_id'];
 

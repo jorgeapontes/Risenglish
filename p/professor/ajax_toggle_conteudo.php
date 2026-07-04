@@ -1,13 +1,13 @@
 <?php
 // Define o tipo de conteúdo como JSON para o JavaScript saber como processar a resposta.
 header('Content-Type: application/json');
-session_start();
+require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php'; // Ajuste o caminho conforme a estrutura de pastas
 
 $response = ['success' => false, 'message' => ''];
 
 // 1. Verificação de Sessão e Permissão
-if (!isset($_SESSION['user_id']) || $_SESSION['user_tipo'] !== 'professor') {
+if ($_SESSION['user_tipo'] !== 'professor') {
     $response['message'] = 'Acesso negado. Sessão inválida ou usuário não é professor.';
     echo json_encode($response);
     exit;
