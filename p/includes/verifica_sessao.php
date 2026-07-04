@@ -1,6 +1,6 @@
 <?php
 // Configurações de sessão antes de iniciar a sessão
-$tempo_sessao = 1800;
+$tempo_sessao = 7200;
 ini_set('session.gc_maxlifetime', $tempo_sessao);
 session_set_cookie_params([
     'lifetime' => $tempo_sessao,
@@ -33,7 +33,7 @@ function getRealIP() {
 $ip_atual = getRealIP();
 $user_agent_atual = $_SERVER['HTTP_USER_AGENT'];
 
-if ($_SESSION['user_ip'] !== $ip_atual || $_SESSION['user_agent'] !== $user_agent_atual) {
+if ($_SESSION['user_agent'] !== $user_agent_atual) {
     // Possível sequestro de sessão
     session_unset();
     session_destroy();
@@ -42,9 +42,9 @@ if ($_SESSION['user_ip'] !== $ip_atual || $_SESSION['user_agent'] !== $user_agen
 }
 
 // =============================================
-// EXPIRAÇÃO AUTOMÁTICA DA SESSÃO (30 minutos)
+// EXPIRAÇÃO AUTOMÁTICA DA SESSÃO (2 horas)
 // =============================================
-$tempo_maximo_sessao = 1800; // 30 segundos
+$tempo_maximo_sessao = 7200; // 2 horas
 
 if (isset($_SESSION['login_time']) && (time() - $_SESSION['login_time'] > $tempo_maximo_sessao)) {
     session_unset();
