@@ -205,6 +205,9 @@ CREATE TABLE `leads` (
 CREATE TABLE `logs_acesso` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
+  `ip` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `tipo_evento` varchar(50) DEFAULT NULL,
   `data_acesso` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
@@ -766,3 +769,6 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+    

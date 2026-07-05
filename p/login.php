@@ -211,9 +211,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
                         $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
                         $_SESSION['login_time'] = time();
 
-                        $sqlLog = "INSERT INTO logs_acesso (usuario_id, data_acesso) VALUES (:id, CONVERT_TZ(NOW(), '+00:00', '-03:00'))";
+                        $sqlLog = "INSERT INTO logs_acesso (usuario_id, ip, user_agent, tipo_evento, data_acesso) VALUES (:id, :ip, :user_agent, 'login_sucesso', CONVERT_TZ(NOW(), '+00:00', '-03:00'))";
                         $stmtLog = $pdo->prepare($sqlLog);
                         $stmtLog->bindParam(':id', $usuario['id']);
+                        $stmtLog->bindParam(':ip', $ip_usuario);
+                        $stmtLog->bindValue(':user_agent', substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255));
                         $stmtLog->execute();
 
                         switch ($_SESSION['user_tipo']) {
@@ -246,6 +248,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
                     $stmtUpdate->bindParam(':bloqueado_ate', $bloqueado_ate);
                     $stmtUpdate->bindParam(':id', $usuario['id']);
                     $stmtUpdate->execute();
+
+                    $sqlLogFalha = "INSERT INTO logs_acesso (usuario_id, ip, user_agent, tipo_evento, data_acesso) VALUES (:id, :ip, :user_agent, 'login_falha', CONVERT_TZ(NOW(), '+00:00', '-03:00'))";
+                    $stmtLogFalha = $pdo->prepare($sqlLogFalha);
+                    $stmtLogFalha->bindParam(':id', $usuario['id']);
+                    $stmtLogFalha->bindParam(':ip', $ip_usuario);
+                    $stmtLogFalha->bindValue(':user_agent', substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255));
+                    $stmtLogFalha->execute();
 
                     registerFailedAttemptIP($pdo, $ip_usuario, $MAX_TENTATIVAS_IP, $TEMPO_BLOQUEIO_IP_MINUTOS);
                 }
