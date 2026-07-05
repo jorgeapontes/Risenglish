@@ -54,6 +54,41 @@ function getRealIP() {
     return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : '0.0.0.0';
 }
 
+// Ofusca os dois últimos octetos do IP para conformidade com LGPD
+// Ex: 189.40.22.10 → 189.40.*.*
+// Usado apenas nos logs — o IP completo continua sendo usado para bloqueio
+function obfuscateIP($ip) {
+    // IPv4: ofusca os dois últimos octetos
+    // Ex: 189.40.22.10 → 189.40.*.*
+    if (strpos($ip, '.') !== false) {
+        $parts = explode('.', $ip);
+        if (count($parts) === 4) {
+            $parts[2] = '*';
+            $parts[3] = '*';
+            return implode('.', $parts);
+        }
+    }
+    // IPv6: ofusca os últimos 4 grupos, mantendo os primeiros 4 visíveis
+    // Ex: 2804:14c:f429:5f47:ad50:6fff:41d2:f96b → 2804:14c:f429:5f47:****:****:****:****
+    if (strpos($ip, ':') !== false) {
+        $parts = explode(':', $ip);
+        if (count($parts) === 8) {
+            for ($i = 4; $i < 8; $i++) {
+                $parts[$i] = '****';
+            }
+            return implode(':', $parts);
+        }
+        // IPv6 em formato comprimido — ofusca a partir dos dois pontos duplos
+        $half = (int)(count(explode(':', $ip)) / 2);
+        $groups = explode(':', $ip);
+        for ($i = $half; $i < count($groups); $i++) {
+            $groups[$i] = '****';
+        }
+        return implode(':', $groups);
+    }
+    return '*.*.*.*';
+}
+
 $ip_usuario = getRealIP();
 
 // =============================================
@@ -96,7 +131,7 @@ if ($ipBlockData) {
 // FUNÇÃO PARA REGISTRAR TENTATIVA FALHA POR IP
 // =============================================
 function registerFailedAttemptIP($pdo, $ip, $max_tentativas, $tempo_bloqueio_minutos) {
-    $agora = new DateTime();
+    $agora = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
     $futuro = clone $agora;
     $futuro->modify("+{$tempo_bloqueio_minutos} minutes");
     $bloqueado_ate = $futuro->format('Y-m-d H:i:s');
@@ -214,7 +249,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
                         $sqlLog = "INSERT INTO logs_acesso (usuario_id, ip, user_agent, tipo_evento, data_acesso) VALUES (:id, :ip, :user_agent, 'login_sucesso', CONVERT_TZ(NOW(), '+00:00', '-03:00'))";
                         $stmtLog = $pdo->prepare($sqlLog);
                         $stmtLog->bindParam(':id', $usuario['id']);
-                        $stmtLog->bindParam(':ip', $ip_usuario);
+                        $stmtLog->bindValue(':ip', obfuscateIP($ip_usuario));
                         $stmtLog->bindValue(':user_agent', substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255));
                         $stmtLog->execute();
 
@@ -252,7 +287,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
                     $sqlLogFalha = "INSERT INTO logs_acesso (usuario_id, ip, user_agent, tipo_evento, data_acesso) VALUES (:id, :ip, :user_agent, 'login_falha', CONVERT_TZ(NOW(), '+00:00', '-03:00'))";
                     $stmtLogFalha = $pdo->prepare($sqlLogFalha);
                     $stmtLogFalha->bindParam(':id', $usuario['id']);
-                    $stmtLogFalha->bindParam(':ip', $ip_usuario);
+                    $stmtLogFalha->bindValue(':ip', obfuscateIP($ip_usuario));
                     $stmtLogFalha->bindValue(':user_agent', substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255));
                     $stmtLogFalha->execute();
 
