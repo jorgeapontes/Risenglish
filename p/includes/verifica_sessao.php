@@ -1,6 +1,6 @@
 <?php
 // Configurações de sessão antes de iniciar a sessão
-$tempo_sessao = 10800;
+$tempo_sessao = 0; // 0 = cookie de sessão dura até fechar o navegador
 ini_set('session.gc_maxlifetime', $tempo_sessao);
 session_set_cookie_params([
     'lifetime' => $tempo_sessao,
@@ -40,19 +40,4 @@ if ($_SESSION['user_agent'] !== $user_agent_atual) {
     header("Location: ../login.php?erro=sessao_invalida");
     exit;
 }
-
-// =============================================
-// EXPIRAÇÃO AUTOMÁTICA DA SESSÃO (3 horas)
-// =============================================
-$tempo_maximo_sessao = 10800; // 3 horas
-
-if (isset($_SESSION['login_time']) && (time() - $_SESSION['login_time'] > $tempo_maximo_sessao)) {
-    session_unset();
-    session_destroy();
-    header("Location: ../login.php?erro=sessao_expirada");
-    exit;
-}
-
-// Renova o tempo da sessão a cada requisição
-$_SESSION['login_time'] = time();
 ?>
