@@ -1,7 +1,7 @@
 <?php
 // Configurações de sessão antes de iniciar a sessão
 $tempo_sessao = 0; // 0 = cookie de sessão dura até fechar o navegador
-ini_set('session.gc_maxlifetime', $tempo_sessao);
+ini_set('session.gc_maxlifetime', 86400); // servidor mantém dados da sessão por 24h
 session_set_cookie_params([
     'lifetime' => $tempo_sessao,
     'path' => '/',
