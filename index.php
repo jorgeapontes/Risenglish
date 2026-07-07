@@ -239,9 +239,6 @@
                 <a href="#home" class="btn btn-backtop">
                     <span>Voltar ao topo</span>
                 </a>
-                <a href="politica_privacidade.php" class="btn btn-backtop privacy-btn">
-                    <span>Política de Privacidade</span>
-                </a>
             </div>
         </div>
         
@@ -292,7 +289,7 @@
                     <p>&copy; Risenglish by Laura Antero. Todos os direitos reservados.</p>
                 </div>
                 <div class="footer-credits">
-                    <p>Desenvolvido com <i class="fas fa-heart"></i> para transformar vidas!</p>
+                    <a href="politica_privacidade.php">Política de Privacidade</a>
                 </div>
             </div>
         </footer>
