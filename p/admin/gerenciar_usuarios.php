@@ -165,15 +165,33 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
     $total_sucesso = 0;
     $total_erros = 0;
 
+    // Extensões permitidas para upload
+    $extensoes_permitidas = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx'];
+    // Tamanho máximo: 10MB por arquivo
+    $tamanho_maximo = 10 * 1024 * 1024;
+
     if (isset($arquivos['name']) && is_array($arquivos['name']) && !empty($arquivos['name'][0])) {
         $dir = '../uploads/anexos_usuarios/';
         if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
+            mkdir($dir, 0755, true); // permissão corrigida de 0777 para 0755
         }
 
         foreach ($arquivos['name'] as $key => $nome_original) {
             if ($arquivos['error'][$key] === UPLOAD_ERR_OK) {
                 $ext = strtolower(pathinfo($nome_original, PATHINFO_EXTENSION));
+                
+                // Valida extensão
+                if (!in_array($ext, $extensoes_permitidas)) {
+                    $total_erros++;
+                    continue;
+                }
+                
+                // Valida tamanho
+                if ($arquivos['size'][$key] > $tamanho_maximo) {
+                    $total_erros++;
+                    continue;
+                }
+                
                 $novo_nome_fisico = time() . '_' . uniqid() . '.' . $ext;
                 $caminho_destino = $dir . $novo_nome_fisico;
                 
@@ -194,7 +212,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
             $mensagem = "Upload concluído: $total_sucesso arquivo(s) adicionado(s) com sucesso!" . ($total_erros > 0 ? " Ocorreram $total_erros erro(s)." : "");
             $tipo_mensagem = 'success';
         } else {
-            $mensagem = "Nenhum arquivo pôde ser enviado. Verifique se os arquivos são válidos.";
+            $mensagem = "Nenhum arquivo pôde ser enviado. Verifique se os arquivos são do tipo permitido (PDF, JPG, PNG, DOC, DOCX, XLS, XLSX) e com no máximo 10MB.";
             $tipo_mensagem = 'danger';
         }
     } else {
@@ -1007,7 +1025,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                         html += `
                             <li class="list-group-item d-flex justify-content-between align-items-center py-2">
                                 <div class="text-truncate me-2">
-                                    <a href="../${anexo.caminho_arquivo}" target="_blank" class="text-decoration-none">
+                                    <a href="baixar_anexo.php?id=${anexo.id}" target="_blank" class="text-decoration-none">
                                         <i class="fas fa-file-alt text-primary me-2"></i><strong>${anexo.nome_arquivo}</strong>
                                     </a>
                                     <br><small class="text-muted" style="font-size: 0.7rem;">Adicionado em: ${anexo.data_upload}</small>
