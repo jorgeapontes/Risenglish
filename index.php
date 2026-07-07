@@ -239,6 +239,9 @@
                 <a href="#home" class="btn btn-backtop">
                     <span>Voltar ao topo</span>
                 </a>
+                <a href="politica_privacidade.php" class="btn btn-backtop privacy-btn">
+                    <span>Política de Privacidade</span>
+                </a>
             </div>
         </div>
         
