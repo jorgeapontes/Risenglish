@@ -945,6 +945,20 @@ html {
     transform: translateY(-3px);
 }
 
+.backtop {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 150px;
+    margin-bottom: 100px;
+}
+
+.privacy-btn {
+    min-width: 220px;
+    justify-content: center;
+}
+
 .footerfooter {
     width: 100%;
     background: transparent;

@@ -1,0 +1,332 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --dark-blue: #0A1931;
+    --wine-red: #B91D23;
+    --cream: #F8F5EB;
+    --gold: #FFD700;
+    --light-gold: #FFE55C;
+    --light-blue: #1E40AF;
+    --text: #223449;
+    --muted: #60708a;
+    --line: rgba(10, 25, 49, 0.12);
+    --surface: rgba(255, 255, 255, 0.96);
+    --shadow: 0 20px 60px rgba(10, 25, 49, 0.12);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(180deg, #fcfaf4 0%, #f4eee0 100%);
+    color: var(--text);
+    line-height: 1.8;
+    overflow-x: hidden;
+}
+
+a {
+    color: inherit;
+}
+
+header {
+    background: rgba(10, 25, 49, 0.97);
+    backdrop-filter: blur(12px);
+    padding: 1.1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 10px 30px rgba(10, 25, 49, 0.14);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+header .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    background: linear-gradient(45deg, var(--gold), var(--light-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+header a.voltar {
+    color: var(--cream);
+    text-decoration: none;
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+    transition: all 0.25s ease;
+}
+
+header a.voltar:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 215, 0, 0.45);
+    color: var(--light-gold);
+}
+
+.hero {
+    background: linear-gradient(135deg, var(--dark-blue) 0%, #142b53 55%, #214173 100%);
+    color: var(--cream);
+    padding: 5rem 1.5rem 6rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before,
+.hero::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(45deg, rgba(185, 29, 35, 0.16), transparent);
+}
+
+.hero::before {
+    width: 280px;
+    height: 280px;
+    top: -90px;
+    right: -90px;
+}
+
+.hero::after {
+    width: 200px;
+    height: 200px;
+    bottom: -70px;
+    left: -50px;
+}
+
+.hero .tag {
+    display: inline-block;
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--light-gold);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    max-width: 650px;
+    margin: 0 auto;
+    font-size: 1.05rem;
+    color: rgba(248, 245, 235, 0.85);
+}
+
+.hero .atualizado {
+    display: inline-block;
+    margin-top: 1.25rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(248, 245, 235, 0.76);
+    font-size: 0.9rem;
+}
+
+.container {
+    max-width: 980px;
+    margin: -2.2rem auto 0;
+    padding: 0 1.25rem 4rem;
+    position: relative;
+    z-index: 10;
+}
+
+.indice,
+.secao {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+}
+
+.indice {
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.indice h2 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--light-blue);
+    margin-bottom: 1rem;
+}
+
+.indice ol {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem 1.5rem;
+    padding-left: 1.2rem;
+}
+
+.indice ol li a {
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.indice ol li a:hover {
+    color: var(--wine-red);
+}
+
+.secao {
+    padding: 2rem 2.2rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.secao::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    background: linear-gradient(180deg, var(--gold) 0%, var(--wine-red) 100%);
+}
+
+.secao-numero {
+    margin-bottom: 0.7rem;
+    color: var(--wine-red);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+}
+
+.secao h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    color: var(--dark-blue);
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.secao p,
+.secao ul,
+.secao ol {
+    margin-bottom: 0.95rem;
+}
+
+.secao p:last-child,
+.secao ul:last-child,
+.secao ol:last-child {
+    margin-bottom: 0;
+}
+
+.secao ul,
+.secao ol {
+    padding-left: 1.25rem;
+}
+
+.secao ul li,
+.secao ol li {
+    margin-bottom: 0.55rem;
+}
+
+.destaque {
+    margin: 1rem 0;
+    padding: 1rem 1.1rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.18), rgba(185, 29, 35, 0.06));
+    color: var(--text);
+}
+
+.destaque strong {
+    color: var(--dark-blue);
+}
+
+.secao-contato {
+    background: linear-gradient(135deg, var(--dark-blue) 0%, #15325e 100%);
+    color: var(--cream);
+}
+
+.secao-contato::before {
+    background: linear-gradient(180deg, var(--light-gold), var(--wine-red));
+}
+
+.secao-contato .secao-numero {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.secao-contato h2 {
+    color: var(--cream);
+    border-bottom-color: rgba(255, 255, 255, 0.16);
+}
+
+.secao-contato a {
+    color: var(--light-gold);
+    text-decoration: none;
+}
+
+.secao-contato a:hover {
+    text-decoration: underline;
+}
+
+footer {
+    text-align: center;
+    padding: 1.2rem 1rem 2.5rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+@media (max-width: 700px) {
+    header {
+        padding: 1rem 1rem;
+    }
+
+    header .logo {
+        font-size: 1.55rem;
+    }
+
+    header a.voltar {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .hero {
+        padding: 4rem 1rem 5rem;
+    }
+
+    .container {
+        padding: 0 0.9rem 3rem;
+    }
+
+    .indice {
+        padding: 1.4rem;
+    }
+
+    .indice ol {
+        grid-template-columns: 1fr;
+    }
+
+    .secao {
+        padding: 1.4rem 1.1rem;
+    }
+}
