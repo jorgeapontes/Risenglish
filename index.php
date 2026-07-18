@@ -289,7 +289,9 @@
                     <p>&copy; Risenglish by Laura Antero. Todos os direitos reservados.</p>
                 </div>
                 <div class="footer-credits">
-                    <a href="politica_privacidade.php">Política de Privacidade</a>
+                    <a href="politica_privacidade.php">Política de Privacidade </a>
+                    <a> / </a>
+                    <a href="termos_de_uso.php">Termos de Uso</a>
                 </div>
             </div>
         </footer>
