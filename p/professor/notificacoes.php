@@ -314,19 +314,19 @@ $base_dir = ($user_tipo === 'professor') ? 'professor' : 'aluno';
                             $href = '';
                             // Preferir campo aula_id (quando presente na tabela)
                             if (!empty($notif['aula_id'])) {
-                                $href = '/Risenglish/p/professor/detalhes_aula.php?aula_id=' . intval($notif['aula_id']);
+                                $href = '/p/professor/detalhes_aula.php?aula_id=' . intval($notif['aula_id']);
                             } else {
                                 $link_raw = $notif['link'] ?? '';
                                 // Tentar extrair id do query string
                                 if (preg_match('/[?&](?:id|aula_id)=(\d+)/', $link_raw, $m)) {
-                                    $href = '/Risenglish/p/professor/detalhes_aula.php?aula_id=' . intval($m[1]);
+                                    $href = '/p/professor/detalhes_aula.php?aula_id=' . intval($m[1]);
                                 } else {
                                     // Se já é absoluto, manter
                                     if (strpos($link_raw, '/') === 0 || preg_match('#^https?://#', $link_raw)) {
                                         $href = $link_raw;
                                     } else {
                                         // Relativo: prefixar com a pasta do professor
-                                        $href = '/Risenglish/p/professor/' . ltrim($link_raw, './');
+                                        $href = '/p/professor/' . ltrim($link_raw, './');
                                     }
                                 }
                             }
