@@ -105,8 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $filtro_mes = $_GET['filtro_mes'] ?? date('Y-m');
 $filtro_busca = $_GET['filtro_busca'] ?? '';
 $filtro_status = $_GET['filtro_status'] ?? 'todos'; // Novo filtro de status
-$periodo_inicio = $filtro_mes . '-01';
-$periodo_fim = date('Y-m-t', strtotime($periodo_inicio));
+$mes_referencia_inicio = $filtro_mes . '-01';
 
 // Determinar se o mês filtrado é passado, atual ou futuro
 $data_filtro = new DateTime($filtro_mes . '-01');
@@ -142,7 +141,7 @@ try {
                  AND IFNULL(u_dep.nao_pagante,0) = 0
                  AND u_dep.status = 'desativado') as dependentes_inativos
         FROM usuarios pagador
-        LEFT JOIN pagamentos p ON pagador.id = p.aluno_id AND p.data_pagamento BETWEEN ? AND ?
+        LEFT JOIN pagamentos p ON pagador.id = p.aluno_id AND p.mes_referencia = ?
         LEFT JOIN usuarios dep ON dep.responsavel_financeiro_id = pagador.id 
             AND IFNULL(dep.nao_pagante,0) = 0 
             AND dep.status != 'desativado'
@@ -151,7 +150,7 @@ try {
             IFNULL(pagador.nao_pagante,0) = 0
     ";
     
-    $params = [$periodo_inicio, $periodo_fim];
+    $params = [$mes_referencia_inicio];
     
     // Aplicar filtro de status baseado na seleção do usuário
     if ($filtro_status === 'ativos') {
@@ -380,7 +379,7 @@ $total_ativos = $total_registros - $count_inativos;
                 </div>
                 <div style="flex: 0 0 200px;">
                     <label class="form-label mb-1">
-                        <i class="fas fa-calendar-alt"></i> Mês do Pagamento
+                        <i class="fas fa-calendar-alt"></i> Mês de Referência
                     </label>
                     <input type="month" 
                            name="filtro_mes" 
@@ -427,14 +426,14 @@ $total_ativos = $total_registros - $count_inativos;
         <?php if ($filtro_status === 'inativos' && $count_inativos === 0): ?>
         <div class="alert alert-warning">
             <i class="fas fa-exclamation-triangle"></i> 
-            Nenhum aluno inativo encontrado para o mês de pagamento <?= date('m/Y', strtotime($filtro_mes)) ?>.
+            Nenhum aluno inativo encontrado para o mês <?= date('m/Y', strtotime($filtro_mes)) ?>.
         </div>
         <?php endif; ?>
 
         <?php if ($filtro_status === 'ativos' && $total_ativos === 0): ?>
         <div class="alert alert-warning">
             <i class="fas fa-exclamation-triangle"></i> 
-            Nenhum aluno ativo encontrado para o mês de pagamento <?= date('m/Y', strtotime($filtro_mes)) ?>.
+            Nenhum aluno ativo encontrado para o mês <?= date('m/Y', strtotime($filtro_mes)) ?>.
         </div>
         <?php endif; ?>
 

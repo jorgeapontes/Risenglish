@@ -41,13 +41,13 @@ try {
     $stmt->execute([$inicio_mes, $fim_mes]);
     $turmas_ativas = (int) $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-    $stmt = $pdo->prepare("SELECT IFNULL(SUM(valor), 0) as total FROM pagamentos WHERE data_pagamento BETWEEN ? AND ?");
-    $stmt->execute([$inicio_mes, $fim_mes]);
+    $stmt = $pdo->prepare("SELECT IFNULL(SUM(valor), 0) as total FROM pagamentos WHERE mes_referencia = ?");
+    $stmt->execute([$inicio_mes]);
     $receita_liquida = (float) $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-    // Buscar pagamentos diários
-    $stmt = $pdo->prepare("SELECT data_pagamento, SUM(valor) as total_valor FROM pagamentos WHERE data_pagamento BETWEEN ? AND ? GROUP BY data_pagamento ORDER BY data_pagamento");
-    $stmt->execute([$inicio_mes, $fim_mes]);
+    // Buscar pagamentos diários (agrupados pela data em que foram pagos, mas filtrados pelo mês de referência)
+    $stmt = $pdo->prepare("SELECT data_pagamento, SUM(valor) as total_valor FROM pagamentos WHERE mes_referencia = ? GROUP BY data_pagamento ORDER BY data_pagamento");
+    $stmt->execute([$inicio_mes]);
     $pagamentos_diarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Criar array completo com todos os dias do mês
