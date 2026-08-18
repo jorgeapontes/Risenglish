@@ -176,6 +176,54 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
 
         header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
         exit;
+
+    } elseif ($_POST['acao'] === 'editar_titulo') {
+        $recurso_id = isset($_POST['recurso_id']) ? (int)$_POST['recurso_id'] : 0;
+        $novo_titulo = trim($_POST['novo_titulo'] ?? '');
+
+        if (empty($novo_titulo) || $recurso_id <= 0) {
+            $_SESSION['mensagem'] = "Por favor, informe um título válido.";
+            $_SESSION['sucesso'] = false;
+            header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+            exit;
+        }
+
+        try {
+            // Garante que o recurso pertence ao professor logado e ao tema atual (direto ou em subpasta)
+            $sql_check = "SELECT id FROM conteudos 
+                          WHERE id = :id AND professor_id = :professor_id 
+                          AND (parent_id = :tema_id OR parent_id IN (SELECT id FROM conteudos WHERE parent_id = :tema_id AND eh_subpasta = 1))";
+            $stmt_check = $pdo->prepare($sql_check);
+            $stmt_check->execute([':id' => $recurso_id, ':professor_id' => $professor_id, ':tema_id' => $tema_id]);
+
+            if (!$stmt_check->fetch()) {
+                $_SESSION['mensagem'] = "Recurso não encontrado ou você não tem permissão para editá-lo.";
+                $_SESSION['sucesso'] = false;
+                header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+                exit;
+            }
+
+            $sql_update = "UPDATE conteudos SET titulo = :titulo WHERE id = :id AND professor_id = :professor_id";
+            $stmt_update = $pdo->prepare($sql_update);
+
+            if ($stmt_update->execute([
+                ':titulo' => $novo_titulo,
+                ':id' => $recurso_id,
+                ':professor_id' => $professor_id
+            ])) {
+                $_SESSION['mensagem'] = "Título atualizado para <strong>" . htmlspecialchars($novo_titulo) . "</strong> com sucesso!";
+                $_SESSION['sucesso'] = true;
+            } else {
+                $_SESSION['mensagem'] = "Erro ao atualizar o título.";
+                $_SESSION['sucesso'] = false;
+            }
+        } catch (PDOException $e) {
+            $_SESSION['mensagem'] = "Erro de BD: " . $e->getMessage();
+            $_SESSION['sucesso'] = false;
+        }
+
+        header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+        exit;
     }
 }
 
@@ -581,6 +629,9 @@ function get_youtube_id($url) {
                                                     </a>
                                                 <?php endif; ?>
                                             <?php endif; ?>
+                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalEditarRecurso" data-recurso-titulo="<?= htmlspecialchars($r['titulo']) ?>" data-recurso-id="<?= $r['id'] ?>" title="Editar Título" onclick="event.stopPropagation()">
+                                                <i class="fas fa-pen"></i>
+                                            </button>
                                             <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalExcluirRecurso" data-recurso-titulo="<?= htmlspecialchars($r['titulo']) ?>" data-recurso-id="<?= $r['id'] ?>" title="Excluir Recurso" onclick="event.stopPropagation()">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
@@ -672,6 +723,15 @@ function get_youtube_id($url) {
                                                                         </a>
                                                                     <?php endif; ?>
                                                                 <?php endif; ?>
+                                                                <button class="btn btn-sm btn-outline-secondary" 
+                                                                        data-bs-toggle="modal" 
+                                                                        data-bs-target="#modalEditarRecurso" 
+                                                                        data-recurso-titulo="<?= htmlspecialchars($arq['titulo']) ?>" 
+                                                                        data-recurso-id="<?= $arq['id'] ?>" 
+                                                                        title="Editar Título"
+                                                                        onclick="event.stopPropagation()">
+                                                                    <i class="fas fa-pen"></i>
+                                                                </button>
                                                                 <button class="btn btn-sm btn-outline-danger" 
                                                                         data-bs-toggle="modal" 
                                                                         data-bs-target="#modalExcluirRecurso" 
@@ -849,6 +909,34 @@ function get_youtube_id($url) {
     </div>
 </div>
 
+<!-- Modal de Edição de Título -->
+<div class="modal fade" id="modalEditarRecurso" tabindex="-1" aria-labelledby="modalEditarRecursoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formEditarRecurso" method="POST" action="gerenciar_arquivos_tema.php?tema_id=<?= $tema_id ?>">
+                <input type="hidden" name="acao" value="editar_titulo">
+                <input type="hidden" name="recurso_id" id="editarRecursoId" value="">
+                <div class="modal-header" style="background-color: #081d40; color: white;">
+                    <h5 class="modal-title" id="modalEditarRecursoLabel"><i class="fas fa-pen me-1"></i> Editar Título do Recurso</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="editarNovoTitulo" class="form-label">Título do Recurso</label>
+                        <input type="text" class="form-control" id="editarNovoTitulo" name="novo_titulo" required maxlength="255">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-save me-1"></i> Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Modal de Exclusão -->
 <div class="modal fade" id="modalExcluirRecurso" tabindex="-1" aria-labelledby="modalExcluirRecursoLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -898,6 +986,16 @@ $(document).ready(function() {
         var modal = $(this);
         modal.find('#recursoTituloModal').text(recursoTitulo);
         modal.find('#linkExcluirRecurso').attr('href', 'gerenciar_arquivos_tema.php?tema_id=<?= $tema_id ?>&excluir=' + recursoId);
+    });
+
+    // Modal de edição de título
+    $('#modalEditarRecurso').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var recursoId = button.data('recurso-id');
+        var recursoTitulo = button.data('recurso-titulo');
+        var modal = $(this);
+        modal.find('#editarRecursoId').val(recursoId);
+        modal.find('#editarNovoTitulo').val(recursoTitulo);
     });
 
     // Modal para adicionar recurso em subpasta
