@@ -259,7 +259,7 @@ function val($k, $d=''){
         <div class="mb-3">
             <label class="form-label">Imagem Sobre (opcional)</label>
             <input type="file" name="about_image" class="form-control">
-            <img src="/<?= htmlspecialchars(get_setting('about_image','php/professora.jpg')) ?>" alt="" style="max-width:200px;margin-top:8px">
+            <img src="/<?= htmlspecialchars(get_setting('about_image','p/professora.jpg')) ?>" alt="" style="max-width:200px;margin-top:8px">
         </div>
 
         <hr>

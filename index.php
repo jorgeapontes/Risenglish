@@ -51,9 +51,6 @@
         </div>
         <div class="hero-container">
             <div class="hero-content">
-                <div class="hero-badge">
-                    <span><i class="fas fa-star"></i> Método Exclusivo</span>
-                </div>
                 <h1 class="hero-title">
                     <span class="title-line"><?php echo htmlspecialchars(get_setting('hero_title_line1','Fale inglês com confiança.')); ?></span>
                     <span class="title-line accent"><?php echo htmlspecialchars(get_setting('hero_title_line2','Cresça com propósito.')); ?></span>
@@ -86,12 +83,15 @@
             <div class="hero-image">
                 <div class="logo-orbit">
                     <img src="<?php echo htmlspecialchars(get_setting('hero_image','LogoRisenglish.png')); ?>" alt="Logo da Escola">
-                    <span class="orbit-ring"></span>
+                    <span class="orbit-ring" aria-hidden="true"></span>
+                    <span class="orbit-semicircle" aria-hidden="true"></span>
                 </div>
             </div>
         </div>
         <div class="scroll-indicator">
-            <div class="scroll-arrow"></div>
+            <div class="scroll-arrow" aria-hidden="true">
+                <span class="arrow"></span>
+            </div>
         </div>
     </section>
 
