@@ -124,7 +124,7 @@
                 </div>
                 <div class="methodology-card">
                     <div class="card-icon">
-                        <i class="fas fa-comments"></i>
+                        <i class="fas fa-comments"></i>f
                     </div>
                     <h3 class="card-title">PRÁTICA</h3>
                     <div class="card-content">
@@ -288,9 +288,9 @@
                     <p>&copy; Risenglish by Laura Antero. Todos os direitos reservados.</p>
                 </div>
                 <div class="footer-credits">
-                    <a href="politica_privacidade.php">Política de Privacidade </a>
+                    <a href="politica_privacidade.php" target="_blank">Política de Privacidade </a>
                     <a> / </a>
-                    <a href="termos_de_uso.php">Termos de Uso</a>
+                    <a href="termos_de_uso.php" target="_blank">Termos de Uso</a>
                 </div>
             </div>
         </footer>
