@@ -13,7 +13,7 @@
     --light-blue: #1E40AF;
     --ink: #3A3A38;
     --line: rgba(15, 30, 54, 0.12);
-    --radius-sm: 8px;
+    --radius-sm: 15px;
     --radius-md: 8px;
 }
 
@@ -108,7 +108,7 @@ html {
 .login-btn {
     background: var(--wine-red);
     padding: 0.6rem 1.4rem;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     transition: background 0.2s ease;
     border: none;
     color: white;
@@ -708,7 +708,7 @@ html {
     background: var(--dark-blue);
     color: white;
     padding: 0.85rem 1.3rem;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     text-align: left;
     border-left: 3px solid var(--gold);
 }
