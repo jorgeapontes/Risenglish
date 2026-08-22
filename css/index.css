@@ -343,7 +343,7 @@ html {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 28px;
+    padding: 12px;
 }
 
 .logo-orbit img {
@@ -355,25 +355,13 @@ html {
     border: 1px solid #3c5074;
 }
 
-.orbit-ring {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 1;
-    border: 1px solid #3c5074;
-}
-
 /* Semicircunferência girando ao redor da logo */
 .orbit-semicircle {
     position: absolute;
-    top: -20px;
-    left: -20px;
-    width: calc(100% + 40px);
-    height: calc(100% + 40px);
+    top: -8px;
+    left: -8px;
+    width: calc(100% + 16px);
+    height: calc(100% + 16px);
     border-radius: 50%;
     border: 6px solid var(--light-gold);
     box-sizing: border-box;
@@ -1053,6 +1041,10 @@ html {
     .logo-orbit {
         width: 240px;
         margin: 0 auto;
+    }
+
+    .hero-image {
+        order: -1;
     }
 
     .hero-shape-1 {

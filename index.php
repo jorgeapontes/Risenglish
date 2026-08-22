@@ -83,7 +83,6 @@
             <div class="hero-image">
                 <div class="logo-orbit">
                     <img src="<?php echo htmlspecialchars(get_setting('hero_image','LogoRisenglish.png')); ?>" alt="Logo da Escola">
-                    <span class="orbit-ring" aria-hidden="true"></span>
                     <span class="orbit-semicircle" aria-hidden="true"></span>
                 </div>
             </div>
