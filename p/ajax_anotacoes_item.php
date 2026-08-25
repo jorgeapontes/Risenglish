@@ -16,18 +16,6 @@ $acao = $_POST['acao'] ?? $_GET['acao'] ?? '';
 
 try {
     if ($acao === 'create') {
-        // Debug: registrar chamadas create para análise (apenas append)
-        try {
-            $debugData = [
-                'time' => date('c'),
-                'user_id' => $user_id,
-                'user_tipo' => $user_tipo,
-                'post' => $_POST,
-                'get' => $_GET,
-                'remote' => $_SERVER['REMOTE_ADDR'] ?? null
-            ];
-            @file_put_contents(__DIR__ . '/debug_anotacoes.log', json_encode($debugData) . PHP_EOL, FILE_APPEND | LOCK_EX);
-        } catch (Exception $e) {}
         $aula_id = $_POST['aula_id'] ?? null;
         $conteudo = trim($_POST['conteudo'] ?? '');
         if (!$aula_id || $conteudo === '') throw new Exception('Dados inválidos');

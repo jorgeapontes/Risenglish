@@ -36,14 +36,10 @@ $caminho_completo = $raiz_projeto . DIRECTORY_SEPARATOR . $conteudo['caminho_arq
 $caminho_completo = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $caminho_completo);
 
 
-// 4. VERIFICAÇÃO FINAL (AGORA COM DEBUG ATIVO)
+// 4. Verificação final
 if (!file_exists($caminho_completo)) {
     http_response_code(404);
-    
-    // LINHA DE DEBUG ATIVA:
-    die("DEBUG FINAL: Tentando acessar: " . $caminho_completo); 
-    
-    // die("Arquivo físico não encontrado no servidor."); // Originalmente desativada
+    die("Arquivo físico não encontrado no servidor.");
 }
 
 // 5. Envio dos Headers para visualização INLINE
