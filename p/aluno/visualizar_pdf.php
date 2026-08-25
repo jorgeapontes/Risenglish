@@ -17,12 +17,7 @@ $titulo = $_GET['titulo'] ?? 'Material de Aula';
     <title><?= htmlspecialchars($titulo) ?> - Risenglish</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <style>
-        body { background: #525659; margin: 0; padding: 0; }
-        #pdf-render-container { text-align: center; padding: 20px; }
-        canvas { box-shadow: 0 5px 15px rgba(0,0,0,0.4); margin-bottom: 30px; max-width: 100%; display: block; margin-left: auto; margin-right: auto; }
-        .loading-msg { color: white; text-align: center; margin-top: 50px; font-family: sans-serif; }
-    </style>
+    <link rel="stylesheet" href="../../css/aluno/visualizar_pdf.css">
 </head>
 <body oncontextmenu="return false;">
     <div id="loading" class="loading-msg">Carregando material protegido...</div>
