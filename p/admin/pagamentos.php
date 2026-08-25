@@ -253,60 +253,6 @@ $total_ativos = $total_registros - $count_inativos;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
     <link rel="stylesheet" href="../../css/admin/pagamentos.css">
-    <style>
-        .badge-status {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            margin-left: 0.5rem;
-        }
-        .badge-status.ativo {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .badge-status.inativo {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .dependente-info {
-            font-size: 0.85em;
-            margin-top: 5px;
-            padding: 3px 8px;
-            border-radius: 4px;
-        }
-        .dependente-info.ativos {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-        .dependente-info.inativos {
-            background-color: #ffebee;
-            color: #c62828;
-            margin-top: 2px;
-        }
-        .btn-reativar {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-left: 0.5rem;
-        }
-        .btn-reativar:hover {
-            background-color: #218838;
-        }
-        .info-badge {
-            background-color: #e7f3ff;
-            color: #004085;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border-left: 4px solid #007bff;
-        }
-    </style>
 </head>
 <body>
 

@@ -110,30 +110,7 @@ for ($i = 0; $i < 7; $i++) {
     <link rel="stylesheet" href="../../css/professor/dashboard.css">
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
-    <style>
-        body {
-            background-color: #FAF9F6;
-        }
-
-        h1 {
-            color: var(--cor-primaria);
-            font-weight: 600;
-        }
-
-        .page-header {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .calendar-header h2 {
-            margin-bottom: 0;
-            color: #081d40;
-        }
-    </style>
+    <link rel="stylesheet" href="../../css/admin/agendas.css">
 </head>
 <body>
     <div class="container-fluid">
