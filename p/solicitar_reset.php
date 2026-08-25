@@ -67,33 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Esqueci Minha Senha - Ris English</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: linear-gradient(to bottom right, #8B0000, #0B2C59);; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .login-container { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.15); width: 100%; max-width: 400px; height: 350px; }
-        h2 { text-align: center; color: #333; margin-top: 0; }
-        .form-group { margin-bottom: 20px; margin-top: 40px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
-        .form-control { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; transition: border-color 0.3s; }
-        .form-control:focus { border-color: #007bff; outline: none; }
-        .btn-primary { 
-            background-color: #0B2C59; 
-            color: white; 
-            padding: 12px; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            width: 100%; 
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s ease; 
-            margin-top: 15px;
-        }
-        .btn-primary:hover { background-color: #173b6d; }
-        .alert { padding: 15px; margin-bottom: 20px; border-radius: 6px; text-align: center; font-weight: bold; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .alert-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-    </style>
+    <link rel="stylesheet" href="../css/solicitar_reset.css">
 </head>
 <body>
     <div class="login-container">

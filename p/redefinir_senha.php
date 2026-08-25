@@ -64,19 +64,7 @@
     <!-- Inclua o CSS da sua tela de login aqui -->
     <link rel="stylesheet" href="../../css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* Estilos básicos para este formulário, use seu CSS de login */
-        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f2f5; }
-        .login-container { background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); width: 350px; }
-        .form-group { margin-bottom: 20px; }
-        .form-control { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        .btn-primary { background-color: #007bff; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
-        .btn-primary:hover { background-color: #0056b3; }
-        .alert { padding: 15px; margin-bottom: 20px; border-radius: 5px; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    </style>
+    <link rel="stylesheet" href="../../css/redefinir_senha.css">
 </head>
 <body>
     <div class="login-container">
