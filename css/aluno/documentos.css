@@ -1,0 +1,91 @@
+.doc-container {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    overflow: hidden;
+}
+
+.doc-item {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+    text-decoration: none !important;
+    color: inherit;
+    cursor: pointer;
+}
+
+.doc-item:last-child { border-bottom: none; }
+
+.doc-item:hover {
+    background-color: #fcfcfc;
+    transform: translateX(5px);
+}
+
+.file-icon-wrapper {
+    width: 50px;
+    height: 50px;
+    background-color: #fdf2f1;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    color: var(--cor-secundaria);
+    font-size: 1.5rem;
+    transition: 0.3s;
+}
+
+.doc-item:hover .file-icon-wrapper {
+    background-color: var(--cor-secundaria);
+    color: white;
+}
+
+.doc-info { flex-grow: 1; }
+
+.doc-title {
+    display: block;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--cor-primaria);
+    margin-bottom: 2px;
+}
+
+.doc-meta {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.btn-view {
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: 2px solid #eee;
+    color: #555;
+    transition: 0.3s;
+}
+
+.doc-item:hover .btn-view {
+    background-color: var(--cor-secundaria);
+    border-color: var(--cor-secundaria);
+    color: white;
+}
+
+.empty-state {
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #eee;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .doc-item { flex-direction: column; text-align: center; }
+    .file-icon-wrapper { margin-right: 0; margin-bottom: 15px; }
+    .btn-view { width: 100%; margin-top: 15px; }
+}

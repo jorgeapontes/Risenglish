@@ -1,0 +1,180 @@
+body {
+    background-color: #FAF9F6;
+    overflow-x: hidden;
+}
+
+.btn-danger {
+    background-color: #c0392b;
+    border-color: #c0392b;
+}
+
+.btn-danger:hover {
+    background-color: #a93226;
+    border-color: #a93226;
+}
+
+.btn-outline-danger {
+    color: #c0392b;
+    border-color: #c0392b;
+}
+
+.btn-outline-danger:hover {
+    background-color: #c0392b;
+    color: white;
+}
+
+#botao-sair {
+    border: none;
+}
+
+#botao-sair:hover {
+    background-color: #c0392b;
+    color: white;
+    transform: none;
+}
+
+.card-aula {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border-left: 4px solid #c0392b;
+}
+.card-aula:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.status-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+.aula-passada {
+    opacity: 0.8;
+}
+.toggle-section {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.toggle-section:hover {
+    background-color: #f8f9fa;
+}
+.aulas-passadas-container {
+    transition: all 0.3s ease;
+}
+.collapse-icon {
+    transition: transform 0.3s ease;
+}
+.collapsed .collapse-icon {
+    transform: rotate(-90deg);
+}
+
+/* Estilos para o cabeçalho do mês */
+.mes-header {
+    background: linear-gradient(135deg, #081d40 0%, #0a2a5c 100%);
+    color: white;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.mes-titulo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.mes-estatisticas {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.badge-presenca {
+    background-color: #28a745;
+    color: white;
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+.badge-futuras {
+    background-color: #17a2b8;
+    color: white;
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+.badge-total {
+    background-color: #6c757d;
+    color: white;
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+.badge-mes-atual {
+    background-color: #ffc107;
+    color: black;
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+.mes-toggle {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.mes-toggle:hover {
+    background-color: #f8f9fa;
+}
+
+.mes-toggle .collapse-icon {
+    transition: transform 0.3s ease;
+}
+
+.mes-toggle.collapsed .collapse-icon {
+    transform: rotate(-90deg);
+}
+
+/* Menu Mobile */
+@media (max-width: 991px) {
+    .sidebar {
+        display: none !important;
+    }
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+    .mobile-navbar-custom {
+        background: #081d40 !important;
+        color: #fff !important;
+    }
+    .mobile-navbar-custom h5 {
+        color: #fff !important;
+    }
+    .mobile-navbar-custom .btn-outline-primary {
+        color: #fff !important;
+        border-color: #fff !important;
+    }
+    .mobile-navbar-custom .btn-outline-primary:active,
+    .mobile-navbar-custom .btn-outline-primary:focus,
+    .mobile-navbar-custom .btn-outline-primary:hover {
+        background: #0a2a5c !important;
+        color: #fff !important;
+        border-color: #fff !important;
+    }
+
+    .mes-header {
+        padding: 12px 15px;
+        margin-bottom: 15px;
+    }
+
+    .mes-titulo {
+        font-size: 1.2rem;
+    }
+}

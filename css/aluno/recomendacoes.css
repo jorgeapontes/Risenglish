@@ -1,0 +1,102 @@
+body {
+    background-color: #FAF9F6;
+    overflow-x: hidden;
+}
+
+.btn-danger {
+    background-color: #c0392b;
+    border-color: #c0392b;
+}
+
+.btn-danger:hover {
+    background-color: #a93226;
+    border-color: #a93226;
+}
+
+.btn-outline-danger {
+    color: #c0392b;
+    border-color: #c0392b;
+}
+
+.btn-outline-danger:hover {
+    background-color: #c0392b;
+    color: white;
+}
+
+#botao-sair {
+    border: none;
+}
+
+#botao-sair:hover {
+    background-color: #c0392b;
+    color: white;
+    transform: none;
+}
+
+.card-recurso {
+    transition: all 0.3s ease;
+    border-left: 4px solid #c0392b;
+    height: 100%;
+}
+.card-recurso:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.card-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.recurso-icon {
+    font-size: 2.5rem;
+    color: #081d40;
+    margin-bottom: 1rem;
+}
+.btn-recurso {
+    background-color: #081d40;
+    color: white;
+    border: none;
+}
+.btn-recurso:hover {
+    background-color: #0a2550;
+    color: white;
+}
+.categoria-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+/* Menu Mobile */
+@media (max-width: 991px) {
+    .sidebar {
+        display: none !important;
+    }
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+    .mobile-navbar-custom {
+        background: #081d40 !important;
+        color: #fff !important;
+    }
+    .mobile-navbar-custom h5 {
+        color: #fff !important;
+    }
+    .mobile-navbar-custom .btn-outline-primary {
+        color: #fff !important;
+        border-color: #fff !important;
+    }
+    .mobile-navbar-custom .btn-outline-primary:active,
+    .mobile-navbar-custom .btn-outline-primary:focus,
+    .mobile-navbar-custom .btn-outline-primary:hover {
+        background: #0a2a5c !important;
+        color: #fff !important;
+        border-color: #fff !important;
+    }
+}

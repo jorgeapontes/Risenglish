@@ -1,0 +1,4 @@
+body { background: #525659; margin: 0; padding: 0; }
+#pdf-render-container { text-align: center; padding: 20px; }
+canvas { box-shadow: 0 5px 15px rgba(0,0,0,0.4); margin-bottom: 30px; max-width: 100%; display: block; margin-left: auto; margin-right: auto; }
+.loading-msg { color: white; text-align: center; margin-top: 50px; font-family: sans-serif; }
