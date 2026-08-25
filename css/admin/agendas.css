@@ -3,7 +3,7 @@ body {
 }
 
 h1 {
-    color: var(--cor-primaria);
+    color: #0A1931;
     font-weight: 600;
 }
 
@@ -19,4 +19,162 @@ h1 {
 .calendar-header h2 {
     margin-bottom: 0;
     color: #081d40;
+}
+
+/* Movido de css/professor/dashboard.css — usado pelo FullCalendar nesta página */
+.calendar-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 25px;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+.fc .fc-button-primary {
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+    color: #081d40 !important;
+    text-transform: capitalize !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    box-shadow: none !important;
+    padding: 8px 16px !important;
+    transition: all 0.2s ease;
+}
+
+.fc .fc-button-primary:hover {
+    background-color: #e9ecef !important;
+    border-color: #ced4da !important;
+}
+
+.fc .fc-button-active {
+    background-color: #081d40 !important;
+    border-color: #081d40 !important;
+    color: white !important;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #081d40;
+}
+
+.fc th {
+    padding: 12px 0 !important;
+    background-color: #fbfbfb;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    color: #6c757d !important;
+    border-bottom: 2px solid #f1f1f1 !important;
+}
+
+.fc-v-event {
+    background-color: #081d40 !important;
+    border: none !important;
+    margin-bottom: 2px !important;
+}
+
+.fc-event-main {
+    padding: 4px 8px !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+}
+
+.fc td, .fc th {
+    border-color: #f1f1f1 !important;
+}
+
+.fc .fc-timegrid-now-indicator-line {
+    border-color: #c0392b !important;
+}
+
+@media (max-width: 768px) {
+    .fc .fc-toolbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .calendar-card {
+        padding: 10px;
+    }
+}
+
+.fc .fc-col-header-cell {
+    background-color: #081d40 !important;
+    padding: 15px 0 !important;
+    border-color: #0a2755 !important;
+    vertical-align: middle !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+    display: block !important;
+    padding: 12px 5px !important;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    text-transform: capitalize;
+    font-weight: 600 !important;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.fc-theme-standard .fc-scrollgrid {
+    border: 1px solid #081d40 !important;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.fc-event {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.fc-event:hover {
+    opacity: 0.9;
+}
+
+.fc .fc-daygrid-more-link {
+    color: #081d40 !important;
+    text-decoration: none !important;
+    font-weight: 600;
+}
+
+.fc .fc-daygrid-day-number {
+    color: #333333 !important;
+    text-decoration: none !important;
+    font-weight: 500;
+    padding: 8px !important;
+    transition: color 0.2s ease;
+}
+
+.fc .fc-daygrid-day-number:hover {
+    color: #081d40 !important;
+    text-decoration: none !important;
+}
+
+.fc .fc-timegrid-col-header-cell-cushion,
+.fc .fc-list-day-text,
+.fc .fc-list-day-side-text {
+    color: #ffffff !important;
+    text-decoration: none !important;
+}
+
+.fc .fc-day-today {
+    background-color: rgba(8, 29, 64, 0.02) !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+    background-color: #081d40;
+    color: #ffffff !important;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 4px;
+}
+
+.fc-timegrid-axis-cushion,
+.fc-timegrid-slot-label-cushion {
+    color: #666 !important;
+    font-size: 0.8rem;
+    text-transform: uppercase;
 }

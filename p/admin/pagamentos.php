@@ -4,7 +4,7 @@ require_once '../includes/conexao.php';
 
 // Garante que apenas admin acessa esta página
 if ($_SESSION['user_tipo'] !== 'admin') {
-    header("Location: ../login.php?erro=acesso_negado");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
@@ -252,32 +252,13 @@ $total_ativos = $total_registros - $count_inativos;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../css/admin/base.css">
     <link rel="stylesheet" href="../../css/admin/pagamentos.css">
 </head>
 <body>
 
 <div class="d-flex">
-    <div class="col-md-2 d-flex flex-column sidebar p-3">
-        <div class="mb-4 text-center">
-            <h5 class="mt-4"><?php echo htmlspecialchars($nome_usuario); ?></h5>
-        </div>
-
-        <div class="d-flex flex-column flex-grow-1 mb-5">
-            <a href="dashboard.php"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-            <a href="leads.php" class="rounded"><i class="fas fa-user-tie"></i>&nbsp;&nbsp;Leads</a>
-            <a href="personalizar_index.php" class="rounded"><i class="fas fa-paint-brush"></i>&nbsp;&nbsp;Personalizar Site</a>
-            <a href="gerenciar_turmas.php"><i class="fas fa-users"></i>&nbsp;&nbsp;&nbsp;Turmas</a>
-            <a href="gerenciar_usuarios.php"><i class="fas fa-user"></i>&nbsp;&nbsp;Usuários</a>
-            <a href="gerenciar_uteis.php"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Recomendações</a>
-            <a href="agendas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;Agendas</a>
-            <a href="pagamentos.php" class="active"><i class="fas fa-dollar-sign"></i>&nbsp;&nbsp;Pagamentos</a>
-            <a href="acessos.php" class="rounded"><i class="fas fa-chart-line"></i>&nbsp;&nbsp;Relatório de Acessos</a>
-        </div>
-
-        <div class="mt-auto">
-            <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-        </div>
-    </div>
+    <?php $paginaAtiva = 'pagamentos'; require '../includes/layout/admin_sidebar.php'; ?>
 
     <div class="main-content flex-grow-1">
         <h1 class="mb-4">Controle de Pagamentos - PIX</h1>
@@ -349,7 +330,7 @@ $total_ativos = $total_registros - $count_inativos;
                 </div>
                 <?php if (!empty($filtro_busca) || $filtro_status !== 'todos'): ?>
                 <div style="flex: 0 0 auto;">
-                    <a href="pagamentos.php" class="btn btn-secondary">
+                    <a href="pagamentos" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Limpar
                     </a>
                 </div>
@@ -525,7 +506,7 @@ $total_ativos = $total_registros - $count_inativos;
                 <h5 class="modal-title" id="modalPagamentoLabel">Registrar Pagamento</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="pagamentos.php">
+            <form method="POST" action="pagamentos">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="registrar_pagamento">
                     <input type="hidden" name="aluno_id" id="pagamento_aluno_id">
@@ -572,7 +553,7 @@ $total_ativos = $total_registros - $count_inativos;
                 <h5 class="modal-title" id="modalVencimentoLabel">Definir Vencimento</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="pagamentos.php">
+            <form method="POST" action="pagamentos">
                 <div class="modal-body">
                     <input type="hidden" name="action" value="atualizar_vencimento">
                     <input type="hidden" name="aluno_id" id="vencimento_aluno_id">
@@ -602,12 +583,12 @@ $total_ativos = $total_registros - $count_inativos;
     </div>
 </div>
 
-<form id="formRemover" method="POST" action="pagamentos.php">
+<form id="formRemover" method="POST" action="pagamentos">
     <input type="hidden" name="action" value="remover_pagamento">
     <input type="hidden" name="pagamento_id" id="remover_pagamento_id">
 </form>
 
-<form id="formReativar" method="POST" action="pagamentos.php">
+<form id="formReativar" method="POST" action="pagamentos">
     <input type="hidden" name="action" value="reativar_usuario">
     <input type="hidden" name="usuario_id" id="reativar_usuario_id">
 </form>

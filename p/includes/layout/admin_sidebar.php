@@ -7,15 +7,15 @@
 $paginaAtiva = $paginaAtiva ?? '';
 
 $itensMenu = [
-    'dashboard'     => ['href' => 'dashboard.php',              'icon' => 'fa-home',            'label' => 'Dashboard'],
-    'leads'         => ['href' => 'leads.php',                  'icon' => 'fa-user-tie',         'label' => 'Leads'],
-    'personalizar'  => ['href' => 'personalizar_index.php',     'icon' => 'fa-paint-brush',      'label' => 'Personalizar Site'],
-    'turmas'        => ['href' => 'gerenciar_turmas.php',       'icon' => 'fa-users',            'label' => 'Turmas'],
-    'usuarios'      => ['href' => 'gerenciar_usuarios.php',     'icon' => 'fa-user',             'label' => 'Usuários'],
-    'uteis'         => ['href' => 'gerenciar_uteis.php',        'icon' => 'fa-book-open',        'label' => 'Recomendações'],
-    'agendas'       => ['href' => 'agendas.php',                'icon' => 'fa-calendar-alt',     'label' => 'Agendas'],
-    'pagamentos'    => ['href' => 'pagamentos.php',             'icon' => 'fa-dollar-sign',      'label' => 'Pagamentos'],
-    'acessos'       => ['href' => 'acessos.php',                'icon' => 'fa-chart-line',       'label' => 'Relatório de Acessos'],
+    'dashboard'     => ['href' => 'dashboard',              'icon' => 'fa-home',            'label' => 'Dashboard'],
+    'leads'         => ['href' => 'leads',                  'icon' => 'fa-user-tie',         'label' => 'Leads'],
+    'personalizar'  => ['href' => 'personalizar_index',     'icon' => 'fa-paint-brush',      'label' => 'Personalizar Site'],
+    'turmas'        => ['href' => 'gerenciar_turmas',       'icon' => 'fa-users',            'label' => 'Turmas'],
+    'usuarios'      => ['href' => 'gerenciar_usuarios',     'icon' => 'fa-user',             'label' => 'Usuários'],
+    'uteis'         => ['href' => 'gerenciar_uteis',        'icon' => 'fa-book-open',        'label' => 'Recomendações'],
+    'agendas'       => ['href' => 'agendas',                'icon' => 'fa-calendar-alt',     'label' => 'Agendas'],
+    'pagamentos'    => ['href' => 'pagamentos',             'icon' => 'fa-dollar-sign',      'label' => 'Pagamentos'],
+    'acessos'       => ['href' => 'acessos',                'icon' => 'fa-chart-line',       'label' => 'Relatório de Acessos'],
 ];
 ?>
 <script>
@@ -49,7 +49,7 @@ $itensMenu = [
     </div>
 
     <div class="mt-auto">
-        <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100" aria-label="Sair" title="Sair">
+        <a href="../logout" id="botao-sair" class="btn btn-outline-danger w-100" aria-label="Sair" title="Sair">
             <i class="fas fa-sign-out-alt me-2"></i><span class="nav-label">Sair</span>
         </a>
     </div>

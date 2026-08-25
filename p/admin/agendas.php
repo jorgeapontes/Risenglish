@@ -4,7 +4,7 @@ require_once '../includes/conexao.php';
 
 // Garante que apenas admin acessa esta página
 if ($_SESSION['user_tipo'] !== 'admin') {
-    header("Location: ../login.php?erro=acesso_negado");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
@@ -107,35 +107,15 @@ for ($i = 0; $i < 7; $i++) {
     <title>Agendas - Admin Risenglish</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="../../css/professor/dashboard.css">
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../css/admin/base.css">
     <link rel="stylesheet" href="../../css/admin/agendas.css">
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <div class="mb-4 text-center">
-                    <h5 class="mt-4"><?php echo htmlspecialchars($_SESSION['user_nome'] ?? 'Admin'); ?></h5>
-                </div>
-
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="leads.php" class="rounded"><i class="fas fa-user-tie"></i>&nbsp;&nbsp;Leads</a>
-                    <a href="personalizar_index.php" class="rounded"><i class="fas fa-paint-brush"></i>&nbsp;&nbsp;Personalizar Site</a>
-                    <a href="gerenciar_turmas.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;&nbsp;Turmas</a>
-                    <a href="gerenciar_usuarios.php" class="rounded"><i class="fas fa-user"></i>&nbsp;&nbsp;Usuários</a>
-                    <a href="gerenciar_uteis.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Recomendações</a>
-                    <a href="agendas.php" class="rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;Agendas</a>
-                    <a href="pagamentos.php" class="rounded"><i class="fas fa-dollar-sign"></i>&nbsp;&nbsp;Pagamentos</a>
-                    <a href="acessos.php" class="rounded"><i class="fas fa-chart-line"></i>&nbsp;&nbsp;Relatório de Acessos</a>
-                </div>
-
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-                </div>
-            </div>
+            <?php $paginaAtiva = 'agendas'; require '../includes/layout/admin_sidebar.php'; ?>
 
             <div class="col-md-10 main-content p-4">
 
@@ -193,7 +173,7 @@ for ($i = 0; $i < 7; $i++) {
                 eventDisplay: 'block',
                 eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
                 events: {
-                    url: 'agendas.php',
+                    url: 'agendas',
                     method: 'GET',
                     extraParams: {
                         acao: 'buscar_eventos',
@@ -201,7 +181,7 @@ for ($i = 0; $i < 7; $i++) {
                     }
                 },
                 eventClick: function(info) {
-                    window.location.href = 'detalhes_aula.php?aula_id=' + info.event.id;
+                    window.location.href = 'detalhes_aula?aula_id=' + info.event.id;
                 }
             });
             calendar.render();
@@ -209,7 +189,7 @@ for ($i = 0; $i < 7; $i++) {
             var professorSelect = document.getElementById('professor_id');
             professorSelect.addEventListener('change', function() {
                 calendar.setOption('events', {
-                    url: 'agendas.php',
+                    url: 'agendas',
                     method: 'GET',
                     extraParams: {
                         acao: 'buscar_eventos',

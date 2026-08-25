@@ -8,7 +8,7 @@ if (!isset($pdo)) {
 }
 
 if ($_SESSION['user_tipo'] !== 'admin') {
-    header("Location: ../login.php");
+    header("Location: ../login");
     exit;
 }
 

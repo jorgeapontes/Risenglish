@@ -19,10 +19,10 @@ session_start();
 // =============================================
 if (isset($_SESSION['user_id'])) {
     switch ($_SESSION['user_tipo']) {
-        case 'admin':     header("Location: admin/dashboard.php"); break;
-        case 'professor': header("Location: professor/dashboard.php"); break;
-        case 'aluno':     header("Location: aluno/dashboard.php"); break;
-        default:          header("Location: login.php?erro=sessao_invalida");
+        case 'admin':     header("Location: admin/dashboard"); break;
+        case 'professor': header("Location: professor/dashboard"); break;
+        case 'aluno':     header("Location: aluno/dashboard"); break;
+        default:          header("Location: login?erro=sessao_invalida");
     }
     exit;
 }
@@ -254,13 +254,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
                         $stmtLog->execute();
 
                         switch ($_SESSION['user_tipo']) {
-                            case 'admin':     header("Location: admin/dashboard.php"); break;
-                            case 'professor': header("Location: professor/dashboard.php"); break;
-                            case 'aluno':     header("Location: aluno/dashboard.php"); break;
+                            case 'admin':     header("Location: admin/dashboard"); break;
+                            case 'professor': header("Location: professor/dashboard"); break;
+                            case 'aluno':     header("Location: aluno/dashboard"); break;
                             default:
                                 session_unset();
                                 session_destroy();
-                                header("Location: login.php?erro=tipo_invalido");
+                                header("Location: login?erro=tipo_invalido");
                         }
                         exit;
                     }
@@ -331,7 +331,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
       </div>
     <?php endif; ?>
 
-    <form method="POST" action="login.php">
+    <form method="POST" action="login">
       <!-- Token CSRF: campo oculto validado no servidor -->
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
 
@@ -346,8 +346,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
 
       <button type="submit" class="btn btn-login">ENTRAR</button>
     </form>
-    <a class="footer-text" href="../index.php">← Home</a><br>
-    <a href="solicitar_reset.php" class="footer-text">Esqueceu sua senha?</a>
+    <a class="footer-text" href="../">← Home</a><br>
+    <a href="solicitar_reset" class="footer-text">Esqueceu sua senha?</a>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

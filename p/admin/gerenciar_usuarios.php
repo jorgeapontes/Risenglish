@@ -4,7 +4,7 @@ require_once '../includes/conexao.php';
 
 // Garante que apenas admin acessa esta página
 if ($_SESSION['user_tipo'] !== 'admin') {
-    header("Location: ../login.php?erro=acesso_negado");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
@@ -300,32 +300,13 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../css/admin/base.css">
     <link rel="stylesheet" href="../../css/admin/gerenciar_usuarios.css">
 </head>
 <body>
 
 <div class="d-flex">
-    <div class="col-md-2 d-flex flex-column sidebar p-3">
-        <div class="mb-4 text-center">
-            <h5 class="mt-4"><?php echo $_SESSION['user_nome'] ?? 'Admin'; ?></h5>
-        </div>
-
-        <div class="d-flex flex-column flex-grow-1 mb-5">
-            <a href="dashboard.php" ><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-            <a href="leads.php" class="rounded"><i class="fas fa-user-tie"></i>&nbsp;&nbsp;Leads</a>
-            <a href="personalizar_index.php" class="rounded"><i class="fas fa-paint-brush"></i>&nbsp;&nbsp;Personalizar Site</a>
-            <a href="gerenciar_turmas.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;&nbsp;Turmas</a>
-            <a href="gerenciar_usuarios.php" class="rounded active"><i class="fas fa-user"></i>&nbsp;&nbsp;Usuários</a>
-            <a href="gerenciar_uteis.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Recomendações</a>
-            <a href="agendas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;Agendas</a>
-            <a href="pagamentos.php" class="rounded"><i class="fas fa-dollar-sign"></i>&nbsp;&nbsp;Pagamentos</a>
-            <a href="acessos.php" class="rounded"><i class="fas fa-chart-line"></i>&nbsp;&nbsp;Relatório de Acessos</a>
-        </div>
-
-        <div class="mt-auto">
-            <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-        </div>
-    </div>
+    <?php $paginaAtiva = 'usuarios'; require '../includes/layout/admin_sidebar.php'; ?>
 
     <div class="main-content flex-grow-1">
         <div class="page-header">
@@ -360,7 +341,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                         <i class="fas fa-info-circle me-1"></i>
                         Pesquisando por: <strong>"<?php echo htmlspecialchars($termo_pesquisa); ?>"</strong>
                         <span class="badge ms-2"><?php echo (count($professores) + count($alunos)); ?> usuário(s) encontrado(s)</span>
-                        <a href="gerenciar_usuarios.php" class="btn btn-sm btn-outline-secondary ms-2">
+                        <a href="gerenciar_usuarios" class="btn btn-sm btn-outline-secondary ms-2">
                             <i class="fas fa-times me-1"></i> Limpar Pesquisa
                         </a>
                     </div>
@@ -562,7 +543,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         <h5 class="modal-title" id="modalAddUsuarioLabel">Cadastrar Novo Usuário</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form method="POST" action="gerenciar_usuarios.php">
+      <form method="POST" action="gerenciar_usuarios">
         <div class="modal-body">
             <input type="hidden" name="acao" id="usuario_acao" value="add_usuario">
             <input type="hidden" name="usuario_id" id="usuario_id">
@@ -634,7 +615,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         <hr>
 
         <h6 class="mb-3 text-secondary">Adicionar Novo(s) Anexo(s)</h6>
-        <form method="POST" action="gerenciar_usuarios.php" enctype="multipart/form-data">
+        <form method="POST" action="gerenciar_usuarios" enctype="multipart/form-data">
             <input type="hidden" name="acao" value="upload_anexo">
             <input type="hidden" name="usuario_id_anexo" id="usuario_id_anexo">
             
@@ -651,17 +632,17 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
   </div>
 </div>
 
-<form id="formRemover" method="POST" action="gerenciar_usuarios.php">
+<form id="formRemover" method="POST" action="gerenciar_usuarios">
     <input type="hidden" name="acao" value="remover_usuario">
     <input type="hidden" name="id_usuario" id="remover_id_usuario">
 </form>
 
-<form id="formToggleStatus" method="POST" action="gerenciar_usuarios.php">
+<form id="formToggleStatus" method="POST" action="gerenciar_usuarios">
     <input type="hidden" name="acao" value="toggle_status">
     <input type="hidden" name="id_usuario_toggle" id="id_usuario_toggle">
 </form>
 
-<form id="formExcluirAnexo" method="POST" action="gerenciar_usuarios.php">
+<form id="formExcluirAnexo" method="POST" action="gerenciar_usuarios">
     <input type="hidden" name="acao" value="excluir_anexo">
     <input type="hidden" name="anexo_id_excluir" id="anexo_id_excluir">
 </form>
@@ -714,7 +695,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         const lista = document.getElementById('lista_anexos');
         lista.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"></div></div>';
         
-        fetch(`gerenciar_usuarios.php?acao=buscar_anexos&usuario_id=${userId}`)
+        fetch(`gerenciar_usuarios?acao=buscar_anexos&usuario_id=${userId}`)
             .then(res => res.json())
             .then(data => {
                 if (data.length === 0) {
@@ -725,7 +706,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                         html += `
                             <li class="list-group-item d-flex justify-content-between align-items-center py-2">
                                 <div class="text-truncate me-2">
-                                    <a href="baixar_anexo.php?id=${anexo.id}" target="_blank" class="text-decoration-none">
+                                    <a href="baixar_anexo?id=${anexo.id}" target="_blank" class="text-decoration-none">
                                         <i class="fas fa-file-alt text-primary me-2"></i><strong>${anexo.nome_arquivo}</strong>
                                     </a>
                                     <br><small class="text-muted" style="font-size: 0.7rem;">Adicionado em: ${anexo.data_upload}</small>
