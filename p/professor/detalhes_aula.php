@@ -6,11 +6,14 @@ require_once '../includes/conexao.php';
 date_default_timezone_set('America/Sao_Paulo'); // Força o PHP para horário de Brasília
 $pdo->exec("SET time_zone = '-03:00'"); // Força o MySQL para horário de Brasília
 
-// Garante que apenas professor acessa esta página
-if ($_SESSION['user_tipo'] !== 'professor') {
+// Professor acessa normalmente; admin acessa em modo somente-visualização
+if (!in_array($_SESSION['user_tipo'], ['professor', 'admin'], true)) {
     header("Location: ../login.php");
     exit;
 }
+
+// Admin pode ver os detalhes de qualquer aula, mas não pode editar/marcar presença/comentar
+$pode_editar = ($_SESSION['user_tipo'] === 'professor');
 
 $professor_id = $_SESSION['user_id'];
 $professor_nome = $_SESSION['user_nome'] ?? 'Professor';
@@ -23,7 +26,7 @@ if (!$aula_id || !is_numeric($aula_id)) {
     exit;
 }
 
-// Buscar detalhes da aula
+// Buscar detalhes da aula (professor só vê as suas; admin vê qualquer uma)
 $sql_detalhes = "SELECT
     a.id AS aula_id, a.titulo_aula, a.data_aula, a.horario, a.descricao AS desc_aula,
     t.id AS turma_id, t.nome_turma, t.link_aula,
@@ -31,10 +34,14 @@ $sql_detalhes = "SELECT
     FROM aulas a
     JOIN turmas t ON a.turma_id = t.id
     JOIN usuarios p ON a.professor_id = p.id
-    WHERE a.id = :aula_id AND a.professor_id = :professor_id";
+    WHERE a.id = :aula_id" . ($pode_editar ? " AND a.professor_id = :professor_id" : "");
 
 $stmt_detalhes = $pdo->prepare($sql_detalhes);
-$stmt_detalhes->execute([':aula_id' => $aula_id, ':professor_id' => $professor_id]);
+$params_detalhes = [':aula_id' => $aula_id];
+if ($pode_editar) {
+    $params_detalhes[':professor_id'] = $professor_id;
+}
+$stmt_detalhes->execute($params_detalhes);
 
 $detalhes_aula = $stmt_detalhes->fetch(PDO::FETCH_ASSOC);
 
@@ -446,6 +453,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h1 style="color: #081d40;">Detalhes da Aula</h1>
                     <div>
+                        <?php if ($pode_editar): ?>
                         <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editarAulaModal">
                             <i class="fas fa-edit me-2"></i> Editar Aula
                         </button>
@@ -455,6 +463,11 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                         <a href="detalhes_turma.php?turma_id=<?= $detalhes_aula['turma_id'] ?>" class="btn btn-secondary ms-2">
                             <i class="fas fa-arrow-left me-2"></i> Voltar para Turma
                         </a>
+                        <?php else: ?>
+                        <a href="../admin/agendas.php" class="btn btn-secondary ms-2">
+                            <i class="fas fa-arrow-left me-2"></i> Voltar para Agenda
+                        </a>
+                        <?php endif; ?>
                     </div>
                 </div>
                 
@@ -562,7 +575,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                     id="presenca_<?= $aluno['aluno_id'] ?>" 
                                                     data-aula-id="<?= $detalhes_aula['aula_id'] ?>"
                                                     data-aluno-id="<?= $aluno['aluno_id'] ?>"
-                                                    <?= $is_presente ? 'checked' : '' ?>>
+                                                    <?= $is_presente ? 'checked' : '' ?> <?= $pode_editar ? '' : 'disabled' ?>>
                                                 <label class="form-check-label small" for="presenca_<?= $aluno['aluno_id'] ?>">
                                                     <?= $is_presente ? 'Sim' : 'Não' ?>
                                                 </label>
@@ -714,10 +727,12 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                                 <span class="text-muted small"> - <?= isset($item['data_criacao']) ? formatarData($item['data_criacao']) : '' ?></span>
                                                             </small>
                                                             <p class="mb-0 item-conteudo"><?= nl2br(htmlspecialchars($item['conteudo'])) ?></p>
+                                                            <?php if ($pode_editar): ?>
                                                             <div class="mt-1">
                                                                 <button type="button" class="btn btn-sm btn-outline-secondary btn-edit-item" data-item-id="<?= $item['id'] ?>">Editar</button>
                                                                 <button type="button" class="btn btn-sm btn-outline-danger btn-delete-item" data-item-id="<?= $item['id'] ?>">Apagar</button>
                                                             </div>
+                                                            <?php endif; ?>
                                                         </div>
                                                     <?php endif; ?>
                                                 <?php endforeach; ?>
@@ -728,9 +743,8 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                 <div class="visto-container">
                                                     <div class="visto-info">
                                                         <div class="d-flex align-items-center">
-                                                            <span class="visto-badge <?= $vistoClass ?>" 
-                                                                  onclick="event.stopPropagation(); marcarVisto(<?= $anotacao['id'] ?>, this)"
-                                                                  title="Clique para alternar">
+                                                            <span class="visto-badge <?= $vistoClass ?>"
+                                                                  <?php if ($pode_editar): ?>onclick="event.stopPropagation(); marcarVisto(<?= $anotacao['id'] ?>, this)" title="Clique para alternar"<?php endif; ?>>
                                                                 <i class="fas <?= $vistoIcon ?>"></i>
                                                                 <span><?= $vistoText ?></span>
                                                             </span>
@@ -749,6 +763,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                 </div>
                                             <?php endif; ?>
                                             
+                                            <?php if ($pode_editar): ?>
                                             <form method="POST" action="" class="mt-2 form-comentario" data-index="<?= $index ?>" data-aluno-id="<?= $anotacao['aluno_id'] ?>">
                                                 <input type="hidden" name="aluno_id" value="<?= $anotacao['aluno_id'] ?>">
                                                 
@@ -781,6 +796,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                     </button>
                                                 </div>
                                             </form>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -887,7 +903,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                                     data-aula-id="<?= $detalhes_aula['aula_id'] ?>" 
                                                                     data-conteudo-id="<?= $tema['tema_id'] ?>" 
                                                                     data-tipo="tema" 
-                                                                    <?= $is_planejado ? 'checked' : '' ?>>
+                                                                    <?= $is_planejado ? 'checked' : '' ?> <?= $pode_editar ? '' : 'disabled' ?>>
                                                                 <label class="form-check-label small status-label" for="switch_<?= $tema['tema_id'] ?>">
                                                                     <?= $is_planejado ? 'Sim' : 'Não' ?>
                                                                 </label>
@@ -946,7 +962,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                                                 data-aula-id="<?= $detalhes_aula['aula_id'] ?>" 
                                                                                 data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
                                                                                 data-tipo="subpasta" 
-                                                                                <?= $is_subpasta_planejada ? 'checked' : '' ?>>
+                                                                                <?= $is_subpasta_planejada ? 'checked' : '' ?> <?= $pode_editar ? '' : 'disabled' ?>>
                                                                             <label class="form-check-label small status-label" for="switch_<?= $subpasta['subpasta_id'] ?>">
                                                                                 <?= $is_subpasta_planejada ? 'Sim' : 'Não' ?>
                                                                             </label>
@@ -1029,7 +1045,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                                     data-aula-id="<?= $detalhes_aula['aula_id'] ?>" 
                                                                     data-conteudo-id="<?= $tema['tema_id'] ?>" 
                                                                     data-tipo="tema" 
-                                                                    <?= $is_planejado ? 'checked' : '' ?>>
+                                                                    <?= $is_planejado ? 'checked' : '' ?> <?= $pode_editar ? '' : 'disabled' ?>>
                                                                 <label class="form-check-label small status-label" for="switch_<?= $tema['tema_id'] ?>">
                                                                     <?= $is_planejado ? 'Sim' : 'Não' ?>
                                                                 </label>
@@ -1088,7 +1104,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                                                 data-aula-id="<?= $detalhes_aula['aula_id'] ?>" 
                                                                                 data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
                                                                                 data-tipo="subpasta" 
-                                                                                <?= $is_subpasta_planejada ? 'checked' : '' ?>>
+                                                                                <?= $is_subpasta_planejada ? 'checked' : '' ?> <?= $pode_editar ? '' : 'disabled' ?>>
                                                                             <label class="form-check-label small status-label" for="switch_<?= $subpasta['subpasta_id'] ?>">
                                                                                 <?= $is_subpasta_planejada ? 'Sim' : 'Não' ?>
                                                                             </label>

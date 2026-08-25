@@ -181,7 +181,7 @@ for ($i = 0; $i < 7; $i++) {
                     }
                 },
                 eventClick: function(info) {
-                    window.location.href = 'detalhes_aula?aula_id=' + info.event.id;
+                    window.location.href = '../professor/detalhes_aula?aula_id=' + info.event.id;
                 }
             });
             calendar.render();
