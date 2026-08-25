@@ -408,3 +408,261 @@ body {
 .espacamento {
     margin-top: 32px;
 }
+
+/* Movido do <style> inline de detalhes_turma.php */
+.informacoes-alunos {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    background-color: #f8f9fa;
+}
+.aluno-info {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+.aluno-info:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+.aluno-nome {
+    font-weight: bold;
+    color: #081d40;
+    margin-bottom: 5px;
+}
+.aluno-informacoes {
+    font-size: 0.9em;
+    color: #495057;
+    line-height: 1.4;
+}
+.sem-informacoes {
+    font-style: italic;
+    color: #6c757d;
+}
+
+.agendar {
+    max-height: 200px;
+}
+
+.btn-agendar-modal {
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #081d40 0%, #1a365d 100%);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-agendar-modal:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, #081d40 0%, #1a365d 100%);
+    color: white;
+}
+
+.modal-header-custom {
+    background-color: #081d40;
+    color: white;
+}
+
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Estilos para a seção de presença */
+.presenca-card {
+    margin-top: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.presenca-header {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.presenca-body {
+    padding: 15px;
+}
+
+.presenca-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+}
+
+.presenca-row:hover {
+    background-color: #f8f9fa;
+}
+
+.presenca-row:last-child {
+    border-bottom: none;
+}
+
+.presenca-nome {
+    flex: 3;
+    font-weight: 500;
+}
+
+.presenca-stats {
+    flex: 2;
+    text-align: center;
+}
+
+.presenca-frequencia {
+    flex: 2;
+    text-align: center;
+}
+
+.presenca-progresso {
+    flex: 4;
+    padding: 0 15px;
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-label {
+    min-width: 40px;
+    text-align: right;
+    font-weight: 500;
+}
+
+.progress-bar-custom {
+    flex: 1;
+    height: 12px;
+    background-color: #e9ecef;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #28a745;
+    border-radius: 6px;
+    transition: width 0.3s ease;
+}
+
+.progress-fill.baixa {
+    background-color: #dc3545;
+}
+
+.progress-fill.media {
+    background-color: #ffc107;
+}
+
+.badge-frequencia {
+    font-size: 0.85em;
+    padding: 4px 8px;
+}
+
+.stats-summary {
+    display: flex;
+    justify-content: space-around;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.stat-value.presencas {
+    color: #28a745;
+}
+
+.stat-value.faltas {
+    color: #dc3545;
+}
+
+.stat-value.frequencia {
+    color: #007bff;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #dee2e6;
+}
+
+/* Nova cor para o card de presenças */
+.card-presenca-turma {
+    border: 1px solid #081d40;
+    background: linear-gradient(135deg, #081d40 0%, #1a3b6e 100%);
+    color: white;
+}
+
+.card-presenca-turma .card-header {
+    background-color: #081d40;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-presenca-turma .card-footer {
+    background-color: rgba(8, 29, 64, 0.8);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-presenca-turma .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+@media (max-width: 768px) {
+    .presenca-row {
+        flex-wrap: wrap;
+        padding: 15px 0;
+    }
+
+    .presenca-nome {
+        flex: 100%;
+        margin-bottom: 10px;
+    }
+
+    .presenca-stats,
+    .presenca-frequencia,
+    .presenca-progresso {
+        flex: 1 0 33.333%;
+        margin-bottom: 10px;
+    }
+
+    .progress-container {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .progress-label {
+        text-align: center;
+        width: 100%;
+    }
+}

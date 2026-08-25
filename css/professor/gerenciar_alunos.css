@@ -1,76 +1,286 @@
- /* Paleta de Cores: Creme, Vermelho Escuro, Marinho Escuro */
-        :root {
-            --cor-primaria: #0A1931; /* Marinho Escuro */
-            --cor-secundaria: #B91D23; /* Vermelho Escuro */
-            --cor-fundo: #F5F5DC; /* Creme/Bege */
-        }
-        body { background-color: var(--cor-fundo); }
-        .sidebar { background-color: var(--cor-primaria); color: white; min-height: 100vh; }
-        .sidebar a { color: white; padding: 15px; text-decoration: none; display: block; }
-        .sidebar a:hover { background-color: var(--cor-secundaria); }
-        .main-content { padding: 30px; }
-        
-        /* Estilo do Acordeão */
-        .accordion-item {
-            border: 1px solid var(--cor-primaria);
-            margin-bottom: 10px;
-        }
-        /* O cabeçalho agora tem um padding maior para acomodar o botão flutuante */
-        .accordion-header-custom {
-            display: flex;
-            align-items: center;
-            background-color: var(--cor-primaria);
-            color: white;
-            padding: 0; /* Remove padding default do header */
-        }
-        .accordion-button {
-            background-color: transparent; /* Cor transparente para o botão do acordeão */
-            color: white;
-            font-weight: bold;
-            flex-grow: 1; /* Faz o botão ocupar a maior parte do espaço */
-            text-align: left;
-            padding: 1rem 1.25rem; /* Ajusta o padding interno do botão */
-        }
-        .accordion-button:not(.collapsed) {
-            background-color: var(--cor-secundaria);
-            color: white;
-        }
-        .accordion-button:focus {
-            box-shadow: none;
-        }
-        .aluno-item {
-            padding: 8px 15px;
-            border-bottom: 1px dashed #ccc;
-        }
-        .aluno-item:last-child {
-            border-bottom: none;
-        }
-        .btn-gerenciar {
-            margin-right: 1.25rem;
-            flex-shrink: 0; /* Evita que o botão encolha */
-        }
+body {
+    background-color: #FAF9F6;
+    overflow-x: hidden;
+}
 
-        /* Certifica que a sidebar tem 'relative' para o link-sair funcionar */
-.sidebar { 
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 16.666667%; /* Equivale a col-md-2 */
+    background-color: #081d40;
+    color: #fff;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.sidebar a {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.sidebar a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(3px);
+    transition: 0.3s;
+}
+
+.sidebar .active {
+    background-color: #c0392b;
+}
+
+.sidebar .active:hover{
+    background-color: #c0392b;
+}
+
+.main-content {
+    margin-left: 16.666667%; /* Compensa a largura da sidebar fixa */
+    width: 83.333333%; /* Equivale a col-md-10 */
+    min-height: 100vh;
+    overflow-y: auto;
+}
+
+.btn-danger {
+    background-color: #c0392b;
+    border-color: #c0392b;
+}
+
+.btn-danger:hover {
+    background-color: #a93226;
+    border-color: #a93226;
+}
+
+.btn-outline-danger {
+    color: #c0392b;
+    border-color: #c0392b;
+}
+
+.btn-outline-danger:hover {
+    background-color: #c0392b;
+    color: white;
+}
+
+#botao-sair {
+    border: none;
+}
+
+#botao-sair:hover {
+    background-color: #c0392b;
+    color: white;
+    transform: none;
+}
+
+.accordion-header-custom {
     position: relative;
-    /* ... outros estilos ... */ 
 }
 
-/* Estilo do Botão Sair */
-.link-sair {
+.btn-gerenciar {
     position: absolute;
-    bottom: 20px; 
-    
-    /* Compensamos o padding p-3 (15px) da sidebar para ele alinhar */
-    left: 15px; 
-    right: 15px; 
-    
-    /* Mantém o padding do <a> interno de 15px */
-    padding: 15px;
-    text-align: left; /* Ou 'center', se preferir */
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background-color: #c0392b;
+    border-color: #c0392b;
+    color: white;
 }
 
-/* Estilo de hover para manter a consistência com os outros links */
-.link-sair:hover {
-    background-color: var(--cor-secundaria);
+.btn-gerenciar:hover {
+    background-color: #a93226;
+    border-color: #a93226;
+    color: white;
+}
+
+/* CORREÇÃO AQUI: Estilos mais simples para o accordion */
+.accordion-button {
+    background-color: #f8f9fa;
+    color: #333;
+    font-weight: bold;
+    border: 1px solid #dee2e6;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #e9ecef;
+    color: #333;
+    box-shadow: none;
+    border-bottom: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(192, 57, 43, 0.25);
+    border-color: #c0392b;
+}
+
+.accordion-button:hover {
+    background-color: #e9ecef;
+    color: #333;
+}
+
+/* Garantindo que o conteúdo fique visível */
+.accordion-button i.fa-graduation-cap {
+    color: #081d40;
+}
+
+.accordion-button small {
+    color: #6c757d !important;
+    opacity: 1 !important;
+}
+
+.accordion-button:not(.collapsed) small {
+    color: #6c757d !important;
+}
+
+/* Estilo para a badge de contagem de alunos */
+.aluno-badge {
+    position: absolute;
+    right: 1300px; /* Posição ajustada para não sobrepor o botão gerenciar */
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: white;
+    color: #081d40;
+    border: 1px solid #081d40;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    font-weight: normal;
+}
+
+.accordion-item {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.aluno-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.aluno-item:last-child {
+    border-bottom: none;
+}
+
+.aluno-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Estilos para a barra de pesquisa */
+.search-container {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    border: 1px solid #dee2e6;
+}
+
+.search-input-group {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    z-index: 5;
+}
+
+.search-input {
+    padding-left: 45px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    height: 45px;
+}
+
+.search-input:focus {
+    border-color: #081d40;
+
+}
+
+.search-results-info {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.search-results-info .badge {
+    background-color: #081d40 !important;
+    color: white !important;
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.no-results i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #dee2e6;
+}
+
+/* Estilo para destacar o termo de pesquisa */
+mark.bg-warning {
+    background-color: #ffc107 !important;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .accordion-header-custom {
+        padding-right: 15px;
+    }
+
+    .btn-gerenciar {
+        position: relative;
+        right: auto;
+        top: auto;
+        transform: none;
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    .search-container {
+        margin-top: 15px;
+    }
+
+    .aluno-badge {
+        position: relative;
+        right: auto;
+        top: auto;
+        transform: none;
+        display: inline-block;
+        margin-left: 10px;
+        margin-top: 5px;
+    }
+
+    .accordion-button {
+        padding-right: 15px;
+    }
 }

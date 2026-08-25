@@ -1,62 +1,21 @@
-/* Paleta de Cores: Creme, Vermelho Escuro, Marinho Escuro */
-        :root {
-            --cor-primaria: #0A1931; /* Marinho Escuro */
-            --cor-secundaria: #B91D23; /* Vermelho Escuro */
-            --cor-fundo: #F5F5DC; /* Creme/Bege */
-        }
-        body { background-color: var(--cor-fundo); }
-        .sidebar { background-color: var(--cor-primaria); color: white; min-height: 100vh; }
-        .sidebar a { color: white; padding: 15px; text-decoration: none; display: block; }
-        .sidebar a:hover { background-color: var(--cor-secundaria); }
-        .main-content { padding: 30px; }
-        .card-header-custom {
-            background-color: var(--cor-primaria);
-            color: white;
-            font-weight: bold;
-        }
-        /* Estilo para integrar Select2 ao Bootstrap 5 */
-        .select2-container .select2-selection--multiple {
-            min-height: 38px;
-            border: 1px solid #ced4da;
-            padding: 2px 5px;
-        }
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            background-color: var(--cor-secundaria);
-            border: 1px solid #a0191d;
-            color: white;
-        }
-
-        /* Certifica que a sidebar tem 'relative' para o link-sair funcionar */
-.sidebar { 
-    position: relative;
-    /* ... outros estilos ... */ 
-}
-
-/* Estilo do Botão Sair */
-.link-sair {
-    position: absolute;
-    bottom: 20px; 
-    
-    /* left e right ajustam a largura baseados no padding da .sidebar (p-3 = 15px) */
-    left: 15px; 
-    right: 15px; 
-    
-    /* Mantém o padding do <a> interno de 15px, mas agora é posicionado */
-    padding: 15px;
-    text-align: left; 
-
-    /* Estilos visuais que eram do :last-child */
-    background-color: transparent;
-    color: #B91D23;
-    border: 1px solid #B91D23;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    
-    /* Garante que o link-sair tenha a mesma altura que os outros links */
-    display: flex;
-}
-
-.link-sair:hover {
-    background-color: #B91D23; /* Cor de hover clara */
-    color: #fff; /* Cor do texto no hover */
-}
+body { background-color: #FAF9F6; overflow-x: hidden; }
+.sidebar { position: fixed; left: 0; top: 0; height: 100vh; width: 16.666667%; background-color: #081d40; color: #fff; z-index: 1000; overflow-y: auto; }
+.sidebar a { color: #fff; text-decoration: none; display: block; padding: 10px 15px; margin-bottom: 5px; border-radius: 5px; transition: 0.3s; }
+.sidebar a:hover { background-color: rgba(255,255,255,0.1); transform: translateX(3px); }
+.sidebar .active { background-color: #c0392b; }
+.main-content { margin-left: 16.666667%; width: 83.333333%; min-height: 100vh; overflow-y: auto; padding: 20px; }
+.card-header { background-color: #081d40; color: white; }
+.btn-danger { background-color: #c0392b; border-color: #c0392b; }
+.btn-danger:hover { background-color: #a93226; border-color: #a93226; }
+.btn-success { background-color: #28a745; border-color: #28a745; }
+.btn-success:hover { background-color: #218838; border-color: #218838; }
+.btn-primary { background-color: #007bff; border-color: #007bff; }
+.btn-primary:hover { background-color: #0069d9; border-color: #0062cc; }
+#botao-sair { border: none; }
+#botao-sair:hover { background-color: #c0392b; color: white; }
+.table th { background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; }
+.btn-info-detalhes { background-color: #099410ff; border-color: #099410ff; color: white; }
+.btn-info-detalhes:hover { background-color: #087e0eff; border-color: #087e0eff; color: white; }
+@media (max-width: 768px) { .sidebar { position: relative; width: 100%; height: auto; } .main-content { margin-left: 0; width: 100%; } }
+.btn-group-agendar .btn { margin-right: 10px; }
+.preview-datas { max-height: 100px; overflow-y: auto; font-size: 0.85rem; padding: 8px; background-color: #f8f9fa; border: 1px solid #ced4da; border-radius: 4px; }
