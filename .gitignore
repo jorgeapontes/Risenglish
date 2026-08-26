@@ -2,6 +2,17 @@
 .DS_Store
 Thumbs.db
 *.log
+error_log
+
+# Pastas de IDE/editor
+/.vscode/
+/.idea/
+
+# Arquivos de backup/temporários comuns
+*.bak
+*.tmp
+*~
+*.orig
 
 # CRUCIAL: variáveis de ambiente com credenciais reais (mantenha .env.example versionado)
 /public_html/.env

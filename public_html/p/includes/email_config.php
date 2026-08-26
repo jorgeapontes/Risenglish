@@ -19,7 +19,7 @@ require_once __DIR__ . '/env.php';
 // SMTP config from environment with fallbacks
 $smtp_host = getenv('SMTP_HOST') ?: 'smtp.hostinger.com.br';
 $smtp_user = getenv('SMTP_USER') ?: 'contato@risenglish.com.br';
-$smtp_pass = getenv('SMTP_PASS') ?: 'REDACTED_SMTP_PASSWORD';
+$smtp_pass = getenv('SMTP_PASS') ?: '';
 $smtp_port = getenv('SMTP_PORT') ? (int)getenv('SMTP_PORT') : 465;
 $smtp_secure = getenv('SMTP_SECURE') ?: 'ssl'; // 'ssl' or 'tls'
 $smtp_from = getenv('SMTP_FROM') ?: $smtp_user;
