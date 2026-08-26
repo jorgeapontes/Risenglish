@@ -26,7 +26,7 @@ $titulo = $_GET['titulo'] ?? 'Material de Aula';
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
         
-        const url = '<?= $arquivo ?>';
+        const url = <?= json_encode($arquivo, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
         const container = document.getElementById('pdf-render-container');
         
         // 1. Carregar a Logo antes de tudo

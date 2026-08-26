@@ -154,18 +154,19 @@ if ($user_tipo === 'professor' && isset($aluno_id)) {
         $conteudo = trim($_POST['conteudo'] ?? '');
         if (!$item_id || $conteudo === '') throw new Exception('Dados inválidos');
 
-        $sql_sel = "SELECT ai.id, ai.autor, aa.aluno_id, aa.aula_id 
-                    FROM anotacoes_itens ai 
-                    JOIN anotacoes_aula aa ON ai.anotacao_id = aa.id 
+        $sql_sel = "SELECT ai.id, ai.autor, aa.aluno_id, aa.aula_id, a.professor_id
+                    FROM anotacoes_itens ai
+                    JOIN anotacoes_aula aa ON ai.anotacao_id = aa.id
+                    JOIN aulas a ON aa.aula_id = a.id
                     WHERE ai.id = :id";
         $stmt = $pdo->prepare($sql_sel);
         $stmt->execute([':id' => $item_id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) throw new Exception('Item não encontrado');
 
-        // permissões: aluno só edita seus itens; professor só edita seus itens
-        if ($user_tipo === 'aluno' && $row['autor'] !== 'aluno') throw new Exception('Permissão negada');
-        if ($user_tipo === 'professor' && $row['autor'] !== 'professor') throw new Exception('Permissão negada');
+        // permissões: só o autor do item, dono da thread (aluno) ou professor da aula pode editar
+        if ($user_tipo === 'aluno' && ($row['autor'] !== 'aluno' || (int) $row['aluno_id'] !== (int) $user_id)) throw new Exception('Permissão negada');
+        if ($user_tipo === 'professor' && ($row['autor'] !== 'professor' || (int) $row['professor_id'] !== (int) $user_id)) throw new Exception('Permissão negada');
 
         $sql_up = "UPDATE anotacoes_itens SET conteudo = :conteudo WHERE id = :id";
         $stmt_up = $pdo->prepare($sql_up);
@@ -184,14 +185,19 @@ if ($user_tipo === 'professor' && isset($aluno_id)) {
         $item_id = $_POST['item_id'] ?? null;
         if (!$item_id) throw new Exception('Dados inválidos');
 
-        $sql_sel = "SELECT ai.id, ai.autor FROM anotacoes_itens ai WHERE ai.id = :id";
+        $sql_sel = "SELECT ai.id, ai.autor, aa.aluno_id, aa.aula_id, a.professor_id
+                    FROM anotacoes_itens ai
+                    JOIN anotacoes_aula aa ON ai.anotacao_id = aa.id
+                    JOIN aulas a ON aa.aula_id = a.id
+                    WHERE ai.id = :id";
         $stmt = $pdo->prepare($sql_sel);
         $stmt->execute([':id' => $item_id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) throw new Exception('Item não encontrado');
 
-        if ($user_tipo === 'aluno' && $row['autor'] !== 'aluno') throw new Exception('Permissão negada');
-        if ($user_tipo === 'professor' && $row['autor'] !== 'professor') throw new Exception('Permissão negada');
+        // permissões: só o autor do item, dono da thread (aluno) ou professor da aula pode apagar
+        if ($user_tipo === 'aluno' && ($row['autor'] !== 'aluno' || (int) $row['aluno_id'] !== (int) $user_id)) throw new Exception('Permissão negada');
+        if ($user_tipo === 'professor' && ($row['autor'] !== 'professor' || (int) $row['professor_id'] !== (int) $user_id)) throw new Exception('Permissão negada');
 
         $sql_del = "DELETE FROM anotacoes_itens WHERE id = :id";
         $stmt_del = $pdo->prepare($sql_del);
