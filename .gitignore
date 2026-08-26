@@ -1,8 +1,17 @@
 # Arquivos de Sistema Operacional/Ambiente
 .DS_Store
+Thumbs.db
 *.log
 
-# CRUCIAL: Ignorar arquivo de conexão com credenciais reais
-/p/includes/conexao.php
-/p/includes/email_config.php
-/.env
+# CRUCIAL: variáveis de ambiente com credenciais reais (mantenha .env.example versionado)
+/public_html/.env
+
+# Dumps de banco de dados (podem conter dados reais de usuários)
+*.sql
+
+# Logs de execução
+/public_html/p/includes/cron_log.txt
+
+# Uploads de usuários (documentos e imagens enviados pelo site/app)
+/public_html/uploads/
+/public_html/p/uploads/
