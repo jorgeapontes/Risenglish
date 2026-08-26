@@ -23,16 +23,6 @@ body {
     color: white;
 }
 
-#botao-sair {
-    border: none;
-}
-
-#botao-sair:hover {
-    background-color: #c0392b;
-    color: white;
-    transform: none;
-}
-
 .card-aula {
     transition: all 0.3s ease;
     cursor: pointer;
@@ -143,32 +133,6 @@ body {
 
 /* Menu Mobile */
 @media (max-width: 991px) {
-    .sidebar {
-        display: none !important;
-    }
-    .main-content {
-        margin-left: 0 !important;
-        width: 100% !important;
-    }
-    .mobile-navbar-custom {
-        background: #081d40 !important;
-        color: #fff !important;
-    }
-    .mobile-navbar-custom h5 {
-        color: #fff !important;
-    }
-    .mobile-navbar-custom .btn-outline-primary {
-        color: #fff !important;
-        border-color: #fff !important;
-    }
-    .mobile-navbar-custom .btn-outline-primary:active,
-    .mobile-navbar-custom .btn-outline-primary:focus,
-    .mobile-navbar-custom .btn-outline-primary:hover {
-        background: #0a2a5c !important;
-        color: #fff !important;
-        border-color: #fff !important;
-    }
-
     .mes-header {
         padding: 12px 15px;
         margin-bottom: 15px;
