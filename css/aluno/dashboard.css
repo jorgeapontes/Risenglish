@@ -136,6 +136,68 @@ body {
     transform: translateX(5px);
 }
 
+/* Botão de recolher/expandir da sidebar (desktop) */
+.sidebar-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--cor-clara);
+    font-size: 1.1rem;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    align-self: flex-start;
+}
+
+.sidebar-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+@media (min-width: 992px) {
+    :root {
+        --aluno-sidebar-collapsed-width: 68px;
+    }
+
+    .sidebar,
+    .main-content {
+        transition: width 0.2s ease, margin-left 0.2s ease;
+    }
+
+    html.aluno-sidebar-collapsed .sidebar {
+        width: var(--aluno-sidebar-collapsed-width);
+    }
+
+    html.aluno-sidebar-collapsed .main-content {
+        margin-left: var(--aluno-sidebar-collapsed-width);
+        width: calc(100% - var(--aluno-sidebar-collapsed-width));
+    }
+
+    html.aluno-sidebar-collapsed .sidebar .nav-label,
+    html.aluno-sidebar-collapsed .sidebar .user-name {
+        display: none;
+    }
+
+    html.aluno-sidebar-collapsed .sidebar a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 0;
+    }
+
+    html.aluno-sidebar-collapsed .sidebar .mt-auto.d-flex {
+        justify-content: center !important;
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar,
+    .main-content {
+        transition: none;
+    }
+}
+
 /* Estilo para a seção "Aulas de Hoje" no mobile */
 .bloco-aula-simples {
     color: white;

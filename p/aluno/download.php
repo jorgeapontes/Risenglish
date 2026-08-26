@@ -4,7 +4,7 @@ require_once '../includes/conexao.php';
 
 // Garante que apenas aluno acessa esta página
 if ($_SESSION['user_tipo'] !== 'aluno') {
-    header("Location: ../login.php?erro=acesso_negado");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 

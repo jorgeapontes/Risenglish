@@ -4,7 +4,7 @@ require_once '../includes/conexao.php';
 
 // Garante que apenas aluno acessa esta página
 if ($_SESSION['user_tipo'] !== 'aluno') {
-    header("Location: ../login.php?erro=acesso_negado");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 date_default_timezone_set('America/Sao_Paulo');
@@ -51,65 +51,13 @@ try {
 
 <div class="container-fluid p-0">
     
-    <header class="d-flex d-md-none mobile-navbar-custom border-bottom shadow-sm p-3 align-items-center sticky-top">
-        <button class="btn btn-outline-primary me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
-            <i class="fas fa-bars"></i>
-        </button>
-        <h5 class="mb-0 fw-bold">Documentos</h5>
-    </header>
-
-    <div class="offcanvas offcanvas-top text-white mobile-offcanvas" tabindex="-1" id="sidebarOffcanvas">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title fw-bold"><?php echo $aluno_nome; ?></h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
-        </div>
-        <div class="offcanvas-body d-flex flex-column">
-            <nav class="d-flex flex-column gap-2">
-                <a href="notificacoes.php" class="rounded position-relative">
-                    <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                    <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                        <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                    <?php endif; ?>
-                </a>
-                <a href="dashboard.php"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                <a href="minhas_aulas.php"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;Minhas Aulas</a>
-                <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
-                <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
-                <a href="documentos.php" class="active"><i class="fa-solid fa-box-archive"></i>&nbsp;&nbsp;&nbsp;Documentos</a>
-            </nav>
-            <div class="mt-auto">
-                <a href="../logout.php" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-            </div>
-        </div>
-    </div>
+    <?php
+    $paginaAtiva = 'documentos';
+    $tituloMobile = 'Documentos';
+    require '../includes/layout/aluno_sidebar.php';
+    ?>
 
     <div class="row g-0">
-        <div class="col-md-2 d-none d-md-flex flex-column sidebar p-3">
-            <div class="mb-4 text-center">
-                <h5 class="mt-4 fw-bold text-white"><?php echo $aluno_nome; ?></h5>
-            </div>
-            
-            <div class="d-flex flex-column flex-grow-1">
-                <a href="notificacoes.php" class="rounded position-relative">
-                    <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                    <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                        <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                    <?php endif; ?>
-                </a>
-                <a href="dashboard.php"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                <a href="minhas_aulas.php"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;Minhas Aulas</a>
-                <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
-                <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
-                <a href="documentos.php" class="active"><i class="fa-solid fa-box-archive"></i>&nbsp;&nbsp;&nbsp;Documentos</a>
-            </div>
-
-            <div class="mt-auto">
-                <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100 border-0">
-                    <i class="fas fa-sign-out-alt me-2"></i>Sair
-                </a>
-            </div>
-        </div>
-
         <div class="col-12 col-md-10 main-content p-4">
             <div class="mb-5">
                 <h2 class="fw-bold mb-1" style="color: var(--cor-primaria);">Material de Apoio</h2>
@@ -135,7 +83,7 @@ try {
                         if(in_array($ext, ['ppt', 'pptx'])) $icon = 'fa-file-powerpoint';
                         if(in_array($ext, ['zip', 'rar'])) $icon = 'fa-file-archive';
                     ?>
-                        <a href="download.php?id=<?= $doc['id'] ?>" class="doc-item">
+                        <a href="download?id=<?= $doc['id'] ?>" class="doc-item">
                             <div class="file-icon-wrapper">
                                 <i class="far <?= $icon ?>"></i>
                             </div>

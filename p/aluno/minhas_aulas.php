@@ -4,7 +4,7 @@ require_once '../includes/conexao.php';
 
 // Garante que apenas aluno acessa esta página
 if ($_SESSION['user_tipo'] !== 'aluno') {
-    header("Location: ../login.php?erro=acesso_negado");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
@@ -124,72 +124,13 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
 <body>
     <div class="container-fluid p-0">
         
-        <!-- Menu Mobile (Hamburger & Header) -->
-        <header class="d-flex d-md-none mobile-navbar-custom border-bottom shadow-sm p-3 align-items-center sticky-top">
-            <button class="btn btn-outline-primary me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Abrir Menu">
-                <i class="fas fa-bars"></i>
-            </button>
-            <h5 class="mb-0 fw-bold">Minhas Aulas</h5>
-        </header>
-
-        <!-- Sidebar Offcanvas (Menu para Mobile) -->
-        <div class="offcanvas offcanvas-top text-white mobile-offcanvas" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel" style="background-color: #081d40; height: 50vh;">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title fw-bold" id="sidebarOffcanvasLabel"><?php echo $aluno_nome; ?></h5>
-                <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body d-flex flex-column">
-                 <!-- Menu centralizado verticalmente -->
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </a>
-                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="minhas_aulas.php" class="rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
-                    <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
-                    <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
-                    <a href="documentos.php" class="rounded"><i class="fa-solid fa-box-archive"></i>&nbsp;&nbsp;&nbsp;Documentos</a>
-                </div>
-
-                <!-- Botão sair no rodapé -->
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-                </div>
-            </div>
-        </div>
+        <?php
+        $paginaAtiva = 'minhas_aulas';
+        $tituloMobile = 'Minhas Aulas';
+        require '../includes/layout/aluno_sidebar.php';
+        ?>
 
         <div class="row g-0">
-            <!-- Sidebar Desktop (Visível apenas em md e acima) -->
-            <div class="col-md-2 d-none d-md-flex flex-column sidebar p-3">
-                <!-- Nome do aluno -->
-                <div class="mb-4 text-center">
-                    <h5 class="mt-4"><?php echo $aluno_nome; ?></h5>
-                </div>
-
-                <!-- Menu -->
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </a>
-                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="minhas_aulas.php" class="rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
-                    <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
-                    <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
-                    <a href="documentos.php" class="rounded"><i class="fa-solid fa-box-archive"></i>&nbsp;&nbsp;&nbsp;Documentos</a>
-                </div>
-
-                <!-- Botão sair no rodapé -->
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-                </div>
-            </div>
-
             <!-- Conteúdo Principal -->
             <div class="col-12 col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -275,7 +216,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                 }
                             ?>
                             <div class="col-md-6 col-lg-4 mb-3">
-                                <div class="card card-aula h-100" onclick="window.location.href='detalhes_aula.php?id=<?= $aula['aula_id'] ?>'">
+                                <div class="card card-aula h-100" onclick="window.location.href='detalhes_aula?id=<?= $aula['aula_id'] ?>'">
                                     <div class="card-body position-relative">
                                         <span class="badge <?= $badge_class ?> status-badge"><?= $texto_data ?></span>
                                         <h5 class="card-title"><?= htmlspecialchars($aula['titulo_aula']) ?></h5>
@@ -364,7 +305,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                     $data_aula = $aula['data_hora_obj'];
                                 ?>
                                 <div class="col-md-6 col-lg-4 mb-3">
-                                    <div class="card card-aula aula-passada h-100" onclick="window.location.href='detalhes_aula.php?id=<?= $aula['aula_id'] ?>'">
+                                    <div class="card card-aula aula-passada h-100" onclick="window.location.href='detalhes_aula?id=<?= $aula['aula_id'] ?>'">
                                         <div class="card-body position-relative">
                                             <span class="badge bg-secondary status-badge">Realizada</span>
                                             <h5 class="card-title"><?= htmlspecialchars($aula['titulo_aula']) ?></h5>

@@ -5,13 +5,13 @@ require_once '../includes/email_config.php';
 
 // Garante que apenas aluno acessa esta página
 if ($_SESSION['user_tipo'] !== 'aluno') {
-    header("Location: ../login.php?erro=acesso_negado");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
 // Verificar se o ID da aula foi fornecido
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    header("Location: minhas_aulas.php");
+    header("Location: minhas_aulas");
     exit;
 }
 
@@ -55,7 +55,7 @@ $aula = $stmt_aula->fetch(PDO::FETCH_ASSOC);
 
 // Verificar se a aula existe e pertence ao aluno
 if (!$aula) {
-    header("Location: minhas_aulas.php");
+    header("Location: minhas_aulas");
     exit;
 }
 
@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_anotacao'])) {
         }
     }
     // Redirecionar para evitar reenvio do formulário
-    header("Location: detalhes_aula.php?id=" . $aula_id . "&saved=1");
+    header("Location: detalhes_aula?id=" . $aula_id . "&saved=1");
     exit;
 }
 
@@ -567,39 +567,22 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
     </script>
 
+    <link rel="stylesheet" href="../../css/aluno/dashboard.css">
     <link rel="stylesheet" href="../../css/aluno/detalhes_aula.css">
 </head>
 <body oncontextmenu="return false;">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <div class="mb-4 text-center">
-                    <h5 class="mt-4"><?php echo htmlspecialchars($aluno_nome); ?></h5>
-                </div>
+            <?php
+            $paginaAtiva = 'minhas_aulas';
+            $tituloMobile = $aula['titulo_aula'];
+            require '../includes/layout/aluno_sidebar.php';
+            ?>
 
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </a>
-                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="minhas_aulas.php" class="rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
-                    <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
-                    <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
-                    <a href="documentos.php" class="rounded"><i class="fa-solid fa-box-archive"></i>&nbsp;&nbsp;&nbsp;Documentos</a>
-                </div>
-
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-                </div>
-            </div>
-
-            <div class="col-md-10 main-content p-4">
+            <div class="col-12 col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                        <a href="minhas_aulas.php" class="btn btn-outline-secondary mb-2">
+                        <a href="minhas_aulas" class="btn btn-outline-secondary mb-2">
                             <i class="fas fa-arrow-left me-2"></i>Voltar para Minhas Aulas
                         </a>
                         <h3 class="mb-0"><?= htmlspecialchars($aula['titulo_aula']) ?></h3>
@@ -981,7 +964,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                         formData.append('aula_id', '<?= $aula_id ?>');
                         formData.append('conteudo', conteudo);
 
-                        fetch('../ajax_anotacoes_item.php', {
+                        fetch('../ajax_anotacoes_item', {
                             method: 'POST',
                             body: formData
                         }).then(res => res.json()).then(data => {
@@ -1014,7 +997,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                     if (deleteBtn) {
                         var itemId = deleteBtn.getAttribute('data-item-id');
                         if (!confirm('Confirma apagar esta anotação?')) return;
-                        fetch('../ajax_anotacoes_item.php', {
+                        fetch('../ajax_anotacoes_item', {
                             method: 'POST',
                             body: new URLSearchParams({acao: 'delete', item_id: itemId})
                         }).then(r => r.json()).then(d => {
@@ -1065,7 +1048,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                             var novo = ta.value.trim();
                             if (novo === '') return alert('Conteúdo vazio');
                             saveBtn.disabled = true; saveBtn.textContent = 'Salvando...';
-                            fetch('../ajax_anotacoes_item.php', {
+                            fetch('../ajax_anotacoes_item', {
                                 method: 'POST',
                                 body: new URLSearchParams({acao: 'edit', item_id: itemId, conteudo: novo})
                             }).then(r => r.json()).then(d => {

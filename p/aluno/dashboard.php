@@ -6,7 +6,7 @@ require_once '../includes/conexao.php';
 
 // Bloqueio de acesso para usuários não-aluno
 if ($_SESSION['user_tipo'] !== 'aluno') {
-    header("Location: ../login.php");
+    header("Location: ../login");
     exit;
 }
 date_default_timezone_set('America/Sao_Paulo');
@@ -157,95 +157,15 @@ foreach ($aulas_por_dia as $dia => $aulas) {
 <body>
     <div class="container-fluid p-0">
         
-        <!-- 
-            =================================================
-            1. Menu Mobile (Hamburger & Header)
-            =================================================
-        -->
-        <header class="d-flex d-md-none mobile-navbar-custom border-bottom shadow-sm p-3 align-items-center sticky-top">
-            <button class="btn btn-outline-primary me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Abrir Menu">
-                <i class="fas fa-bars"></i>
-            </button>
-            <h5 class="mb-0 fw-bold">Minhas Aulas</h5>
-            
-            <!-- Botão de notificações no mobile -->
-            <button class="btn-notificacoes ms-auto" id="btnNotificacoesMobile" title="Notificações" style="color: white;">
-                <i class="fas fa-bell"></i>
-                <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                    <span class="badge"><?= $total_notificacoes_nao_lidas ?></span>
-                <?php endif; ?>
-            </button>
-        </header>
-        <div class="offcanvas offcanvas-top text-white mobile-offcanvas" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel" style="background-color: var(--cor-primaria); height: 50vh;">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title fw-bold" id="sidebarOffcanvasLabel"><?php echo $aluno_nome; ?></h5>
-                <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body d-flex flex-column">
-                 <!-- Menu centralizado verticalmente -->
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </a>
-                    <a href="dashboard.php" class="rounded active"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="minhas_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
-                    <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
-                    <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
-                    <a href="documentos.php" class="rounded"><i class="fa-solid fa-box-archive"></i>&nbsp;&nbsp;&nbsp;Documentos</a>
-                </div>
-
-                <!-- Botão sair no rodapé -->
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-                </div>
-            </div>
-        </div>
+        <?php
+        $paginaAtiva = 'dashboard';
+        $tituloMobile = 'Dashboard';
+        $comBotaoNotificacoes = true;
+        require '../includes/layout/aluno_sidebar.php';
+        ?>
 
         <div class="row g-0">
-            <!-- 
-                =================================================
-                3. Sidebar Desktop (Visível apenas em md e acima)
-                =================================================
-            -->
-            <div class="col-md-2 d-none d-md-flex flex-column sidebar p-3">
-                <!-- Nome do aluno -->
-                <div class="mb-4 text-center">
-                    <h5 class="mt-4"><?php echo $aluno_nome; ?></h5>
-                </div>
-
-                <!-- Menu -->
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </a>
-                    <a href="dashboard.php" class="rounded active"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="minhas_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
-                    <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
-                    <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
-                    <a href="documentos.php" class="rounded"><i class="fa-solid fa-box-archive"></i>&nbsp;&nbsp;&nbsp;Documentos</a>
-                </div>
-
-                <!-- Botão sair no rodapé com notificações -->
-                <div class="mt-auto d-flex align-items-center justify-content-between">
-                    <button class="btn-notificacoes" id="btnNotificacoes" title="Notificações">
-                        <i class="fas fa-bell"></i>
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </button>
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger">
-                        <i class="fas fa-sign-out-alt me-2"></i>Sair
-                    </a>
-                </div>
-            </div>
-
-            <!-- 
+            <!--
                 =================================================
                 4. Conteúdo Principal
                 =================================================
@@ -265,8 +185,8 @@ foreach ($aulas_por_dia as $dia => $aulas) {
                             <p class="text-center text-muted mb-0 py-2">Nenhuma aula agendada para hoje.</p>
                         <?php else: ?>
                             <?php foreach ($aulas_hoje as $aula): 
-                                $url_redirecionamento = "detalhes_aula.php?id=" . $aula['aula_id'];
-                                $cor_fundo_aula = '#1a2a3a'; 
+                                $url_redirecionamento = "detalhes_aula?id=" . $aula['aula_id'];
+                                $cor_fundo_aula = '#1a2a3a';
                             ?>
                                 <div class="bloco-aula-simples mb-2" 
                                     style="background-color: <?= $cor_fundo_aula ?>;"
@@ -289,13 +209,13 @@ foreach ($aulas_por_dia as $dia => $aulas) {
                     Controle de Navegação do Mês (Visível em todas as telas)
                 -->
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-                    <a href="dashboard.php?mes=<?= $data_ant->format('m') ?>&ano=<?= $data_ant->format('Y') ?>" class="btn btn-outline-secondary mb-2 mb-sm-0">
+                    <a href="dashboard?mes=<?= $data_ant->format('m') ?>&ano=<?= $data_ant->format('Y') ?>" class="btn btn-outline-secondary mb-2 mb-sm-0">
                         <i class="fas fa-chevron-left"></i> <?= $nomes_meses[$data_ant->format('m')] ?>
                     </a>
                     <h3 class="text-center fw-light flex-grow-1 mx-2">
                         <span class="fw-bold text-primary"><?= $nomes_meses[$primeiro_dia_mes->format('m')] ?></span> de <?= $primeiro_dia_mes->format('Y') ?>
                     </h3>
-                    <a href="dashboard.php?mes=<?= $data_prox->format('m') ?>&ano=<?= $data_prox->format('Y') ?>" class="btn btn-outline-secondary">
+                    <a href="dashboard?mes=<?= $data_prox->format('m') ?>&ano=<?= $data_prox->format('Y') ?>" class="btn btn-outline-secondary">
                         <?= $nomes_meses[$data_prox->format('m')] ?> <i class="fas fa-chevron-right"></i>
                     </a>
                 </div>
@@ -330,7 +250,7 @@ foreach ($aulas_por_dia as $dia => $aulas) {
                                                 return strcmp($a['hora'], $b['hora']);
                                             });
                                             foreach ($aulas as $aula): 
-                                                $url_redirecionamento = "detalhes_aula.php?id=" . $aula['aula_id'];
+                                                $url_redirecionamento = "detalhes_aula?id=" . $aula['aula_id'];
                                             ?>
                                                 <div class="bloco-aula-simples mb-2" 
                                                     style="background-color: #1a2a3a;"
@@ -386,7 +306,7 @@ foreach ($aulas_por_dia as $dia => $aulas) {
                                     
                                     foreach ($aulas_por_dia[$dia] as $aula): 
                                         $texto_exibido = $aula['turma']; 
-                                        $url_redirecionamento = "detalhes_aula.php?id=" . $aula['aula_id'];
+                                        $url_redirecionamento = "detalhes_aula?id=" . $aula['aula_id'];
                                         
                                         // Define a cor de fundo com base no dia da semana 
                                         $dia_da_semana = (new DateTime($data_completa))->format('w');
@@ -436,7 +356,7 @@ foreach ($aulas_por_dia as $dia => $aulas) {
             </div>
         </div>
         <div class="notificacoes-footer">
-            <a href="notificacoes.php">Ver todas as notificações</a>
+            <a href="notificacoes">Ver todas as notificações</a>
         </div>
     </div>
 
@@ -493,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function carregarNotificacoes() {
-            fetch('ajax_notificacoes.php?acao=buscar_nao_lidas')
+            fetch('ajax_notificacoes?acao=buscar_nao_lidas')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -555,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Função para marcar notificação como lida (chamada via AJAX antes de redirecionar)
     window.marcarNotificacaoLida = function(notificacaoId) {
-        fetch('ajax_notificacoes.php', {
+        fetch('ajax_notificacoes', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'acao=marcar_lida&notificacao_id=' + notificacaoId,
@@ -565,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Função para atualizar apenas o contador do badge
     function carregarContadorNotificacoes() {
-        fetch('ajax_notificacoes.php?acao=buscar_nao_lidas')
+        fetch('ajax_notificacoes?acao=buscar_nao_lidas')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -578,12 +498,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Função para atualizar o badge na sidebar e no botão
     function atualizarBadgeNotificacoes(total) {
         // Atualizar badge na sidebar
-        const sidebarBadge = document.querySelector('.sidebar a[href="notificacoes.php"] .badge');
+        const sidebarBadge = document.querySelector('.sidebar a[href="notificacoes"] .badge');
         if (total > 0) {
             if (sidebarBadge) {
                 sidebarBadge.textContent = total;
             } else {
-                const linkNotificacoes = document.querySelector('.sidebar a[href="notificacoes.php"]');
+                const linkNotificacoes = document.querySelector('.sidebar a[href="notificacoes"]');
                 if (linkNotificacoes) {
                     const span = document.createElement('span');
                     span.className = 'badge bg-danger ms-2';

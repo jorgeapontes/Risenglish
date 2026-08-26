@@ -4,7 +4,7 @@ require_once '../includes/conexao.php';
 
 // Garante que apenas aluno acessa esta página
 if ($_SESSION['user_tipo'] !== 'aluno') {
-    header("Location: ../login.php?erro=acesso_negado");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
@@ -143,36 +143,19 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../css/aluno/dashboard.css">
     <link rel="stylesheet" href="../../css/aluno/anotacoes.css">
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <div class="mb-4 text-center">
-                    <h5 class="mt-4"><?php echo htmlspecialchars($aluno_nome); ?></h5>
-                </div>
+            <?php
+            $paginaAtiva = 'anotacoes';
+            $tituloMobile = 'Caderno de Anotações';
+            require '../includes/layout/aluno_sidebar.php';
+            ?>
 
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </a>
-                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="minhas_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
-                    <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
-                    <a href="anotacoes.php" class="rounded active"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
-                    <a href="documentos.php" class="rounded"><i class="fa-solid fa-box-archive"></i>&nbsp;&nbsp;&nbsp;Documentos</a>
-                </div>
-
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-                </div>
-            </div>
-
-            <div class="col-md-10 main-content p-4">
+            <div class="col-12 col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h1 style="color: #081d40;">Caderno de Anotações</h1>
                     <div>
@@ -245,7 +228,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                 <div class="d-flex justify-content-between align-items-center mt-4">
                                     <div>
                                         <?php if ($anotacao_edit): ?>
-                                            <a href="anotacoes.php" class="btn btn-outline-secondary">
+                                            <a href="anotacoes" class="btn btn-outline-secondary">
                                                 <i class="fas fa-times me-1"></i>Cancelar
                                             </a>
                                         <?php else: ?>
