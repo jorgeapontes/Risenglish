@@ -107,16 +107,76 @@ html.admin-sidebar-collapsed .sidebar a {
     }
 }
 
+/* Cabeçalho mobile (hamburger) e menu offcanvas */
+.mobile-navbar-custom {
+    background: var(--admin-sidebar-bg) !important;
+    color: #fff !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+}
+
+.mobile-navbar-custom h5 {
+    color: #fff !important;
+}
+
+.mobile-navbar-custom .btn-outline-light {
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+.mobile-navbar-custom .btn-outline-light:active,
+.mobile-navbar-custom .btn-outline-light:focus,
+.mobile-navbar-custom .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+.mobile-offcanvas {
+    background: var(--admin-sidebar-bg) !important;
+    color: #fff;
+    width: 280px !important;
+}
+
+.mobile-offcanvas .offcanvas-body a {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.mobile-offcanvas .offcanvas-body a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-offcanvas .offcanvas-body .active {
+    background-color: var(--admin-sidebar-accent);
+}
+
+@media (min-width: 769px) {
+    .mobile-navbar-custom,
+    .mobile-offcanvas {
+        display: none !important;
+    }
+}
+
 @media (max-width: 768px) {
     .sidebar {
-        width: 100%;
-        position: relative;
-        min-height: auto;
+        display: none !important;
     }
 
     .main-content {
-        margin-left: 0;
-        width: 100%;
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding-top: 70px !important;
     }
 
     html.admin-sidebar-collapsed .sidebar,

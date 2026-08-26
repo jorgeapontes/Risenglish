@@ -1,8 +1,11 @@
 <?php
 /**
- * Sidebar compartilhada das páginas de admin, com botão de recolher/expandir.
+ * Sidebar compartilhada das páginas de admin: menu offcanvas no mobile e
+ * sidebar recolhível (rail de ícones) no desktop.
  * Não mexe em sessão/autenticação — cada página continua responsável por isso.
- * Espera (opcional): $paginaAtiva (chave de $itensMenu abaixo, ex: 'dashboard').
+ * Espera (opcional):
+ *   $paginaAtiva   chave de $itensMenu abaixo, ex: 'dashboard'
+ *   $tituloMobile  título exibido no cabeçalho mobile (fallback: label do item ativo)
  */
 $paginaAtiva = $paginaAtiva ?? '';
 
@@ -17,6 +20,9 @@ $itensMenu = [
     'pagamentos'    => ['href' => 'pagamentos',             'icon' => 'fa-dollar-sign',      'label' => 'Pagamentos'],
     'acessos'       => ['href' => 'acessos',                'icon' => 'fa-chart-line',       'label' => 'Relatório de Acessos'],
 ];
+
+$adminNome = htmlspecialchars($_SESSION['user_nome'] ?? 'Admin');
+$tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
 ?>
 <script>
     // Aplica o estado salvo da sidebar antes dela ser pintada, evitando flash do estado errado.
@@ -28,13 +34,40 @@ $itensMenu = [
         } catch (e) {}
     })();
 </script>
-<div class="col-md-2 d-flex flex-column sidebar p-3">
+
+<header class="d-flex d-md-none mobile-navbar-custom border-bottom shadow-sm p-3 align-items-center sticky-top">
+    <button class="btn btn-outline-light me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebarOffcanvas" aria-controls="adminSidebarOffcanvas" aria-label="Abrir Menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    <h5 class="mb-0 fw-bold"><?php echo htmlspecialchars($tituloMobile); ?></h5>
+</header>
+
+<div class="offcanvas offcanvas-start text-white mobile-offcanvas" tabindex="-1" id="adminSidebarOffcanvas" aria-labelledby="adminSidebarOffcanvasLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title fw-bold" id="adminSidebarOffcanvasLabel"><?php echo $adminNome; ?></h5>
+        <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column">
+        <div class="d-flex flex-column flex-grow-1 mb-5">
+            <?php foreach ($itensMenu as $chave => $item): ?>
+            <a href="<?php echo htmlspecialchars($item['href']); ?>" class="rounded<?php echo $chave === $paginaAtiva ? ' active' : ''; ?>">
+                <i class="fas <?php echo htmlspecialchars($item['icon']); ?>"></i>&nbsp;&nbsp;<?php echo htmlspecialchars($item['label']); ?>
+            </a>
+            <?php endforeach; ?>
+        </div>
+        <div class="mt-auto">
+            <a href="../logout" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-2 d-none d-md-flex flex-column sidebar p-3">
     <button type="button" id="sidebarToggle" class="sidebar-toggle-btn" title="Recolher/expandir menu" aria-label="Recolher ou expandir menu">
         <i class="fas fa-bars"></i>
     </button>
 
     <div class="mb-4 text-center">
-        <h5 class="mt-4 user-name"><?php echo htmlspecialchars($_SESSION['user_nome'] ?? 'Admin'); ?></h5>
+        <h5 class="mt-4 user-name"><?php echo $adminNome; ?></h5>
     </div>
 
     <div class="d-flex flex-column flex-grow-1 mb-5">
