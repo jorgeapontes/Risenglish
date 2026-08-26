@@ -515,8 +515,10 @@ function displayConteudo($conteudo, $nivel = 0) {
                     </a>
                 <?php endif; ?>
             <?php else: ?>
-                <?php if ($is_pdf): ?>
-                    <a href="#" onclick="abrirPDFSeguro('../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>', '<?= htmlspecialchars($conteudo['titulo']) ?>'); return false;" class="btn btn-outline-danger btn-sm mt-2">
+                <?php if ($is_pdf):
+                    $pdf_view_href = 'visualizar_pdf?file=' . urlencode('../' . $conteudo['caminho_arquivo']) . '&titulo=' . urlencode($conteudo['titulo']);
+                ?>
+                    <a href="<?= htmlspecialchars($pdf_view_href) ?>" target="_blank" rel="noopener" class="btn btn-outline-danger btn-sm mt-2">
                         <i class="fa-solid fa-file-pdf me-1"></i>Visualizar Material
                     </a>
                 <?php elseif ($is_video): ?>
