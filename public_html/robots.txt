@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /login.php
+
+Sitemap: https://www.risenglish.com.br/sitemap.xml

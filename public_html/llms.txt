@@ -1,0 +1,13 @@
+# Rise English
+
+> Plataforma de ensino de inglês online, com acesso via login para alunos cadastrados.
+
+## Páginas principais
+
+- [Início](https://www.risenglish.com.br/index.php): Apresentação da plataforma e proposta de ensino de inglês.
+- [Login](https://www.risenglish.com.br/login.php): Área de acesso para alunos cadastrados.
+
+## Políticas
+
+- [Política de Privacidade](https://www.risenglish.com.br/politica_privacidade.php): Como os dados dos usuários são tratados.
+- [Termos de Uso](https://www.risenglish.com.br/termos_de_uso.php): Regras de uso da plataforma.

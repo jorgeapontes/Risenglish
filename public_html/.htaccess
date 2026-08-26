@@ -1,0 +1,140 @@
+# =============================================
+# OCULTAR VERSÃO DO PHP
+# =============================================
+<IfModule mod_php.c>
+    php_flag expose_php Off
+</IfModule>
+
+# =============================================
+# IMPEDIR LISTAGEM DE DIRETÓRIOS
+# =============================================
+Options -Indexes
+
+# =============================================
+# BLOQUEAR MÉTODOS HTTP DESNECESSÁRIOS
+# =============================================
+<LimitExcept GET POST HEAD>
+    Deny from all
+</LimitExcept>
+
+# =============================================
+# PROTEÇÃO DO ARQUIVO .HTACCESS
+# =============================================
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# =============================================
+# PROTEGER ARQUIVO .ENV
+# =============================================
+<FilesMatch "^\.env">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# =============================================
+# PROTEGER ARQUIVOS DE LOG E BACKUP
+# =============================================
+<FilesMatch "\.(log|bak|old|sql)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# =============================================
+# PROTEGER ARQUIVOS DE CONFIGURAÇÃO
+# =============================================
+<FilesMatch "^(composer\.(json|lock)|package\.json|package-lock\.json|README\.md|\.gitignore|phpunit\.xml)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# =============================================
+# BLOQUEAR REPOSITÓRIOS GIT / SVN
+# =============================================
+RedirectMatch 404 /\.git
+RedirectMatch 404 /\.svn
+
+# =============================================
+# HEADERS DE SEGURANÇA
+# =============================================
+<IfModule mod_headers.c>
+
+    # HSTS - Forçar HTTPS
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+    # Proteção contra Clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+
+    # Prevenir MIME sniffing
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Proteção XSS (para navegadores antigos)
+    Header always set X-XSS-Protection "1; mode=block"
+
+    # Referrer Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Permissions Policy
+    Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(), fullscreen=(self)"
+
+    # Content Security Policy (ATUALIZADA PARA PERMITIR YOUTUBE)
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://code.jquery.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://code.jquery.com; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com;"
+
+</IfModule>
+
+# =============================================
+# COMPRESSÃO GZIP
+# =============================================
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml
+</IfModule>
+
+# =============================================
+# CACHE DE ARQUIVOS ESTÁTICOS
+# =============================================
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+
+    ExpiresByType application/json "access plus 0 seconds"
+</IfModule>
+
+# =============================================
+# REWRITE ENGINE (declarado uma única vez)
+# =============================================
+RewriteEngine On
+
+# =============================================
+# PROTEÇÃO CONTRA HOTLINK
+# =============================================
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^https://(www\.)?risenglish\.com [NC]
+RewriteRule \.(jpg|jpeg|png|gif|webp)$ - [F,L]
+
+# =============================================
+# REDIRECIONAR HTTP PARA HTTPS
+# =============================================
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# =============================================
+# OCULTAR EXTENSÃO .PHP DA URL
+# =============================================
+
+# Redireciona acessos diretos "pagina.php" -> "/pagina" (só GET, para não quebrar forms POST)
+RewriteCond %{THE_REQUEST} ^GET\s([^?\s]+)\.php[\s?] [NC]
+RewriteRule ^ %1 [R=301,L]
+
+# Reescreve internamente "/pagina" -> "pagina.php" (se o arquivo existir), sem mudar a URL
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L]
