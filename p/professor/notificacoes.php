@@ -4,7 +4,7 @@ require_once '../includes/conexao.php';
 
 // Garante que apenas professor acessa esta página
 if ($_SESSION['user_tipo'] !== 'professor') {
-    header("Location: ../login.php");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
@@ -17,7 +17,7 @@ if (isset($_POST['marcar_todas'])) {
     $sql = "UPDATE notificacoes SET lida = 1, data_leitura = NOW() WHERE usuario_id = :user_id AND lida = 0";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':user_id' => $user_id]);
-    header("Location: notificacoes.php");
+    header("Location: notificacoes");
     exit;
 }
 
@@ -67,52 +67,20 @@ $base_dir = ($user_tipo === 'professor') ? 'professor' : 'aluno';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../css/professor/base.css">
     <link rel="stylesheet" href="../../css/professor/notificacoes.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <div class="mb-4 text-center">
-                    <h5 class="mt-4"><?php echo htmlspecialchars($user_nome); ?></h5>
-                </div>
-                
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <?php if ($user_tipo === 'professor'): ?>
-                        <a href="notificacoes.php" class="rounded active">
-                            <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                            <?php if ($total_nao_lidas > 0): ?>
-                                <span class="badge bg-danger ms-2"><?= $total_nao_lidas ?></span>
-                            <?php endif; ?>
-                        </a>
-                        <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                        <a href="gerenciar_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
-                        <a href="gerenciar_conteudos.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
-                        <a href="gerenciar_alunos.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
-                    <?php else: ?>
-                        <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                        <a href="minhas_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Minhas Aulas</a>
-                        <a href="recomendacoes.php" class="rounded"><i class="fas fa-lightbulb"></i>&nbsp;&nbsp;&nbsp;Recomendações</a>
-                        <a href="anotacoes.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;&nbsp;Anotações</a>
-                        <a href="notificacoes.php" class="rounded active">
-                            <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                            <?php if ($total_nao_lidas > 0): ?>
-                                <span class="badge bg-danger ms-2"><?= $total_nao_lidas ?></span>
-                            <?php endif; ?>
-                        </a>
-                    <?php endif; ?>
-                </div>
-                
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100">
-                        <i class="fas fa-sign-out-alt me-2"></i>Sair
-                    </a>
-                </div>
-            </div>
-            
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <?php
+            $paginaAtiva = 'notificacoes';
+            $totalNotificacoesNaoLidas = $total_nao_lidas;
+            require '../includes/layout/professor_sidebar.php';
+            ?>
+
             <!-- Conteúdo principal -->
-            <div class="col-md-10 main-content">
+            <div class="col-12 col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h2 class="mb-0 fw-bold" style="color: #081d40;">
@@ -149,12 +117,12 @@ $base_dir = ($user_tipo === 'professor') ? 'professor' : 'aluno';
                             $href = '';
                             // Preferir campo aula_id (quando presente na tabela)
                             if (!empty($notif['aula_id'])) {
-                                $href = '/p/professor/detalhes_aula.php?aula_id=' . intval($notif['aula_id']);
+                                $href = '/p/professor/detalhes_aula?aula_id=' . intval($notif['aula_id']);
                             } else {
                                 $link_raw = $notif['link'] ?? '';
                                 // Tentar extrair id do query string
                                 if (preg_match('/[?&](?:id|aula_id)=(\d+)/', $link_raw, $m)) {
-                                    $href = '/p/professor/detalhes_aula.php?aula_id=' . intval($m[1]);
+                                    $href = '/p/professor/detalhes_aula?aula_id=' . intval($m[1]);
                                 } else {
                                     // Se já é absoluto, manter
                                     if (strpos($link_raw, '/') === 0 || preg_match('#^https?://#', $link_raw)) {
@@ -205,7 +173,7 @@ $base_dir = ($user_tipo === 'professor') ? 'professor' : 'aluno';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     function marcarNotificacaoLida(notificacaoId) {
-        fetch('ajax_notificacoes.php', {
+        fetch('ajax_notificacoes', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'acao=marcar_lida&notificacao_id=' + notificacaoId,

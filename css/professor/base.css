@@ -1,0 +1,187 @@
+:root {
+    --professor-sidebar-bg: #081d40;
+    --professor-sidebar-accent: #c0392b;
+    --professor-sidebar-width: 16.666667%;
+    --professor-sidebar-collapsed-width: 68px;
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: var(--professor-sidebar-width);
+    background-color: var(--professor-sidebar-bg);
+    color: #fff;
+    z-index: 1000;
+    overflow-y: auto;
+    transition: width 0.2s ease;
+}
+
+.sidebar a {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(3px);
+}
+
+.sidebar .active {
+    background-color: var(--professor-sidebar-accent);
+}
+
+.sidebar .active:hover {
+    background-color: var(--professor-sidebar-accent);
+}
+
+#botao-sair {
+    border: none;
+}
+
+#botao-sair:hover {
+    background-color: var(--professor-sidebar-accent);
+    color: white;
+    transform: none;
+}
+
+/* Botão de recolher/expandir */
+.sidebar-toggle-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.1rem;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    align-self: flex-start;
+}
+
+.sidebar-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Main content: só a parte de posicionamento é compartilhada;
+   padding/min-height continuam no CSS de cada página. */
+.main-content {
+    margin-left: var(--professor-sidebar-width);
+    width: calc(100% - var(--professor-sidebar-width));
+    transition: margin-left 0.2s ease, width 0.2s ease;
+}
+
+/* Sidebar recolhida (rail de ícones) */
+html.professor-sidebar-collapsed .sidebar {
+    width: var(--professor-sidebar-collapsed-width);
+}
+
+html.professor-sidebar-collapsed .main-content {
+    margin-left: var(--professor-sidebar-collapsed-width);
+    width: calc(100% - var(--professor-sidebar-collapsed-width));
+}
+
+html.professor-sidebar-collapsed .sidebar .nav-label,
+html.professor-sidebar-collapsed .sidebar .user-name {
+    display: none;
+}
+
+html.professor-sidebar-collapsed .sidebar a {
+    justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar,
+    .main-content {
+        transition: none;
+    }
+}
+
+/* Cabeçalho mobile (hamburger) e menu offcanvas */
+.mobile-navbar-custom {
+    background: var(--professor-sidebar-bg) !important;
+    color: #fff !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+}
+
+.mobile-navbar-custom h5 {
+    color: #fff !important;
+}
+
+.mobile-navbar-custom .btn-outline-light {
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+.mobile-navbar-custom .btn-outline-light:active,
+.mobile-navbar-custom .btn-outline-light:focus,
+.mobile-navbar-custom .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+.mobile-offcanvas {
+    background: var(--professor-sidebar-bg) !important;
+    color: #fff;
+    width: 280px !important;
+}
+
+.mobile-offcanvas .offcanvas-body a {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.mobile-offcanvas .offcanvas-body a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-offcanvas .offcanvas-body .active {
+    background-color: var(--professor-sidebar-accent);
+}
+
+@media (min-width: 769px) {
+    .mobile-navbar-custom,
+    .mobile-offcanvas {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        display: none !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding-top: 70px !important;
+    }
+
+    html.professor-sidebar-collapsed .sidebar,
+    html.professor-sidebar-collapsed .main-content {
+        width: 100%;
+        margin-left: 0;
+    }
+}

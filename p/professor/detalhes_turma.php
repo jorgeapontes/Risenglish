@@ -4,7 +4,7 @@ require_once '../includes/conexao.php';
 
 // Garante que apenas professor acessa esta página
 if ($_SESSION['user_tipo'] !== 'professor') {
-    header("Location: ../login.php");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
@@ -16,7 +16,7 @@ $professor_id = $_SESSION['user_id'];
 $turma_id = $_GET['turma_id'] ?? null;
 
 if (!$turma_id || !is_numeric($turma_id)) {
-    header("Location: gerenciar_alunos.php");
+    header("Location: gerenciar_alunos");
     exit;
 }
 
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
             $sucesso = true;
             
             // Recarrega a página para mostrar a nova aula
-            header("Location: detalhes_turma.php?turma_id=" . $turma_id . "&sucesso=" . ($sucesso ? '1' : '0') . "&mensagem=" . urlencode($mensagem));
+            header("Location: detalhes_turma?turma_id=" . $turma_id . "&sucesso=" . ($sucesso ? '1' : '0') . "&mensagem=" . urlencode($mensagem));
             exit;
         } catch (PDOException $e) {
             $mensagem = "Erro ao agendar a aula: " . $e->getMessage();
@@ -137,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
             $sucesso = true;
             
             // Recarrega a página para mostrar as novas aulas
-            header("Location: detalhes_turma.php?turma_id=" . $turma_id . "&sucesso=" . ($sucesso ? '1' : '0') . "&mensagem=" . urlencode($mensagem));
+            header("Location: detalhes_turma?turma_id=" . $turma_id . "&sucesso=" . ($sucesso ? '1' : '0') . "&mensagem=" . urlencode($mensagem));
             exit;
         } catch (PDOException $e) {
             $mensagem = "Erro ao agendar as aulas recorrentes: " . $e->getMessage();
@@ -171,7 +171,7 @@ $stmt_turma->execute([':turma_id' => $turma_id, ':professor_id' => $professor_id
 $turma_detalhes = $stmt_turma->fetch(PDO::FETCH_ASSOC);
 
 if (!$turma_detalhes) {
-    header("Location: gerenciar_alunos.php");
+    header("Location: gerenciar_alunos");
     exit;
 }
 
@@ -369,38 +369,28 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
     <title>Gerenciar Turma <?= htmlspecialchars($turma_detalhes['nome_turma']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../../css/professor/base.css">
     <link rel="stylesheet" href="../../css/professor/detalhes_turma.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <div class="mb-4 text-center">
-                    <h5 class="mt-4">Prof. <?= htmlspecialchars($_SESSION['user_nome'] ?? 'Professor') ?></h5>
-                </div>
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="gerenciar_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
-                    <a href="gerenciar_conteudos.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
-                    <a href="gerenciar_alunos.php" class="rounded active"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
-                </div>
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-                </div>
-            </div>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <?php
+            $paginaAtiva = 'alunos';
+            require '../includes/layout/professor_sidebar.php';
+            ?>
             <!-- Conteúdo principal -->
-            <div class="col-md-10 main-content p-4">
+            <div class="col-12 col-md-10 main-content p-4">
                 <?php if (!empty($mensagem)): ?>
                     <div class="alert alert-<?= $sucesso ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
                         <?= $mensagem ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 <?php endif; ?>
-                
-                <h2 class="mb-4 mt-3"><a id="back-link" href="gerenciar_alunos.php"> Gerenciamento de Turmas</a> > <strong><?= htmlspecialchars($turma_detalhes['nome_turma']) ?></strong></h2>
+
+                <h2 class="mb-4 mt-3"><a id="back-link" href="gerenciar_alunos"> Gerenciamento de Turmas</a> > <strong><?= htmlspecialchars($turma_detalhes['nome_turma']) ?></strong></h2>
                 
                 <div class="row mb-4">
                     <!-- Coluna da esquerda - Informações da Turma (agora com 8 colunas) -->
@@ -511,13 +501,13 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
                                 <p class="mb-0 text-muted small">Frequência detalhada de cada aluno da turma no mês atual</p>
                             </div>
                             <div>
-                                <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>&mes=<?= $mes_anterior ?>&ano=<?= $mes_anterior == 12 ? $ano - 1 : $ano ?>" class="btn btn-sm btn-light me-2" title="Mês anterior">
+                                <a href="detalhes_turma?turma_id=<?= $turma_id ?>&mes=<?= $mes_anterior ?>&ano=<?= $mes_anterior == 12 ? $ano - 1 : $ano ?>" class="btn btn-sm btn-light me-2" title="Mês anterior">
                                     <i class="fas fa-chevron-left"></i>
                                 </a>
-                                <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>&mes=<?= date('n') ?>&ano=<?= date('Y') ?>" class="btn btn-sm btn-light me-2" title="Mês atual">
+                                <a href="detalhes_turma?turma_id=<?= $turma_id ?>&mes=<?= date('n') ?>&ano=<?= date('Y') ?>" class="btn btn-sm btn-light me-2" title="Mês atual">
                                     <i class="fas fa-calendar-day"></i>
                                 </a>
-                                <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>&mes=<?= $mes_proximo ?>&ano=<?= $mes_proximo == 1 ? $ano + 1 : $ano ?>" class="btn btn-sm btn-light" title="Próximo mês">
+                                <a href="detalhes_turma?turma_id=<?= $turma_id ?>&mes=<?= $mes_proximo ?>&ano=<?= $mes_proximo == 1 ? $ano + 1 : $ano ?>" class="btn btn-sm btn-light" title="Próximo mês">
                                     <i class="fas fa-chevron-right"></i>
                                 </a>
                             </div>
@@ -610,7 +600,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
     </div>
 </div>
                 <div class="text-center mt-3">
-                    <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>&mes=<?= date('n') ?>&ano=<?= date('Y') ?>" class="btn btn-secondary">
+                    <a href="detalhes_turma?turma_id=<?= $turma_id ?>&mes=<?= date('n') ?>&ano=<?= date('Y') ?>" class="btn btn-secondary">
                         <i class="fas fa-calendar-day me-2"></i>Voltar para Mês Atual
                     </a>
                 </div>
@@ -673,7 +663,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
                 <h5 class="modal-title" id="modalAulaUnicaLabel">Agendar Aula Única</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="detalhes_turma.php?turma_id=<?= $turma_id ?>" method="POST">
+            <form action="detalhes_turma?turma_id=<?= $turma_id ?>" method="POST">
                 <div class="modal-body">
                     <input type="hidden" name="acao" value="adicionar_unica">
                     <input type="hidden" name="turma_id" value="<?= $turma_id ?>">
@@ -720,7 +710,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
                 <h5 class="modal-title" id="modalAulaRecorrenteLabel">Agendar Aulas Recorrentes</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="detalhes_turma.php?turma_id=<?= $turma_id ?>" method="POST">
+            <form action="detalhes_turma?turma_id=<?= $turma_id ?>" method="POST">
                 <div class="modal-body">
                     <input type="hidden" name="acao" value="adicionar_recorrente">
                     <input type="hidden" name="turma_id" value="<?= $turma_id ?>">
@@ -892,14 +882,14 @@ document.addEventListener('DOMContentLoaded', function() {
         eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
         
         // Carrega apenas aulas desta turma específica
-        events: 'buscar_aulas_turma.php?turma_id=' + turmaId,
+        events: 'buscar_aulas_turma?turma_id=' + turmaId,
         
         eventClick: function(info) {
-            window.location.href = 'detalhes_aula.php?aula_id=' + info.event.id;
+            window.location.href = 'detalhes_aula?aula_id=' + info.event.id;
         },
 
         eventDrop: function(info) {
-            fetch('atualizar_aula.php', { // Reutiliza o arquivo que já funciona na dashboard
+            fetch('atualizar_aula', { // Reutiliza o arquivo que já funciona na dashboard
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -7,7 +7,7 @@ date_default_timezone_set('America/Sao_Paulo');
 
 // Garante que apenas professor acessa esta página
 if ($_SESSION['user_tipo'] !== 'professor') {
-    header("Location: ../login.php");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $mensagem = "Aula única agendada com sucesso!";
                 $sucesso = true;
-                header("Location: gerenciar_aulas.php?sucesso=1");
+                header("Location: gerenciar_aulas?sucesso=1");
                 exit;
             } catch (PDOException $e) {
                 $mensagem = "Erro ao agendar a aula: " . $e->getMessage();
@@ -147,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $mensagem = "{$aulas_criadas} aulas recorrentes agendadas com sucesso!";
                 $sucesso = true;
-                header("Location: gerenciar_aulas.php?sucesso=1");
+                header("Location: gerenciar_aulas?sucesso=1");
                 exit;
             } catch (PDOException $e) {
                 $mensagem = "Erro ao agendar as aulas recorrentes: " . $e->getMessage();
@@ -183,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $mensagem = "Aula atualizada com sucesso!";
                 $sucesso = true;
-                header("Location: gerenciar_aulas.php?sucesso=1");
+                header("Location: gerenciar_aulas?sucesso=1");
                 exit;
             } catch (PDOException $e) {
                 $mensagem = "Erro ao atualizar a aula: " . $e->getMessage();
@@ -213,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $mensagem = "Aula não encontrada ou você não tem permissão para excluí-la.";
                 }
                 
-                header("Location: gerenciar_aulas.php?sucesso=1");
+                header("Location: gerenciar_aulas?sucesso=1");
                 exit;
             } catch (PDOException $e) {
                 $mensagem = "Erro ao excluir a aula: " . $e->getMessage();
@@ -280,37 +280,19 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../css/professor/base.css">
     <link rel="stylesheet" href="../../css/professor/gerenciar_aulas.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <div class="mb-4 text-center">
-                    <h5 class="mt-4">Prof. <?php echo $_SESSION['user_nome'] ?? 'Professor'; ?></h5>
-                </div>
-
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </a>
-                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="gerenciar_aulas.php" class="rounded active"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
-                    <a href="gerenciar_conteudos.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
-                    <a href="gerenciar_alunos.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
-                </div>
-
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-                </div>
-            </div>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <?php
+            $paginaAtiva = 'aulas';
+            require '../includes/layout/professor_sidebar.php';
+            ?>
 
             <!-- Conteúdo principal -->
-            <div class="col-md-10 main-content">
+            <div class="col-12 col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between">
                     <h2 class="mb-4 mt-3">Agendamento e Gerenciamento de Aulas</h2>
                 </div>
@@ -365,7 +347,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                 <td><?= htmlspecialchars($aula['titulo_aula']) ?></td>
                                                 <td><?= htmlspecialchars($aula['nome_turma']) ?></td>
                                                 <td>
-                                                    <a href="detalhes_aula.php?aula_id=<?= $aula['id'] ?>" class="btn btn-sm btn-info-detalhes" title="Ver Detalhes">
+                                                    <a href="detalhes_aula?aula_id=<?= $aula['id'] ?>" class="btn btn-sm btn-info-detalhes" title="Ver Detalhes">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     

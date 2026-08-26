@@ -4,7 +4,7 @@ require_once '../includes/conexao.php';
 
 // Garante que apenas professor acessa esta página
 if ($_SESSION['user_tipo'] !== 'professor') {
-    header("Location: ../login.php");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
@@ -218,29 +218,18 @@ $icones_disponiveis = [
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../css/professor/base.css">
     <link rel="stylesheet" href="../../css/professor/gerenciar_conteudos.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <div class="mb-4 text-center"><h5 class="mt-4">Prof. <?= $_SESSION['user_nome'] ?></h5></div>
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </a>
-                    <a href="dashboard.php"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="gerenciar_aulas.php"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
-                    <a href="gerenciar_conteudos.php" class="active"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
-                    <a href="gerenciar_alunos.php"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
-                </div>
-                <div class="mt-auto"><a href="../logout.php" class="btn btn-outline-danger w-100 border-0"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></div>
-            </div>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <?php
+            $paginaAtiva = 'conteudos';
+            require '../includes/layout/professor_sidebar.php';
+            ?>
 
-            <div class="col-md-10 main-content">
+            <div class="col-12 col-md-10 main-content p-4">
                 <h2 class="mb-4 mt-3">Biblioteca de Conteúdos</h2>
                 
                 <?php if ($mensagem): ?>
@@ -263,7 +252,7 @@ $icones_disponiveis = [
                         <i class="fas fa-layer-group me-2"></i> Criar Novo Grupo
                     </div>
                     <div class="card-body">
-                        <form action="gerenciar_conteudos.php" method="POST">
+                        <form action="gerenciar_conteudos" method="POST">
                             <input type="hidden" name="acao_grupo" value="cadastrar">
                             <div class="row g-3">
                                 <div class="col-md-4">
@@ -303,7 +292,7 @@ $icones_disponiveis = [
                         <i class="fas fa-folder-plus me-2"></i> Criar Novo Tema
                     </div>
                     <div class="card-body">
-                        <form action="gerenciar_conteudos.php" method="POST">
+                        <form action="gerenciar_conteudos" method="POST">
                             <input type="hidden" name="acao_tema" value="cadastrar">
                             <div class="row g-3">
                                 <div class="col-md-5">
@@ -394,7 +383,7 @@ $icones_disponiveis = [
                                             foreach ($temas_do_grupo as $tema): 
                                             ?>
                                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <div class="w-100" onclick="window.location.href='gerenciar_arquivos_tema.php?tema_id=<?= $tema['id'] ?>'">
+                                                    <div class="w-100" onclick="window.location.href='gerenciar_arquivos_tema?tema_id=<?= $tema['id'] ?>'">
                                                         <div>
                                                             <span class="text-muted fw-bold me-2"><?= $contador ?>.</span>
                                                             <strong class="text-dark"><i class="fas fa-folder me-2"></i> <?= htmlspecialchars($tema['titulo']) ?></strong>
@@ -454,7 +443,7 @@ $icones_disponiveis = [
                                             foreach ($temas_sem_grupo as $tema): 
                                             ?>
                                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <div class="w-100" onclick="window.location.href='gerenciar_arquivos_tema.php?tema_id=<?= $tema['id'] ?>'">
+                                                    <div class="w-100" onclick="window.location.href='gerenciar_arquivos_tema?tema_id=<?= $tema['id'] ?>'">
                                                         <div>
                                                             <span class="text-muted fw-bold me-2"><?= $contador ?>.</span>
                                                             <strong class="text-dark"><i class="fas fa-folder me-2"></i> <?= htmlspecialchars($tema['titulo']) ?></strong>
@@ -494,7 +483,7 @@ $icones_disponiveis = [
     <!-- Modal Editar Grupo -->
     <div class="modal fade" id="modalEditarGrupo" tabindex="-1">
         <div class="modal-dialog">
-            <form action="gerenciar_conteudos.php" method="POST" class="modal-content">
+            <form action="gerenciar_conteudos" method="POST" class="modal-content">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title">Editar Grupo</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -533,7 +522,7 @@ $icones_disponiveis = [
     <!-- Modal Editar Tema -->
     <div class="modal fade" id="modalEditarTema" tabindex="-1">
         <div class="modal-dialog">
-            <form action="gerenciar_conteudos.php" method="POST" class="modal-content">
+            <form action="gerenciar_conteudos" method="POST" class="modal-content">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title">Editar Tema</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -569,7 +558,7 @@ $icones_disponiveis = [
     <!-- Modal Mover Tema -->
     <div class="modal fade" id="modalMoverTema" tabindex="-1">
         <div class="modal-dialog">
-            <form action="gerenciar_conteudos.php" method="POST" class="modal-content">
+            <form action="gerenciar_conteudos" method="POST" class="modal-content">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title">Mover Tema</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -709,13 +698,13 @@ $icones_disponiveis = [
         // Funções de confirmação
         function confirmarExclusaoGrupo(id, nome) {
             if (confirm("Deseja realmente excluir o grupo '" + nome + "'?\nOs temas serão movidos para 'Sem Grupo'.")) {
-                window.location.href = 'gerenciar_conteudos.php?excluir_grupo=' + id;
+                window.location.href = 'gerenciar_conteudos?excluir_grupo=' + id;
             }
         }
 
         function confirmarExclusaoTema(id, titulo) {
             if (confirm("Deseja realmente excluir o tema '" + titulo + "'?")) {
-                window.location.href = 'gerenciar_conteudos.php?excluir_tema=' + id;
+                window.location.href = 'gerenciar_conteudos?excluir_tema=' + id;
             }
         }
 

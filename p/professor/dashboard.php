@@ -4,7 +4,7 @@ require_once '../includes/conexao.php';
 
 // Bloqueio de acesso para usuários não-professor
 if ($_SESSION['user_tipo'] !== 'professor') {
-    header("Location: ../login.php");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 date_default_timezone_set('America/Sao_Paulo');
@@ -129,50 +129,29 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
     <title>Dashboard - Agenda de Aulas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../../css/professor/base.css">
     <link rel="stylesheet" href="../../css/professor/dashboard.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <link rel="stylesheet" href="../../css/professor/dashboard_page.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <!-- Nome do professor -->
-                <div class="mb-4 text-center">
-                    <h5 class="mt-4">Prof. <?php echo $_SESSION['user_nome'] ?? 'Professor'; ?></h5>
-                </div>
-
-                <!-- Menu centralizado verticalmente -->
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </a>
-                    <a href="dashboard.php" class="rounded active"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="gerenciar_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
-                    <a href="gerenciar_conteudos.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
-                    <a href="gerenciar_alunos.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
-                </div>
-
-                <!-- Botão sair no rodapé -->
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-                </div>
-            </div>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <?php
+            $paginaAtiva = 'dashboard';
+            require '../includes/layout/professor_sidebar.php';
+            ?>
 
             <!-- Conteúdo principal -->
-            <div class="col-md-10 main-content p-4">
+            <div class="col-12 col-md-10 main-content p-4">
                 
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <a href="dashboard.php?mes=<?= $data_ant->format('m') ?>&ano=<?= $data_ant->format('Y') ?>" class="btn btn-outline-secondary">
+                    <a href="dashboard?mes=<?= $data_ant->format('m') ?>&ano=<?= $data_ant->format('Y') ?>" class="btn btn-outline-secondary">
                         <i class="fas fa-chevron-left"></i> <?= $nomes_meses[$data_ant->format('m')] ?>
                     </a>
                     <h3>Agenda de Aulas - <?= $nomes_meses[$primeiro_dia_mes->format('m')] ?> de <?= $primeiro_dia_mes->format('Y') ?></h3>
-                    <a href="dashboard.php?mes=<?= $data_prox->format('m') ?>&ano=<?= $data_prox->format('Y') ?>" class="btn btn-outline-secondary">
+                    <a href="dashboard?mes=<?= $data_prox->format('m') ?>&ano=<?= $data_prox->format('Y') ?>" class="btn btn-outline-secondary">
                         <?= $nomes_meses[$data_prox->format('m')] ?> <i class="fas fa-chevron-right"></i>
                     </a>
                 </div>
@@ -184,7 +163,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                 <h1 class="h3 mb-1 fw-bold" style="color: #081d40;">Sua Agenda</h1>
                                 <p class="text-muted small">Arraste as aulas para reagendar horários instantaneamente</p>
                             </div>
-                            <button class="btn btn-primary-modern shadow-sm" onclick="window.location.href='gerenciar_aulas.php'">
+                            <button class="btn btn-primary-modern shadow-sm" onclick="window.location.href='gerenciar_aulas'">
                                 <i class="fas fa-plus me-2"></i>Nova Aula
                             </button>
                         </div>
@@ -211,7 +190,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
             </div>
         </div>
         <div class="notificacoes-footer">
-            <a href="notificacoes.php">Ver todas as notificações</a>
+            <a href="notificacoes">Ver todas as notificações</a>
         </div>
     </div>
 
@@ -242,14 +221,14 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                 
                 eventDisplay: 'block',
                 eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
-                events: 'buscar_aulas.php',
-                
+                events: 'buscar_aulas',
+
                 eventClick: function(info) {
-                    window.location.href = 'detalhes_aula.php?aula_id=' + info.event.id;
+                    window.location.href = 'detalhes_aula?aula_id=' + info.event.id;
                 },
 
                 eventDrop: function(info) {
-                    fetch('atualizar_aula.php', {
+                    fetch('atualizar_aula', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -279,17 +258,19 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
             const notificacoesTotal = document.getElementById('notificacoes-total');
             
             // Toggle dropdown
-            btnNotificacoes.addEventListener('click', function(e) {
-                e.stopPropagation();
-                dropdown.classList.toggle('show');
-                if (dropdown.classList.contains('show')) {
-                    carregarNotificacoes();
-                }
-            });
-            
+            if (btnNotificacoes) {
+                btnNotificacoes.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('show');
+                    if (dropdown.classList.contains('show')) {
+                        carregarNotificacoes();
+                    }
+                });
+            }
+
             // Fechar dropdown ao clicar fora
             document.addEventListener('click', function(e) {
-                if (!dropdown.contains(e.target) && !btnNotificacoes.contains(e.target)) {
+                if (!dropdown.contains(e.target) && !(btnNotificacoes && btnNotificacoes.contains(e.target))) {
                     dropdown.classList.remove('show');
                 }
             });
@@ -305,7 +286,7 @@ function escapeHtml(str) {
 }
 
 function carregarNotificacoes() {
-    fetch('ajax_notificacoes.php?acao=buscar_nao_lidas')
+    fetch('ajax_notificacoes?acao=buscar_nao_lidas')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -367,7 +348,7 @@ function carregarNotificacoes() {
             
             // Função para marcar notificação como lida (chamada via AJAX antes de redirecionar)
             window.marcarNotificacaoLida = function(notificacaoId) {
-                fetch('ajax_notificacoes.php', {
+                fetch('ajax_notificacoes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: 'acao=marcar_lida&notificacao_id=' + notificacaoId,
@@ -377,7 +358,7 @@ function carregarNotificacoes() {
             
             // Função para atualizar apenas o contador do badge
             function carregarContadorNotificacoes() {
-                fetch('ajax_notificacoes.php?acao=buscar_nao_lidas')
+                fetch('ajax_notificacoes?acao=buscar_nao_lidas')
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
@@ -390,12 +371,12 @@ function carregarNotificacoes() {
             // Função para atualizar o badge na sidebar e no botão
             function atualizarBadgeNotificacoes(total) {
                 // Atualizar badge na sidebar
-                const sidebarBadge = document.querySelector('.sidebar a[href="notificacoes.php"] .badge');
+                const sidebarBadge = document.querySelector('.sidebar a[href="notificacoes"] .badge');
                 if (total > 0) {
                     if (sidebarBadge) {
                         sidebarBadge.textContent = total;
                     } else {
-                        const linkNotificacoes = document.querySelector('.sidebar a[href="notificacoes.php"]');
+                        const linkNotificacoes = document.querySelector('.sidebar a[href="notificacoes"]');
                         if (linkNotificacoes) {
                             const span = document.createElement('span');
                             span.className = 'badge bg-danger ms-2';
@@ -403,22 +384,26 @@ function carregarNotificacoes() {
                             linkNotificacoes.appendChild(span);
                         }
                     }
-                    
+
                     // Atualizar badge do botão
-                    const btnBadge = btnNotificacoes.querySelector('.badge');
-                    if (btnBadge) {
-                        btnBadge.textContent = total;
-                    } else {
-                        const badge = document.createElement('span');
-                        badge.className = 'badge';
-                        badge.textContent = total;
-                        btnNotificacoes.appendChild(badge);
+                    if (btnNotificacoes) {
+                        const btnBadge = btnNotificacoes.querySelector('.badge');
+                        if (btnBadge) {
+                            btnBadge.textContent = total;
+                        } else {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge';
+                            badge.textContent = total;
+                            btnNotificacoes.appendChild(badge);
+                        }
                     }
                 } else {
                     // Remover badges se total = 0
                     if (sidebarBadge) sidebarBadge.remove();
-                    const btnBadge = btnNotificacoes.querySelector('.badge');
-                    if (btnBadge) btnBadge.remove();
+                    if (btnNotificacoes) {
+                        const btnBadge = btnNotificacoes.querySelector('.badge');
+                        if (btnBadge) btnBadge.remove();
+                    }
                 }
             }
             

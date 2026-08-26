@@ -4,7 +4,7 @@ require_once '../includes/conexao.php';
 
 // Garante que apenas professor acessa esta página
 if ($_SESSION['user_tipo'] !== 'professor') {
-    header("Location: ../login.php");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
@@ -148,43 +148,23 @@ $turmas_com_alunos = $resultados_filtrados;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../css/professor/base.css">
     <link rel="stylesheet" href="../../css/professor/gerenciar_alunos.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <!-- Nome do professor -->
-                <div class="mb-4 text-center">
-                    <h5 class="mt-4">Prof. <?php echo $_SESSION['user_nome'] ?? 'Professor'; ?></h5>
-                </div>
-
-                <!-- Menu centralizado verticalmente -->
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="gerenciar_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
-                    <a href="gerenciar_conteudos.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
-                    <a href="gerenciar_alunos.php" class="rounded active"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
-                </div>
-
-                <!-- Botão sair no rodapé -->
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-                </div>
-            </div>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <?php
+            $paginaAtiva = 'alunos';
+            require '../includes/layout/professor_sidebar.php';
+            ?>
 
             <!-- Conteúdo principal -->
-            <div class="col-md-10 main-content p-4">
+            <div class="col-12 col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
                     <h2 class="mb-0">Gerenciamento de Turmas</h2>
                     <?php if (!empty($termo_pesquisa)): ?>
-                        <a href="gerenciar_alunos.php" class="btn btn-outline-secondary">
+                        <a href="gerenciar_alunos" class="btn btn-outline-secondary">
                             <i class="fas fa-times me-1"></i> Limpar Pesquisa
                         </a>
                     <?php endif; ?>
@@ -217,7 +197,7 @@ $turmas_com_alunos = $resultados_filtrados;
                         <i class="fas fa-search"></i>
                         <h4 class="mt-3">Nenhum resultado encontrado</h4>
                         <p class="text-muted">Não encontramos turmas ou alunos com o termo "<?php echo htmlspecialchars($termo_pesquisa); ?>"</p>
-                        <a href="gerenciar_alunos.php" class="btn btn-outline-danger">
+                        <a href="gerenciar_alunos" class="btn btn-outline-danger">
                              Ver todas as turmas
                         </a>
                     </div>
@@ -263,7 +243,7 @@ $turmas_com_alunos = $resultados_filtrados;
                                         </span> -->
                                     </button>
                                     
-                                    <a href="detalhes_turma.php?turma_id=<?= $turma_id ?>" class="btn btn-sm btn-gerenciar" title="Gerenciar Turma e Aulas">
+                                    <a href="detalhes_turma?turma_id=<?= $turma_id ?>" class="btn btn-sm btn-gerenciar" title="Gerenciar Turma e Aulas">
                                         <i class="fas fa-cog me-1"></i> Gerenciar
                                     </a>
                                 </h2>

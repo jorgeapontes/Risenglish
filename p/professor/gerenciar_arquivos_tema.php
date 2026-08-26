@@ -5,7 +5,7 @@ require_once '../includes/conexao.php';
 
 // Garante que apenas professor acessa esta página
 if ($_SESSION['user_tipo'] !== 'professor') {
-    header("Location: ../login.php");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
@@ -23,7 +23,7 @@ if (isset($_SESSION['mensagem'])) {
 
 // --- 2. VALIDAÇÃO DO TEMA ---
 if (!isset($_GET['tema_id']) || !is_numeric($_GET['tema_id'])) {
-    header("Location: gerenciar_conteudos.php");
+    header("Location: gerenciar_conteudos");
     exit;
 }
 
@@ -39,7 +39,7 @@ $stmt_tema->execute([':tema_id' => $tema_id]);
 $tema = $stmt_tema->fetch(PDO::FETCH_ASSOC);
 
 if (!$tema) {
-    header("Location: gerenciar_conteudos.php");
+    header("Location: gerenciar_conteudos");
     exit;
 }
 
@@ -52,7 +52,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
         if (empty($titulo_subpasta)) {
             $_SESSION['mensagem'] = "Por favor, informe o título da subpasta.";
             $_SESSION['sucesso'] = false;
-            header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+            header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
             exit;
         }
 
@@ -78,7 +78,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
             $_SESSION['sucesso'] = false;
         }
 
-        header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+        header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
         exit;
 
     } elseif ($_POST['acao'] === 'upload_recurso') {
@@ -92,7 +92,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
         if (empty($titulo_recurso) || (!$is_file_upload && !$is_link_provided)) {
             $_SESSION['mensagem'] = "Por favor, preencha o Título e envie um Arquivo ou forneça um Link.";
             $_SESSION['sucesso'] = false;
-            header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+            header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
             exit;
         }
 
@@ -116,7 +116,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
             if (!in_array($uploaded_mime_type, $allowed_mime_types)) {
                 $_SESSION['mensagem'] = "Tipo de arquivo não permitido. Apenas PDF e Imagens (JPG, PNG, GIF).";
                 $_SESSION['sucesso'] = false;
-                header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+                header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
                 exit;
             }
 
@@ -127,7 +127,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
             } else {
                 $_SESSION['mensagem'] = "Erro ao mover o arquivo. Tente novamente.";
                 $_SESSION['sucesso'] = false;
-                header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+                header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
                 exit;
             }
 
@@ -135,7 +135,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
             if (!filter_var($link_url, FILTER_VALIDATE_URL)) {
                 $_SESSION['mensagem'] = "O link fornecido não é uma URL válida.";
                 $_SESSION['sucesso'] = false;
-                header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+                header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
                 exit;
             }
 
@@ -174,7 +174,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
             $_SESSION['sucesso'] = false;
         }
 
-        header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+        header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
         exit;
 
     } elseif ($_POST['acao'] === 'editar_titulo') {
@@ -184,7 +184,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
         if (empty($novo_titulo) || $recurso_id <= 0) {
             $_SESSION['mensagem'] = "Por favor, informe um título válido.";
             $_SESSION['sucesso'] = false;
-            header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+            header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
             exit;
         }
 
@@ -199,7 +199,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
             if (!$stmt_check->fetch()) {
                 $_SESSION['mensagem'] = "Recurso não encontrado ou você não tem permissão para editá-lo.";
                 $_SESSION['sucesso'] = false;
-                header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+                header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
                 exit;
             }
 
@@ -222,7 +222,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
             $_SESSION['sucesso'] = false;
         }
 
-        header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+        header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
         exit;
     }
 }
@@ -240,7 +240,7 @@ if ($tema_id > 0 && isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
         if (!$recurso_info) {
             $_SESSION['mensagem'] = "Recurso não encontrado ou você não tem permissão para excluí-lo.";
             $_SESSION['sucesso'] = false;
-            header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+            header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
             exit;
         }
 
@@ -254,7 +254,7 @@ if ($tema_id > 0 && isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
             if ($resultado['total'] > 0) {
                 $_SESSION['mensagem'] = "Não é possível excluir a subpasta porque ela contém arquivos. Exclua os arquivos primeiro.";
                 $_SESSION['sucesso'] = false;
-                header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+                header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
                 exit;
             }
         }
@@ -281,7 +281,7 @@ if ($tema_id > 0 && isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
         $_SESSION['sucesso'] = false;
     }
 
-    header("Location: gerenciar_arquivos_tema.php?tema_id=" . $tema_id);
+    header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
     exit;
 }
 
@@ -366,33 +366,23 @@ function get_youtube_id($url) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../css/professor/base.css">
     <link rel="stylesheet" href="../../css/professor/gerenciar_arquivos_tema.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <div class="mb-4 text-center">
-                    <h5 class="mt-4">Prof. <?php echo $_SESSION['user_nome'] ?? 'Professor'; ?></h5>
-                </div>
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="gerenciar_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
-                    <a href="gerenciar_conteudos.php" class="rounded active"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
-                    <a href="gerenciar_alunos.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
-                </div>
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-                </div>
-            </div>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <?php
+            $paginaAtiva = 'conteudos';
+            require '../includes/layout/professor_sidebar.php';
+            ?>
             <!-- Conteúdo principal -->
-            <div class="col-md-10 main-content p-4">
+            <div class="col-12 col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="mt-3"><a id="back-link" href="gerenciar_conteudos.php"> Gerenciamento de Temas</a> > <strong><?= htmlspecialchars($tema['titulo'] ?? 'Tema') ?></strong></h2>
+                    <h2 class="mt-3"><a id="back-link" href="gerenciar_conteudos"> Gerenciamento de Temas</a> > <strong><?= htmlspecialchars($tema['titulo'] ?? 'Tema') ?></strong></h2>
                     <div>
                         <div class="mt-4">
-                            <a href="gerenciar_conteudos.php" class="btn btn-outline-secondary me-2">
+                            <a href="gerenciar_conteudos" class="btn btn-outline-secondary me-2">
                                 <i class="fas fa-arrow-left me-1"></i> Voltar para Temas
                             </a>
                             <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#modalCriarSubpasta">
@@ -587,7 +577,7 @@ function get_youtube_id($url) {
                 <h5 class="modal-title" id="modalCriarSubpastaLabel">Criar Nova Subpasta</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="gerenciar_arquivos_tema.php?tema_id=<?= $tema_id ?>">
+            <form method="POST" action="gerenciar_arquivos_tema?tema_id=<?= $tema_id ?>">
                 <div class="modal-body">
                     <input type="hidden" name="acao" value="criar_subpasta">
                     <div class="mb-3">
@@ -620,7 +610,7 @@ function get_youtube_id($url) {
                 <h5 class="modal-title" id="modalAdicionarRecursoLabel">Adicionar Novo Recurso</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" enctype="multipart/form-data" action="gerenciar_arquivos_tema.php?tema_id=<?= $tema_id ?>" id="formRecurso">
+            <form method="POST" enctype="multipart/form-data" action="gerenciar_arquivos_tema?tema_id=<?= $tema_id ?>" id="formRecurso">
                 <div class="modal-body">
                     <input type="hidden" name="acao" value="upload_recurso">
                     <div class="mb-3">
@@ -673,7 +663,7 @@ function get_youtube_id($url) {
                 <h5 class="modal-title" id="modalAdicionarRecursoSubpastaLabel">Adicionar Recurso na Subpasta</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" enctype="multipart/form-data" action="gerenciar_arquivos_tema.php?tema_id=<?= $tema_id ?>" id="formRecursoSubpasta">
+            <form method="POST" enctype="multipart/form-data" action="gerenciar_arquivos_tema?tema_id=<?= $tema_id ?>" id="formRecursoSubpasta">
                 <div class="modal-body">
                     <input type="hidden" name="acao" value="upload_recurso">
                     <input type="hidden" name="subpasta_id" id="subpasta_id">
@@ -727,7 +717,7 @@ function get_youtube_id($url) {
 <div class="modal fade" id="modalEditarRecurso" tabindex="-1" aria-labelledby="modalEditarRecursoLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="formEditarRecurso" method="POST" action="gerenciar_arquivos_tema.php?tema_id=<?= $tema_id ?>">
+            <form id="formEditarRecurso" method="POST" action="gerenciar_arquivos_tema?tema_id=<?= $tema_id ?>">
                 <input type="hidden" name="acao" value="editar_titulo">
                 <input type="hidden" name="recurso_id" id="editarRecursoId" value="">
                 <div class="modal-header" style="background-color: #081d40; color: white;">
@@ -799,7 +789,7 @@ $(document).ready(function() {
         var recursoTitulo = button.data('recurso-titulo');
         var modal = $(this);
         modal.find('#recursoTituloModal').text(recursoTitulo);
-        modal.find('#linkExcluirRecurso').attr('href', 'gerenciar_arquivos_tema.php?tema_id=<?= $tema_id ?>&excluir=' + recursoId);
+        modal.find('#linkExcluirRecurso').attr('href', 'gerenciar_arquivos_tema?tema_id=<?= $tema_id ?>&excluir=' + recursoId);
     });
 
     // Modal de edição de título

@@ -8,7 +8,7 @@ $pdo->exec("SET time_zone = '-03:00'"); // Força o MySQL para horário de Bras�
 
 // Professor acessa normalmente; admin acessa em modo somente-visualização
 if (!in_array($_SESSION['user_tipo'], ['professor', 'admin'], true)) {
-    header("Location: ../login.php");
+    header("Location: ../login?erro=acesso_negado");
     exit;
 }
 
@@ -22,7 +22,7 @@ $aula_id = $_GET['aula_id'] ?? null;
 
 // Verificação do ID da aula
 if (!$aula_id || !is_numeric($aula_id)) {
-    header("Location: gerenciar_aulas.php");
+    header("Location: gerenciar_aulas");
     exit;
 }
 
@@ -46,7 +46,7 @@ $stmt_detalhes->execute($params_detalhes);
 $detalhes_aula = $stmt_detalhes->fetch(PDO::FETCH_ASSOC);
 
 if(!$detalhes_aula) {
-    header("Location: gerenciar_aulas.php");
+    header("Location: gerenciar_aulas");
     exit;
 }
 
@@ -197,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_comentario']))
         }
         
         // Redirecionar para evitar reenvio do formulário
-        header("Location: detalhes_aula.php?aula_id=" . $aula_id . "&saved=1");
+        header("Location: detalhes_aula?aula_id=" . $aula_id . "&saved=1");
         exit;
     }
 }
@@ -423,33 +423,18 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../css/professor/base.css">
     <link rel="stylesheet" href="../../css/professor/detalhes_aula.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-2 d-flex flex-column sidebar p-3">
-                <div class="mb-4 text-center">
-                    <h5 class="mt-4">Prof. <?= htmlspecialchars($professor_nome) ?></h5>
-                </div>
-                <div class="d-flex flex-column flex-grow-1 mb-5">
-                     <a href="notificacoes.php" class="rounded position-relative">
-                        <i class="fas fa-bell"></i>&nbsp;&nbsp;Notificações
-                        <?php if ($total_notificacoes_nao_lidas > 0): ?>
-                            <span class="badge bg-danger ms-2"><?= $total_notificacoes_nao_lidas ?></span>
-                        <?php endif; ?>
-                    </a>
-                    <a href="dashboard.php" class="rounded"><i class="fas fa-home"></i>&nbsp;&nbsp;Dashboard</a>
-                    <a href="gerenciar_aulas.php" class="rounded"><i class="fas fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp;Aulas</a>
-                    <a href="gerenciar_conteudos.php" class="rounded"><i class="fas fa-book-open"></i>&nbsp;&nbsp;Conteúdos</a>
-                    <a href="gerenciar_alunos.php" class="rounded"><i class="fas fa-users"></i>&nbsp;&nbsp;Alunos/Turmas</a>
-                </div>
-                <div class="mt-auto">
-                    <a href="../logout.php" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
-                </div>
-            </div>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <?php
+            $paginaAtiva = 'aulas';
+            require '../includes/layout/professor_sidebar.php';
+            ?>
 
-            <div class="col-md-10 main-content p-4">
+            <div class="col-12 col-md-10 main-content p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h1 style="color: #081d40;">Detalhes da Aula</h1>
                     <div>
@@ -460,11 +445,11 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                         <button class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#excluirAulaModal">
                             <i class="fas fa-trash me-2"></i> Excluir Aula
                         </button>
-                        <a href="detalhes_turma.php?turma_id=<?= $detalhes_aula['turma_id'] ?>" class="btn btn-secondary ms-2">
+                        <a href="detalhes_turma?turma_id=<?= $detalhes_aula['turma_id'] ?>" class="btn btn-secondary ms-2">
                             <i class="fas fa-arrow-left me-2"></i> Voltar para Turma
                         </a>
                         <?php else: ?>
-                        <a href="../admin/agendas.php" class="btn btn-secondary ms-2">
+                        <a href="../admin/agendas" class="btn btn-secondary ms-2">
                             <i class="fas fa-arrow-left me-2"></i> Voltar para Agenda
                         </a>
                         <?php endif; ?>
@@ -917,7 +902,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                                 <?php else: ?>
                                                                     <i class="fas fa-folder me-2 text-primary"></i>
                                                                 <?php endif; ?>
-                                                                <a href="gerenciar_arquivos_tema.php?tema_id=<?= $tema['tema_id'] ?>" class="link-tema">
+                                                                <a href="gerenciar_arquivos_tema?tema_id=<?= $tema['tema_id'] ?>" class="link-tema">
                                                                     <strong><?= htmlspecialchars($tema['titulo']) ?></strong>
                                                                 </a>
                                                             </div>
@@ -1059,7 +1044,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                                 <?php else: ?>
                                                                     <i class="fas fa-folder me-2 text-primary"></i>
                                                                 <?php endif; ?>
-                                                                <a href="gerenciar_arquivos_tema.php?tema_id=<?= $tema['tema_id'] ?>" class="link-tema">
+                                                                <a href="gerenciar_arquivos_tema?tema_id=<?= $tema['tema_id'] ?>" class="link-tema">
                                                                     <strong><?= htmlspecialchars($tema['titulo']) ?></strong>
                                                                 </a>
                                                             </div>
@@ -1158,7 +1143,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                     <h5 class="modal-title" id="editarAulaModalLabel">Editar Detalhes da Aula</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="formEditarAula" method="POST" action="ajax_editar_aula.php">
+                <form id="formEditarAula" method="POST" action="ajax_editar_aula">
                     <div class="modal-body">
                         <div id="editarAulaMessageContainer"></div>
                         <input type="hidden" name="aula_id" value="<?= $detalhes_aula['aula_id'] ?>">
@@ -1220,7 +1205,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form id="formExcluirAula" method="POST" action="ajax_excluir_aula.php" style="display: inline;">
+                    <form id="formExcluirAula" method="POST" action="ajax_excluir_aula" style="display: inline;">
                         <input type="hidden" name="aula_id" value="<?= $detalhes_aula['aula_id'] ?>">
                         <button type="submit" class="btn btn-danger">
                             <i class="fas fa-trash me-2"></i> Sim, Excluir Aula
@@ -1308,7 +1293,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
         elemento.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Processando...</span>';
         elemento.style.opacity = '0.7';
         
-        fetch('ajax_marcar_visto.php', {
+        fetch('ajax_marcar_visto', {
             method: 'POST',
             body: formData
         })
@@ -1448,7 +1433,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
             if (deleteBtn) {
                 var itemId = deleteBtn.getAttribute('data-item-id');
                 if (!confirm('Confirma apagar este item?')) return;
-                fetch('../ajax_anotacoes_item.php', {
+                fetch('../ajax_anotacoes_item', {
                     method: 'POST',
                     body: new URLSearchParams({acao: 'delete', item_id: itemId})
                 }).then(r => r.json()).then(d => {
@@ -1499,7 +1484,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                     var novo = ta.value.trim();
                     if (novo === '') return alert('Conteúdo vazio');
                     saveBtn.disabled = true; saveBtn.textContent = 'Salvando...';
-                    fetch('../ajax_anotacoes_item.php', {
+                    fetch('../ajax_anotacoes_item', {
                         method: 'POST',
                         body: new URLSearchParams({acao: 'edit', item_id: itemId, conteudo: novo})
                     }).then(r => r.json()).then(d => {
@@ -1535,7 +1520,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                 formData.append('aluno_id', alunoId);
                 formData.append('conteudo', conteudo);
 
-                fetch('../ajax_anotacoes_item.php', { method: 'POST', body: formData })
+                fetch('../ajax_anotacoes_item', { method: 'POST', body: formData })
                 .then(r => r.json())
                 .then(d => {
                     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-1"></i>Salvar'; }
@@ -1645,7 +1630,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                 statusLabel.textContent = '...';
                 statusLabel.classList.add('loading');
 
-                fetch('ajax_toggle_conteudo.php', {
+                fetch('ajax_toggle_conteudo', {
                     method: 'POST',
                     body: formData
                 })
@@ -1720,7 +1705,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                 this.disabled = true;
                 statusLabel.textContent = '...';
 
-                fetch('ajax_controle_presenca.php', {
+                fetch('ajax_controle_presenca', {
                     method: 'POST',
                     body: formData
                 })
@@ -1855,7 +1840,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                     modal.hide();
                     displayAlert(data.message, 'success');
                     setTimeout(() => {
-                        window.location.href = 'detalhes_turma.php?turma_id=<?= $detalhes_aula['turma_id'] ?>';
+                        window.location.href = 'detalhes_turma?turma_id=<?= $detalhes_aula['turma_id'] ?>';
                     }, 1500);
                 } else {
                     displayAlert('Erro: ' + data.message, 'danger');
