@@ -1,8 +1,4 @@
 <?php
-// ATIVAR EXIBIÇÃO DE ERROS (REMOVA DEPOIS)
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // Inclui os arquivos necessários
 include_once 'includes/conexao.php';
 include_once 'includes/email_config.php';
@@ -50,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
             }
         } catch (Exception $e) {
             error_log("Erro no processo de reset: " . $e->getMessage());
-            $message = '<div class="alert alert-danger">Erro de servidor: ' . $e->getMessage() . '</div>';
+            $message = '<div class="alert alert-danger">Houve um erro no servidor. Tente novamente mais tarde.</div>';
         }
     }
 }

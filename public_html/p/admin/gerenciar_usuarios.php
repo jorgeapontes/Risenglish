@@ -85,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
             $stmt->bindParam(':informacoes', $informacoes);
             $stmt->bindParam(':resp_id', $responsavel_id);
             $stmt->bindParam(':nao_pagante', $nao_pagante_flag, PDO::PARAM_INT);
-            $mensagem = "Usuário <strong>{$nome}</strong> cadastrado como <strong>{$tipo}</strong> com sucesso!";
+            $mensagem = "Usuário <strong>" . htmlspecialchars($nome, ENT_QUOTES, 'UTF-8') . "</strong> cadastrado como <strong>" . htmlspecialchars($tipo, ENT_QUOTES, 'UTF-8') . "</strong> com sucesso!";
 
         } else {
             $sql_parts = ["nome = :nome", "email = :email", "tipo_usuario = :tipo_usuario", "informacoes = :informacoes", "responsavel_financeiro_id = :resp_id", "nao_pagante = :nao_pagante"];
@@ -100,7 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
             $stmt->bindParam(':resp_id', $responsavel_id);
             $stmt->bindParam(':nao_pagante', $nao_pagante_flag, PDO::PARAM_INT);
             if (!empty($senha)) $stmt->bindParam(':senha', $senha_hash);
-            $mensagem = "Usuário <strong>{$nome}</strong> atualizado com sucesso!";
+            $mensagem = "Usuário <strong>" . htmlspecialchars($nome, ENT_QUOTES, 'UTF-8') . "</strong> atualizado com sucesso!";
         }
 
         $stmt->bindParam(':nome', $nome);
@@ -110,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
         $tipo_mensagem = 'success';
 
     } catch (Exception $e) {
-        $mensagem = "Erro ao gerenciar usuário: " . $e->getMessage();
+        $mensagem = "Erro ao gerenciar usuário: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         $tipo_mensagem = 'danger';
     }
 }
@@ -127,7 +127,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
         $mensagem = "Usuário removido com sucesso!";
         $tipo_mensagem = 'success';
     } catch (Exception $e) {
-        $mensagem = "Erro ao remover usuário: " . $e->getMessage();
+        $mensagem = "Erro ao remover usuário: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         $tipo_mensagem = 'danger';
     }
 }
@@ -153,7 +153,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
         $mensagem = "Usuário " . ($novo == 'ativo' ? 'ativado' : 'desativado') . " com sucesso!";
         $tipo_mensagem = 'success';
     } catch (Exception $e) {
-        $mensagem = "Erro ao atualizar status: " . $e->getMessage();
+        $mensagem = "Erro ao atualizar status: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         $tipo_mensagem = 'danger';
     }
 }
@@ -240,7 +240,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
             $tipo_mensagem = 'success';
         }
     } catch (Exception $e) {
-        $mensagem = "Erro ao excluir anexo: " . $e->getMessage();
+        $mensagem = "Erro ao excluir anexo: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         $tipo_mensagem = 'danger';
     }
 }

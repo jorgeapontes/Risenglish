@@ -164,8 +164,11 @@ $alunos_turma = $stmt_alunos_turma->fetchAll(PDO::FETCH_ASSOC);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_comentario'])) {
     $aluno_id = $_POST['aluno_id'] ?? null;
     $comentario = $_POST['comentario_professor'] ?? '';
-    
-    if ($aluno_id) {
+
+    // Garante que só o professor dono da aula pode comentar, e apenas em alunos
+    // que de fato estão matriculados na turma desta aula
+    $ids_alunos_turma = array_column($alunos_turma, 'aluno_id');
+    if ($pode_editar && $aluno_id && in_array((int) $aluno_id, $ids_alunos_turma, true)) {
         // Verificar se já existe uma anotação (thread) para este aluno nesta aula
         $sql_check = "SELECT id FROM anotacoes_aula WHERE aula_id = :aula_id AND aluno_id = :aluno_id";
         $stmt_check = $pdo->prepare($sql_check);

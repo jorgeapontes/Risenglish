@@ -45,6 +45,33 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                 $messages[] = "Formato não suportado para $inputName";
                 continue;
             }
+
+            // Valida o tipo real do arquivo (não confia só na extensão)
+            $mimesPermitidos = [
+                'png' => ['image/png'],
+                'jpg' => ['image/jpeg'],
+                'jpeg' => ['image/jpeg'],
+                'gif' => ['image/gif'],
+                'webp' => ['image/webp'],
+                'svg' => ['image/svg+xml', 'text/xml', 'text/plain', 'text/html'],
+            ];
+            $finfoImg = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeReal = finfo_file($finfoImg, $tmp);
+            finfo_close($finfoImg);
+            if (!in_array($mimeReal, $mimesPermitidos[$ext], true)) {
+                $messages[] = "Arquivo inválido para $inputName";
+                continue;
+            }
+
+            // SVG é texto/XML: bloqueia conteúdo com script embutido (risco de XSS armazenado)
+            if ($ext === 'svg') {
+                $conteudoSvg = file_get_contents($tmp);
+                if (preg_match('/<\s*script|on\w+\s*=|javascript:/i', $conteudoSvg)) {
+                    $messages[] = "Arquivo SVG rejeitado por conter conteúdo potencialmente malicioso ($inputName)";
+                    continue;
+                }
+            }
+
             $name = uniqid('site_') . '.' . $ext;
             $dest = $uploadDir . $name;
             if(move_uploaded_file($tmp, $dest)){
