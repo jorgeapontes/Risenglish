@@ -11,9 +11,6 @@ $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
     $email = trim($_POST['email']);
-    
-    // Debug
-    error_log("Email recebido: " . $email);
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $message = '<div class="alert alert-danger">Email inválido.</div>';
@@ -39,10 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
                 // 4. Montar Link de Redefinição
                 $host = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://{$_SERVER['HTTP_HOST']}";
                 $linkReset = "{$host}/php/redefinir_senha.php?token={$token}";
-                
-                // Debug
-                error_log("Link gerado: " . $linkReset);
-                
+
                 // 5. Enviar E-mail (CORRIGIDO: usar enviarEmailReset)
                 if (enviarEmailReset($email, $usuario_nome, $linkReset)) {
                     $message = '<div class="alert alert-success">Se o e-mail estiver cadastrado, um link de redefinição foi enviado. Verifique sua caixa de entrada e spam.</div>';

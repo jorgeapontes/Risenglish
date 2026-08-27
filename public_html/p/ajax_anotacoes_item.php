@@ -32,32 +32,54 @@ try {
         $conteudo = trim($_POST['conteudo'] ?? '');
         if (!$aula_id || $conteudo === '') throw new Exception('Dados inválidos');
 
-        // Buscar informações da aula e do professor
-        $sql_aula_info = "SELECT a.professor_id, a.titulo_aula, t.nome_turma 
-                          FROM aulas a 
-                          JOIN turmas t ON a.turma_id = t.id 
+        // Buscar informações da aula, turma e do professor
+        $sql_aula_info = "SELECT a.professor_id, a.turma_id, a.titulo_aula, t.nome_turma
+                          FROM aulas a
+                          JOIN turmas t ON a.turma_id = t.id
                           WHERE a.id = :aula_id";
         $stmt_aula = $pdo->prepare($sql_aula_info);
         $stmt_aula->execute([':aula_id' => $aula_id]);
         $aula_info = $stmt_aula->fetch(PDO::FETCH_ASSOC);
-        
+
         if (!$aula_info) throw new Exception('Aula não encontrada');
-        
+
         $professor_id = $aula_info['professor_id'];
+        $turma_id = $aula_info['turma_id'];
         $titulo_aula = $aula_info['titulo_aula'];
         $nome_turma = $aula_info['nome_turma'];
+
+        // Garante que o professor logado é o dono desta aula
+        if ($user_tipo === 'professor' && (int) $professor_id !== (int) $user_id) {
+            throw new Exception('Permissão negada: esta aula não pertence a você');
+        }
 
         // garantir thread
         $sql_thread = "SELECT id, aluno_id FROM anotacoes_aula WHERE aula_id = :aula_id AND aluno_id = :aluno_id";
         $stmt = $pdo->prepare($sql_thread);
-        
+        $sql_matricula = "SELECT COUNT(*) FROM alunos_turmas WHERE turma_id = :turma_id AND aluno_id = :aluno_id";
+
         if ($user_tipo === 'aluno') {
+            // Garante que o aluno está matriculado na turma desta aula
+            $stmt_mat = $pdo->prepare($sql_matricula);
+            $stmt_mat->execute([':turma_id' => $turma_id, ':aluno_id' => $user_id]);
+            if ((int) $stmt_mat->fetchColumn() === 0) {
+                throw new Exception('Permissão negada: você não está matriculado nesta turma');
+            }
+
             $stmt->execute([':aula_id' => $aula_id, ':aluno_id' => $user_id]);
             $thread = $stmt->fetch(PDO::FETCH_ASSOC);
         } else {
             // professor must provide aluno_id
             $aluno_id = $_POST['aluno_id'] ?? null;
             if (!$aluno_id) throw new Exception('aluno_id necessário para professor');
+
+            // Garante que o aluno informado está matriculado na turma desta aula
+            $stmt_mat = $pdo->prepare($sql_matricula);
+            $stmt_mat->execute([':turma_id' => $turma_id, ':aluno_id' => $aluno_id]);
+            if ((int) $stmt_mat->fetchColumn() === 0) {
+                throw new Exception('Aluno não matriculado nesta turma');
+            }
+
             $stmt->execute([':aula_id' => $aula_id, ':aluno_id' => $aluno_id]);
             $thread = $stmt->fetch(PDO::FETCH_ASSOC);
         }
