@@ -27,14 +27,21 @@ if (!$conteudo || empty($conteudo['caminho_arquivo'])) {
     die("Arquivo não encontrado no banco de dados.");
 }
 
+// Conteúdos do tipo URL (links externos / YouTube) não são arquivos servidos aqui.
+if ($conteudo['tipo_arquivo'] === 'URL') {
+    http_response_code(400);
+    die("Este conteúdo é um link externo, não um arquivo.");
+}
+
 // 2.1 Verificação de posse: garante que o usuário logado tem direito a ver ESTE conteúdo
 $user_tipo = $_SESSION['user_tipo'] ?? '';
 $tem_acesso = false;
 
-if ($user_tipo === 'admin') {
+if ($user_tipo === 'admin' || $user_tipo === 'professor') {
+    // Professores compartilham a mesma biblioteca de conteudos (temas/grupos sao
+    // visiveis para todos em gerenciar_conteudos), entao qualquer professor pode
+    // visualizar o arquivo. Alunos continuam restritos por matricula (abaixo).
     $tem_acesso = true;
-} elseif ($user_tipo === 'professor') {
-    $tem_acesso = ((int) $conteudo['professor_id'] === (int) $_SESSION['user_id']);
 } elseif ($user_tipo === 'aluno') {
     // Sobe a árvore de pastas (parent_id) até a raiz, coletando todos os IDs no caminho
     $ids_ancestrais = [$conteudo_id];
@@ -65,9 +72,11 @@ if (!$tem_acesso) {
     die("Acesso negado. Você não tem permissão para visualizar este conteúdo.");
 }
 
-// 3. CONSTRUÇÃO DO CAMINHO FÍSICO CORRIGIDO
-// Isso deve retornar a pasta 'Risenglish' (raiz)
-$raiz_projeto = dirname(__DIR__); 
+// 3. CONSTRUÇÃO DO CAMINHO FÍSICO
+// caminho_arquivo é salvo como 'uploads/conteudos/arquivo.pdf', relativo a esta
+// pasta /p (é onde gerenciar_arquivos_tema.php move os uploads). Este script
+// também está em /p, portanto a base é o próprio __DIR__.
+$raiz_projeto = __DIR__;
 $caminho_completo = $raiz_projeto . DIRECTORY_SEPARATOR . $conteudo['caminho_arquivo'];
 
 // Normaliza barras para garantir que funcione em qualquer sistema
@@ -75,10 +84,21 @@ $caminho_completo = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $caminho_compl
 
 
 // 4. VERIFICAÇÃO FINAL
-if (!file_exists($caminho_completo)) {
+$caminho_real = realpath($caminho_completo);
+$base_uploads = realpath($raiz_projeto . DIRECTORY_SEPARATOR . 'uploads');
+
+if ($caminho_real === false || !file_exists($caminho_real)) {
     http_response_code(404);
     die("Arquivo físico não encontrado no servidor.");
 }
+
+// Garante que o arquivo resolvido está de fato dentro de /p/uploads (defesa contra path traversal)
+if ($base_uploads === false || strpos($caminho_real, $base_uploads . DIRECTORY_SEPARATOR) !== 0) {
+    http_response_code(403);
+    die("Acesso negado.");
+}
+
+$caminho_completo = $caminho_real;
 
 // 5. Envio dos Headers para visualização INLINE
 $mime_type = $conteudo['tipo_arquivo'];

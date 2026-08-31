@@ -410,7 +410,7 @@ function get_youtube_id($url) {
                         <?php if (!empty($recursos)): ?>
                             <ul class="list-group mb-3">
                                 <?php foreach ($recursos as $r): ?>
-                                    <li class="list-group-item file-list-item subpasta-file-item d-flex justify-content-between align-items-center" onclick="abrirRecurso('<?= htmlspecialchars($r['caminho_arquivo']) ?>', '<?= $r['tipo_arquivo'] ?>', '<?= htmlspecialchars($r['titulo']) ?>')">
+                                    <li class="list-group-item file-list-item subpasta-file-item d-flex justify-content-between align-items-center" onclick="abrirRecurso('<?= (int) $r['id'] ?>', '<?= htmlspecialchars($r['caminho_arquivo']) ?>', '<?= $r['tipo_arquivo'] ?>', '<?= htmlspecialchars($r['titulo']) ?>')">
                                         <div>
                                             <i class="<?= get_file_icon($r['tipo_arquivo'], $r['caminho_arquivo']) ?> fa-lg me-2"></i>
                                             <strong><?= htmlspecialchars($r['titulo']) ?></strong>
@@ -428,7 +428,7 @@ function get_youtube_id($url) {
                                                         <i class="fas fa-play"></i>
                                                     </button>
                                                 <?php else: ?>
-                                                    <a href="<?= ($r['tipo_arquivo'] === 'URL') ? htmlspecialchars($r['caminho_arquivo']) : '../' . htmlspecialchars($r['caminho_arquivo']) ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Visualizar" onclick="event.stopPropagation()">
+                                                    <a href="<?= ($r['tipo_arquivo'] === 'URL') ? htmlspecialchars($r['caminho_arquivo']) : '../visualizar_conteudo?id=' . (int) $r['id'] ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Visualizar" onclick="event.stopPropagation()">
                                                         <i class="fas fa-external-link-alt"></i>
                                                     </a>
                                                 <?php endif; ?>
@@ -497,8 +497,8 @@ function get_youtube_id($url) {
                                             <?php if (!empty($arquivos_por_subpasta[$subpastaId])): ?>
                                                 <ul class="list-group">
                                                     <?php foreach ($arquivos_por_subpasta[$subpastaId] as $arq): ?>
-                                                        <li class="list-group-item file-list-item subpasta-file-item d-flex justify-content-between align-items-center" 
-                                                            onclick="abrirRecurso('<?= htmlspecialchars($arq['caminho_arquivo']) ?>', '<?= $arq['tipo_arquivo'] ?>', '<?= htmlspecialchars($arq['titulo']) ?>')">
+                                                        <li class="list-group-item file-list-item subpasta-file-item d-flex justify-content-between align-items-center"
+                                                            onclick="abrirRecurso('<?= (int) $arq['id'] ?>', '<?= htmlspecialchars($arq['caminho_arquivo']) ?>', '<?= $arq['tipo_arquivo'] ?>', '<?= htmlspecialchars($arq['titulo']) ?>')">
                                                             <div>
                                                                 <i class="<?= get_file_icon($arq['tipo_arquivo'], $arq['caminho_arquivo']) ?> fa-lg me-2"></i>
                                                                 <strong><?= htmlspecialchars($arq['titulo']) ?></strong>
@@ -522,7 +522,7 @@ function get_youtube_id($url) {
                                                                             <i class="fas fa-play"></i>
                                                                         </button>
                                                                     <?php else: ?>
-                                                                        <a href="<?= ($arq['tipo_arquivo'] === 'URL') ? htmlspecialchars($arq['caminho_arquivo']) : '../' . htmlspecialchars($arq['caminho_arquivo']) ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Visualizar" onclick="event.stopPropagation()">
+                                                                        <a href="<?= ($arq['tipo_arquivo'] === 'URL') ? htmlspecialchars($arq['caminho_arquivo']) : '../visualizar_conteudo?id=' . (int) $arq['id'] ?>" target="_blank" class="btn btn-sm btn-outline-primary" title="Visualizar" onclick="event.stopPropagation()">
                                                                             <i class="fas fa-external-link-alt"></i>
                                                                         </a>
                                                                     <?php endif; ?>
@@ -865,7 +865,7 @@ if (modalYouTube) {
 }
 
 // Função para abrir recursos (arquivos e links)
-function abrirRecurso(caminho, tipo, titulo) {
+function abrirRecurso(id, caminho, tipo, titulo) {
     if (tipo === 'URL') {
         // Verificar se é YouTube para abrir no modal
         var youtubeId = getYouTubeId(caminho);
@@ -884,8 +884,9 @@ function abrirRecurso(caminho, tipo, titulo) {
             window.open(caminho, '_blank');
         }
     } else {
-        // Para arquivos, abrir em nova aba
-        window.open('../' + caminho, '_blank');
+        // Para arquivos, abrir via visualizar_conteudo.php (valida sessão/posse e
+        // contorna o .htaccess "Deny from all" da pasta uploads/conteudos).
+        window.open('../visualizar_conteudo?id=' + encodeURIComponent(id), '_blank');
     }
 }
 

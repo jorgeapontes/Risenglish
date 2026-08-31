@@ -515,18 +515,23 @@ function displayConteudo($conteudo, $nivel = 0) {
                     </a>
                 <?php endif; ?>
             <?php else: ?>
+                <?php
+                    // Arquivos ficam numa pasta com "Deny from all"; precisam ser
+                    // servidos por visualizar_conteudo.php, que valida a matrícula.
+                    $arquivo_seguro_url = '../visualizar_conteudo?id=' . (int) $conteudo['id'];
+                ?>
                 <?php if ($is_pdf):
-                    $pdf_view_href = 'visualizar_pdf?file=' . urlencode('../' . $conteudo['caminho_arquivo']) . '&titulo=' . urlencode($conteudo['titulo']);
+                    $pdf_view_href = 'visualizar_pdf?file=' . urlencode($arquivo_seguro_url) . '&titulo=' . urlencode($conteudo['titulo']);
                 ?>
                     <a href="<?= htmlspecialchars($pdf_view_href) ?>" target="_blank" rel="noopener" class="btn btn-outline-danger btn-sm mt-2">
                         <i class="fa-solid fa-file-pdf me-1"></i>Visualizar Material
                     </a>
                 <?php elseif ($is_video): ?>
-                    <a href="../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
+                    <a href="<?= htmlspecialchars($arquivo_seguro_url) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
                         <i class="fas fa-play me-1"></i>Assistir Vídeo
                     </a>
                 <?php else: ?>
-                    <a href="../<?= htmlspecialchars($conteudo['caminho_arquivo']) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
+                    <a href="<?= htmlspecialchars($arquivo_seguro_url) ?>" target="_blank" class="btn btn-outline-primary btn-sm mt-2">
                         <i class="fas fa-external-link me-1"></i>Abrir Arquivo
                     </a>
                 <?php endif; ?>
