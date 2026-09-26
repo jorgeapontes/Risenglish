@@ -1,5 +1,10 @@
-User-agent: *
-Allow: /
-Disallow: /login.php
+# Robots.txt - Risenglish
+# Área interna (painéis de admin, aluno e professor, uploads de usuários) fica fora do rastreamento.
+# O login continua rastreável apenas para que os buscadores leiam o "noindex" da página.
 
-Sitemap: https://www.risenglish.com.br/sitemap.xml
+User-agent: *
+Disallow: /p/
+Allow: /p/login$
+Allow: /p/professora.jpg
+
+Sitemap: https://risenglish.com.br/sitemap.xml

@@ -91,6 +91,13 @@ RedirectMatch 404 /\.svn
 </IfModule>
 
 # =============================================
+# CHARSET UTF-8 PARA ARQUIVOS DE TEXTO (llms.txt, robots.txt, sitemap.xml)
+# =============================================
+<IfModule mod_mime.c>
+    AddCharset UTF-8 .txt .xml
+</IfModule>
+
+# =============================================
 # CACHE DE ARQUIVOS ESTÁTICOS
 # =============================================
 <IfModule mod_expires.c>
@@ -121,10 +128,23 @@ RewriteCond %{HTTP_REFERER} !^https://(www\.)?risenglish\.com [NC]
 RewriteRule \.(jpg|jpeg|png|gif|webp)$ - [F,L]
 
 # =============================================
+# DOMÍNIO CANÔNICO: SEM WWW (www -> https://risenglish.com.br)
+# Vem antes do redirect HTTPS para resolver http://www em um único 301
+# =============================================
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+# =============================================
 # REDIRECIONAR HTTP PARA HTTPS
 # =============================================
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# =============================================
+# HOME CANÔNICA: "/index" e "/index.php" -> "/"
+# =============================================
+RewriteCond %{THE_REQUEST} ^GET\s/index(\.php)?[\s?] [NC]
+RewriteRule ^ / [R=301,L]
 
 # =============================================
 # OCULTAR EXTENSÃO .PHP DA URL

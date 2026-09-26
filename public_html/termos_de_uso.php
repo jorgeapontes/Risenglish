@@ -7,14 +7,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Termos de Uso — Risenglish</title>
+    <meta name="description" content="Termos e condições de uso da plataforma Risenglish: site, área do aluno e área do professor.">
+    <link rel="canonical" href="https://risenglish.com.br/termos_de_uso">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/termos_de_uso.css">
 </head>
 <body>
 
 <header>
-    <a href="index.php" class="logo">RISENGLISH</a>
-    <a href="index.php" class="voltar">← Voltar para home</a>
+    <a href="./" class="logo">RISENGLISH</a>
+    <a href="./" class="voltar">← Voltar para home</a>
 </header>
 
 <div class="hero">
@@ -48,7 +50,7 @@
     <div class="secao" id="aceitacao">
         <div class="secao-numero">01</div>
         <h2>Aceitação dos termos</h2>
-        <p>Ao acessar, utilizar ou interagir com a plataforma Risenglish — incluindo o site, painel de alunos, área de professores e demais funcionalidades — você declara ter lido, compreendido e concordado integralmente com estes Termos de Uso e com a <a href="politica_privacidade.php">Política de Privacidade</a>.</p>
+        <p>Ao acessar, utilizar ou interagir com a plataforma Risenglish — incluindo o site, painel de alunos, área de professores e demais funcionalidades — você declara ter lido, compreendido e concordado integralmente com estes Termos de Uso e com a <a href="politica_privacidade">Política de Privacidade</a>.</p>
         <p>Se você não concordar com qualquer parte destes termos, não utilize a plataforma. O uso continuado do serviço implica na aceitação plena das condições aqui estabelecidas.</p>
         <div class="destaque">
             <strong>Menores de 18 anos</strong> só podem utilizar a plataforma com a supervisão e autorização de um responsável legal, que também concorda com estes termos em nome do menor.
@@ -119,7 +121,7 @@
     <div class="secao" id="privacidade">
         <div class="secao-numero">06</div>
         <h2>Privacidade e dados pessoais</h2>
-        <p>A Risenglish trata os dados pessoais dos usuários em conformidade com a Lei Geral de Proteção de Dados Pessoais (LGPD — Lei nº 13.709/2018) e com a nossa <a href="politica_privacidade.php">Política de Privacidade</a>.</p>
+        <p>A Risenglish trata os dados pessoais dos usuários em conformidade com a Lei Geral de Proteção de Dados Pessoais (LGPD — Lei nº 13.709/2018) e com a nossa <a href="politica_privacidade">Política de Privacidade</a>.</p>
         <ul>
             <li>Coletamos e utilizamos apenas os dados necessários para a prestação do serviço educacional;</li>
             <li>Não compartilhamos dados pessoais com terceiros para fins comerciais ou publicitários;</li>

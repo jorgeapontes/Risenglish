@@ -4,14 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Política de Privacidade — Risenglish</title>
+    <meta name="description" content="Saiba como a Risenglish coleta, usa e protege os dados pessoais de alunos e visitantes, em conformidade com a LGPD.">
+    <link rel="canonical" href="https://risenglish.com.br/politica_privacidade">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/politica_privacidade.css">
 </head>
 <body>
 
 <header>
-    <a href="index.php" class="logo">RISENGLISH</a>
-    <a href="index.php" class="voltar">← Voltar para home</a>
+    <a href="./" class="logo">RISENGLISH</a>
+    <a href="./" class="voltar">← Voltar para home</a>
 </header>
 
 <div class="hero">

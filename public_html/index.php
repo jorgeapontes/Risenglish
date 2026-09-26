@@ -4,11 +4,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Risenglish - English Learning</title>
+    <title>Aulas de Inglês Online com Foco em Conversação | Risenglish</title>
+    <meta name="description" content="Aprenda a falar inglês com confiança em aulas online com a professora Laura Antero. Método focado em conversação e escuta ativa, com acompanhamento individual.">
+    <link rel="canonical" href="https://risenglish.com.br/">
+
+    <!-- Open Graph / redes sociais (prévia no WhatsApp, Instagram, Facebook) -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="Risenglish">
+    <meta property="og:url" content="https://risenglish.com.br/">
+    <meta property="og:title" content="Aulas de Inglês Online com Foco em Conversação | Risenglish">
+    <meta property="og:description" content="Fale inglês com confiança. Método focado em conversação e escuta ativa, com acompanhamento individual da professora Laura Antero.">
+    <meta property="og:image" content="https://risenglish.com.br/LogoRisenglish.png">
+    <meta name="twitter:card" content="summary">
+
+    <!-- Dados estruturados (Schema.org) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "EducationalOrganization",
+        "name": "Risenglish",
+        "url": "https://risenglish.com.br/",
+        "logo": "https://risenglish.com.br/LogoRisenglish.png",
+        "description": "Aulas de inglês online com foco em conversação e escuta ativa, com acompanhamento individual.",
+        "founder": {
+            "@type": "Person",
+            "name": "Laura Antero",
+            "jobTitle": "Professora de inglês"
+        },
+        "sameAs": [
+            "https://www.instagram.com/miss.antero/"
+        ],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+55-41-9716-2705",
+            "contactType": "customer service",
+            "availableLanguage": ["Portuguese", "English"]
+        },
+        "areaServed": "BR",
+        "inLanguage": "pt-BR"
+    }
+    </script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/index.css">
     <link rel="shortcut icon" href="<?php echo htmlspecialchars(get_setting('logo_image','LogoRisenglish.png')); ?>" type="image/x-icon">
-    <!-- <p>teste</p> -->
 </head>
 <body>
     <!-- Navbar -->
@@ -31,7 +71,7 @@
                     <a href="#contact" class="nav-link">Contato</a>
                 </li>
                 <li class="nav-item">
-                    <a href="p/login.php" class="nav-link login-btn">Login</a>
+                    <a href="p/login" class="nav-link login-btn">Login</a>
                 </li>
             </ul>
             <div class="hamburger">
@@ -82,7 +122,7 @@
             </div>
             <div class="hero-image">
                 <div class="logo-orbit">
-                    <img src="<?php echo htmlspecialchars(get_setting('hero_image','LogoRisenglish.png')); ?>" alt="Logo da Escola">
+                    <img src="<?php echo htmlspecialchars(get_setting('hero_image','LogoRisenglish.png')); ?>" alt="Logo Risenglish">
                     <span class="orbit-ring" aria-hidden="true"></span>
                     <span class="orbit-semicircle" aria-hidden="true"></span>
                 </div>
@@ -164,7 +204,7 @@
             <div class="about-container">
                 <div class="about-image">
                     <div class="image-frame">
-                        <img src="<?php echo htmlspecialchars(get_setting('about_image','php/professora.jpg')); ?>" alt="Professora Risenglish">
+                        <img src="<?php echo htmlspecialchars(get_setting('about_image','p/professora.jpg')); ?>" alt="Professora Laura Antero, da Risenglish">
                         <div class="image-overlay">
                             <div class="experience-badge">
                                 <span>+ de 500 alunos</span>
@@ -289,9 +329,9 @@
                     <p>&copy; Risenglish by Laura Antero. Todos os direitos reservados.</p>
                 </div>
                 <div class="footer-credits">
-                    <a href="politica_privacidade.php">Política de Privacidade </a>
+                    <a href="politica_privacidade">Política de Privacidade </a>
                     <a> / </a>
-                    <a href="termos_de_uso.php">Termos de Uso</a>
+                    <a href="termos_de_uso">Termos de Uso</a>
                 </div>
             </div>
         </footer>

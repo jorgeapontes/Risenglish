@@ -1,13 +1,38 @@
-# Rise English
+# Risenglish
 
-> Plataforma de ensino de inglês online, com acesso via login para alunos cadastrados.
+> Aulas de inglês online com a professora Laura Antero (@miss.antero), com foco em conversação (speaking) e escuta ativa (listening). Acompanhamento individual, material autoral e mais de 500 alunos atendidos.
 
-## Páginas principais
+A Risenglish não ensina inglês por memorização de regras ou listas de palavras. O aluno aprende pelo uso real do idioma, num processo baseado em exposição, prática e ajuste contínuo, no próprio ritmo e com suporte direto da professora.
 
-- [Início](https://www.risenglish.com.br/index.php): Apresentação da plataforma e proposta de ensino de inglês.
-- [Login](https://www.risenglish.com.br/login.php): Área de acesso para alunos cadastrados.
+## Metodologia
 
-## Políticas
+O método Risenglish tem três etapas:
 
-- [Política de Privacidade](https://www.risenglish.com.br/politica_privacidade.php): Como os dados dos usuários são tratados.
-- [Termos de Uso](https://www.risenglish.com.br/termos_de_uso.php): Regras de uso da plataforma.
+- **Aquisição:** contato com conteúdo real (listening, leitura simples, vocabulário em uso).
+- **Prática:** conversação guiada, repetição inteligente e tarefas reais.
+- **Ajuste:** feedback individual, correções naturais e evolução contínua.
+
+Por que funciona: é baseado em como o cérebro realmente aprende, prioriza a comunicação em vez das regras, é personalizado para cada aluno e trabalha também a confiança para falar.
+
+## Diferenciais
+
+- Aulas 100% online
+- Foco em conversação (speaking) e compreensão oral (listening)
+- Acompanhamento individual com a professora
+- Conteúdos autorais, pensados para cada nível e objetivo
+- Área do aluno com materiais das aulas
+
+## Páginas
+
+- [Página inicial](https://risenglish.com.br/): apresentação do método, sobre a professora e formas de contato.
+
+## Contato e matrícula
+
+- [WhatsApp](https://wa.me/554197162705): resposta rápida para dúvidas e matrícula.
+- [Instagram @miss.antero](https://www.instagram.com/miss.antero/): perfil da professora Laura Antero.
+- [Formulário de inscrição](https://docs.google.com/forms/d/e/1FAIpQLSdEDqEX0jYnXMELzBEpa1H-QYoOAyxAFCc_xsPAXOK_PzTPeg/viewform): inscrição online.
+
+## Optional
+
+- [Política de Privacidade](https://risenglish.com.br/politica_privacidade): como os dados dos usuários são tratados (LGPD).
+- [Termos de Uso](https://risenglish.com.br/termos_de_uso): regras de uso da plataforma.

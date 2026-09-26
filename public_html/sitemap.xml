@@ -1,23 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://www.risenglish.com.br/index.php</loc>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
+    <loc>https://risenglish.com.br/</loc>
+    <lastmod>2026-09-25</lastmod>
   </url>
   <url>
-    <loc>https://www.risenglish.com.br/login.php</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
+    <loc>https://risenglish.com.br/politica_privacidade</loc>
+    <lastmod>2026-09-25</lastmod>
   </url>
   <url>
-    <loc>https://www.risenglish.com.br/politica_privacidade.php</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  <url>
-    <loc>https://www.risenglish.com.br/termos_de_uso.php</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://risenglish.com.br/termos_de_uso</loc>
+    <lastmod>2026-09-25</lastmod>
   </url>
 </urlset>
