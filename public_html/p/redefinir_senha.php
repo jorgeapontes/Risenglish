@@ -1,5 +1,5 @@
 <?php
-    include_once 'php/includes/conexao.php'; 
+    include_once 'includes/conexao.php';
 
     $token = $_GET['token'] ?? null;
     $aluno_id = 0;
@@ -41,8 +41,8 @@
                 // Encripta a nova senha (usando password_hash)
                 $senha_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
 
-                // Atualiza a senha e limpa o token e a expiração (para invalidar o link)
-                $stmt_update = $pdo->prepare("UPDATE usuarios SET senha = ?, reset_token = NULL, token_expira_em = NULL WHERE id = ?");
+                // Atualiza a senha, limpa o token e a expiração (para invalidar o link) e zera o bloqueio por tentativas
+                $stmt_update = $pdo->prepare("UPDATE usuarios SET senha = ?, reset_token = NULL, token_expira_em = NULL, tentativas_falhas = 0, bloqueado_ate = NULL WHERE id = ?");
                 $stmt_update->execute([$senha_hash, $aluno_id]);
 
                 $message = '<div class="alert alert-success">Sua senha foi redefinida com sucesso! Você pode <a href="login.php" style="font-weight: bold;">fazer login agora</a>.</div>';

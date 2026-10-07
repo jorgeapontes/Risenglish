@@ -30,8 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
                 $stmt_update->execute([$token, $expira_em, $usuario_id]);
                 
                 // 4. Montar Link de Redefinição
-                $host = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://{$_SERVER['HTTP_HOST']}";
-                $linkReset = "{$host}/php/redefinir_senha.php?token={$token}";
+                // Usa APP_URL do .env para não depender do header Host (que pode ser forjado)
+                $host = getenv('APP_URL') ?: ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://{$_SERVER['HTTP_HOST']}");
+                $host = rtrim($host, '/');
+                $linkReset = "{$host}/p/redefinir_senha?token={$token}";
 
                 // 5. Enviar E-mail (CORRIGIDO: usar enviarEmailReset)
                 if (enviarEmailReset($email, $usuario_nome, $linkReset)) {
@@ -42,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
 
             } else {
                 // Mensagem genérica por segurança
-                $message = '<div class="alert alert-warning">Um link de redefinição de senha foi enviado para o e-mail fornecido.</div>';
+                $message = '<div class="alert alert-success">Se o e-mail estiver cadastrado, um link de redefinição foi enviado. Verifique sua caixa de entrada e spam.</div>';
             }
         } catch (Exception $e) {
             error_log("Erro no processo de reset: " . $e->getMessage());
