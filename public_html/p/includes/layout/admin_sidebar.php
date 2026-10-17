@@ -24,6 +24,7 @@ $itensMenu = [
 $adminNome = htmlspecialchars($_SESSION['user_nome'] ?? 'Admin');
 $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
 ?>
+<?php require __DIR__ . '/sem_reenvio.php'; ?>
 <script>
     // Aplica o estado salvo da sidebar antes dela ser pintada, evitando flash do estado errado.
     (function () {

@@ -110,20 +110,20 @@ $ipBlockData = $stmtIpBlock->fetch(PDO::FETCH_ASSOC);
 
 $agora = new DateTime();
 
-if ($ipBlockData) {
-    if ($ipBlockData['tentativas'] >= $MAX_TENTATIVAS_IP && !empty($ipBlockData['bloqueado_ate'])) {
-        $bloqueio_ip = new DateTime($ipBlockData['bloqueado_ate']);
-        if ($agora < $bloqueio_ip) {
-            $ip_bloqueado = true;
-            $diff = $agora->diff($bloqueio_ip);
-            $minutos_restantes = $diff->i + ($diff->h * 60) + 1;
-            $erro = "Muitas tentativas deste endereço IP. Aguarde {$minutos_restantes} minutos.";
-        } else {
-            $sqlCleanIp = "DELETE FROM tentativas_ip WHERE ip = :ip";
-            $stmtCleanIp = $pdo->prepare($sqlCleanIp);
-            $stmtCleanIp->bindParam(':ip', $ip_usuario);
-            $stmtCleanIp->execute();
-        }
+// bloqueado_ate é renovado a cada falha: enquanto não passa, conta como janela de tentativas
+// (e, a partir do limite, como bloqueio). Quando passa, o contador do IP recomeça do zero.
+if ($ipBlockData && !empty($ipBlockData['bloqueado_ate'])) {
+    $bloqueio_ip = new DateTime($ipBlockData['bloqueado_ate']);
+    if ($agora >= $bloqueio_ip) {
+        $sqlCleanIp = "DELETE FROM tentativas_ip WHERE ip = :ip";
+        $stmtCleanIp = $pdo->prepare($sqlCleanIp);
+        $stmtCleanIp->bindParam(':ip', $ip_usuario);
+        $stmtCleanIp->execute();
+    } elseif ($ipBlockData['tentativas'] >= $MAX_TENTATIVAS_IP) {
+        $ip_bloqueado = true;
+        $diff = $agora->diff($bloqueio_ip);
+        $minutos_restantes = $diff->i + ($diff->h * 60) + 1;
+        $erro = "Muitas tentativas deste endereço IP. Aguarde {$minutos_restantes} minutos.";
     }
 }
 
@@ -190,10 +190,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
             $bloqueado = false;
 
             // JANELA DE ESQUECIMENTO (ZERAR ERROS POR TEMPO)
+            // Vale também para o fim de um bloqueio: sem zerar aqui, o contador continuaria
+            // no limite e a primeira senha errada após o bloqueio bloquearia a conta de novo.
             if ($usuario['tentativas_falhas'] > 0 && !empty($usuario['bloqueado_ate'])) {
                 $validade_erro = new DateTime($usuario['bloqueado_ate']);
 
-                if ($usuario['tentativas_falhas'] < $MAX_TENTATIVAS && $agora > $validade_erro) {
+                if ($agora >= $validade_erro) {
                     $sqlResetTempo = "UPDATE usuarios SET tentativas_falhas = 0, bloqueado_ate = NULL WHERE id = :id";
                     $stmtResetTempo = $pdo->prepare($sqlResetTempo);
                     $stmtResetTempo->bindParam(':id', $usuario['id']);
@@ -352,6 +354,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php require __DIR__ . '/includes/layout/sem_reenvio.php'; ?>
 </body>
 
 </html>

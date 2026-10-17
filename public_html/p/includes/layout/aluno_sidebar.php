@@ -24,8 +24,14 @@ $itensMenu = [
     'recomendacoes' => ['href' => 'recomendacoes',  'icon' => 'fas fa-lightbulb',       'label' => 'Recomendações'],
     'anotacoes'     => ['href' => 'anotacoes',      'icon' => 'fas fa-book-open',       'label' => 'Anotações'],
     'documentos'    => ['href' => 'documentos',     'icon' => 'fa-solid fa-box-archive', 'label' => 'Documentos'],
+    'perfil'        => ['href' => 'perfil',         'icon' => 'fas fa-user-circle',     'label' => 'Meu Perfil'],
 ];
+
+require_once __DIR__ . '/../avatar.php';
+$alunoFoto = avatar_foto_sessao($pdo ?? null);
 ?>
+<link rel="stylesheet" href="../../css/avatar.css">
+<?php require __DIR__ . '/sem_reenvio.php'; ?>
 <script>
     // Aplica o estado salvo da sidebar antes dela ser pintada, evitando flash do estado errado.
     (function () {
@@ -54,7 +60,7 @@ $itensMenu = [
 
 <div class="offcanvas offcanvas-top text-white mobile-offcanvas" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title fw-bold" id="sidebarOffcanvasLabel"><?php echo htmlspecialchars($alunoNome); ?></h5>
+        <h5 class="offcanvas-title fw-bold" id="sidebarOffcanvasLabel"><?php echo avatar_html($alunoNome, $alunoFoto, 36); ?><span><?php echo htmlspecialchars($alunoNome); ?></span></h5>
         <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column">
@@ -80,9 +86,10 @@ $itensMenu = [
         <i class="fas fa-bars"></i>
     </button>
 
-    <div class="mb-4 text-center">
-        <h5 class="mt-4 user-name"><?php echo htmlspecialchars($alunoNome); ?></h5>
-    </div>
+    <a href="perfil" class="sidebar-usuario mb-3" title="Meu Perfil" aria-label="Meu Perfil">
+        <?php echo avatar_html($alunoNome, $alunoFoto, 56); ?>
+        <h5 class="user-name"><?php echo htmlspecialchars($alunoNome); ?></h5>
+    </a>
 
     <div class="d-flex flex-column flex-grow-1 mb-5">
         <?php foreach ($itensMenu as $chave => $item): ?>

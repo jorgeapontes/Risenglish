@@ -1,0 +1,77 @@
+/* Avatares (foto de perfil ou iniciais) — usado nas sidebars e em qualquer lista com usuários */
+.avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #e9ecef;
+    vertical-align: middle;
+}
+
+.avatar-iniciais {
+    color: #fff;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.5px;
+    user-select: none;
+}
+
+/* Bloco do usuário no topo da sidebar */
+.sidebar .sidebar-usuario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 8px;
+    margin-top: 8px;
+}
+
+.sidebar .sidebar-usuario:hover {
+    transform: none;
+}
+
+.sidebar .sidebar-usuario .avatar {
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    transition: width 0.2s ease, height 0.2s ease;
+}
+
+.sidebar .sidebar-usuario .user-name {
+    margin: 0;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.mobile-offcanvas .offcanvas-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobile-offcanvas .offcanvas-title .avatar {
+    border: 2px solid rgba(255, 255, 255, 0.85);
+}
+
+/* Sidebar recolhida: só o avatar, menor.
+   A sidebar recolhida tem 68px com p-3, então sobram 36px úteis: o avatar precisa caber nisso. */
+html.aluno-sidebar-collapsed .sidebar .sidebar-usuario,
+html.professor-sidebar-collapsed .sidebar .sidebar-usuario {
+    padding: 6px 0;
+    overflow: visible;
+}
+
+html.aluno-sidebar-collapsed .sidebar .sidebar-usuario .avatar,
+html.professor-sidebar-collapsed .sidebar .sidebar-usuario .avatar {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 13px !important;
+    border-width: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar .sidebar-usuario .avatar {
+        transition: none;
+    }
+}

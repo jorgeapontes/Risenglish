@@ -18,11 +18,17 @@ $itensMenu = [
     'aulas'        => ['href' => 'gerenciar_aulas',      'icon' => 'fa-calendar-alt', 'label' => 'Aulas'],
     'conteudos'    => ['href' => 'gerenciar_conteudos',  'icon' => 'fa-book-open',    'label' => 'Conteúdos'],
     'alunos'       => ['href' => 'gerenciar_alunos',     'icon' => 'fa-users',        'label' => 'Alunos/Turmas'],
+    'perfil'       => ['href' => 'perfil',               'icon' => 'fa-user-circle',  'label' => 'Meu Perfil'],
 ];
 
-$professorNome = htmlspecialchars($_SESSION['user_nome'] ?? 'Professor');
+require_once __DIR__ . '/../avatar.php';
+$professorNomeBruto = $_SESSION['user_nome'] ?? 'Professor';
+$professorNome = htmlspecialchars($professorNomeBruto);
+$professorFoto = avatar_foto_sessao($pdo ?? null);
 $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
 ?>
+<link rel="stylesheet" href="../../css/avatar.css">
+<?php require __DIR__ . '/sem_reenvio.php'; ?>
 <script>
     // Aplica o estado salvo da sidebar antes dela ser pintada, evitando flash do estado errado.
     (function () {
@@ -43,7 +49,7 @@ $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
 
 <div class="offcanvas offcanvas-start text-white mobile-offcanvas" tabindex="-1" id="professorSidebarOffcanvas" aria-labelledby="professorSidebarOffcanvasLabel">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title fw-bold" id="professorSidebarOffcanvasLabel">Prof. <?php echo $professorNome; ?></h5>
+        <h5 class="offcanvas-title fw-bold" id="professorSidebarOffcanvasLabel"><?php echo avatar_html($professorNomeBruto, $professorFoto, 36); ?><span>Prof. <?php echo $professorNome; ?></span></h5>
         <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column">
@@ -69,9 +75,10 @@ $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
         <i class="fas fa-bars"></i>
     </button>
 
-    <div class="mb-4 text-center">
-        <h5 class="mt-4 user-name">Prof. <?php echo $professorNome; ?></h5>
-    </div>
+    <a href="perfil" class="sidebar-usuario mb-3" title="Meu Perfil" aria-label="Meu Perfil">
+        <?php echo avatar_html($professorNomeBruto, $professorFoto, 56); ?>
+        <h5 class="user-name">Prof. <?php echo $professorNome; ?></h5>
+    </a>
 
     <div class="d-flex flex-column flex-grow-1 mb-5">
         <?php foreach ($itensMenu as $chave => $item): ?>

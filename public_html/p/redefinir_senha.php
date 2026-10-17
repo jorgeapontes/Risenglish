@@ -93,5 +93,6 @@
         
         <p style="text-align: center; margin-top: 20px;"><a href="login.php" style="color: #007bff;">Voltar para o Login</a></p>
     </div>
+<?php require __DIR__ . '/includes/layout/sem_reenvio.php'; ?>
 </body>
 </html>

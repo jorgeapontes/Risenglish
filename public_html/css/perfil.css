@@ -1,0 +1,315 @@
+/* Página "Meu Perfil" (aluno e professor)
+   Layout de configurações: um painel único, seções separadas por linhas finas,
+   descrição à esquerda e campos à direita. */
+.perfil {
+    --perfil-azul: #081d40;
+    --perfil-vermelho: #c0392b;
+    --perfil-borda: #e3e5e8;
+    --perfil-texto-suave: #6b7280;
+    max-width: 920px;
+    margin: 0 auto;
+    color: #1f2937;
+}
+
+.perfil-cabecalho {
+    margin-bottom: 24px;
+}
+
+.perfil-cabecalho h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--perfil-azul);
+    margin: 0 0 4px;
+}
+
+.perfil-cabecalho p {
+    color: var(--perfil-texto-suave);
+    margin: 0;
+}
+
+.perfil-painel {
+    background: #fff;
+    border: 1px solid var(--perfil-borda);
+    border-radius: 10px;
+}
+
+.perfil-secao {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    gap: 32px;
+    padding: 28px 32px;
+}
+
+.perfil-secao + .perfil-secao {
+    border-top: 1px solid var(--perfil-borda);
+}
+
+.perfil-secao-info h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--perfil-azul);
+    margin: 0 0 6px;
+}
+
+.perfil-secao-info p {
+    font-size: 0.875rem;
+    color: var(--perfil-texto-suave);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ----- Foto ----- */
+.perfil-foto-linha {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.perfil-foto {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.perfil-foto .avatar {
+    width: 88px !important;
+    height: 88px !important;
+    box-shadow: 0 0 0 1px var(--perfil-borda);
+}
+
+.perfil-foto-enviando .avatar {
+    opacity: 0.5;
+}
+
+.perfil-foto-botoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.perfil-foto-botoes form {
+    margin: 0;
+}
+
+/* ----- Campos ----- */
+.perfil-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0 0 6px;
+}
+
+.perfil-label-linha {
+    max-width: 420px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.perfil-input {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    height: 40px;
+    padding: 0 12px;
+    margin-bottom: 18px;
+    font: inherit;
+    font-size: 0.95rem;
+    color: inherit;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.perfil-input:focus {
+    outline: none;
+    border-color: var(--perfil-azul);
+    box-shadow: 0 0 0 3px rgba(8, 29, 64, 0.12);
+}
+
+.perfil-input-bloqueado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+    background: #f3f4f6;
+    border-color: var(--perfil-borda);
+    color: var(--perfil-texto-suave);
+    cursor: not-allowed;
+}
+
+.perfil-input-bloqueado span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.perfil-input-bloqueado i {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.perfil-dica {
+    font-size: 0.8rem;
+    color: var(--perfil-texto-suave);
+    margin: 8px 0 0;
+}
+
+.perfil-link {
+    font-size: 0.8rem;
+    color: var(--perfil-azul);
+}
+
+/* ----- Senha ----- */
+.perfil-senha-resumo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    max-width: 420px;
+}
+
+.perfil-senha-pontos {
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    color: var(--perfil-texto-suave);
+}
+
+.perfil-senha-campo {
+    position: relative;
+    max-width: 420px;
+}
+
+.perfil-senha-campo .perfil-input {
+    padding-right: 44px;
+}
+
+.perfil-olho {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: var(--perfil-texto-suave);
+    cursor: pointer;
+}
+
+.perfil-olho:hover {
+    color: var(--perfil-azul);
+}
+
+/* ----- Botões ----- */
+.perfil-btn {
+    height: 36px;
+    padding: 0 14px;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.perfil-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.perfil-btn-primario {
+    background: var(--perfil-azul);
+    color: #fff;
+}
+
+.perfil-btn-primario:hover:not(:disabled) {
+    background: #0d2b5e;
+}
+
+.perfil-btn-secundario {
+    background: #fff;
+    border-color: #d1d5db;
+    color: #1f2937;
+}
+
+.perfil-btn-secundario:hover:not(:disabled) {
+    background: #f3f4f6;
+}
+
+.perfil-btn-perigo {
+    background: #fff;
+    border-color: #d1d5db;
+    color: var(--perfil-vermelho);
+}
+
+.perfil-btn-perigo:hover {
+    background: #fdf2f1;
+    border-color: var(--perfil-vermelho);
+}
+
+.perfil-btn-texto {
+    background: transparent;
+    color: var(--perfil-texto-suave);
+}
+
+.perfil-btn-texto:hover {
+    color: #1f2937;
+}
+
+.perfil-acoes {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    max-width: 420px;
+    margin-top: 6px;
+}
+
+.perfil-acoes .perfil-aviso {
+    margin: 0 auto 0 0;
+}
+
+/* ----- Avisos ----- */
+.perfil-aviso {
+    font-size: 0.85rem;
+    margin: 10px 0 0;
+}
+
+.perfil-aviso-ok {
+    color: #15803d;
+}
+
+.perfil-aviso-ok::before {
+    content: "✓ ";
+}
+
+.perfil-aviso-erro {
+    color: var(--perfil-vermelho);
+}
+
+/* ----- Responsivo ----- */
+@media (max-width: 991px) {
+    .perfil-secao {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 24px 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .perfil-foto-linha {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .perfil-input,
+    .perfil-label-linha,
+    .perfil-senha-campo,
+    .perfil-senha-resumo,
+    .perfil-acoes {
+        max-width: none;
+    }
+}

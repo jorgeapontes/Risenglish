@@ -128,5 +128,6 @@ unset($_SESSION['flash_reset']);
             setTimeout(fecharToast, 5000);
         }
     </script>
+<?php require __DIR__ . '/includes/layout/sem_reenvio.php'; ?>
 </body>
 </html>
