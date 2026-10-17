@@ -123,6 +123,8 @@ RewriteEngine On
 # =============================================
 # PROTEÇÃO CONTRA HOTLINK
 # =============================================
+# (no ambiente local — localhost/127.0.0.1 — as imagens não são bloqueadas)
+RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:\d+)?$ [NC]
 RewriteCond %{HTTP_REFERER} !^$
 RewriteCond %{HTTP_REFERER} !^https://(www\.)?risenglish\.com [NC]
 RewriteRule \.(jpg|jpeg|png|gif|webp)$ - [F,L]
@@ -137,6 +139,8 @@ RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 # =============================================
 # REDIRECIONAR HTTP PARA HTTPS
 # =============================================
+# (exceto no ambiente local, que roda em http://localhost/<pasta> sem certificado)
+RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:\d+)?$ [NC]
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 
