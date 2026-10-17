@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/avatar.php';
 
 // Garante que apenas admin acessa esta página
 if ($_SESSION['user_tipo'] !== 'admin') {
@@ -64,7 +65,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
 }
 
 // --- CONSULTAS ---
-$sql_turmas = "SELECT t.*, u.nome AS nome_professor
+$sql_turmas = "SELECT t.*, u.nome AS nome_professor, u.foto_perfil AS foto_professor
                FROM turmas t
                LEFT JOIN usuarios u ON t.professor_id = u.id
                ORDER BY t.nome_turma";
@@ -124,9 +125,11 @@ $professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
                             <td><?= htmlspecialchars($turma['id']) ?></td>
                             <td><?= htmlspecialchars($turma['nome_turma']) ?></td>
                             <td>
-                                <span class="badge bg-primary">
-                                    <?= htmlspecialchars($turma['nome_professor'] ?? 'Aguardando Associação') ?>
-                                </span>
+                                <?php if (!empty($turma['nome_professor'])): ?>
+                                    <?= avatar_com_nome($turma['nome_professor'], $turma['foto_professor'], 24) ?>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">Aguardando Associação</span>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <?php if (!empty($turma['link_aula'])): ?>

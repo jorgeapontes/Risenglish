@@ -242,3 +242,26 @@ mark.bg-warning {
 .page-header h1 {
     margin-bottom: 0;
 }
+
+/* Aviso de conta bloqueada por senhas erradas (só aparece quando bloqueada) */
+.usuario-bloqueado {
+    margin: 4px 0 0 40px;
+    font-size: 0.8rem;
+    color: #c0392b;
+    white-space: nowrap;
+}
+
+.usuario-bloqueado .btn-desbloquear {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: #081d40;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.usuario-bloqueado .btn-desbloquear:hover {
+    color: #c0392b;
+}

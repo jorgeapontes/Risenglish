@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/avatar.php';
 
 // Garante que apenas admin acessa esta página
 if ($_SESSION['user_tipo'] !== 'admin') {
@@ -26,6 +27,7 @@ $sql = "
     SELECT 
         u.id,
         u.nome, 
+        u.foto_perfil,
         u.email, 
         u.tipo_usuario, 
         MAX(l.data_acesso) AS ultimo_acesso,
@@ -39,7 +41,7 @@ $sql = "
     FROM usuarios u
     LEFT JOIN logs_acesso l ON u.id = l.usuario_id
     $where
-    GROUP BY u.id, u.nome, u.email, u.tipo_usuario
+    GROUP BY u.id, u.nome, u.foto_perfil, u.email, u.tipo_usuario
     ORDER BY MAX(l.data_acesso) $ordemSQL
 ";
 
@@ -161,7 +163,7 @@ $urlBase = '?busca=' . urlencode($busca) . '&tipo_filtro=' . urlencode($tipo_fil
                         <?php foreach ($relatorioAcessos as $usuario): ?>
                             <tr>
                                 <td class="align-middle">
-                                    <strong><?= htmlspecialchars($usuario['nome']) ?></strong>
+                                    <strong><?= avatar_com_nome($usuario['nome'], $usuario['foto_perfil'], 28) ?></strong>
                                 </td>
                                 <td class="align-middle"><?= htmlspecialchars($usuario['email']) ?></td>
                                 <td class="align-middle">

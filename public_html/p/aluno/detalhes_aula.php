@@ -2,6 +2,7 @@
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 require_once '../includes/email_config.php';
+require_once '../includes/avatar.php';
 
 // Garante que apenas aluno acessa esta página
 if ($_SESSION['user_tipo'] !== 'aluno') {
@@ -33,7 +34,8 @@ $sql_aula = "
         t.nome_turma,
         t.link_aula,
         u.nome AS nome_professor,
-        u.email AS email_professor
+        u.email AS email_professor,
+        u.foto_perfil AS foto_professor
     FROM 
         aulas a
     JOIN 
@@ -58,6 +60,10 @@ if (!$aula) {
     header("Location: minhas_aulas");
     exit;
 }
+
+// Avatares da conversa de anotações (professor da aula e o próprio aluno)
+$avatarProfessorItem = avatar_html($aula['nome_professor'], $aula['foto_professor'], 20, 'me-1');
+$avatarAlunoItem = avatar_html($_SESSION['user_nome'] ?? 'Aluno', avatar_foto_sessao($pdo), 20, 'me-1');
 
 // ========== SISTEMA DE ANOTAÇÕES COM VISTO ==========
 // Buscar anotação existente para esta aula
@@ -651,9 +657,9 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                                         </small>
                                                                         <small class="text-muted small ms-2">
                                                                             <?php if (isset($item['autor']) && $item['autor'] === 'professor'): ?>
-                                                                                <span class="badge bg-primary">Professor</span>
+                                                                                <?= $avatarProfessorItem ?><span class="badge bg-primary">Professor</span>
                                                                             <?php else: ?>
-                                                                                <span class="badge bg-success">Você</span>
+                                                                                <?= $avatarAlunoItem ?><span class="badge bg-success">Você</span>
                                                                             <?php endif; ?>
                                                                         </small>
                                                                     </div>
@@ -688,9 +694,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                             <div class="comentario-professor mt-3">
                                                 <div class="professor-header">
                                                     <div class="professor-info">
-                                                        <div class="professor-avatar">
-                                                            <?= strtoupper(substr($aula['nome_professor'], 0, 1)) ?>
-                                                        </div>
+                                                        <?= avatar_html($aula['nome_professor'], $aula['foto_professor'], 40, 'me-2') ?>
                                                         <div>
                                                             <strong><?= htmlspecialchars($aula['nome_professor']) ?></strong>
                                                             <small class="text-muted d-block">Professor</small>
@@ -818,7 +822,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                 </div>
                                 <div class="mb-3">
                                     <strong><i class="fas fa-user me-2 text-primary"></i>Professor:</strong>
-                                    <p class="mb-0"><?= htmlspecialchars($aula['nome_professor']) ?></p>
+                                    <p class="mb-0"><?= avatar_com_nome($aula['nome_professor'], $aula['foto_professor'], 24) ?></p>
                                     <small class="text-muted"><?= htmlspecialchars($aula['email_professor']) ?></small>
                                 </div>
                                 <div class="mb-3">
@@ -877,6 +881,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>var AVATAR_ALUNO_ITEM = <?= json_encode($avatarAlunoItem, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script>
     <script>
         // Inicializar todos os collapses como fechados por padrão
         document.addEventListener('DOMContentLoaded', function() {
@@ -984,7 +989,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                 var div = document.createElement('div');
                                 div.className = 'minha-anotacao-item mb-2';
                                 div.setAttribute('data-item-id', data.item.id);
-                                div.innerHTML = '<div class="d-flex justify-content-between align-items-start"><small class="text-success small d-block">' + (data.item.data_criacao ? data.item.data_criacao : '') + '</small><small class="text-muted small ms-2"><span class="badge bg-success">Você</span></small></div>' +
+                                div.innerHTML = '<div class="d-flex justify-content-between align-items-start"><small class="text-success small d-block">' + (data.item.data_criacao ? data.item.data_criacao : '') + '</small><small class="text-muted small ms-2">' + AVATAR_ALUNO_ITEM + '<span class="badge bg-success">Você</span></small></div>' +
                                         '<p class="mb-0 item-conteudo">' + (data.item.conteudo.replace(/\n/g, '<br>')) + '</p>' +
                                         '<div class="mt-1"><button type="button" class="btn btn-sm btn-outline-secondary btn-edit-item" data-item-id="' + data.item.id + '">Editar</button> <button type="button" class="btn btn-sm btn-outline-danger btn-delete-item" data-item-id="' + data.item.id + '">Apagar</button></div>';
                                 lista.appendChild(div);

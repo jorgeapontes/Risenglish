@@ -340,11 +340,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
 
       <div class="mb-3 text-start">
         <label for="email" class="form-label">E-MAIL</label>
-        <input type="email" class="form-control" id="email" name="email" placeholder="Digite seu e-mail" required>
+        <input type="email" class="form-control" id="email" name="email" placeholder="Digite seu e-mail" autocomplete="username" value="<?= htmlspecialchars($email ?? '') ?>" required>
       </div>
       <div class="mb-3 text-start">
         <label for="senha" class="form-label">SENHA</label>
-        <input type="password" class="form-control" id="senha" name="senha" placeholder="Digite sua senha" required>
+        <input type="password" class="form-control" id="senha" name="senha" placeholder="Digite sua senha" autocomplete="current-password" required data-senha>
       </div>
 
       <button type="submit" class="btn btn-login">ENTRAR</button>
@@ -354,6 +354,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<?php require __DIR__ . '/includes/layout/campo_senha.php'; ?>
 <?php require __DIR__ . '/includes/layout/sem_reenvio.php'; ?>
 </body>
 

@@ -1,11 +1,42 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/avatar.php';
 
 // Garante que apenas admin acessa esta página
 if ($_SESSION['user_tipo'] !== 'admin') {
     header("Location: ../login?erro=acesso_negado");
     exit;
+}
+
+// Mesmo limite de tentativas usado em login.php ($MAX_TENTATIVAS)
+const LOGIN_MAX_TENTATIVAS = 5;
+
+/** Retorna até quando a conta está bloqueada por senha errada, ou null se não estiver. */
+function usuario_bloqueado_ate(array $usuario): ?DateTime
+{
+    if ((int) ($usuario['tentativas_falhas'] ?? 0) < LOGIN_MAX_TENTATIVAS || empty($usuario['bloqueado_ate'])) {
+        return null;
+    }
+    // login.php grava bloqueado_ate no horário de São Paulo
+    $fuso = new DateTimeZone('America/Sao_Paulo');
+    $ate = new DateTime($usuario['bloqueado_ate'], $fuso);
+    return $ate > new DateTime('now', $fuso) ? $ate : null;
+}
+
+/** Célula de nome: avatar + nome e, só se a conta estiver bloqueada, o aviso com "Desbloquear". */
+function celula_nome_usuario(array $usuario, string $nomeHtml): string
+{
+    $html = avatar_com_nome($usuario['nome'], $usuario['foto_perfil'] ?? null, 32, $nomeHtml);
+    $ate = usuario_bloqueado_ate($usuario);
+    if ($ate) {
+        $html .= '<div class="usuario-bloqueado">'
+            . '<i class="fas fa-lock" aria-hidden="true"></i> Bloqueado até ' . $ate->format('H:i') . ' · '
+            . '<button type="button" class="btn-desbloquear" data-id="' . (int) $usuario['id'] . '"'
+            . ' data-nome="' . htmlspecialchars($usuario['nome']) . '">Desbloquear</button>'
+            . '</div>';
+    }
+    return $html;
 }
 
 // --- AJAX PARA BUSCAR ANEXOS DO USUÁRIO ---
@@ -158,6 +189,19 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
     }
 }
 
+// --- LÓGICA PARA DESBLOQUEAR USUÁRIO (bloqueio por tentativas de login) ---
+elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST['acao'] == 'desbloquear_usuario') {
+    try {
+        $stmt = $pdo->prepare("UPDATE usuarios SET tentativas_falhas = 0, bloqueado_ate = NULL WHERE id = ?");
+        $stmt->execute([(int) $_POST['id_usuario_desbloquear']]);
+        $mensagem = "Usuário desbloqueado. Ele já pode tentar entrar novamente.";
+        $tipo_mensagem = 'success';
+    } catch (Exception $e) {
+        $mensagem = "Erro ao desbloquear usuário: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+        $tipo_mensagem = 'danger';
+    }
+}
+
 // --- LÓGICA PARA UPLOAD MÚLTIPLO DE ANEXOS ---
 elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST['acao'] == 'upload_anexo') {
     $usuario_id = $_POST['usuario_id_anexo'];
@@ -252,7 +296,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $termo_like = "%" . $termo_pesquisa . "%";
     
     // CONSULTA PROFESSORES
-    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes, status, responsavel_financeiro_id 
+    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes, status, responsavel_financeiro_id, foto_perfil, tentativas_falhas, bloqueado_ate 
                         FROM usuarios 
                         WHERE tipo_usuario = 'professor' 
                         AND (nome LIKE :termo OR email LIKE :termo OR informacoes LIKE :termo)
@@ -263,7 +307,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $professores = $stmt_professores->fetchAll(PDO::FETCH_ASSOC);
     
     // CONSULTA ALUNOS
-    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, u.responsavel_financeiro_id,
+    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, u.responsavel_financeiro_id, u.foto_perfil, u.tentativas_falhas, u.bloqueado_ate,
                           GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
                    FROM usuarios u
                    LEFT JOIN alunos_turmas at ON u.id = at.aluno_id
@@ -278,10 +322,10 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $alunos = $stmt_alunos->fetchAll(PDO::FETCH_ASSOC);
 } else {
     // CONSULTAS SEM PESQUISA
-    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes, status, responsavel_financeiro_id FROM usuarios WHERE tipo_usuario = 'professor' ORDER BY nome";
+    $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes, status, responsavel_financeiro_id, foto_perfil, tentativas_falhas, bloqueado_ate FROM usuarios WHERE tipo_usuario = 'professor' ORDER BY nome";
     $professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
 
-    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, u.responsavel_financeiro_id, GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
+    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, u.responsavel_financeiro_id, u.foto_perfil, u.tentativas_falhas, u.bloqueado_ate, GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
                    FROM usuarios u
                    LEFT JOIN alunos_turmas at ON u.id = at.aluno_id
                    LEFT JOIN turmas t ON at.turma_id = t.id
@@ -401,7 +445,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                                     }
                                 ?>
                                 <tr>
-                                    <td><?= $nome_professor ?></td>
+                                    <td><?= celula_nome_usuario($professor, $nome_professor) ?></td>
                                     <td><?= $email_professor ?></td>
                                     <td>
                                         <div class="informacoes-text">
@@ -486,7 +530,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                                     }
                                 ?>
                                 <tr>
-                                    <td><?= $nome_aluno ?></td>
+                                    <td><?= celula_nome_usuario($aluno, $nome_aluno) ?></td>
                                     <td><?= $email_aluno ?></td>
                                     <td>
                                         <div class="informacoes-text">
@@ -642,6 +686,11 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     <input type="hidden" name="id_usuario_toggle" id="id_usuario_toggle">
 </form>
 
+<form id="formDesbloquear" method="POST" action="gerenciar_usuarios">
+    <input type="hidden" name="acao" value="desbloquear_usuario">
+    <input type="hidden" name="id_usuario_desbloquear" id="id_usuario_desbloquear">
+</form>
+
 <form id="formExcluirAnexo" method="POST" action="gerenciar_usuarios">
     <input type="hidden" name="acao" value="excluir_anexo">
     <input type="hidden" name="anexo_id_excluir" id="anexo_id_excluir">
@@ -764,6 +813,15 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         }
     }
     
+    document.querySelectorAll('.btn-desbloquear').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            if (confirm(`Desbloquear "${btn.dataset.nome}"? O contador de senhas erradas será zerado.`)) {
+                document.getElementById('id_usuario_desbloquear').value = btn.dataset.id;
+                document.getElementById('formDesbloquear').submit();
+            }
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.querySelector('input[name="pesquisa"]');
         if (searchInput && searchInput.value) {

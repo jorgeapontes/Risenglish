@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/avatar.php';
 
 // Garante que apenas professor acessa esta página
 if ($_SESSION['user_tipo'] !== 'professor') {
@@ -178,7 +179,7 @@ if (!$turma_detalhes) {
 // --- CONSULTA PARA INFORMAÇÕES DOS ALUNOS DA TURMA ---
 $sql_alunos = "
     SELECT 
-        u.id, u.nome, u.email, u.informacoes
+        u.id, u.nome, u.email, u.informacoes, u.foto_perfil
     FROM 
         usuarios u
     JOIN 
@@ -253,6 +254,7 @@ $sql_presenca_stats_mes = "
     SELECT 
         u.id AS aluno_id,
         u.nome AS aluno_nome,
+        u.foto_perfil AS aluno_foto,
         COUNT(DISTINCT a.id) AS total_aulas_mes,
         COUNT(DISTINCT CASE WHEN COALESCE(pa.presente, 1) = 1 THEN a.id END) AS total_presencas_mes,
         COUNT(DISTINCT CASE WHEN pa.presente = 0 THEN a.id END) AS total_faltas_mes,
@@ -270,7 +272,7 @@ $sql_presenca_stats_mes = "
         at.turma_id = :turma_id
         AND u.tipo_usuario = 'aluno'
     GROUP BY 
-        u.id, u.nome
+        u.id, u.nome, u.foto_perfil
     ORDER BY 
         u.nome ASC
 ";
@@ -421,7 +423,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
                                             <?php foreach ($alunos as $aluno): ?>
                                             <div class="aluno-info">
                                                 <div class="aluno-nome">
-                                                    <i class="fas fa-user me-1"></i><?= htmlspecialchars($aluno['nome']) ?>
+                                                    <?= avatar_com_nome($aluno['nome'], $aluno['foto_perfil'], 24) ?>
                                                 </div>
                                                 <div class="aluno-informacoes">
                                                     <?php if (!empty($aluno['informacoes'])): ?>
@@ -555,7 +557,7 @@ function renderTimePicker($id_prefix, $currentTime = '09:00') {
                             ?>
                                 <div class="presenca-row">
                                     <div class="presenca-nome">
-                                        <strong><?= htmlspecialchars($aluno_nome) ?></strong>
+                                        <strong><?= avatar_com_nome($aluno_nome, $stats['aluno_foto'] ?? null, 28) ?></strong>
                                     </div>
                                     <div class="presenca-stats">
                                         <div class="d-flex align-items-center justify-content-center gap-2">

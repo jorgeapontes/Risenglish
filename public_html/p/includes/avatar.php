@@ -76,6 +76,17 @@ function avatar_html(string $nome, ?string $foto, int $tamanho = 40, string $cla
 }
 
 /**
+ * Avatar pequeno seguido do nome, para listas e tabelas.
+ * $nomeHtml permite passar o nome já escapado/formatado (ex: com destaque de pesquisa);
+ * se omitido, o nome é escapado aqui.
+ */
+function avatar_com_nome(string $nome, ?string $foto, int $tamanho = 28, ?string $nomeHtml = null, string $prefixo = '../../'): string
+{
+    return '<span class="avatar-nome">' . avatar_html($nome, $foto, $tamanho, '', $prefixo)
+        . '<span>' . ($nomeHtml ?? htmlspecialchars($nome)) . '</span></span>';
+}
+
+/**
  * Foto do usuário logado, guardada na sessão para não consultar o banco a cada página.
  * Sessões abertas antes desta funcionalidade carregam o valor na primeira chamada.
  */
@@ -146,7 +157,6 @@ function avatar_corrigir_orientacao($imagem, string $caminho)
     if (isset($angulos[$orientacao])) {
         $rotacionada = imagerotate($imagem, $angulos[$orientacao], 0);
         if ($rotacionada !== false) {
-            imagedestroy($imagem);
             return $rotacionada;
         }
     }
@@ -200,7 +210,6 @@ function avatar_processar_upload(array $arquivo, int $usuarioId): array
     }
 
     if (!avatar_preparar_dir()) {
-        imagedestroy($origem);
         return ['ok' => false, 'erro' => 'Erro ao salvar a foto. Tente novamente mais tarde.'];
     }
 
@@ -219,14 +228,11 @@ function avatar_processar_upload(array $arquivo, int $usuarioId): array
         imagefill($destino, 0, 0, imagecolorallocatealpha($destino, 0, 0, 0, 127));
         imagecopyresampled($destino, $origem, 0, 0, $x, $y, $tamanho, $tamanho, $lado, $lado);
         $salvo = imagewebp($destino, avatar_dir() . '/avatar_' . $base . '_' . $tamanho . '.webp', 80);
-        imagedestroy($destino);
         if (!$salvo) {
-            imagedestroy($origem);
             avatar_apagar($base);
             return ['ok' => false, 'erro' => 'Erro ao salvar a foto. Tente novamente mais tarde.'];
         }
     }
-    imagedestroy($origem);
 
     return ['ok' => true, 'foto' => $base];
 }

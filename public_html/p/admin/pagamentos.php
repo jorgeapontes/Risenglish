@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/avatar.php';
 
 // Garante que apenas admin acessa esta página
 if ($_SESSION['user_tipo'] !== 'admin') {
@@ -120,6 +121,7 @@ try {
         SELECT DISTINCT
             pagador.id,
             pagador.nome,
+            pagador.foto_perfil,
             pagador.email,
             pagador.dia_vencimento,
             pagador.status,
@@ -385,7 +387,7 @@ $total_ativos = $total_registros - $count_inativos;
                         <tr class="<?= $aluno['status'] === 'desativado' ? 'table-secondary' : '' ?>">
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <strong><?= htmlspecialchars($aluno['nome']) ?></strong>
+                                    <strong><?= avatar_com_nome($aluno['nome'], $aluno['foto_perfil'], 28) ?></strong>
                                     <?php if ($aluno['status'] === 'desativado'): ?>
                                         <span class="badge-status inativo">Inativo</span>
                                     <?php else: ?>

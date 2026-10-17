@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/avatar.php';
 
 // Garante que apenas admin acessa esta página
 if ($_SESSION['user_tipo'] !== 'admin') {
@@ -66,10 +67,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST['aca
 }
 
 // --- CONSULTAS ---
-$sql_todos_alunos = "SELECT id, nome FROM usuarios WHERE tipo_usuario = 'aluno' ORDER BY nome";
+$sql_todos_alunos = "SELECT id, nome, foto_perfil FROM usuarios WHERE tipo_usuario = 'aluno' ORDER BY nome";
 $todos_alunos = $pdo->query($sql_todos_alunos)->fetchAll(PDO::FETCH_ASSOC);
 
-$sql_alunos_associados = "SELECT u.id, u.nome
+$sql_alunos_associados = "SELECT u.id, u.nome, u.foto_perfil
                           FROM usuarios u
                           JOIN alunos_turmas at ON u.id = at.aluno_id
                           WHERE at.turma_id = :turma_id
@@ -130,7 +131,7 @@ $alunos_associados = $stmt_alunos_associados->fetchAll(PDO::FETCH_ASSOC);
                     <?php else: ?>
                         <?php foreach ($alunos_associados as $aluno): ?>
                         <tr>
-                            <td><?= htmlspecialchars($aluno['nome']) ?></td>
+                            <td><?= avatar_com_nome($aluno['nome'], $aluno['foto_perfil'], 28) ?></td>
                             <td><span class="badge bg-success">Matriculado</span></td>
                         </tr>
                         <?php endforeach; ?>
@@ -166,7 +167,7 @@ $alunos_associados = $stmt_alunos_associados->fetchAll(PDO::FETCH_ASSOC);
                                 <input class="form-check-input aluno-checkbox" type="checkbox" name="alunos_selecionados[]" value="<?= $aluno['id'] ?>" id="aluno_<?= $aluno['id'] ?>"
                                     <?php if (in_array($aluno['id'], $ids_associados)): ?> checked <?php endif; ?>>
                                 <label class="form-check-label" for="aluno_<?= $aluno['id'] ?>">
-                                    <?= htmlspecialchars($aluno['nome']) ?>
+                                    <?= avatar_com_nome($aluno['nome'], $aluno['foto_perfil'], 24) ?>
                                 </label>
                             </div>
                             <?php endforeach; ?>

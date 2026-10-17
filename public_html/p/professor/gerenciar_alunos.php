@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/avatar.php';
 
 // Garante que apenas professor acessa esta página
 if ($_SESSION['user_tipo'] !== 'professor') {
@@ -57,7 +58,8 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
             SELECT 
                 u.id AS aluno_id, 
                 u.nome AS nome_aluno,
-                u.email AS email_aluno
+                u.email AS email_aluno,
+                u.foto_perfil AS foto_aluno
             FROM 
                 alunos_turmas at
             JOIN 
@@ -108,7 +110,8 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
             SELECT 
                 u.id AS aluno_id, 
                 u.nome AS nome_aluno,
-                u.email AS email_aluno
+                u.email AS email_aluno,
+                u.foto_perfil AS foto_aluno
             FROM 
                 alunos_turmas at
             JOIN 
@@ -266,8 +269,7 @@ $turmas_com_alunos = $resultados_filtrados;
                                                     ?>
                                                         <li class="aluno-item d-flex justify-content-between align-items-center">
                                                             <div>
-                                                                <i class="fas fa-user-circle me-2" style="color: #081d40;"></i> 
-                                                                <strong><?= $nome_aluno ?></strong>
+                                                                <strong><?= avatar_com_nome($aluno['nome_aluno'], $aluno['foto_aluno'], 28, $nome_aluno) ?></strong>
                                                             </div>
                                                             <small class="text-muted"><?= $email_aluno ?></small>
                                                         </li>

@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/avatar.php';
 
 // Garante que apenas aluno acessa esta página
 if ($_SESSION['user_tipo'] !== 'aluno') {
@@ -23,7 +24,8 @@ $sql = "
         a.descricao,
         t.id AS turma_id,
         t.nome_turma,
-        u.nome AS nome_professor
+        u.nome AS nome_professor,
+        u.foto_perfil AS foto_professor
     FROM 
         aulas a
     JOIN 
@@ -233,7 +235,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                             </small>
                                             <br>
                                             <small class="text-muted">
-                                                <i class="fas fa-user me-1"></i>Prof. <?= htmlspecialchars($aula['nome_professor']) ?>
+                                                <?= avatar_html($aula['nome_professor'], $aula['foto_professor'], 18, 'me-1') ?>Prof. <?= htmlspecialchars($aula['nome_professor']) ?>
                                             </small>
                                         </div>
                                     </div>
@@ -322,7 +324,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                 </small>
                                                 <br>
                                                 <small class="text-muted">
-                                                    <i class="fas fa-user me-1"></i>Prof. <?= htmlspecialchars($aula['nome_professor']) ?>
+                                                    <?= avatar_html($aula['nome_professor'], $aula['foto_professor'], 18, 'me-1') ?>Prof. <?= htmlspecialchars($aula['nome_professor']) ?>
                                                 </small>
                                             </div>
                                         </div>

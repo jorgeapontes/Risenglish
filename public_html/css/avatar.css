@@ -18,6 +18,19 @@
     user-select: none;
 }
 
+/* Avatar + nome em listas e tabelas */
+.avatar-nome {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    vertical-align: middle;
+}
+
+.avatar-nome > span:last-child {
+    min-width: 0;
+}
+
 /* Bloco do usuário no topo da sidebar */
 .sidebar .sidebar-usuario {
     display: flex;
@@ -57,13 +70,15 @@
 /* Sidebar recolhida: só o avatar, menor.
    A sidebar recolhida tem 68px com p-3, então sobram 36px úteis: o avatar precisa caber nisso. */
 html.aluno-sidebar-collapsed .sidebar .sidebar-usuario,
-html.professor-sidebar-collapsed .sidebar .sidebar-usuario {
+html.professor-sidebar-collapsed .sidebar .sidebar-usuario,
+html.admin-sidebar-collapsed .sidebar .sidebar-usuario {
     padding: 6px 0;
     overflow: visible;
 }
 
 html.aluno-sidebar-collapsed .sidebar .sidebar-usuario .avatar,
-html.professor-sidebar-collapsed .sidebar .sidebar-usuario .avatar {
+html.professor-sidebar-collapsed .sidebar .sidebar-usuario .avatar,
+html.admin-sidebar-collapsed .sidebar .sidebar-usuario .avatar {
     width: 32px !important;
     height: 32px !important;
     font-size: 13px !important;

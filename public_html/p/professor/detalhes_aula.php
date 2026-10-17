@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/avatar.php';
 
 // ADICIONE ESTAS LINHAS AQUI:
 date_default_timezone_set('America/Sao_Paulo'); // Força o PHP para horário de Brasília
@@ -30,7 +31,8 @@ if (!$aula_id || !is_numeric($aula_id)) {
 $sql_detalhes = "SELECT
     a.id AS aula_id, a.titulo_aula, a.data_aula, a.horario, a.descricao AS desc_aula,
     t.id AS turma_id, t.nome_turma, t.link_aula,
-    p.nome AS nome_professor
+    p.nome AS nome_professor,
+    p.foto_perfil AS foto_professor
     FROM aulas a
     JOIN turmas t ON a.turma_id = t.id
     JOIN usuarios p ON a.professor_id = p.id
@@ -49,6 +51,9 @@ if(!$detalhes_aula) {
     header("Location: gerenciar_aulas");
     exit;
 }
+
+// Avatar do professor da aula nos comentários da conversa de anotações
+$avatarProfessorItem = avatar_html($detalhes_aula['nome_professor'], $detalhes_aula['foto_professor'], 20, 'me-1');
 
 // ========== SISTEMA DE ANOTAÇÕES COMPARTILHADAS COM VISTO ==========
 // Verificar se a tabela de anotações existe
@@ -149,7 +154,8 @@ if (!$historico_exists) {
 $sql_alunos_turma = "SELECT 
     u.id AS aluno_id, 
     u.nome AS aluno_nome,
-    u.email AS aluno_email
+    u.email AS aluno_email,
+    u.foto_perfil AS aluno_foto
 FROM usuarios u
 INNER JOIN alunos_turmas at ON u.id = at.aluno_id
 WHERE at.turma_id = :turma_id
@@ -517,6 +523,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                         $sql_alunos = "SELECT 
                             u.id AS aluno_id, 
                             u.nome AS aluno_nome,
+                            u.foto_perfil AS aluno_foto,
                             COALESCE(p.presente, 1) AS presente
                         FROM usuarios u
                         INNER JOIN alunos_turmas at ON u.id = at.aluno_id
@@ -571,7 +578,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                         </div>
                                         
                                         <div class="col-8">
-                                            <strong><?= htmlspecialchars($aluno['aluno_nome']) ?></strong>
+                                            <strong><?= avatar_com_nome($aluno['aluno_nome'], $aluno['aluno_foto'], 28) ?></strong>
                                         </div>
                                         
                                         <div class="col-3 text-center">
@@ -672,9 +679,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                     <div class="anotacao-card" data-anotacao-id="<?= $anotacao['id'] ?>">
                                         <div class="anotacao-header" onclick="toggleAnotacao(<?= $index ?>)">
                                             <div class="aluno-info">
-                                                <div class="aluno-avatar">
-                                                    <?= strtoupper(substr($anotacao['aluno_nome'], 0, 1)) ?>
-                                                </div>
+                                                <?= avatar_html($anotacao['aluno_nome'], $anotacao['aluno_foto'], 32) ?>
                                                 <div>
                                                     <strong class="d-block"><?= htmlspecialchars($anotacao['aluno_nome']) ?></strong>
                                                     <small class="text-muted"><?= htmlspecialchars($anotacao['aluno_email']) ?></small>
@@ -703,7 +708,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                     <?php if ($item['autor'] === 'aluno'): ?>
                                                         <div class="anotacao-conteudo-aluno mb-2" data-item-id="<?= $item['id'] ?>">
                                                             <small class="text-success fw-bold d-block mb-1">
-                                                                <i class="fas fa-sticky-note me-1"></i>Anotação do aluno
+                                                                <?= avatar_html($anotacao['aluno_nome'], $anotacao['aluno_foto'], 20, 'me-1') ?>Anotação do aluno
                                                                 <span class="text-muted small"> - <?= isset($item['data_criacao']) ? formatarData($item['data_criacao']) : '' ?></span>
                                                             </small>
                                                             <p class="mb-0 item-conteudo"><?= nl2br(htmlspecialchars($item['conteudo'])) ?></p>
@@ -711,7 +716,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                     <?php else: ?>
                                                         <div class="comentario-professor-area mb-2" data-item-id="<?= $item['id'] ?>">
                                                             <small class="text-primary fw-bold d-block mb-1">
-                                                                <i class="fas fa-comment-dots me-1"></i>Comentário do professor
+                                                                <?= $avatarProfessorItem ?>Comentário do professor
                                                                 <span class="text-muted small"> - <?= isset($item['data_criacao']) ? formatarData($item['data_criacao']) : '' ?></span>
                                                             </small>
                                                             <p class="mb-0 item-conteudo"><?= nl2br(htmlspecialchars($item['conteudo'])) ?></p>
@@ -1220,6 +1225,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>var AVATAR_PROFESSOR_ITEM = <?= json_encode($avatarProfessorItem, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script>
     <script>
     // Estado dos grupos (expandido/recolhido)
     let gruposExpandidos = JSON.parse(localStorage.getItem('gruposExpandidosDetalhes')) || {};
@@ -1539,7 +1545,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                         var div = document.createElement('div');
                         div.className = 'comentario-professor-area mb-2';
                         div.setAttribute('data-item-id', d.item.id);
-                        div.innerHTML = '<small class="text-primary fw-bold d-block mb-1"><i class="fas fa-comment-dots me-1"></i>Comentário do professor <span class="text-muted small"> - ' + (d.item.data_criacao ? d.item.data_criacao : '') + '</span></small>' +
+                        div.innerHTML = '<small class="text-primary fw-bold d-block mb-1">' + AVATAR_PROFESSOR_ITEM + 'Comentário do professor <span class="text-muted small"> - ' + (d.item.data_criacao ? d.item.data_criacao : '') + '</span></small>' +
                                         '<p class="mb-0 item-conteudo">' + d.item.conteudo.replace(/\n/g, '<br>') + '</p>' +
                                         '<div class="mt-1"><button type="button" class="btn btn-sm btn-outline-secondary btn-edit-item" data-item-id="' + d.item.id + '">Editar</button> <button type="button" class="btn btn-sm btn-outline-danger btn-delete-item" data-item-id="' + d.item.id + '">Apagar</button></div>';
                         lista.appendChild(div);

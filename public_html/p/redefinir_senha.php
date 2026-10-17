@@ -79,12 +79,12 @@
                 
                 <div class="form-group">
                     <label for="nova_senha">Nova Senha</label>
-                    <input type="password" id="nova_senha" name="nova_senha" class="form-control" required>
+                    <input type="password" id="nova_senha" name="nova_senha" class="form-control" autocomplete="new-password" required data-senha>
                 </div>
 
                 <div class="form-group">
                     <label for="confirma_senha">Confirme a Nova Senha</label>
-                    <input type="password" id="confirma_senha" name="confirma_senha" class="form-control" required>
+                    <input type="password" id="confirma_senha" name="confirma_senha" class="form-control" autocomplete="new-password" required data-senha>
                 </div>
 
                 <button type="submit" class="btn-primary">Salvar Nova Senha</button>
@@ -93,6 +93,7 @@
         
         <p style="text-align: center; margin-top: 20px;"><a href="login.php" style="color: #007bff;">Voltar para o Login</a></p>
     </div>
+<?php require __DIR__ . '/includes/layout/campo_senha.php'; ?>
 <?php require __DIR__ . '/includes/layout/sem_reenvio.php'; ?>
 </body>
 </html>

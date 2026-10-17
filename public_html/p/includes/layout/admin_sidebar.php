@@ -21,9 +21,12 @@ $itensMenu = [
     'acessos'       => ['href' => 'acessos',                'icon' => 'fa-chart-line',       'label' => 'Relatório de Acessos'],
 ];
 
-$adminNome = htmlspecialchars($_SESSION['user_nome'] ?? 'Admin');
+require_once __DIR__ . '/../avatar.php';
+$adminNomeBruto = $_SESSION['user_nome'] ?? 'Admin';
+$adminNome = htmlspecialchars($adminNomeBruto);
 $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
 ?>
+<link rel="stylesheet" href="../../css/avatar.css">
 <?php require __DIR__ . '/sem_reenvio.php'; ?>
 <script>
     // Aplica o estado salvo da sidebar antes dela ser pintada, evitando flash do estado errado.
@@ -45,7 +48,7 @@ $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
 
 <div class="offcanvas offcanvas-start text-white mobile-offcanvas" tabindex="-1" id="adminSidebarOffcanvas" aria-labelledby="adminSidebarOffcanvasLabel">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title fw-bold" id="adminSidebarOffcanvasLabel"><?php echo $adminNome; ?></h5>
+        <h5 class="offcanvas-title fw-bold" id="adminSidebarOffcanvasLabel"><?php echo avatar_html($adminNomeBruto, null, 36); ?><span><?php echo $adminNome; ?></span></h5>
         <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column">
@@ -67,8 +70,9 @@ $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
         <i class="fas fa-bars"></i>
     </button>
 
-    <div class="mb-4 text-center">
-        <h5 class="mt-4 user-name"><?php echo $adminNome; ?></h5>
+    <div class="sidebar-usuario mb-3">
+        <?php echo avatar_html($adminNomeBruto, null, 56); ?>
+        <h5 class="user-name"><?php echo $adminNome; ?></h5>
     </div>
 
     <div class="d-flex flex-column flex-grow-1 mb-5">
