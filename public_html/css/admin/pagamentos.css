@@ -97,9 +97,6 @@
             border-radius: 20px;
         }
 
-        .badge-pago { background-color: #28a745; color: white; }
-        .badge-pendente { background-color: #ffc107; color: #000; }
-        .badge-atrasado { background-color: #dc3545; color: white; }
 
         .alert {
             border: none;
@@ -158,57 +155,6 @@
             gap: 15px;
         }
 
-        .btn-registrar {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-registrar:hover {
-            background: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-            color: white;
-        }
-
-        .btn-vencimento {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-        }
-
-        .btn-vencimento:hover {
-            background: #0056b3;
-            color: white;
-        }
-
-        .btn-remover {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-        }
-
-        .btn-remover:hover {
-            background: #c82333;
-            color: white;
-        }
-
-        .vencimento-badge {
-            font-size: 0.85rem;
-            padding: 4px 8px;
-            background: #0056b3;
-        }
 
         @media (max-width: 768px) {
             .main-content {
@@ -229,50 +175,154 @@
             }
         }
 
-/* Movido do <style> inline de pagamentos.php */
-.badge-status {
+/* ===== Tabela de pagamentos =====
+   Cor só para o que pede ação (atrasado); o resto fica neutro. */
+.pagador-nome {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.texto-inativo {
     font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    margin-left: 0.5rem;
+    color: #6c757d;
 }
-.badge-status.ativo {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+
+.linha-inativa > td {
+    color: #6c757d;
+    background-color: #f8f9fa;
 }
-.badge-status.inativo {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
+
+/* Dependentes financeiros: destacados com ícone e etiquetas, sem depender de cor */
 .dependente-info {
-    font-size: 0.85em;
-    margin-top: 5px;
-    padding: 3px 8px;
-    border-radius: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: #343a40;
 }
-.dependente-info.ativos {
-    background-color: #e8f5e9;
-    color: #2e7d32;
+
+.dependente-info > .fa-users {
+    color: var(--cor-primaria);
 }
-.dependente-info.inativos {
-    background-color: #ffebee;
-    color: #c62828;
-    margin-top: 2px;
+
+.dependente-rotulo {
+    font-weight: 600;
 }
-.btn-reativar {
-    background-color: #28a745;
-    color: white;
+
+.dependente-chip {
+    padding: 2px 8px;
+    border: 1px solid #adb5bd;
+    border-radius: 999px;
+    background: #fff;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.dependente-chip.inativo {
+    border-style: dashed;
+    color: #6c757d;
+    font-weight: 400;
+}
+
+/* Dia de vencimento: texto que abre a edição ao clicar */
+.vencimento-link {
+    padding: 0;
     border: none;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    border-radius: 4px;
+    background: none;
+    font: inherit;
+    color: inherit;
     cursor: pointer;
-    margin-left: 0.5rem;
+    text-decoration: underline dotted #adb5bd;
+    text-underline-offset: 3px;
 }
-.btn-reativar:hover {
-    background-color: #218838;
+
+.vencimento-link:hover,
+.vencimento-link:focus-visible {
+    color: var(--cor-primaria);
+    text-decoration: underline solid;
+}
+
+.vencimento-link.vazio {
+    color: #6c757d;
+}
+
+/* Status: texto com bolinha discreta; só "Atrasado" ganha destaque */
+.status-pagamento {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: #495057;
+}
+
+.status-pagamento::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #adb5bd;
+}
+
+.status-pago::before {
+    background-color: #6fbf8a;
+}
+
+.status-atrasado {
+    color: #c0392b;
+    font-weight: 600;
+}
+
+.status-atrasado::before {
+    background-color: #c0392b;
+}
+
+.observacao-resumo {
+    max-width: 200px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Ações: só ícones, sempre lado a lado */
+.acoes-pagamento {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+}
+
+.btn-acao-icone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    padding: 0;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background: #fff;
+    color: #495057;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-acao-icone:hover,
+.btn-acao-icone:focus-visible {
+    border-color: var(--cor-primaria);
+    color: var(--cor-primaria);
+    background: #f1f3f5;
+}
+
+.btn-acao-icone.perigo:hover,
+.btn-acao-icone.perigo:focus-visible {
+    border-color: #c0392b;
+    color: #c0392b;
+    background: #fdf2f1;
 }
 .info-badge {
     background-color: #e7f3ff;
@@ -281,4 +331,24 @@
     border-radius: 8px;
     margin-bottom: 1rem;
     border-left: 4px solid #007bff;
+}
+
+/* Botões de formulário (filtrar e salvar nos modais): azul primário */
+.btn-registrar,
+.btn-vencimento {
+    background: var(--cor-primaria);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: background-color 0.15s ease;
+}
+
+.btn-registrar:hover,
+.btn-vencimento:hover,
+.btn-registrar:focus-visible,
+.btn-vencimento:focus-visible {
+    background: #142a4d;
+    color: #fff;
 }

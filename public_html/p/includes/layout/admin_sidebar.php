@@ -21,9 +21,16 @@ $itensMenu = [
     'acessos'       => ['href' => 'acessos',                'icon' => 'fa-chart-line',       'label' => 'Relatório de Acessos'],
 ];
 
-require_once __DIR__ . '/../avatar.php';
-$adminNomeBruto = $_SESSION['user_nome'] ?? 'Admin';
-$adminNome = htmlspecialchars($adminNomeBruto);
+$adminNome = htmlspecialchars($_SESSION['user_nome'] ?? 'Admin');
+
+// O admin não tem foto de perfil: o avatar é o logo da escola (versão pequena em WebP do LogoRisenglish.png)
+if (!function_exists('admin_avatar_logo')) {
+    function admin_avatar_logo(int $tamanho): string
+    {
+        return '<img src="../../logo-avatar.webp" alt="Risenglish" class="avatar" width="' . $tamanho . '" height="' . $tamanho . '"'
+            . ' style="width:' . $tamanho . 'px;height:' . $tamanho . 'px;">';
+    }
+}
 $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
 ?>
 <link rel="stylesheet" href="../../css/avatar.css">
@@ -48,7 +55,7 @@ $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
 
 <div class="offcanvas offcanvas-start text-white mobile-offcanvas" tabindex="-1" id="adminSidebarOffcanvas" aria-labelledby="adminSidebarOffcanvasLabel">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title fw-bold" id="adminSidebarOffcanvasLabel"><?php echo avatar_html($adminNomeBruto, null, 36); ?><span><?php echo $adminNome; ?></span></h5>
+        <h5 class="offcanvas-title fw-bold" id="adminSidebarOffcanvasLabel"><?php echo admin_avatar_logo(36); ?><span><?php echo $adminNome; ?></span></h5>
         <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column">
@@ -71,7 +78,7 @@ $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
     </button>
 
     <div class="sidebar-usuario mb-3">
-        <?php echo avatar_html($adminNomeBruto, null, 56); ?>
+        <?php echo admin_avatar_logo(56); ?>
         <h5 class="user-name"><?php echo $adminNome; ?></h5>
     </div>
 

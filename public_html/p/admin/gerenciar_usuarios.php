@@ -307,7 +307,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $professores = $stmt_professores->fetchAll(PDO::FETCH_ASSOC);
     
     // CONSULTA ALUNOS
-    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, u.responsavel_financeiro_id, u.foto_perfil, u.tentativas_falhas, u.bloqueado_ate,
+    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, u.responsavel_financeiro_id, u.foto_perfil, u.tentativas_falhas, u.bloqueado_ate, u.nao_pagante,
                           GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
                    FROM usuarios u
                    LEFT JOIN alunos_turmas at ON u.id = at.aluno_id
@@ -325,7 +325,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
     $sql_professores = "SELECT id, nome, email, tipo_usuario, informacoes, status, responsavel_financeiro_id, foto_perfil, tentativas_falhas, bloqueado_ate FROM usuarios WHERE tipo_usuario = 'professor' ORDER BY nome";
     $professores = $pdo->query($sql_professores)->fetchAll(PDO::FETCH_ASSOC);
 
-    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, u.responsavel_financeiro_id, u.foto_perfil, u.tentativas_falhas, u.bloqueado_ate, GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
+    $sql_alunos = "SELECT u.id, u.nome, u.email, u.tipo_usuario, u.informacoes, u.status, u.responsavel_financeiro_id, u.foto_perfil, u.tentativas_falhas, u.bloqueado_ate, u.nao_pagante, GROUP_CONCAT(t.nome_turma SEPARATOR ', ') AS turmas_associadas
                    FROM usuarios u
                    LEFT JOIN alunos_turmas at ON u.id = at.aluno_id
                    LEFT JOIN turmas t ON at.turma_id = t.id
@@ -460,7 +460,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                                         </button>
 
                                         <button class="btn btn-sm btn-outline-primary me-1" 
-                                                onclick="openEditUsuarioModal(<?= $professor['id'] ?>, '<?= htmlspecialchars($professor['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($professor['informacoes'] ?? '', ENT_QUOTES) ?>', '<?= $professor['responsavel_financeiro_id'] ?? '' ?>')"
+                                                onclick="openEditUsuarioModal(<?= htmlspecialchars(substr(json_encode([(int) $professor['id'], $professor['nome'], $professor['email'], $professor['tipo_usuario'], $professor['informacoes'] ?? '', (string) ($professor['responsavel_financeiro_id'] ?? '')]), 1, -1), ENT_QUOTES) ?>)"
                                                 title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </button>
@@ -548,7 +548,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
                                         </button>
 
                                         <button class="btn btn-sm btn-outline-primary me-1" 
-                                                onclick="openEditUsuarioModal(<?= $aluno['id'] ?>, '<?= htmlspecialchars($aluno['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['email'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['tipo_usuario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($aluno['informacoes'] ?? '', ENT_QUOTES) ?>', '<?= $aluno['responsavel_financeiro_id'] ?? '' ?>')"
+                                                onclick="openEditUsuarioModal(<?= htmlspecialchars(substr(json_encode([(int) $aluno['id'], $aluno['nome'], $aluno['email'], $aluno['tipo_usuario'], $aluno['informacoes'] ?? '', !empty($aluno['nao_pagante']) ? 'nao_pagante' : (string) ($aluno['responsavel_financeiro_id'] ?? '')]), 1, -1), ENT_QUOTES) ?>)"
                                                 title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </button>
