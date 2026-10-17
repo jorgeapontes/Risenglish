@@ -54,7 +54,7 @@ function avatar_iniciais(string $nome): string
 }
 
 /**
- * HTML do avatar: a foto, ou um círculo com as iniciais numa cor fixa derivada do nome.
+ * HTML do avatar: a foto, ou um círculo cinza claro com as iniciais (cores em css/avatar.css).
  * $tamanho é o tamanho exibido em px.
  */
 function avatar_html(string $nome, ?string $foto, int $tamanho = 40, string $classes = '', string $prefixo = '../../'): string
@@ -69,8 +69,7 @@ function avatar_html(string $nome, ?string $foto, int $tamanho = 40, string $cla
             . ' style="' . $estilo . '" loading="lazy" decoding="async">';
     }
 
-    $matiz = crc32(mb_strtolower(trim($nome))) % 360;
-    $estilo .= 'background-color:hsl(' . $matiz . ',45%,42%);font-size:' . round($tamanho * 0.4) . 'px;';
+    $estilo .= 'font-size:' . round($tamanho * 0.4) . 'px;';
     return '<span class="' . htmlspecialchars($classes . ' avatar-iniciais') . '" style="' . $estilo . '"'
         . ' role="img" aria-label="' . htmlspecialchars($nome) . '">' . htmlspecialchars(avatar_iniciais($nome)) . '</span>';
 }

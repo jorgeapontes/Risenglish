@@ -164,12 +164,6 @@ h1, h2, h3, h4, h6 {
     color: #adb5bd;
 }
 
-/* Nesta tela as iniciais ficam em cinza (fotos de verdade continuam aparecendo) */
-.tabela-acessos .avatar-iniciais {
-    background-color: #e9ecef !important;
-    color: #495057;
-}
-
 .page-header {
     display: flex;
     justify-content: space-between;
