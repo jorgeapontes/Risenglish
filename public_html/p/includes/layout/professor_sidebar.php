@@ -29,6 +29,7 @@ $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
 ?>
 <link rel="stylesheet" href="../../css/avatar.css">
 <?php require __DIR__ . '/sem_reenvio.php'; ?>
+<?php require __DIR__ . '/tema.php'; ?>
 <script>
     // Aplica o estado salvo da sidebar antes dela ser pintada, evitando flash do estado errado.
     (function () {
@@ -65,6 +66,7 @@ $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
             <?php endforeach; ?>
         </div>
         <div class="mt-auto">
+            <?php echo tema_botao('mb-2'); ?>
             <a href="../logout" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
         </div>
     </div>
@@ -95,6 +97,7 @@ $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
     </div>
 
     <div class="mt-auto">
+        <?php echo tema_botao('mb-2'); ?>
         <a href="../logout" id="botao-sair" class="btn btn-outline-danger w-100" aria-label="Sair" title="Sair">
             <i class="fas fa-sign-out-alt me-2"></i><span class="nav-label">Sair</span>
         </a>

@@ -7,7 +7,7 @@ body { background-color: #FAF9F6; overflow-x: hidden; }
 .btn-success:hover { background-color: #218838; border-color: #218838; }
 .btn-primary { background-color: #007bff; border-color: #007bff; }
 .btn-primary:hover { background-color: #0069d9; border-color: #0062cc; }
-.table th { background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; }
+.table th { background-color: var(--tabela-cabecalho-fundo, #f8f9fa); border-bottom: 2px solid var(--tabela-cabecalho-borda, #dee2e6); }
 .btn-info-detalhes { background-color: #099410ff; border-color: #099410ff; color: white; }
 .btn-info-detalhes:hover { background-color: #087e0eff; border-color: #087e0eff; color: white; }
 .btn-group-agendar .btn { margin-right: 10px; }

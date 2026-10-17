@@ -30,8 +30,8 @@ body {
     border-radius: 0 0 5px 5px;
 }
 .table th {
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
+    background-color: var(--tabela-cabecalho-fundo, #f8f9fa);
+    border-bottom: 2px solid var(--tabela-cabecalho-borda, #dee2e6);
 }
 .btn-group-sm > .btn, .btn-sm {
     padding: .25rem .5rem;

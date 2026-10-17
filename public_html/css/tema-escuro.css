@@ -1,0 +1,579 @@
+/* =====================================================================
+   Modo escuro da área logada (ativado por p/includes/layout/tema.php)
+   ---------------------------------------------------------------------
+   O Bootstrap 5.3 cuida dos próprios componentes via data-bs-theme="dark".
+   Aqui ficam: a paleta, o botão de alternar e os ajustes das classes do site
+   que têm cores fixas nos CSS de cada página.
+   A sidebar continua azul-marinho nos dois temas.
+   ===================================================================== */
+
+/* ----- Botão de alternar tema (sidebar e menu do celular) ----- */
+.btn-tema {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 5px;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s ease;
+}
+
+.btn-tema:hover,
+.btn-tema:focus-visible {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.btn-tema .nav-label {
+    font-size: 0.95rem;
+}
+
+.btn-tema svg {
+    flex-shrink: 0;
+}
+
+/* No claro mostra a lua (ativar escuro); no escuro mostra o sol (ativar claro) */
+.btn-tema .tema-icone-sol,
+html[data-tema="escuro"] .btn-tema .tema-icone-lua {
+    display: none;
+}
+
+html[data-tema="escuro"] .btn-tema .tema-icone-sol {
+    display: inline;
+}
+
+html.aluno-sidebar-collapsed .sidebar .btn-tema,
+html.professor-sidebar-collapsed .sidebar .btn-tema,
+html.admin-sidebar-collapsed .sidebar .btn-tema {
+    justify-content: center;
+    padding: 10px 0;
+}
+
+/* ----- Paleta do modo escuro ----- */
+html[data-tema="escuro"] {
+    color-scheme: dark;
+    --tema-fundo: #111722;
+    --tema-superficie: #1a2130;
+    --tema-superficie-2: #222b3c;
+    --tema-borda: #2e384b;
+    --tema-texto: #e4e8ef;
+    --tema-texto-suave: #9aa5b8;
+    --tema-titulo: #dce5f5;
+    --tema-destaque: #8fb4ff;
+    --tema-hover: #2c3649;
+
+    --bs-body-bg: var(--tema-fundo);
+    --bs-body-color: var(--tema-texto);
+    --bs-emphasis-color: #fff;
+    --bs-secondary-color: var(--tema-texto-suave);
+    --bs-secondary-bg: var(--tema-superficie-2);
+    --bs-tertiary-bg: var(--tema-superficie);
+    --bs-border-color: var(--tema-borda);
+    --bs-heading-color: var(--tema-titulo);
+    --bs-link-color: var(--tema-destaque);
+    --bs-link-hover-color: #b5ceff;
+    --bs-link-color-rgb: 143, 180, 255;
+    --bs-link-hover-color-rgb: 181, 206, 255;
+}
+
+html[data-tema="escuro"] body,
+html[data-tema="escuro"] .main-content {
+    background-color: var(--tema-fundo) !important;
+    color: var(--tema-texto);
+}
+
+/* Títulos que usam o azul-marinho da escola como cor de texto */
+html[data-tema="escuro"] h1,
+html[data-tema="escuro"] h2,
+html[data-tema="escuro"] h3,
+html[data-tema="escuro"] h4,
+html[data-tema="escuro"] h5,
+html[data-tema="escuro"] h6 {
+    color: var(--tema-titulo);
+}
+
+/* A sidebar e o cabeçalho mobile mantêm o texto branco sobre o azul */
+html[data-tema="escuro"] .sidebar h5,
+html[data-tema="escuro"] .mobile-offcanvas h5,
+html[data-tema="escuro"] .mobile-navbar-custom h5 {
+    color: #fff;
+}
+
+html[data-tema="escuro"] .text-muted {
+    color: var(--tema-texto-suave) !important;
+}
+
+html[data-tema="escuro"] .bg-light,
+html[data-tema="escuro"] .bg-white {
+    background-color: var(--tema-superficie) !important;
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] .text-dark {
+    color: var(--tema-texto) !important;
+}
+
+/* =====================================================================
+   Ajustes por tela (classes próprias com cores fixas)
+   ===================================================================== */
+
+/* ----- Texto azul-marinho (cor da escola) usado direto em títulos, links e botões ----- */
+html[data-tema="escuro"] .main-content :is(h1, h2, h3, h4, h5, h6),
+html[data-tema="escuro"] .main-content [style*="#081d40"],
+html[data-tema="escuro"] .main-content [style*="cor-primaria"],
+html[data-tema="escuro"] #back-link,
+html[data-tema="escuro"] .grupo-data,
+html[data-tema="escuro"] .perfil-titulo {
+    color: var(--tema-titulo) !important;
+}
+
+/* Exceção: títulos dentro de faixas azul-marinho continuam brancos */
+html[data-tema="escuro"] .card-header :is(h1, h2, h3, h4, h5, h6),
+html[data-tema="escuro"] .modal-header :is(h1, h2, h3, h4, h5, h6) {
+    color: #fff !important;
+}
+
+html[data-tema="escuro"] .btn-outline-secondary,
+html[data-tema="escuro"] .btn-outline-primary,
+html[data-tema="escuro"] .btn-custom-outline-dark {
+    color: var(--tema-texto) !important;
+    border-color: var(--tema-borda) !important;
+    background-color: transparent;
+}
+
+html[data-tema="escuro"] .btn-outline-secondary:hover,
+html[data-tema="escuro"] .btn-outline-primary:hover,
+html[data-tema="escuro"] .btn-custom-outline-dark:hover {
+    background-color: var(--tema-superficie-2) !important;
+}
+
+html[data-tema="escuro"] .nav-tabs .nav-link:not(.active) {
+    color: var(--tema-texto-suave) !important;
+}
+
+/* Links "Voltar" em vermelho escuro (cor escrita direto no HTML), apagados no fundo escuro */
+html[data-tema="escuro"] a[style*="cor-secundaria"] {
+    color: #ff8a7a !important;
+}
+
+/* Texto azul-marinho em rótulos, valores e nomes */
+html[data-tema="escuro"] :is(
+    .form-label, .stat-card .value, .aluno-nome, .aluno-nome .avatar-nome > span
+) {
+    color: var(--tema-titulo) !important;
+}
+
+/* Texto quase preto (#333, #1a1a2e) */
+html[data-tema="escuro"] :is(.numero-dia, .notificacao-titulo, .lead-nome) {
+    color: var(--tema-texto) !important;
+}
+
+/* Texto secundário em cinza médio (#6c757d/#495057), apagado no fundo escuro */
+html[data-tema="escuro"] :is(
+    .contador-caracteres, .data-visto, .data-atualizacao, .sem-informacoes, .aluno-informacoes,
+    .notificacao-mensagem, .summary-card small, .lead-contato, .lead-contato span, .lead-observacoes,
+    .stat-card .count, .stat-card h6, .texto-inativo
+) {
+    color: var(--tema-texto-suave) !important;
+}
+
+html[data-tema="escuro"] .text-success {
+    color: #4cc38a !important;
+}
+
+html[data-tema="escuro"] .data-visto-info {
+    color: var(--tema-texto-suave) !important;
+}
+
+html[data-tema="escuro"] .main-content .btn-outline-danger {
+    color: #ff8a7a !important;
+    border-color: rgba(255, 138, 122, 0.5) !important;
+}
+
+html[data-tema="escuro"] .main-content .btn-outline-danger:hover {
+    background-color: rgba(255, 138, 122, 0.12) !important;
+}
+
+/* ----- Superfícies (cards e painéis com fundo branco fixo) ----- */
+html[data-tema="escuro"] :is(
+    .notificacao-card.nao-lida, .doc-container, .perfil-painel, .calendar-card,
+    .search-container, .anotacao-card, .grupo-item, .summary-card, .chart-card,
+    .kanban-header, .lead-card, .stat-card, .caderno-container, .celula-dia
+) {
+    background-color: var(--tema-superficie) !important;
+    border-color: var(--tema-borda) !important;
+    color: var(--tema-texto);
+}
+
+/* Superfícies secundárias (cinza claro fixo) */
+html[data-tema="escuro"] :is(
+    .notificacao-card.lida, .anotacao-header, .anotacao-conteudo-aluno, .visto-container,
+    .grupo-header, .informacoes-alunos, .presenca-header, .presenca-row, .chart-card-header,
+    .kanban-column, .filter-section, .filtros-acessos, .accordion-header-custom .accordion-button,
+    .celula-dia.outros-meses, .perfil-input-bloqueado
+) {
+    background-color: var(--tema-superficie-2) !important;
+    border-color: var(--tema-borda) !important;
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] .calendario.card {
+    background-color: var(--tema-borda) !important;
+    border-color: var(--tema-borda) !important;
+}
+
+html[data-tema="escuro"] .notificacao-data,
+html[data-tema="escuro"] .data-criacao {
+    color: var(--tema-texto-suave) !important;
+}
+
+/* ----- Tabelas e botões claros do Bootstrap que não mudam sozinhos ----- */
+html[data-tema="escuro"] .table-light,
+html[data-tema="escuro"] .table thead.bg-light th {
+    --bs-table-bg: var(--tema-superficie-2);
+    --bs-table-color: var(--tema-texto);
+    --bs-table-border-color: var(--tema-borda);
+    background-color: var(--tema-superficie-2) !important;
+    color: var(--tema-texto) !important;
+}
+
+html[data-tema="escuro"] .btn-light {
+    --bs-btn-bg: var(--tema-superficie-2);
+    --bs-btn-color: var(--tema-texto);
+    --bs-btn-border-color: var(--tema-borda);
+    --bs-btn-hover-bg: var(--tema-borda);
+    --bs-btn-hover-color: #fff;
+}
+
+/* ----- Calendários (FullCalendar) ----- */
+html[data-tema="escuro"] .fc {
+    --fc-page-bg-color: var(--tema-superficie);
+    --fc-neutral-bg-color: var(--tema-superficie-2);
+    --fc-border-color: var(--tema-borda);
+    --fc-today-bg-color: rgba(143, 180, 255, 0.12);
+    background-color: var(--tema-superficie) !important;
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] .fc .fc-button {
+    background-color: var(--tema-superficie-2) !important;
+    border-color: var(--tema-borda) !important;
+    color: var(--tema-texto) !important;
+}
+
+html[data-tema="escuro"] .fc .fc-button.fc-button-active,
+html[data-tema="escuro"] .fc .fc-button:active {
+    background-color: #081d40 !important;
+    color: #fff !important;
+}
+
+html[data-tema="escuro"] .fc th,
+html[data-tema="escuro"] .fc .fc-timegrid-axis,
+html[data-tema="escuro"] .fc .fc-scrollgrid-section-header > * {
+    background-color: var(--tema-superficie-2) !important;
+    color: var(--tema-texto) !important;
+}
+
+html[data-tema="escuro"] .fc .fc-col-header-cell-cushion,
+html[data-tema="escuro"] .fc .fc-daygrid-day-number,
+html[data-tema="escuro"] .fc .fc-timegrid-slot-label-cushion {
+    color: var(--tema-texto) !important;
+}
+
+/* ----- Professor: detalhes da aula ----- */
+html[data-tema="escuro"] .presenca-item.presente {
+    background-color: rgba(25, 135, 84, 0.16) !important;
+}
+
+html[data-tema="escuro"] .presenca-item.ausente {
+    background-color: rgba(220, 53, 69, 0.16) !important;
+}
+
+html[data-tema="escuro"] .comentario-professor-area {
+    background-color: rgba(143, 180, 255, 0.12) !important;
+    border-color: rgba(143, 180, 255, 0.3) !important;
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] .visto-badge.visto-false {
+    background-color: var(--tema-superficie-2) !important;
+    color: var(--tema-texto) !important;
+}
+
+/* ----- Aluno: detalhes da aula (conversa de anotações) ----- */
+html[data-tema="escuro"] :is(.anotacao-aluno) {
+    background-color: var(--tema-superficie) !important;
+    border-color: var(--tema-borda) !important;
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] :is(.minhas-anotacoes, .visto-status, .minha-anotacao-item) {
+    background-color: var(--tema-superficie-2) !important;
+    border-color: var(--tema-borda) !important;
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] .minha-anotacao-item.anotacao-de-professor {
+    background-color: rgba(143, 180, 255, 0.12) !important;
+    border-color: rgba(143, 180, 255, 0.3) !important;
+}
+
+html[data-tema="escuro"] .anotacoes-textarea {
+    background-color: var(--tema-fundo) !important;
+    border-color: var(--tema-borda) !important;
+    color: var(--tema-texto) !important;
+}
+
+/* ----- Professor: tabelas de aulas e de arquivos do tema (cabeçalho via variável) ----- */
+html[data-tema="escuro"] {
+    --tabela-cabecalho-fundo: var(--tema-superficie-2);
+    --tabela-cabecalho-borda: var(--tema-borda);
+}
+
+/* ----- Detalhes da turma: barras de frequência ----- */
+html[data-tema="escuro"] .progress-bar-custom {
+    background-color: var(--tema-borda) !important;
+}
+
+/* ----- Leads ----- */
+html[data-tema="escuro"] .lead-badge {
+    background-color: rgba(143, 180, 255, 0.15) !important;
+    color: var(--tema-destaque) !important;
+}
+
+/* ----- Perfil ----- */
+html[data-tema="escuro"] .perfil {
+    --perfil-borda: var(--tema-borda);
+    --perfil-texto-suave: var(--tema-texto-suave);
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] .perfil-input {
+    background-color: var(--tema-superficie-2);
+    border-color: var(--tema-borda);
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] .perfil-input:focus {
+    border-color: var(--tema-destaque);
+    box-shadow: 0 0 0 3px rgba(143, 180, 255, 0.2);
+}
+
+html[data-tema="escuro"] .perfil-btn-secundario,
+html[data-tema="escuro"] .perfil-btn-perigo {
+    background-color: var(--tema-superficie-2);
+    border-color: var(--tema-borda);
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] .perfil-btn-perigo {
+    color: #ff8a7a;
+}
+
+html[data-tema="escuro"] .perfil-btn-secundario:hover:not(:disabled) {
+    background-color: var(--tema-borda);
+}
+
+html[data-tema="escuro"] .perfil-btn-primario {
+    background-color: #2f5bb7;
+}
+
+html[data-tema="escuro"] .perfil-btn-primario:hover:not(:disabled) {
+    background-color: #3a6ad0;
+}
+
+html[data-tema="escuro"] .perfil-link {
+    color: var(--tema-destaque);
+}
+
+/* ----- Pagamentos ----- */
+html[data-tema="escuro"] .linha-inativa > td {
+    background-color: var(--tema-superficie-2) !important;
+    color: var(--tema-texto-suave) !important;
+}
+
+html[data-tema="escuro"] .btn-acao-icone,
+html[data-tema="escuro"] .dependente-chip {
+    background-color: var(--tema-superficie-2);
+    border-color: var(--tema-borda);
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] .btn-acao-icone:hover,
+html[data-tema="escuro"] .btn-acao-icone:focus-visible {
+    background-color: var(--tema-borda);
+    border-color: var(--tema-destaque);
+    color: #fff;
+}
+
+html[data-tema="escuro"] .dependente-info,
+html[data-tema="escuro"] .status-pagamento {
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] .dependente-info > .fa-users {
+    color: var(--tema-destaque);
+}
+
+html[data-tema="escuro"] .status-atrasado {
+    color: #ff8a7a;
+}
+
+html[data-tema="escuro"] .status-atrasado::before {
+    background-color: #ff8a7a;
+}
+
+html[data-tema="escuro"] .vencimento-link:hover,
+html[data-tema="escuro"] .vencimento-link:focus-visible {
+    color: var(--tema-destaque);
+}
+
+/* =====================================================================
+   Partes que só aparecem com o mouse ou ao clicar (hovers, menus, painéis)
+   ===================================================================== */
+
+/* ----- Hovers que clareavam o fundo (o texto claro sumia) ----- */
+html[data-tema="escuro"] :is(
+    .notificacao-item, .toggle-pasta, .doc-item, .toggle-section, .mes-toggle, .tema-header,
+    .presenca-item, .grupo-header, .presenca-row, .accordion-button, .aluno-item, .recurso-item,
+    .subpasta-file-item, .list-group-item, .lead-menu-btn, .celula-dia, .visto-badge.visto-false
+):hover,
+html[data-tema="escuro"] .lead-dropdown li a:hover,
+html[data-tema="escuro"] .tabela-acessos tbody tr:hover > td,
+html[data-tema="escuro"] .main-content .table tbody tr:hover > td,
+html[data-tema="escuro"] .fc .fc-button:hover {
+    background-color: var(--tema-hover) !important;
+    color: var(--tema-texto) !important;
+}
+
+/* Hovers de ações destrutivas: vermelho translúcido */
+html[data-tema="escuro"] :is(.perfil-btn-perigo, .btn-acao-icone.perigo, .lead-dropdown li a.text-danger):hover,
+html[data-tema="escuro"] .btn-acao-icone.perigo:focus-visible {
+    background-color: rgba(255, 138, 122, 0.14) !important;
+    border-color: rgba(255, 138, 122, 0.5) !important;
+    color: #ff8a7a !important;
+}
+
+/* Painel do sino: notificações não lidas tinham fundo rosado quase branco */
+html[data-tema="escuro"] .notificacoes-dropdown .notificacao-item {
+    background-color: var(--tema-superficie) !important;
+    border-color: var(--tema-borda) !important;
+}
+
+html[data-tema="escuro"] .notificacoes-dropdown .notificacao-item.nao-lida {
+    background-color: rgba(255, 138, 122, 0.08) !important;
+}
+
+html[data-tema="escuro"] .notificacoes-dropdown .notificacao-item:hover,
+html[data-tema="escuro"] .notificacao-item.nao-lida:hover {
+    background-color: var(--tema-hover) !important;
+}
+
+html[data-tema="escuro"] .notificacoes-footer a {
+    color: #ff8a7a !important;
+}
+
+html[data-tema="escuro"] .perfil-btn-texto:hover,
+html[data-tema="escuro"] .btn-limpar-busca:hover {
+    color: #fff;
+}
+
+/* ----- Painéis e menus que só aparecem ao clicar ----- */
+html[data-tema="escuro"] :is(
+    .notificacoes-dropdown, .lead-dropdown, .form-container, .grupo-conteudo, .nao-planejado,
+    .calendario-container, .calendario-dia
+) {
+    background-color: var(--tema-superficie) !important;
+    border-color: var(--tema-borda) !important;
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] :is(
+    .notificacoes-header, .notificacoes-footer, .info-card, .anotacoes-container, .anotacoes-footer,
+    .subpasta-item, .calendario-dia.outro-mes, .stats-summary, .search-results-info, .preview-datas,
+    .card-header-grupo, #lista_alunos_checkbox, .aluno-badge
+) {
+    background-color: var(--tema-superficie-2) !important;
+    border-color: var(--tema-borda) !important;
+    color: var(--tema-texto);
+}
+
+html[data-tema="escuro"] .calendario-grid {
+    background-color: var(--tema-borda) !important;
+}
+
+html[data-tema="escuro"] .calendario-dia.hoje {
+    background-color: var(--tema-hover) !important;
+}
+
+html[data-tema="escuro"] .calendario-dia.muitas-aulas::after {
+    background: linear-gradient(transparent, var(--tema-superficie)) !important;
+}
+
+html[data-tema="escuro"] .lead-dropdown li.divider {
+    background-color: var(--tema-borda) !important;
+}
+
+/* Textos escuros dentro desses painéis e menus */
+html[data-tema="escuro"] :is(
+    .lead-dropdown li a, .anotacao-conteudo, .btn-marcar-visto, .lead-menu-btn:hover
+) {
+    color: var(--tema-texto) !important;
+}
+
+html[data-tema="escuro"] :is(
+    .anotacao-titulo, .notificacoes-header h6, .recurso-icon, .dia-numero, .card-header-grupo,
+    .aluno-badge, .accordion-button i.fa-graduation-cap, .fa-folder, .fa-folder-open,
+    .fc .fc-toolbar-title, .fc .fc-daygrid-more-link, .calendar-header h2,
+    .usuario-bloqueado .btn-desbloquear
+) {
+    color: var(--tema-titulo) !important;
+}
+
+/* ----- Fundos coloridos claros: versão translúcida ----- */
+html[data-tema="escuro"] .planejado {
+    background-color: rgba(25, 135, 84, 0.16) !important;
+}
+
+html[data-tema="escuro"] :is(.comentario-professor, .info-badge) {
+    background-color: rgba(143, 180, 255, 0.12) !important;
+    border-color: rgba(143, 180, 255, 0.3) !important;
+    color: var(--tema-texto) !important;
+}
+
+html[data-tema="escuro"] .file-icon-wrapper {
+    background-color: rgba(255, 138, 122, 0.14) !important;
+}
+
+/* Alertas de sucesso/erro com gradiente claro (telas do admin) */
+html[data-tema="escuro"] .main-content .alert-success {
+    background: rgba(25, 135, 84, 0.18) !important;
+    border-color: rgba(76, 195, 138, 0.4) !important;
+    color: #8fe0b4 !important;
+}
+
+html[data-tema="escuro"] .main-content .alert-danger {
+    background: rgba(220, 53, 69, 0.18) !important;
+    border-color: rgba(255, 138, 122, 0.4) !important;
+    color: #ffb3a8 !important;
+}
+
+/* ----- Barras de rolagem personalizadas ----- */
+html[data-tema="escuro"] ::-webkit-scrollbar-track {
+    background: var(--tema-superficie) !important;
+}
+
+html[data-tema="escuro"] ::-webkit-scrollbar-thumb {
+    background: var(--tema-borda) !important;
+}
+
+/* ----- Avatares sem foto: cinza escuro em vez de cinza claro ----- */
+html[data-tema="escuro"] .main-content .avatar-iniciais {
+    background-color: var(--tema-borda);
+    color: var(--tema-texto);
+}

@@ -32,6 +32,7 @@ $alunoFoto = avatar_foto_sessao($pdo ?? null);
 ?>
 <link rel="stylesheet" href="../../css/avatar.css">
 <?php require __DIR__ . '/sem_reenvio.php'; ?>
+<?php require __DIR__ . '/tema.php'; ?>
 <script>
     // Aplica o estado salvo da sidebar antes dela ser pintada, evitando flash do estado errado.
     (function () {
@@ -76,6 +77,7 @@ $alunoFoto = avatar_foto_sessao($pdo ?? null);
             <?php endforeach; ?>
         </div>
         <div class="mt-auto">
+            <?php echo tema_botao('mb-2'); ?>
             <a href="../logout" id="botao-sair" class="btn btn-outline-danger w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
         </div>
     </div>
@@ -105,6 +107,8 @@ $alunoFoto = avatar_foto_sessao($pdo ?? null);
         <?php endforeach; ?>
     </div>
 
+    <div class="mt-auto">
+        <?php echo tema_botao('mb-2'); ?>
     <div class="mt-auto<?php echo $comBotaoNotificacoes ? ' d-flex align-items-center justify-content-between' : ''; ?>">
         <?php if ($comBotaoNotificacoes): ?>
             <button class="btn-notificacoes" id="btnNotificacoes" title="Notificações">
@@ -121,6 +125,7 @@ $alunoFoto = avatar_foto_sessao($pdo ?? null);
                 <i class="fas fa-sign-out-alt me-2"></i><span class="nav-label">Sair</span>
             </a>
         <?php endif; ?>
+    </div>
     </div>
 </div>
 <script>
