@@ -1,0 +1,10 @@
+# Arquivos internos (conexão, configurações, layouts, cron e seus logs).
+# São usados só por include/require do PHP ou pela linha de comando do cron;
+# o navegador nunca precisa acessá-los diretamente.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

@@ -118,12 +118,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_tema'])) {
 // --- LÓGICA DE EXCLUSÃO DE TEMA ---
 if (isset($_GET['excluir_tema'])) {
     $id_excluir = $_GET['excluir_tema'];
-    $sql = "DELETE FROM conteudos WHERE id = :id AND professor_id = :professor_id";
-    $stmt = $pdo->prepare($sql);
-    if ($stmt->execute([':id' => $id_excluir, ':professor_id' => $professor_id])) {
-        $mensagem = "Tema excluído com sucesso!";
-        $sucesso = true;
-        $tipo_mensagem = 'success';
+
+    // Um tema com arquivos/subpastas não pode ser excluído: os itens dele ficariam órfãos
+    // no banco e os arquivos esquecidos no servidor (mesma regra das subpastas).
+    $stmt_itens = $pdo->prepare("SELECT COUNT(*) FROM conteudos WHERE parent_id = :id");
+    $stmt_itens->execute([':id' => $id_excluir]);
+    $total_itens = (int) $stmt_itens->fetchColumn();
+
+    if ($total_itens > 0) {
+        $mensagem = "Não é possível excluir o tema porque ele contém {$total_itens} item(ns). Exclua os arquivos e subpastas do tema primeiro.";
+        $sucesso = false;
+        $tipo_mensagem = 'danger';
+    } else {
+        $sql = "DELETE FROM conteudos WHERE id = :id AND professor_id = :professor_id";
+        $stmt = $pdo->prepare($sql);
+        if ($stmt->execute([':id' => $id_excluir, ':professor_id' => $professor_id])) {
+            $mensagem = "Tema excluído com sucesso!";
+            $sucesso = true;
+            $tipo_mensagem = 'success';
+        }
     }
 }
 

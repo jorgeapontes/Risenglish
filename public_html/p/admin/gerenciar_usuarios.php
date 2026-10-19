@@ -151,10 +151,33 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
     $id_usuario = $_POST['id_usuario'];
 
     try {
+        // Arquivos do usuário no servidor: o banco apaga os registros em cascata,
+        // mas os arquivos ficariam esquecidos na pasta de uploads.
+        $stmt_foto = $pdo->prepare("SELECT foto_perfil FROM usuarios WHERE id = ?");
+        $stmt_foto->execute([$id_usuario]);
+        $foto_usuario = $stmt_foto->fetchColumn() ?: null;
+
+        $stmt_arquivos = $pdo->prepare(
+            "SELECT caminho_arquivo FROM usuarios_anexos WHERE usuario_id = :id
+             UNION ALL
+             SELECT caminho_arquivo FROM conteudos WHERE professor_id = :id AND caminho_arquivo LIKE 'uploads/%'"
+        );
+        $stmt_arquivos->execute([':id' => $id_usuario]);
+        $arquivos_usuario = $stmt_arquivos->fetchAll(PDO::FETCH_COLUMN);
+
         $sql = "DELETE FROM usuarios WHERE id = :id_usuario";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':id_usuario', $id_usuario);
         $stmt->execute();
+        $pdo->prepare("DELETE FROM usuarios_anexos WHERE usuario_id = ?")->execute([$id_usuario]);
+
+        avatar_apagar($foto_usuario);
+        foreach ($arquivos_usuario as $caminho) {
+            $arquivo = '../' . $caminho;
+            if (strpos($caminho, '..') === false && is_file($arquivo)) {
+                unlink($arquivo);
+            }
+        }
         $mensagem = "Usuário removido com sucesso!";
         $tipo_mensagem = 'success';
     } catch (Exception $e) {

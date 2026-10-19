@@ -22,6 +22,7 @@ error_log
 
 # Logs de execução
 /public_html/p/includes/cron_log.txt
+/public_html/p/includes/relatorio_orfaos.txt
 
 # Uploads de usuários (documentos e imagens enviados pelo site/app)
 /public_html/uploads/
