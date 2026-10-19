@@ -381,69 +381,69 @@ $total_ativos = $total_registros - $count_inativos;
                     <?php if (empty($alunos_pagamentos)): ?>
                         <tr><td colspan="7" class="text-center">Nenhum registro encontrado para este mês.</td></tr>
                     <?php else: ?>
-                        <?php foreach ($alunos_pagamentos as $aluno):
-                            $inativo = $aluno['status'] === 'desativado';
-                            // Nome como literal JS seguro para usar nos onclick (aspas/apóstrofos no nome)
-                            $nome_js = htmlspecialchars(json_encode($aluno['nome']), ENT_QUOTES);
-                        ?>
-                        <tr class="<?= $inativo ? 'linha-inativa' : '' ?>">
+                        <?php foreach ($alunos_pagamentos as $aluno): ?>
+                        <tr class="<?= $aluno['status'] === 'desativado' ? 'table-secondary' : '' ?>">
                             <td>
-                                <div class="pagador-nome">
+                                <div class="d-flex align-items-center">
                                     <strong><?= htmlspecialchars($aluno['nome']) ?></strong>
-                                    <?php if ($inativo): ?>
-                                        <span class="texto-inativo">Inativo</span>
+                                    <?php if ($aluno['status'] === 'desativado'): ?>
+                                        <span class="badge-status inativo">Inativo</span>
+                                    <?php else: ?>
+                                        <span class="badge-status ativo">Ativo</span>
                                     <?php endif; ?>
                                 </div>
                                 <small class="text-muted"><?= htmlspecialchars($aluno['email']) ?></small>
-
-                                <?php if (!empty($aluno['dependentes_ativos']) || !empty($aluno['dependentes_inativos'])): ?>
-                                    <div class="dependente-info">
-                                        <i class="fas fa-users" aria-hidden="true"></i>
-                                        <span class="dependente-rotulo">Paga também por:</span>
-                                        <?php foreach (array_filter(explode(', ', (string) $aluno['dependentes_ativos'])) as $dependente): ?>
-                                            <span class="dependente-chip"><?= htmlspecialchars($dependente) ?></span>
-                                        <?php endforeach; ?>
-                                        <?php foreach (array_filter(explode(', ', (string) $aluno['dependentes_inativos'])) as $dependente): ?>
-                                            <span class="dependente-chip inativo" title="Dependente inativo"><?= htmlspecialchars($dependente) ?> (inativo)</span>
-                                        <?php endforeach; ?>
+                                
+                                <?php if (!empty($aluno['dependentes_ativos'])): ?>
+                                    <div class="dependente-info ativos">
+                                        <i class="fas fa-users"></i> Dependentes ativos: <?= htmlspecialchars($aluno['dependentes_ativos']) ?>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($aluno['dependentes_inativos'])): ?>
+                                    <div class="dependente-info inativos">
+                                        <i class="fas fa-user-slash"></i> Dependentes inativos: <?= htmlspecialchars($aluno['dependentes_inativos']) ?>
                                     </div>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-nowrap">
-                                <?php $texto_vencimento = $aluno['dia_vencimento'] ? 'Dia ' . (int) $aluno['dia_vencimento'] : 'Definir'; ?>
-                                <?php if (!$inativo): ?>
-                                    <button type="button" class="vencimento-link<?= $aluno['dia_vencimento'] ? '' : ' vazio' ?>"
-                                            title="Alterar dia de vencimento"
-                                            onclick="editarVencimento(<?= (int) $aluno['id'] ?>, <?= $nome_js ?>, <?= $aluno['dia_vencimento'] ? (int) $aluno['dia_vencimento'] : 'null' ?>)">
-                                        <?= $texto_vencimento ?>
-                                    </button>
+                            <td>
+                                <?php if ($aluno['dia_vencimento']): ?>
+                                    <span class="badge vencimento-badge bg-info">
+                                        Dia <?= $aluno['dia_vencimento'] ?>
+                                    </span>
                                 <?php else: ?>
-                                    <span class="text-muted"><?= $aluno['dia_vencimento'] ? $texto_vencimento : '-' ?></span>
+                                    <span class="text-muted">Não definido</span>
+                                <?php endif; ?>
+                                
+                                <?php if ($aluno['status'] !== 'desativado'): ?>
+                                    <button class="btn btn-vencimento btn-sm ms-1" 
+                                            onclick="editarVencimento(<?= $aluno['id'] ?>, <?= htmlspecialchars(json_encode($aluno['nome']), ENT_QUOTES) ?>, <?= $aluno['dia_vencimento'] ?? 'null' ?>)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-nowrap">
-                                <?php if ($inativo && $aluno['status_pagamento'] !== 'pago'): ?>
-                                    <span class="text-muted">-</span>
-                                <?php elseif ($aluno['status_pagamento']):
-                                    $status_texto = [
-                                        'pago' => 'Pago',
-                                        'pendente' => 'Pendente',
-                                        'atrasado' => 'Atrasado'
-                                    ];
-                                ?>
-                                    <span class="status-pagamento status-<?= $aluno['status_pagamento'] ?>">
-                                        <?= $status_texto[$aluno['status_pagamento']] ?>
+                            <td>
+                                <?php if ($aluno['status_pagamento']): ?>
+                                    <span class="badge badge-<?= $aluno['status_pagamento'] ?>">
+                                        <?php 
+                                            $status_texto = [
+                                                'pago' => 'Pago',
+                                                'pendente' => 'Pendente',
+                                                'atrasado' => 'Atrasado'
+                                            ];
+                                            echo $status_texto[$aluno['status_pagamento']];
+                                        ?>
                                     </span>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-nowrap">
+                            <td>
                                 <?php if ($aluno['data_pagamento']): ?>
                                     <?= (new DateTime($aluno['data_pagamento']))->format('d/m/Y') ?>
                                 <?php else: ?>
                                     <span class="text-muted">-</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-nowrap">
+                            <td>
                                 <?php if ($aluno['valor']): ?>
                                     <strong>R$ <?= number_format($aluno['valor'], 2, ',', '.') ?></strong>
                                 <?php else: ?>
@@ -452,47 +452,43 @@ $total_ativos = $total_registros - $count_inativos;
                             </td>
                             <td>
                                 <?php if ($aluno['observacoes']): ?>
-                                    <div class="observacao-resumo" title="<?= htmlspecialchars($aluno['observacoes']) ?>">
-                                        <?= htmlspecialchars($aluno['observacoes']) ?>
+                                    <div style="max-width: 200px; white-space: normal;">
+                                        <small><?= htmlspecialchars($aluno['observacoes']) ?></small>
                                     </div>
                                 <?php else: ?>
                                     <span class="text-muted">-</span>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <div class="acoes-pagamento">
-                                    <?php if (!$inativo):
-                                        $rotulo_registrar = $aluno['data_pagamento'] ? 'Editar pagamento' : 'Registrar pagamento';
-                                        $dados_pagamento = json_encode([
-                                            "aluno_id" => $aluno["id"],
-                                            "aluno_nome" => $aluno["nome"],
-                                            "mes_referencia" => $filtro_mes,
-                                            "pagamento_id" => $aluno["pagamento_id"],
-                                            "valor" => $aluno["valor"],
-                                            "data_pagamento" => $aluno["data_pagamento"],
-                                            "observacoes" => $aluno["observacoes"]
-                                        ]);
-                                    ?>
-                                        <button type="button" class="btn-acao-icone" title="<?= $rotulo_registrar ?>" aria-label="<?= $rotulo_registrar ?>"
-                                                onclick="registrarPagamento(<?= htmlspecialchars($dados_pagamento, ENT_QUOTES) ?>)">
-                                            <i class="fas fa-<?= $aluno['data_pagamento'] ? 'pen' : 'plus' ?>"></i>
-                                        </button>
-                                    <?php endif; ?>
-
-                                    <?php if ($aluno['pagamento_id']): ?>
-                                        <button type="button" class="btn-acao-icone perigo" title="Remover pagamento" aria-label="Remover pagamento"
-                                                onclick="removerPagamento(<?= (int) $aluno['pagamento_id'] ?>, <?= $nome_js ?>)">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    <?php endif; ?>
-
-                                    <?php if ($inativo): ?>
-                                        <button type="button" class="btn-acao-icone" title="Reativar usuário" aria-label="Reativar usuário"
-                                                onclick="reativarUsuario(<?= (int) $aluno['id'] ?>, <?= $nome_js ?>)">
-                                            <i class="fas fa-user-check"></i>
-                                        </button>
-                                    <?php endif; ?>
-                                </div>
+                                <?php if ($aluno['status'] !== 'desativado'): ?>
+                                    <button class="btn btn-registrar btn-sm"<?= $aluno['data_pagamento'] ? ' title="Editar pagamento" aria-label="Editar pagamento"' : '' ?> 
+                                            onclick='registrarPagamento(<?= json_encode([
+                                                "aluno_id" => $aluno["id"],
+                                                "aluno_nome" => $aluno["nome"],
+                                                "mes_referencia" => $filtro_mes,
+                                                "pagamento_id" => $aluno["pagamento_id"],
+                                                "valor" => $aluno["valor"],
+                                                "data_pagamento" => $aluno["data_pagamento"],
+                                                "observacoes" => $aluno["observacoes"]
+                                            ], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP) ?>)'>
+                                        <i class="fas fa-<?= $aluno['data_pagamento'] ? 'edit' : 'plus' ?>"></i>
+                                        <?= $aluno['data_pagamento'] ? '' : 'Registrar' ?>
+                                    </button>
+                                <?php endif; ?>
+                                
+                                <?php if ($aluno['pagamento_id']): ?>
+                                    <button class="btn btn-remover btn-sm ms-1" 
+                                            onclick="removerPagamento(<?= $aluno['pagamento_id'] ?>, <?= htmlspecialchars(json_encode($aluno['nome']), ENT_QUOTES) ?>)">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                <?php endif; ?>
+                                
+                                <?php if ($aluno['status'] === 'desativado'): ?>
+                                    <button class="btn-reativar btn-sm ms-1" 
+                                            onclick="reativarUsuario(<?= $aluno['id'] ?>, <?= htmlspecialchars(json_encode($aluno['nome']), ENT_QUOTES) ?>)">
+                                        <i class="fas fa-user-check"></i> Reativar
+                                    </button>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>
