@@ -8,10 +8,10 @@
  *   2. tentativas_ip: apaga bloqueios/janelas de tentativa expirados há mais de 1 dia
  *   3. notificacoes: apaga as lidas com mais de 90 dias e as de usuários que não existem mais
  *   4. usuarios: limpa tokens de "esqueci a senha" vencidos
- *   5. Órfãos: arquivos em uploads (conteúdos, anexos, fotos de perfil) que nenhum registro usa,
- *      e arquivos/subpastas de temas que foram excluídos.
- *      Por segurança, roda em MODO SIMULAÇÃO: só lista em relatorio_orfaos.txt o que seria apagado.
- *      Para apagar de fato, rode com a opção --apagar-orfaos.
+ *   5. Órfãos: arquivos em uploads (conteúdos e fotos de perfil) que nenhum registro usa,
+ *      e arquivos/subpastas de temas que foram excluídos. Tudo vai para relatorio_orfaos.txt.
+ *      Só apaga com a opção --apagar-orfaos (sem ela, é uma simulação).
+ *      Anexos de usuários removidos (ex-alunos) são só listados, NUNCA apagados: a escola guarda esses documentos.
  *
  * O nome do arquivo foi mantido (antes só limpava logs_acesso) para não precisar mudar o cron.
  */
@@ -124,15 +124,17 @@ try {
         }
     }
 
+    // pasta => pode apagar os órfãos? Anexos de ex-alunos ficam guardados (decisão da escola).
     $pastas = [
-        $pastaP . '/uploads/conteudos',
-        $pastaP . '/uploads/anexos_usuarios',
-        $pastaRaiz . '/uploads/avatars',
+        $pastaP . '/uploads/conteudos'        => true,
+        $pastaP . '/uploads/anexos_usuarios'  => false,
+        $pastaRaiz . '/uploads/avatars'       => true,
     ];
     $umDiaAtras = time() - 86400; // não mexe em uploads recentes (podem estar em andamento)
     $arquivosOrfaos = 0;
     $bytesOrfaos = 0;
-    foreach ($pastas as $pasta) {
+    $anexosGuardados = 0;
+    foreach ($pastas as $pasta => $podeApagar) {
         if (!is_dir($pasta)) {
             continue;
         }
@@ -161,10 +163,16 @@ try {
         }
 
         foreach ($orfaosDaPasta as $arquivo) {
+            $descricao = str_replace($pastaRaiz . DIRECTORY_SEPARATOR, '', $arquivo->getRealPath())
+                . ' (' . round($arquivo->getSize() / 1024) . ' KB, ' . date('d/m/Y', $arquivo->getMTime()) . ')';
+            if (!$podeApagar) {
+                $anexosGuardados++;
+                $relatorio[] = 'guardado (anexo de usuário removido, não é apagado) ' . $descricao;
+                continue;
+            }
             $arquivosOrfaos++;
             $bytesOrfaos += $arquivo->getSize();
-            $relatorio[] = 'arquivo ' . str_replace($pastaRaiz . DIRECTORY_SEPARATOR, '', $arquivo->getRealPath())
-                . ' (' . round($arquivo->getSize() / 1024) . ' KB, ' . date('d/m/Y', $arquivo->getMTime()) . ')';
+            $relatorio[] = 'arquivo ' . $descricao;
             if ($apagarOrfaos && !$suspeito) {
                 @unlink($arquivo->getRealPath());
             }
@@ -172,6 +180,7 @@ try {
     }
     $resumo['conteudos_orfaos'] = count($orfaosConteudo);
     $resumo['arquivos_orfaos'] = $arquivosOrfaos . ' (' . round($bytesOrfaos / 1048576, 1) . ' MB)';
+    $resumo['anexos_guardados'] = $anexosGuardados;
 } catch (Throwable $e) {
     error_log('Erro na manutenção (órfãos): ' . $e->getMessage());
     $resumo['orfaos'] = 'erro — ver log do servidor';
