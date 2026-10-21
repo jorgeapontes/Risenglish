@@ -47,7 +47,8 @@
     </script>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/index.css">
+    <!-- ?v= muda a cada alteração do arquivo, para o navegador não usar o CSS antigo do cache (1 mês) -->
+    <link rel="stylesheet" href="css/index.css?v=<?php echo filemtime(__DIR__ . '/css/index.css'); ?>">
     <link rel="shortcut icon" href="<?php echo htmlspecialchars(get_setting('logo_image','LogoRisenglish.png')); ?>" type="image/x-icon">
 </head>
 <body>

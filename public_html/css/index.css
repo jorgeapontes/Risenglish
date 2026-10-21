@@ -1055,6 +1055,11 @@ html {
         margin: 0 auto;
     }
 
+    /* No celular a logo vem antes do título (no HTML ela fica depois, na coluna da direita) */
+    .hero-image {
+        order: -1;
+    }
+
     .hero-shape-1 {
         display: none;
     }
