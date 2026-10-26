@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/auditoria.php';
 
 // Definir fuso horário do Brasil
 date_default_timezone_set('America/Sao_Paulo');
@@ -199,6 +200,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mensagem = "ID da aula inválido.";
         } else {
             try {
+                $stmt_info = $pdo->prepare("SELECT a.titulo_aula, a.data_aula, t.nome_turma FROM aulas a LEFT JOIN turmas t ON t.id = a.turma_id WHERE a.id = ? AND a.professor_id = ?");
+                $stmt_info->execute([$aula_id, $professor_id]);
+                $aula_info = $stmt_info->fetch(PDO::FETCH_ASSOC);
+
                 $sql_delete_ac = "DELETE FROM aulas_conteudos WHERE aula_id = :aula_id";
                 $pdo->prepare($sql_delete_ac)->execute([':aula_id' => $aula_id]);
                 
@@ -207,6 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt_delete->execute([':id' => $aula_id, ':professor_id' => $professor_id]);
 
                 if ($stmt_delete->rowCount() > 0) {
+                    registrar_auditoria('aula_excluida', "Excluiu a aula \"{$aula_info['titulo_aula']}\" de " . date('d/m/Y', strtotime($aula_info['data_aula'])) . " ({$aula_info['nome_turma']})", 'aula', $aula_id);
                     $mensagem = "Aula excluída com sucesso!";
                     $sucesso = true;
                 } else {

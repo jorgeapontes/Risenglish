@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/auditoria.php';
 
 // Verifica se a conexão PDO existe
 if (!isset($pdo)) {
@@ -79,8 +80,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
         elseif ($_POST['acao'] === 'excluir') {
             $lead_id = intval($_POST['lead_id']);
             
+            $stmt = $pdo->prepare("SELECT nome FROM leads WHERE id = ?");
+            $stmt->execute([$lead_id]);
+            $nome_lead = $stmt->fetchColumn() ?: "#{$lead_id}";
+
             $stmt = $pdo->prepare("DELETE FROM leads WHERE id = ?");
             $stmt->execute([$lead_id]);
+            registrar_auditoria('lead_excluido', "Excluiu o lead {$nome_lead}", 'lead', $lead_id);
             
             $mensagem = "Lead excluído com sucesso!";
             $tipo_mensagem = "success";

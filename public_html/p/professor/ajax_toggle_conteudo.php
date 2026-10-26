@@ -73,13 +73,10 @@ try {
         $response['message'] = 'Tema marcado como NÃO VISÍVEL para os alunos.';
     }
 
-} catch (PDOException $e) {
-    // Em caso de erro no banco de dados
-    $response['message'] = 'Erro no banco de dados: ' . $e->getMessage();
-    // Você pode logar o erro aqui
-} catch (Exception $e) {
-    // Outros erros
-    $response['message'] = 'Erro interno: ' . $e->getMessage();
+} catch (Throwable $e) {
+    // O detalhe do erro vai só para o log (aparece no Monitoramento); o professor vê uma mensagem genérica
+    error_log('ajax_toggle_conteudo (aula ' . $aula_id . ', conteúdo ' . $conteudo_id . '): ' . $e->getMessage());
+    $response['message'] = 'Não foi possível salvar agora. Tente novamente.';
 }
 
 echo json_encode($response);

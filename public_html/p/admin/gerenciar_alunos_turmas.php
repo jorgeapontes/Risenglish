@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/auditoria.php';
 require_once '../includes/avatar.php';
 
 // Garante que apenas admin acessa esta página
@@ -56,6 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST['aca
         }
         
         $pdo->commit();
+        registrar_auditoria('alunos_turma', "Atualizou os alunos da turma {$nome_turma} (" . count($alunos_selecionados) . " aluno(s))", 'turma', $turma_id);
         $mensagem = "Alunos da turma <strong>{$nome_turma}</strong> atualizados com sucesso!";
         $tipo_mensagem = 'success';
 

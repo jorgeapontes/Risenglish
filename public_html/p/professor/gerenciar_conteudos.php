@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/auditoria.php';
 
 // Garante que apenas professor acessa esta página
 if ($_SESSION['user_tipo'] !== 'professor') {
@@ -60,6 +61,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_grupo'])) {
 if (isset($_GET['excluir_grupo'])) {
     $id_excluir = $_GET['excluir_grupo'];
     
+    $stmt_nome = $pdo->prepare("SELECT nome FROM grupos_conteudos WHERE id = ? AND professor_id = ?");
+    $stmt_nome->execute([$id_excluir, $professor_id]);
+    $nome_grupo = $stmt_nome->fetchColumn();
+
     // Primeiro, atualizar os conteúdos para remover o vínculo com o grupo
     $sql_update = "UPDATE conteudos SET grupo_id = NULL WHERE grupo_id = :grupo_id AND professor_id = :professor_id";
     $stmt_update = $pdo->prepare($sql_update);
@@ -69,6 +74,9 @@ if (isset($_GET['excluir_grupo'])) {
     $sql = "DELETE FROM grupos_conteudos WHERE id = :id AND professor_id = :professor_id";
     $stmt = $pdo->prepare($sql);
     if ($stmt->execute([':id' => $id_excluir, ':professor_id' => $professor_id])) {
+        if ($nome_grupo !== false) {
+            registrar_auditoria('grupo_excluido', "Excluiu o grupo de temas \"{$nome_grupo}\"", 'grupo', $id_excluir);
+        }
         $mensagem = "Grupo excluído com sucesso!";
         $sucesso = true;
         $tipo_mensagem = 'success';
@@ -130,9 +138,16 @@ if (isset($_GET['excluir_tema'])) {
         $sucesso = false;
         $tipo_mensagem = 'danger';
     } else {
+        $stmt_nome = $pdo->prepare("SELECT titulo FROM conteudos WHERE id = ? AND professor_id = ?");
+        $stmt_nome->execute([$id_excluir, $professor_id]);
+        $titulo_tema = $stmt_nome->fetchColumn();
+
         $sql = "DELETE FROM conteudos WHERE id = :id AND professor_id = :professor_id";
         $stmt = $pdo->prepare($sql);
         if ($stmt->execute([':id' => $id_excluir, ':professor_id' => $professor_id])) {
+            if ($titulo_tema !== false) {
+                registrar_auditoria('tema_excluido', "Excluiu o tema \"{$titulo_tema}\"", 'tema', $id_excluir);
+            }
             $mensagem = "Tema excluído com sucesso!";
             $sucesso = true;
             $tipo_mensagem = 'success';

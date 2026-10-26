@@ -20,6 +20,18 @@ $itensMenu = [
     'pagamentos'    => ['href' => 'pagamentos',             'icon' => 'fa-dollar-sign',      'label' => 'Pagamentos'],
     'acessos'       => ['href' => 'acessos',                'icon' => 'fa-chart-line',       'label' => 'Relatório de Acessos'],
 ];
+// O master (dono do sistema) não usa as páginas do admin: o menu dele são as seções do monitoramento.
+// $alertaSaude (opcional, definido pela página) mostra um ponto de atenção em "Saúde".
+if (!empty($_SESSION['user_master'])) {
+    $itensMenu = [
+        'saude'         => ['href' => 'monitoramento?aba=saude',         'icon' => 'fa-heartbeat',       'label' => 'Saúde', 'alerta' => !empty($alertaSaude)],
+        'auditoria'     => ['href' => 'monitoramento?aba=auditoria',     'icon' => 'fa-clipboard-list',  'label' => 'Auditoria'],
+        'seguranca'     => ['href' => 'monitoramento?aba=seguranca',     'icon' => 'fa-shield-alt',      'label' => 'Segurança'],
+        'erros'         => ['href' => 'monitoramento?aba=erros',         'icon' => 'fa-bug',             'label' => 'Erros'],
+        'backups'       => ['href' => 'monitoramento?aba=backups',       'icon' => 'fa-database',        'label' => 'Backups'],
+        'configuracoes' => ['href' => 'monitoramento?aba=configuracoes', 'icon' => 'fa-cog',             'label' => 'Configurações'],
+    ];
+}
 
 $adminNome = htmlspecialchars($_SESSION['user_nome'] ?? 'Admin');
 
@@ -63,7 +75,7 @@ $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
         <div class="d-flex flex-column flex-grow-1 mb-5">
             <?php foreach ($itensMenu as $chave => $item): ?>
             <a href="<?php echo htmlspecialchars($item['href']); ?>" class="rounded<?php echo $chave === $paginaAtiva ? ' active' : ''; ?>">
-                <i class="fas <?php echo htmlspecialchars($item['icon']); ?>"></i>&nbsp;&nbsp;<?php echo htmlspecialchars($item['label']); ?>
+                <i class="fas <?php echo htmlspecialchars($item['icon']); ?>"></i>&nbsp;&nbsp;<?php echo htmlspecialchars($item['label']); ?><?php if (!empty($item['alerta'])): ?><span class="ponto-alerta-menu" title="Pede atenção" aria-label="pede atenção"></span><?php endif; ?>
             </a>
             <?php endforeach; ?>
         </div>
@@ -89,7 +101,7 @@ $tituloMobile = $tituloMobile ?? ($itensMenu[$paginaAtiva]['label'] ?? 'Menu');
            class="rounded<?php echo $chave === $paginaAtiva ? ' active' : ''; ?>"
            aria-label="<?php echo htmlspecialchars($item['label']); ?>"
            title="<?php echo htmlspecialchars($item['label']); ?>">
-            <i class="fas <?php echo htmlspecialchars($item['icon']); ?>"></i><span class="nav-label"><?php echo htmlspecialchars($item['label']); ?></span>
+            <i class="fas <?php echo htmlspecialchars($item['icon']); ?>"></i><span class="nav-label"><?php echo htmlspecialchars($item['label']); ?></span><?php if (!empty($item['alerta'])): ?><span class="ponto-alerta-menu" title="Pede atenção" aria-label="pede atenção"></span><?php endif; ?>
         </a>
         <?php endforeach; ?>
     </div>

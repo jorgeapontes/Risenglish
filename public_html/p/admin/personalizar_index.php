@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/auditoria.php';
 require_once '../includes/site_settings.php';
 
 // Garante que apenas admin acessa esta página
@@ -85,6 +86,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     }
 
     $messages[] = 'Configurações salvas.';
+    registrar_auditoria('site_personalizado', 'Salvou as alterações da página inicial (Personalizar Site)', 'site');
 }
 
 function val($k, $d=''){

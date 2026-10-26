@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/auditoria.php';
 
 // Garante que apenas admin acessa esta página
 if ($_SESSION['user_tipo'] !== 'admin') {
@@ -49,6 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$aluno_id, $mes_referencia . '-01', $valor, $data_pagamento, $observacoes]);
                 $mensagem = "Pagamento registrado com sucesso!";
             }
+            registrar_auditoria('pagamento_registrado', ($mensagem === 'Pagamento atualizado com sucesso!' ? 'Editou' : 'Registrou')
+                . ' o pagamento de ' . date('m/Y', strtotime($mes_referencia . '-01')) . ' de ' . auditoria_usuario((int) $aluno_id)
+                . ' — R$ ' . number_format((float) $valor, 2, ',', '.'), 'usuario', $aluno_id);
             
             $tipo_mensagem = 'success';
 
@@ -62,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $stmt = $pdo->prepare("UPDATE usuarios SET dia_vencimento = ? WHERE id = ?");
             $stmt->execute([$dia_vencimento ?: null, $aluno_id]);
+            registrar_auditoria('vencimento_alterado', 'Mudou o dia de vencimento de ' . auditoria_usuario((int) $aluno_id) . ' para ' . ($dia_vencimento ?: 'nenhum'), 'usuario', $aluno_id);
             
             $mensagem = "Data de vencimento atualizada com sucesso!";
             $tipo_mensagem = 'success';
@@ -73,8 +78,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("ID do pagamento é obrigatório.");
             }
 
+            $stmt = $pdo->prepare("SELECT aluno_id, mes_referencia, valor FROM pagamentos WHERE id = ?");
+            $stmt->execute([$pagamento_id]);
+            $pagamento = $stmt->fetch(PDO::FETCH_ASSOC);
+
             $stmt = $pdo->prepare("DELETE FROM pagamentos WHERE id = ?");
             $stmt->execute([$pagamento_id]);
+            if ($pagamento) {
+                registrar_auditoria('pagamento_excluido', 'Excluiu o pagamento de ' . date('m/Y', strtotime($pagamento['mes_referencia']))
+                    . ' de ' . auditoria_usuario((int) $pagamento['aluno_id']) . ' — R$ ' . number_format((float) $pagamento['valor'], 2, ',', '.'), 'pagamento', $pagamento_id);
+            }
             
             $mensagem = "Pagamento removido com sucesso!";
             $tipo_mensagem = 'success';
@@ -85,8 +98,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("ID do usuário é obrigatório.");
             }
 
-            $stmt = $pdo->prepare("UPDATE usuarios SET status = 'ativo' WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE usuarios SET status = 'ativo' WHERE id = ? AND tipo_usuario <> 'master'");
             $stmt->execute([$usuario_id]);
+            registrar_auditoria('usuario_status', 'Reativou o usuário ' . auditoria_usuario((int) $usuario_id) . ' pela tela de pagamentos', 'usuario', $usuario_id);
             
             $mensagem = "Usuário reativado com sucesso!";
             $tipo_mensagem = 'success';

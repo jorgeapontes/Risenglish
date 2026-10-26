@@ -12,6 +12,7 @@ session_start();
 // Inclui os arquivos necessários
 include_once 'includes/conexao.php';
 include_once 'includes/email_config.php';
+require_once 'includes/auditoria.php';
 
 $msg_enviado = 'Se o e-mail estiver cadastrado, um link de redefinição foi enviado. Verifique sua caixa de entrada e spam.';
 
@@ -39,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
                 // (o PHP roda em America/Sao_Paulo e o MySQL de produção em UTC)
                 $stmt_update = $pdo->prepare("UPDATE usuarios SET reset_token = ?, token_expira_em = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE id = ?");
                 $stmt_update->execute([$token, $usuario_id]);
+                registrar_auditoria('reset_solicitado', "Pediu o link de 'esqueci a senha'", 'usuario', $usuario_id, (int) $usuario_id, auditoria_usuario((int) $usuario_id));
 
                 // 4. Montar Link de Redefinição
                 // Usa APP_URL do .env para não depender do header Host (que pode ser forjado)

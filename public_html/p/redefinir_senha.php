@@ -1,5 +1,6 @@
 <?php
     include_once 'includes/conexao.php';
+    require_once 'includes/auditoria.php';
 
     $token = $_GET['token'] ?? null;
     $aluno_id = 0;
@@ -44,6 +45,8 @@
                 // Atualiza a senha, limpa o token e a expiração (para invalidar o link) e zera o bloqueio por tentativas
                 $stmt_update = $pdo->prepare("UPDATE usuarios SET senha = ?, reset_token = NULL, token_expira_em = NULL, tentativas_falhas = 0, bloqueado_ate = NULL WHERE id = ?");
                 $stmt_update->execute([$senha_hash, $aluno_id]);
+                $descricao_usuario = auditoria_usuario((int) $aluno_id);
+                registrar_auditoria('senha_redefinida', "Redefiniu a própria senha pelo link de 'esqueci a senha'", 'usuario', $aluno_id, (int) $aluno_id, $descricao_usuario);
 
                 $message = '<div class="alert alert-success">Sua senha foi redefinida com sucesso! Você pode <a href="login.php" style="font-weight: bold;">fazer login agora</a>.</div>';
                 $token_valido = false; // Desativa o formulário após o sucesso

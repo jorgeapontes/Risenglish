@@ -19,7 +19,7 @@ session_start();
 // =============================================
 if (isset($_SESSION['user_id'])) {
     switch ($_SESSION['user_tipo']) {
-        case 'admin':     header("Location: admin/dashboard"); break;
+        case 'admin':     header(!empty($_SESSION['user_master']) ? "Location: admin/monitoramento" : "Location: admin/dashboard"); break;
         case 'professor': header("Location: professor/dashboard"); break;
         case 'aluno':     header("Location: aluno/dashboard"); break;
         default:          header("Location: login?erro=sessao_invalida");
@@ -243,7 +243,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
 
                         $_SESSION['user_id']    = $usuario['id'];
                         $_SESSION['user_nome']  = $usuario['nome'];
-                        $_SESSION['user_tipo']  = $usuario['tipo_usuario'];
+                        // O master (dono do sistema) navega como admin e tem, além disso, a tela de monitoramento
+                        $_SESSION['user_tipo']  = $usuario['tipo_usuario'] === 'master' ? 'admin' : $usuario['tipo_usuario'];
+                        $_SESSION['user_master'] = $usuario['tipo_usuario'] === 'master';
                         $_SESSION['user_ip']    = $ip_usuario;
                         $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
                         $_SESSION['login_time'] = time();
@@ -256,7 +258,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
                         $stmtLog->execute();
 
                         switch ($_SESSION['user_tipo']) {
-                            case 'admin':     header("Location: admin/dashboard"); break;
+                            case 'admin':     header(!empty($_SESSION['user_master']) ? "Location: admin/monitoramento" : "Location: admin/dashboard"); break;
                             case 'professor': header("Location: professor/dashboard"); break;
                             case 'aluno':     header("Location: aluno/dashboard"); break;
                             default:
@@ -274,6 +276,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
 
                     if ($tentativas >= $MAX_TENTATIVAS) {
                         $erro = "Muitas tentativas incorretas. Sua conta foi bloqueada por {$TEMPO_BLOQUEIO_MINUTOS} minutos.";
+                        require_once 'includes/auditoria.php';
+                        registrar_auditoria('conta_bloqueada', "Conta bloqueada por {$TEMPO_BLOQUEIO_MINUTOS} min após {$tentativas} senhas erradas", 'usuario', $usuario['id'], (int) $usuario['id'], $usuario['nome'], $usuario['tipo_usuario']);
                     } else {
                         $tentativas_restantes = $MAX_TENTATIVAS - $tentativas;
                         $erro = "Email ou senha incorretos. Você tem mais {$tentativas_restantes} tentativa(s).";

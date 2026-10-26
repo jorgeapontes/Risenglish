@@ -457,3 +457,140 @@ body {
 }
 /* ========== FIM ESTILOS OTIMIZADOS ========== */
 
+
+/* ===== "Nesta aula": o que os alunos veem, no topo do card de conteúdo ===== */
+.nesta-aula {
+    padding: 14px 16px;
+    background: #f4f8fd;
+    border: 1px solid #d6e4f5;
+    border-radius: 10px;
+}
+
+.nesta-aula-titulo {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+    font-weight: 700;
+    color: #081d40;
+}
+
+.nesta-aula-contagem {
+    margin-left: 8px;
+    padding: 1px 9px;
+    border-radius: 999px;
+    background: #081d40;
+    color: #fff;
+    font-size: 0.8rem;
+}
+
+.nesta-aula-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nesta-aula-lista li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-top: 1px solid #e3ecf7;
+}
+
+.nesta-aula-nome {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.nesta-aula-grupo {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.nesta-aula-remover {
+    flex-shrink: 0;
+}
+
+/* Biblioteca: título + busca */
+.biblioteca-cabecalho {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.biblioteca-cabecalho h6 {
+    font-weight: 700;
+    color: #081d40;
+}
+
+.busca-biblioteca {
+    position: relative;
+    flex: 0 1 320px;
+}
+
+.busca-biblioteca .fa-search {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #adb5bd;
+    pointer-events: none;
+}
+
+.busca-biblioteca .form-control {
+    padding-left: 36px;
+}
+
+@media (max-width: 575.98px) {
+    .busca-biblioteca {
+        flex-basis: 100%;
+    }
+
+    .nesta-aula-grupo {
+        display: none;
+    }
+}
+
+/* Biblioteca no celular/tablet: as 4 colunas fixas (col-1/5/4/2) não cabem.
+   Fica: botão de visibilidade, nome (ocupa o resto) e contagem; o autor some. */
+@media (max-width: 991.98px) {
+    #lista-conteudos-container .conteudo-item {
+        flex-wrap: nowrap;
+        column-gap: 8px;
+    }
+
+    #lista-conteudos-container .conteudo-item > .col-1,
+    #lista-conteudos-container .conteudo-item > .col-2 {
+        flex: 0 0 auto;
+        width: auto;
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
+    #lista-conteudos-container .conteudo-item > .col-5 {
+        flex: 1 1 0;
+        width: auto;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    #lista-conteudos-container .conteudo-item > .col-4 {
+        display: none;
+    }
+}
+
+/* No celular a contagem de subpastas/arquivos também sai: o nome do tema precisa do espaço */
+@media (max-width: 575.98px) {
+    #lista-conteudos-container .conteudo-item > .col-2 {
+        display: none;
+    }
+
+    #lista-conteudos-container .conteudo-item .status-label {
+        display: none;
+    }
+}

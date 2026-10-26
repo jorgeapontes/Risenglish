@@ -17,7 +17,7 @@ $ordem       = ($_GET['ordem'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
 $ordemSQL    = $ordem === 'asc' ? 'ASC' : 'DESC';
 
 // WHERE: exclui admin sempre; filtra por tipo e busca se necessário
-$where = "WHERE u.tipo_usuario != 'admin' AND (u.nome LIKE :busca OR u.email LIKE :busca)";
+$where = "WHERE u.tipo_usuario NOT IN ('admin', 'master') AND (u.nome LIKE :busca OR u.email LIKE :busca)";
 if ($tipo_filtro === 'aluno' || $tipo_filtro === 'professor') {
     $where .= " AND u.tipo_usuario = :tipo_filtro";
 }

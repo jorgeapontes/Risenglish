@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/auditoria.php';
 
 // Verificar se é professor
 if ($_SESSION['user_tipo'] !== 'professor') {
@@ -18,7 +19,7 @@ if (!$aula_id || !is_numeric($aula_id)) {
 }
 
 // Buscar aula para verificar se pertence ao professor e obter a turma_id
-$sql_verificar = "SELECT id, turma_id FROM aulas WHERE id = :aula_id AND professor_id = :professor_id";
+$sql_verificar = "SELECT a.id, a.turma_id, a.titulo_aula, a.data_aula, t.nome_turma FROM aulas a LEFT JOIN turmas t ON t.id = a.turma_id WHERE a.id = :aula_id AND a.professor_id = :professor_id";
 $stmt_verificar = $pdo->prepare($sql_verificar);
 $stmt_verificar->execute([':aula_id' => $aula_id, ':professor_id' => $professor_id]);
 $aula = $stmt_verificar->fetch(PDO::FETCH_ASSOC);
@@ -51,6 +52,7 @@ try {
     
     // Confirmar transação
     $pdo->commit();
+    registrar_auditoria('aula_excluida', "Excluiu a aula \"{$aula['titulo_aula']}\" de " . date('d/m/Y', strtotime($aula['data_aula'])) . " ({$aula['nome_turma']})", 'aula', $aula_id);
     
     echo json_encode([
         'success' => true, 

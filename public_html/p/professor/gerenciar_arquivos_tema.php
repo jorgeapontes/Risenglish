@@ -2,6 +2,7 @@
 
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/auditoria.php';
 
 // Garante que apenas professor acessa esta página
 if ($_SESSION['user_tipo'] !== 'professor') {
@@ -231,7 +232,7 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
 if ($tema_id > 0 && isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
     $recurso_id = $_GET['excluir'];
     try {
-        $sql_caminho = "SELECT caminho_arquivo, tipo_arquivo, eh_subpasta FROM conteudos 
+        $sql_caminho = "SELECT titulo, caminho_arquivo, tipo_arquivo, eh_subpasta FROM conteudos 
                          WHERE id = :id AND professor_id = :professor_id AND (parent_id = :tema_id OR parent_id IN (SELECT id FROM conteudos WHERE parent_id = :tema_id AND eh_subpasta = 1))";
         $stmt_caminho = $pdo->prepare($sql_caminho);
         $stmt_caminho->execute([':id' => $recurso_id, ':professor_id' => $professor_id, ':tema_id' => $tema_id]);
@@ -270,6 +271,7 @@ if ($tema_id > 0 && isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
                     unlink($caminho_completo);
                 }
             }
+            registrar_auditoria('arquivo_excluido', 'Excluiu ' . ($recurso_info['eh_subpasta'] == 1 ? 'a subpasta' : 'o arquivo') . " \"{$recurso_info['titulo']}\" do tema \"{$tema['titulo']}\"", 'tema', $tema_id);
             $_SESSION['mensagem'] = "Item excluído com sucesso!";
             $_SESSION['sucesso'] = true;
         } else {

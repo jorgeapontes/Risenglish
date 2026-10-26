@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/auditoria.php';
 require_once '../includes/avatar.php';
 
 // Garante que apenas admin acessa esta página
@@ -40,6 +41,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
         $stmt->bindParam(':link_aula', $link_aula);
         $stmt->execute();
         $tipo_mensagem = 'success';
+        if ($acao == 'add_turma') {
+            registrar_auditoria('turma_criada', "Criou a turma {$nome_turma}", 'turma', $pdo->lastInsertId());
+        } else {
+            registrar_auditoria('turma_editada', "Editou a turma {$nome_turma}", 'turma', $turma_id);
+        }
 
     } catch (Exception $e) {
         $mensagem = "Erro ao gerenciar turma: " . $e->getMessage();
@@ -52,10 +58,15 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
     $id_turma = $_POST['id_turma'];
 
     try {
+        $stmt = $pdo->prepare("SELECT nome_turma FROM turmas WHERE id = ?");
+        $stmt->execute([$id_turma]);
+        $nome_turma_removida = $stmt->fetchColumn() ?: "#{$id_turma}";
+
         $sql = "DELETE FROM turmas WHERE id = :id_turma";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':id_turma', $id_turma);
         $stmt->execute();
+        registrar_auditoria('turma_excluida', "Excluiu a turma {$nome_turma_removida}", 'turma', $id_turma);
         $mensagem = "Turma removida com sucesso! (Alunos associados foram removidos da turma)";
         $tipo_mensagem = 'success';
     } catch (Exception $e) {

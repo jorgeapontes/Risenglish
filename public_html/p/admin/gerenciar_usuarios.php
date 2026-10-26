@@ -2,11 +2,20 @@
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 require_once '../includes/avatar.php';
+require_once '../includes/auditoria.php';
 
 // Garante que apenas admin acessa esta página
 if ($_SESSION['user_tipo'] !== 'admin') {
     header("Location: ../login?erro=acesso_negado");
     exit;
+}
+
+/** O usuário master (dono do sistema) não aparece nesta tela e não pode ser alterado por ela. */
+function usuario_e_master(PDO $pdo, $id): bool
+{
+    $stmt = $pdo->prepare("SELECT tipo_usuario FROM usuarios WHERE id = ?");
+    $stmt->execute([(int) $id]);
+    return $stmt->fetchColumn() === 'master';
 }
 
 // Mesmo limite de tentativas usado em login.php ($MAX_TENTATIVAS)
@@ -95,6 +104,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
 
     try {
         if (empty($nome) || empty($email) || empty($tipo)) throw new Exception("Todos os campos obrigatórios (Nome, Email, Tipo) devem ser preenchidos.");
+        if (!in_array($tipo, ['aluno', 'professor', 'admin'], true)) throw new Exception("Tipo de usuário inválido.");
+        if ($acao == 'editar_usuario' && usuario_e_master($pdo, $usuario_id)) throw new Exception("Este usuário não pode ser alterado por aqui.");
 
         if ($acao == 'editar_usuario' && $responsavel_id == $usuario_id) {
             $responsavel_id = null;
@@ -140,6 +151,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && ($_POST['ac
         $stmt->execute();
         $tipo_mensagem = 'success';
 
+        if ($acao == 'add_usuario') {
+            registrar_auditoria('usuario_criado', "Criou o usuário {$nome} ({$tipo})", 'usuario', $pdo->lastInsertId());
+        } else {
+            registrar_auditoria('usuario_editado', "Editou o usuário {$nome} ({$tipo})", 'usuario', $usuario_id);
+            if (!empty($senha)) {
+                registrar_auditoria('senha_alterada', "Trocou a senha do usuário {$nome} ({$tipo}) pela tela de usuários", 'usuario', $usuario_id);
+            }
+        }
+
     } catch (Exception $e) {
         $mensagem = "Erro ao gerenciar usuário: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         $tipo_mensagem = 'danger';
@@ -151,6 +171,9 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
     $id_usuario = $_POST['id_usuario'];
 
     try {
+        if (usuario_e_master($pdo, $id_usuario)) throw new Exception("Este usuário não pode ser removido.");
+        $descricao_usuario = auditoria_usuario((int) $id_usuario);
+
         // Arquivos do usuário no servidor: o banco apaga os registros em cascata,
         // mas os arquivos ficariam esquecidos na pasta de uploads.
         $stmt_foto = $pdo->prepare("SELECT foto_perfil FROM usuarios WHERE id = ?");
@@ -178,6 +201,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
                 unlink($arquivo);
             }
         }
+        registrar_auditoria('usuario_excluido', "Excluiu o usuário {$descricao_usuario}", 'usuario', $id_usuario);
         $mensagem = "Usuário removido com sucesso!";
         $tipo_mensagem = 'success';
     } catch (Exception $e) {
@@ -191,6 +215,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
     $id_usuario = $_POST['id_usuario_toggle'];
 
     try {
+        if (usuario_e_master($pdo, $id_usuario)) throw new Exception("Este usuário não pode ser desativado.");
         $sql = "SELECT status FROM usuarios WHERE id = :id_usuario";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':id_usuario', $id_usuario);
@@ -204,6 +229,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
         $stmt->bindParam(':id_usuario', $id_usuario);
         $stmt->execute();
 
+        registrar_auditoria('usuario_status', ($novo == 'ativo' ? 'Ativou' : 'Desativou') . ' o usuário ' . auditoria_usuario((int) $id_usuario), 'usuario', $id_usuario);
         $mensagem = "Usuário " . ($novo == 'ativo' ? 'ativado' : 'desativado') . " com sucesso!";
         $tipo_mensagem = 'success';
     } catch (Exception $e) {
@@ -217,6 +243,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
     try {
         $stmt = $pdo->prepare("UPDATE usuarios SET tentativas_falhas = 0, bloqueado_ate = NULL WHERE id = ?");
         $stmt->execute([(int) $_POST['id_usuario_desbloquear']]);
+        registrar_auditoria('usuario_desbloqueado', 'Desbloqueou o usuário ' . auditoria_usuario((int) $_POST['id_usuario_desbloquear']), 'usuario', $_POST['id_usuario_desbloquear']);
         $mensagem = "Usuário desbloqueado. Ele já pode tentar entrar novamente.";
         $tipo_mensagem = 'success';
     } catch (Exception $e) {
@@ -276,6 +303,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
         }
         
         if ($total_sucesso > 0) {
+            registrar_auditoria('anexo_enviado', "Enviou {$total_sucesso} anexo(s) para " . auditoria_usuario((int) $usuario_id), 'usuario', $usuario_id);
             $mensagem = "Upload concluído: $total_sucesso arquivo(s) adicionado(s) com sucesso!" . ($total_erros > 0 ? " Ocorreram $total_erros erro(s)." : "");
             $tipo_mensagem = 'success';
         } else {
@@ -293,7 +321,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
     $anexo_id = $_POST['anexo_id_excluir'];
     
     try {
-        $stmt = $pdo->prepare("SELECT caminho_arquivo FROM usuarios_anexos WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT caminho_arquivo, nome_arquivo, usuario_id FROM usuarios_anexos WHERE id = ?");
         $stmt->execute([$anexo_id]);
         $anexo = $stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -303,6 +331,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
                 unlink($caminho_completo);
             }
             $pdo->prepare("DELETE FROM usuarios_anexos WHERE id = ?")->execute([$anexo_id]);
+            registrar_auditoria('anexo_excluido', "Excluiu o anexo \"{$anexo['nome_arquivo']}\" de " . auditoria_usuario((int) $anexo['usuario_id']), 'usuario', $anexo['usuario_id']);
             $mensagem = "Anexo removido com sucesso!";
             $tipo_mensagem = 'success';
         }

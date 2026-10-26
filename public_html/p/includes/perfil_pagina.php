@@ -14,6 +14,7 @@
 require_once __DIR__ . '/verifica_sessao.php';
 require_once __DIR__ . '/conexao.php';
 require_once __DIR__ . '/avatar.php';
+require_once __DIR__ . '/auditoria.php';
 
 if (!in_array($perfilTipo ?? '', ['aluno', 'professor'], true) || $_SESSION['user_tipo'] !== $perfilTipo) {
     header("Location: ../login?erro=acesso_negado");
@@ -112,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $stmt = $pdo->prepare("UPDATE usuarios SET senha = ? WHERE id = ?");
         $stmt->execute([password_hash($novaSenha, PASSWORD_DEFAULT), $usuario_id]);
+        registrar_auditoria('senha_alterada', 'Trocou a própria senha em Meu Perfil', 'usuario', $usuario_id);
         session_regenerate_id(true);
         perfil_redirecionar('success', 'Senha alterada.', 'senha');
     }

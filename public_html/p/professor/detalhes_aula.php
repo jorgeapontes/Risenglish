@@ -256,148 +256,55 @@ foreach ($alunos_turma as $aluno) {
 }
 // ========== FIM SISTEMA DE ANOTAÇÕES COMPARTILHADAS COM VISTO ==========
 
-// BUSCAR GRUPOS (COMPARTILHADO)
-$sql_grupos = "SELECT g.*, u.nome AS autor_grupo FROM grupos_conteudos g JOIN usuarios u ON g.professor_id = u.id ORDER BY g.ordem ASC, g.nome ASC";
-$stmt_grupos = $pdo->prepare($sql_grupos);
-$stmt_grupos->execute();
-$grupos = $stmt_grupos->fetchAll(PDO::FETCH_ASSOC);
+// ========== BIBLIOTECA DE MATERIAIS (compartilhada entre os professores) ==========
+// Tudo em 3 consultas (grupos, temas e subpastas), montado em PHP. Antes era uma consulta por
+// grupo e outra por tema, o que deixava a página mais lenta a cada tema novo.
+$grupos = $pdo->query(
+    "SELECT g.*, u.nome AS autor_grupo FROM grupos_conteudos g JOIN usuarios u ON g.professor_id = u.id ORDER BY g.ordem ASC, g.nome ASC"
+)->fetchAll(PDO::FETCH_ASSOC);
 
-// BUSCAR TEMAS SEM GRUPO (não agrupados)
-$sql_temas_sem_grupo = "
-    SELECT 
-        c.id AS tema_id, 
-        c.titulo, 
-        c.descricao, 
-        c.professor_id,
-        u.nome AS autor_tema,
-        COALESCE(ac.planejado, 0) AS planejado 
-    FROM 
-        conteudos c
-    JOIN
-        usuarios u ON c.professor_id = u.id 
-    LEFT JOIN 
-        aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
-    WHERE 
-        c.parent_id IS NULL
-        AND c.grupo_id IS NULL
-    ORDER BY 
-        c.titulo ASC
-";
+$stmt_temas = $pdo->prepare("
+    SELECT c.id AS tema_id, c.titulo, c.descricao, c.professor_id, c.grupo_id,
+           u.nome AS autor_tema, COALESCE(ac.planejado, 0) AS planejado
+    FROM conteudos c
+    JOIN usuarios u ON c.professor_id = u.id
+    LEFT JOIN aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
+    WHERE c.parent_id IS NULL
+    ORDER BY c.titulo ASC
+");
+$stmt_temas->execute([':aula_id' => $aula_id]);
 
-$stmt_temas_sem_grupo = $pdo->prepare($sql_temas_sem_grupo);
-$stmt_temas_sem_grupo->execute([':aula_id' => $aula_id]);
-$temas_sem_grupo = $stmt_temas_sem_grupo->fetchAll(PDO::FETCH_ASSOC);
+$stmt_subpastas = $pdo->prepare("
+    SELECT c.id AS subpasta_id, c.parent_id, c.titulo AS subpasta_titulo, c.descricao AS subpasta_descricao,
+           COALESCE(ac.planejado, 0) AS planejado, COALESCE(arq.total, 0) AS total_arquivos
+    FROM conteudos c
+    LEFT JOIN aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
+    LEFT JOIN (SELECT parent_id, COUNT(*) AS total FROM conteudos WHERE eh_subpasta = 0 AND parent_id IS NOT NULL GROUP BY parent_id) arq
+           ON arq.parent_id = c.id
+    WHERE c.eh_subpasta = 1
+    ORDER BY c.titulo ASC
+");
+$stmt_subpastas->execute([':aula_id' => $aula_id]);
 
-// BUSCAR TEMAS POR GRUPO
-$temas_por_grupo = [];
-foreach ($grupos as $grupo) {
-    $sql_temas_grupo = "
-        SELECT 
-            c.id AS tema_id, 
-            c.titulo, 
-            c.descricao, 
-            u.nome AS autor_tema,
-            COALESCE(ac.planejado, 0) AS planejado 
-        FROM 
-            conteudos c
-        JOIN
-            usuarios u ON c.professor_id = u.id 
-        LEFT JOIN 
-            aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
-        WHERE 
-            c.parent_id IS NULL
-            AND c.grupo_id = :grupo_id
-        ORDER BY 
-            c.titulo ASC
-    ";
-    
-    $stmt_temas_grupo = $pdo->prepare($sql_temas_grupo);
-    $stmt_temas_grupo->execute([
-        ':aula_id' => $aula_id, 
-        ':grupo_id' => $grupo['id']
-    ]);
-    $temas_por_grupo[$grupo['id']] = $stmt_temas_grupo->fetchAll(PDO::FETCH_ASSOC);
-}
-
-// Buscar subpastas para cada tema
 $subpastas_por_tema = [];
-
-// Para temas sem grupo
-foreach ($temas_sem_grupo as $tema) {
-    $sql_subpastas = "
-        SELECT 
-            c.id AS subpasta_id,
-            c.titulo AS subpasta_titulo,
-            c.descricao AS subpasta_descricao,
-            COALESCE(ac.planejado, 0) AS planejado,
-            (SELECT COUNT(*) FROM conteudos WHERE parent_id = c.id AND eh_subpasta = 0) AS total_arquivos
-        FROM 
-            conteudos c
-        LEFT JOIN 
-            aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
-        WHERE 
-            c.parent_id = :tema_id 
-            AND c.eh_subpasta = 1
-        ORDER BY 
-            c.titulo ASC
-    ";
-    
-    $stmt_subpastas = $pdo->prepare($sql_subpastas);
-    $stmt_subpastas->execute([
-        ':aula_id' => $aula_id,
-        ':tema_id' => $tema['tema_id']
-    ]);
-    $subpastas_por_tema[$tema['tema_id']] = $stmt_subpastas->fetchAll(PDO::FETCH_ASSOC);
+foreach ($stmt_subpastas->fetchAll(PDO::FETCH_ASSOC) as $subpasta) {
+    $subpastas_por_tema[$subpasta['parent_id']][] = $subpasta;
 }
 
-// Para temas em grupos
-foreach ($grupos as $grupo) {
-    foreach ($temas_por_grupo[$grupo['id']] as $tema) {
-        $sql_subpastas = "
-            SELECT 
-                c.id AS subpasta_id,
-                c.titulo AS subpasta_titulo,
-                c.descricao AS subpasta_descricao,
-                COALESCE(ac.planejado, 0) AS planejado,
-                (SELECT COUNT(*) FROM conteudos WHERE parent_id = c.id AND eh_subpasta = 0) AS total_arquivos
-            FROM 
-                conteudos c
-            LEFT JOIN 
-                aulas_conteudos ac ON c.id = ac.conteudo_id AND ac.aula_id = :aula_id
-            WHERE 
-                c.parent_id = :tema_id 
-                AND c.eh_subpasta = 1
-            ORDER BY 
-                c.titulo ASC
-        ";
-        
-        $stmt_subpastas = $pdo->prepare($sql_subpastas);
-        $stmt_subpastas->execute([
-            ':aula_id' => $aula_id,
-            ':tema_id' => $tema['tema_id']
-        ]);
-        $subpastas_por_tema[$tema['tema_id']] = $stmt_subpastas->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-// Contar total de itens planejados
+$temas_sem_grupo = [];
+$temas_por_grupo = array_fill_keys(array_column($grupos, 'id'), []);
 $count_planejados = 0;
-foreach ($temas_sem_grupo as $tema) {
-    if ($tema['planejado'] == 1) $count_planejados++;
-    if (isset($subpastas_por_tema[$tema['tema_id']])) {
-        foreach ($subpastas_por_tema[$tema['tema_id']] as $subpasta) {
-            if ($subpasta['planejado'] == 1) $count_planejados++;
-        }
+foreach ($stmt_temas->fetchAll(PDO::FETCH_ASSOC) as $tema) {
+    if ($tema['grupo_id'] === null) {
+        $temas_sem_grupo[] = $tema;
+    } elseif (isset($temas_por_grupo[$tema['grupo_id']])) {
+        $temas_por_grupo[$tema['grupo_id']][] = $tema;
+    } else {
+        continue; // grupo que não existe mais: o tema não aparecia antes e continua não aparecendo
     }
-}
-foreach ($grupos as $grupo) {
-    foreach ($temas_por_grupo[$grupo['id']] as $tema) {
-        if ($tema['planejado'] == 1) $count_planejados++;
-        if (isset($subpastas_por_tema[$tema['tema_id']])) {
-            foreach ($subpastas_por_tema[$tema['tema_id']] as $subpasta) {
-                if ($subpasta['planejado'] == 1) $count_planejados++;
-            }
-        }
+    $count_planejados += (int) ($tema['planejado'] == 1);
+    foreach ($subpastas_por_tema[$tema['tema_id']] ?? [] as $subpasta) {
+        $count_planejados += (int) ($subpasta['planejado'] == 1);
     }
 }
 
@@ -820,20 +727,35 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                 <div class="card shadow-sm mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span>Conteúdo da Aula - Controle de Visibilidade</span>
-                        
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="filtroPlanejadoSwitch">
-                            <label class="form-check-label text-white" for="filtroPlanejadoSwitch" id="filtroPlanejadoLabel">
-                                Mostrar Apenas Itens Visíveis (<?= $count_planejados ?>)
-                            </label>
-                        </div>
                     </div>
                     
                     <div class="card-body">
                         <?php if (empty($grupos) && empty($temas_sem_grupo)): ?>
                             <p class="text-center text-muted">Não há temas cadastrados.</p>
                         <?php else: ?>
-                            
+
+                            <!-- NESTA AULA: o que os alunos veem (montado pelo JS a partir da biblioteca abaixo) -->
+                            <section class="nesta-aula mb-4" aria-labelledby="tituloNestaAula">
+                                <h6 class="nesta-aula-titulo" id="tituloNestaAula">
+                                    <i class="fas fa-eye me-2"></i>Nesta aula
+                                    <span class="nesta-aula-contagem" id="contagemNestaAula"><?= $count_planejados ?></span>
+                                </h6>
+                                <p class="text-muted small mb-2">Materiais que os alunos veem nesta aula.<?= $pode_editar ? ' Para incluir outros, ligue o botão na biblioteca abaixo.' : '' ?></p>
+                                <ul class="nesta-aula-lista" id="listaNestaAula"></ul>
+                                <p class="nesta-aula-vazia text-muted small mb-0" id="nestaAulaVazia" hidden>
+                                    <i class="fas fa-info-circle me-1"></i>Nenhum material visível para os alunos nesta aula ainda.
+                                </p>
+                            </section>
+
+                            <div class="biblioteca-cabecalho mb-3">
+                                <h6 class="mb-0"><i class="fas fa-book me-2"></i>Biblioteca de materiais</h6>
+                                <div class="busca-biblioteca">
+                                    <i class="fas fa-search" aria-hidden="true"></i>
+                                    <input type="search" class="form-control" id="buscaBiblioteca" placeholder="Buscar tema ou subpasta..." aria-label="Buscar tema ou subpasta na biblioteca" autocomplete="off">
+                                </div>
+                            </div>
+                            <p class="text-muted small" id="buscaSemResultado" hidden>Nenhum tema encontrado para essa busca.</p>
+
                             <div class="row mb-3 align-items-center border-bottom pb-2 text-muted small d-none d-lg-flex">
                                 <div class="col-1 text-center"><strong>Visível?</strong></div>
                                 <div class="col-5"><strong>Item</strong></div>
@@ -847,6 +769,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                 <?php foreach ($grupos as $grupo): 
                                     $temas_do_grupo = $temas_por_grupo[$grupo['id']] ?? [];
                                     $total_temas = count($temas_do_grupo);
+                                    $nome_grupo_atual = $grupo['nome'];
                                 ?>
                                     <div class="grupo-item" data-grupo-id="<?= $grupo['id'] ?>">
                                         <div class="grupo-header" onclick="toggleGrupo(<?= $grupo['id'] ?>)">
@@ -882,9 +805,11 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                         $total_subpastas = count($subpastas_por_tema[$tema['tema_id']] ?? []);
                                                     ?>
                                                     
-                                                    <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>" 
-                                                        data-conteudo-id="<?= $tema['tema_id'] ?>" 
-                                                        data-planejado="<?= $tema['planejado'] ?>" 
+                                                    <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>"
+                                                        data-conteudo-id="<?= $tema['tema_id'] ?>"
+                                                        data-planejado="<?= $tema['planejado'] ?>"
+                                                        data-titulo="<?= htmlspecialchars($tema['titulo']) ?>"
+                                                        data-grupo="<?= htmlspecialchars($nome_grupo_atual) ?>"
                                                         data-tipo="tema">
                                                         
                                                         <div class="col-1 text-center">
@@ -941,9 +866,12 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                                     $is_subpasta_planejada = $subpasta['planejado'] == 1;
                                                                     $subpasta_planejado_class = $is_subpasta_planejada ? 'planejado' : 'nao-planejado';
                                                                 ?>
-                                                                <div class="conteudo-item subpasta-item row mx-0 align-items-center <?= $subpasta_planejado_class ?>" 
-                                                                    data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
-                                                                    data-planejado="<?= $subpasta['planejado'] ?>" 
+                                                                <div class="conteudo-item subpasta-item row mx-0 align-items-center <?= $subpasta_planejado_class ?>"
+                                                                    data-conteudo-id="<?= $subpasta['subpasta_id'] ?>"
+                                                                    data-planejado="<?= $subpasta['planejado'] ?>"
+                                                                    data-titulo="<?= htmlspecialchars($subpasta['subpasta_titulo']) ?>"
+                                                                    data-tema-titulo="<?= htmlspecialchars($tema['titulo']) ?>"
+                                                                    data-grupo="<?= htmlspecialchars($nome_grupo_atual) ?>"
                                                                     data-tipo="subpasta">
                                                                     
                                                                     <div class="col-1 text-center">
@@ -996,7 +924,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                 <?php endforeach; ?>
 
                                 <!-- TEMAS SEM GRUPO -->
-                                <?php if (!empty($temas_sem_grupo)): ?>
+                                <?php if (!empty($temas_sem_grupo)): $nome_grupo_atual = 'Sem grupo'; ?>
                                     <div class="sem-grupo-section">
                                         <div class="grupo-item">
                                             <div class="grupo-header" onclick="toggleGrupo('sem-grupo')">
@@ -1024,9 +952,11 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                         $total_subpastas = count($subpastas_por_tema[$tema['tema_id']] ?? []);
                                                     ?>
                                                     
-                                                    <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>" 
-                                                        data-conteudo-id="<?= $tema['tema_id'] ?>" 
-                                                        data-planejado="<?= $tema['planejado'] ?>" 
+                                                    <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>"
+                                                        data-conteudo-id="<?= $tema['tema_id'] ?>"
+                                                        data-planejado="<?= $tema['planejado'] ?>"
+                                                        data-titulo="<?= htmlspecialchars($tema['titulo']) ?>"
+                                                        data-grupo="<?= htmlspecialchars($nome_grupo_atual) ?>"
                                                         data-tipo="tema">
                                                         
                                                         <div class="col-1 text-center">
@@ -1083,9 +1013,12 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                                     $is_subpasta_planejada = $subpasta['planejado'] == 1;
                                                                     $subpasta_planejado_class = $is_subpasta_planejada ? 'planejado' : 'nao-planejado';
                                                                 ?>
-                                                                <div class="conteudo-item subpasta-item row mx-0 align-items-center <?= $subpasta_planejado_class ?>" 
-                                                                    data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
-                                                                    data-planejado="<?= $subpasta['planejado'] ?>" 
+                                                                <div class="conteudo-item subpasta-item row mx-0 align-items-center <?= $subpasta_planejado_class ?>"
+                                                                    data-conteudo-id="<?= $subpasta['subpasta_id'] ?>"
+                                                                    data-planejado="<?= $subpasta['planejado'] ?>"
+                                                                    data-titulo="<?= htmlspecialchars($subpasta['subpasta_titulo']) ?>"
+                                                                    data-tema-titulo="<?= htmlspecialchars($tema['titulo']) ?>"
+                                                                    data-grupo="<?= htmlspecialchars($nome_grupo_atual) ?>"
                                                                     data-tipo="subpasta">
                                                                     
                                                                     <div class="col-1 text-center">
@@ -1386,8 +1319,6 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
 
     document.addEventListener('DOMContentLoaded', function() {
         const listaConteudosContainer = document.getElementById('lista-conteudos-container');
-        const filtroSwitch = document.getElementById('filtroPlanejadoSwitch');
-        const filtroLabel = document.getElementById('filtroPlanejadoLabel');
 
         // INICIALIZAÇÃO: Fechar todas as subpastas
         document.querySelectorAll('.subpastas-container').forEach(container => {
@@ -1568,53 +1499,119 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
             });
         });
 
-        // Atualizar contagem de itens visíveis
-        function atualizarContagemPlanejados() {
-            const count = document.querySelectorAll('.conteudo-item[data-planejado="1"]').length;
-            filtroLabel.innerHTML = `Mostrar Apenas Itens Visíveis (${count})`;
-            return count;
-        }
+        // ===== NESTA AULA: lista do que está visível, sempre igual aos botões da biblioteca =====
+        const listaNestaAula = document.getElementById('listaNestaAula');
+        const nestaAulaVazia = document.getElementById('nestaAulaVazia');
+        const contagemNestaAula = document.getElementById('contagemNestaAula');
+        const podeEditar = <?= $pode_editar ? 'true' : 'false' ?>;
 
-        // Lógica do Filtro
-        function aplicarFiltro() {
-            const mostrarApenasPlanejados = filtroSwitch.checked;
-            
-            document.querySelectorAll('.conteudo-item').forEach(item => {
-                const isPlanejado = item.dataset.planejado === '1';
-                
-                if (mostrarApenasPlanejados && !isPlanejado) {
-                    item.style.display = 'none';
-                } else {
-                    item.style.display = 'flex';
+        function renderizarNestaAula() {
+            if (!listaNestaAula) return;
+            const itens = document.querySelectorAll('#lista-conteudos-container .conteudo-item[data-planejado="1"]');
+            listaNestaAula.innerHTML = '';
+            itens.forEach(item => {
+                const li = document.createElement('li');
+                const nome = document.createElement('span');
+                nome.className = 'nesta-aula-nome';
+                if (item.dataset.tipo === 'subpasta') {
+                    const pai = document.createElement('span');
+                    pai.className = 'text-muted';
+                    pai.textContent = item.dataset.temaTitulo + ' › ';
+                    nome.appendChild(pai);
                 }
+                nome.appendChild(document.createTextNode(item.dataset.titulo));
+                const grupo = document.createElement('span');
+                grupo.className = 'nesta-aula-grupo';
+                grupo.textContent = item.dataset.grupo;
+                li.append(nome, grupo);
+                if (podeEditar) {
+                    const remover = document.createElement('button');
+                    remover.type = 'button';
+                    remover.className = 'btn btn-sm btn-outline-secondary nesta-aula-remover';
+                    remover.title = 'Deixar de mostrar aos alunos';
+                    remover.setAttribute('aria-label', 'Deixar de mostrar "' + item.dataset.titulo + '" aos alunos');
+                    remover.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                    remover.addEventListener('click', () => {
+                        const sw = item.querySelector('.planejado-switch');
+                        if (!sw || sw.disabled) return;
+                        remover.disabled = true;
+                        sw.checked = false;
+                        sw.dispatchEvent(new Event('change'));
+                    });
+                    li.appendChild(remover);
+                }
+                listaNestaAula.appendChild(li);
             });
+            contagemNestaAula.textContent = itens.length;
+            nestaAulaVazia.hidden = itens.length > 0;
+        }
+        renderizarNestaAula();
 
-            // Gerencia a exibição dos containers de subpastas baseado no filtro
-            document.querySelectorAll('.subpastas-container').forEach(container => {
-                const temaId = container.id.replace('subpastas-', '');
-                const toggle = document.querySelector(`.subpasta-toggle[data-tema-id="${temaId}"]`);
-                const temaPai = document.querySelector(`.conteudo-item[data-conteudo-id="${temaId}"]`);
+        // ===== BUSCA NA BIBLIOTECA (por tema ou subpasta, sem acento e sem diferenciar maiúsculas) =====
+        const buscaBiblioteca = document.getElementById('buscaBiblioteca');
+        const buscaSemResultado = document.getElementById('buscaSemResultado');
+        const normalizar = (texto) => (texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
-                if (temaPai && temaPai.style.display === 'none') {
-                    container.style.display = 'none';
-                    if (toggle) toggle.classList.remove('rotated');
-                    return;
-                }
+        function aplicarBusca() {
+            const termo = normalizar(buscaBiblioteca.value);
+            let encontrados = 0;
 
-                if (mostrarApenasPlanejados) {
-                    const hasVisibleItems = container.querySelector('.conteudo-item[data-planejado="1"]') !== null;
-                    if (hasVisibleItems) {
-                        container.style.display = 'block';
-                        if (toggle) toggle.classList.add('rotated');
-                    } else {
-                        container.style.display = 'none';
+            document.querySelectorAll('#lista-conteudos-container .grupo-item').forEach(grupoItem => {
+                const conteudo = grupoItem.querySelector('.grupo-conteudo');
+                const idGrupo = conteudo ? conteudo.id.replace('grupo-', '') : null;
+                const icone = idGrupo ? document.getElementById('icone-grupo-' + idGrupo) : null;
+                let algumNoGrupo = false;
+
+                grupoItem.querySelectorAll('.tema-header').forEach(tema => {
+                    const subpastas = document.getElementById('subpastas-' + tema.dataset.conteudoId);
+                    const toggle = tema.querySelector('.subpasta-toggle');
+                    if (!termo) {
+                        tema.style.display = '';
+                        if (subpastas) {
+                            subpastas.style.display = 'none';
+                            subpastas.querySelectorAll('.subpasta-item').forEach(sp => sp.style.display = '');
+                        }
                         if (toggle) toggle.classList.remove('rotated');
+                        return;
                     }
+                    const temaBate = normalizar(tema.dataset.titulo).includes(termo);
+                    let subpastaBate = false;
+                    if (subpastas) {
+                        subpastas.querySelectorAll('.subpasta-item').forEach(sp => {
+                            const propria = normalizar(sp.dataset.titulo).includes(termo);
+                            sp.style.display = (temaBate || propria) ? '' : 'none';
+                            subpastaBate = subpastaBate || propria;
+                        });
+                    }
+                    const mostrar = temaBate || subpastaBate;
+                    tema.style.display = mostrar ? '' : 'none';
+                    if (subpastas) subpastas.style.display = subpastaBate ? 'block' : 'none';
+                    if (toggle) toggle.classList.toggle('rotated', subpastaBate);
+                    if (mostrar) { algumNoGrupo = true; encontrados++; }
+                });
+
+                if (!termo) {
+                    // volta ao estado aberto/fechado que o professor deixou
+                    grupoItem.style.display = '';
+                    const aberto = !!gruposExpandidos[idGrupo];
+                    if (conteudo) conteudo.style.display = aberto ? 'block' : 'none';
+                    if (icone) icone.classList.toggle('expanded', aberto);
+                } else {
+                    grupoItem.style.display = algumNoGrupo ? '' : 'none';
+                    if (conteudo) conteudo.style.display = algumNoGrupo ? 'block' : 'none';
+                    if (icone) icone.classList.toggle('expanded', algumNoGrupo);
                 }
             });
+
+            buscaSemResultado.hidden = !termo || encontrados > 0;
         }
 
-        filtroSwitch.addEventListener('change', aplicarFiltro);
+        if (buscaBiblioteca) {
+            buscaBiblioteca.addEventListener('input', aplicarBusca);
+            buscaBiblioteca.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') { buscaBiblioteca.value = ''; aplicarBusca(); }
+            });
+        }
 
         // LÓGICA AJAX PARA OS SWITCHES DE CONTEÚDO
         document.querySelectorAll('.planejado-switch').forEach(function(switchElement) {
@@ -1669,10 +1666,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                             conteudoItem.classList.add('nao-planejado');
                         }
 
-                        atualizarContagemPlanejados();
-                        if (filtroSwitch.checked) {
-                            aplicarFiltro();
-                        }
+                        renderizarNestaAula();
 
                     } else {
                         console.error('Erro:', data.message);
@@ -1864,7 +1858,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
         });
 
         // Inicializar
-        atualizarContagemPlanejados();
+        // (a seção "Nesta aula" é montada logo no início)
     });
     </script>
 </body>

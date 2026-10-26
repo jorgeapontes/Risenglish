@@ -40,4 +40,29 @@ if ($_SESSION['user_agent'] !== $user_agent_atual) {
     header("Location: ../login.php?erro=sessao_invalida");
     exit;
 }
-?>
+?><?php
+// =============================================
+// MASTER: só usa o monitoramento. Qualquer outra página da área logada leva para lá.
+// =============================================
+if (!empty($_SESSION['user_master']) && !in_array(basename($_SERVER['SCRIPT_FILENAME'] ?? '', '.php'), ['monitoramento', 'baixar_backup'], true)) {
+    header("Location: ../admin/monitoramento");
+    exit;
+}
+
+// =============================================
+// REGISTRO DE ACESSO NEGADO
+// As páginas de p/admin, p/professor e p/aluno são de um perfil só. Cada página continua
+// fazendo o próprio redirecionamento; aqui só fica o registro na auditoria.
+// =============================================
+$pasta_perfil = basename(dirname($_SERVER['SCRIPT_FILENAME'] ?? ''));
+if (in_array($pasta_perfil, ['admin', 'professor', 'aluno'], true)) {
+    $pagina_atual = basename($_SERVER['SCRIPT_FILENAME'], '.php');
+    $perfis_permitidos = [$pasta_perfil];
+    if ($pasta_perfil === 'professor' && $pagina_atual === 'detalhes_aula') {
+        $perfis_permitidos[] = 'admin'; // o admin também visualiza os detalhes da aula
+    }
+    if (!in_array($_SESSION['user_tipo'] ?? '', $perfis_permitidos, true)) {
+        require_once __DIR__ . '/auditoria.php';
+        registrar_auditoria('acesso_negado', "Tentou abrir {$pasta_perfil}/{$pagina_atual} sem permissão", 'pagina');
+    }
+}

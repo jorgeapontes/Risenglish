@@ -1,0 +1,123 @@
+/* Monitoramento (só master) — usa a base visual de acessos.css; cor só no que pede atenção */
+
+/* Seção atual: "Monitoramento" pequeno acima do título */
+.sobretitulo {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Ponto de atenção no menu lateral (item "Saúde") */
+.ponto-alerta-menu {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: #ffc107;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.titulo-secao {
+    font-size: 1.1rem;
+    margin: 8px 0 12px;
+}
+
+/* Cartões de status: borda lateral indica o estado */
+.cartao-status {
+    height: 100%;
+    padding: 16px 18px;
+    background: #fff;
+    border: 1px solid var(--cor-borda);
+    border-left: 4px solid #adb5bd;
+    border-radius: 10px;
+}
+
+.cartao-status.ok { border-left-color: #198754; }
+.cartao-status.atencao { border-left-color: #fd7e14; }
+.cartao-status.problema { border-left-color: var(--cor-secundaria); background: #fdf3f2; }
+
+.cartao-status .rotulo {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.cartao-status .rotulo i {
+    margin-right: 4px;
+}
+
+.cartao-status .valor {
+    margin-top: 4px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--cor-primaria);
+}
+
+.cartao-status .detalhe {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.selo {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.selo.ok { background: #e8f5ee; color: #146c43; }
+.selo.atencao { background: #fff1e6; color: #a8510b; }
+
+.resumo-cron {
+    font-size: 0.8rem;
+    min-width: 280px;
+}
+
+.lista-simples {
+    padding-left: 1.1rem;
+}
+
+.lista-simples li {
+    margin-bottom: 4px;
+}
+
+.texto-secundario {
+    color: #6c757d;
+}
+
+/* Log de erros: monoespaçado, rola por dentro */
+.log-erros {
+    max-height: 70vh;
+    overflow: auto;
+    padding: 12px;
+    background: #f8f9fa;
+    border: 1px solid var(--cor-borda);
+    border-radius: 10px;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 0.8rem;
+}
+
+.log-erros > div {
+    padding: 4px 0;
+    border-bottom: 1px solid #eceff1;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.log-erros > div.grave {
+    color: var(--cor-secundaria);
+    font-weight: 600;
+}
+
+table.em-cartoes td.resumo-cron {
+    text-align: left;
+    min-width: 0;
+}

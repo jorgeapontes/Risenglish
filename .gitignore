@@ -27,3 +27,6 @@ error_log
 # Uploads de usuários (documentos e imagens enviados pelo site/app)
 /public_html/uploads/
 /public_html/p/uploads/
+
+# Pasta privada fora do public_html (backups do banco e log de erros)
+/privado/

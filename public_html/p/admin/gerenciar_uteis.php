@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
+require_once '../includes/auditoria.php';
 
 // Garante que apenas admin acessa esta página
 if ($_SESSION['user_tipo'] !== 'admin') {
@@ -59,8 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("ID do recurso é obrigatório para exclusão.");
             }
 
+            $stmt = $pdo->prepare("SELECT titulo FROM recursos_uteis WHERE id = ?");
+            $stmt->execute([$resource_id]);
+            $titulo_recurso = $stmt->fetchColumn() ?: "#{$resource_id}";
+
             $stmt = $pdo->prepare("DELETE FROM recursos_uteis WHERE id = ?");
             $stmt->execute([$resource_id]);
+            registrar_auditoria('util_excluido', "Excluiu o recurso útil {$titulo_recurso}", 'recurso', $resource_id);
             $mensagem = "Recurso excluído com sucesso!";
             $tipo_mensagem = 'success';
         }
