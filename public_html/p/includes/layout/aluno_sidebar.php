@@ -30,8 +30,9 @@ $itensMenu = [
 require_once __DIR__ . '/../avatar.php';
 $alunoFoto = avatar_foto_sessao($pdo ?? null);
 ?>
-<link rel="stylesheet" href="../../css/avatar.css">
+<link rel="stylesheet" href="../../css/avatar.css?v=<?= @filemtime(__DIR__ . '/../../../css/avatar.css') ?>">
 <?php require __DIR__ . '/sem_reenvio.php'; ?>
+<?php require __DIR__ . '/responsivo.php'; ?>
 <script>
     // Aplica o estado salvo da sidebar antes dela ser pintada, evitando flash do estado errado.
     (function () {
@@ -43,7 +44,7 @@ $alunoFoto = avatar_foto_sessao($pdo ?? null);
     })();
 </script>
 
-<header class="d-flex d-md-none mobile-navbar-custom border-bottom shadow-sm p-3 align-items-center sticky-top">
+<header class="d-flex d-xl-none mobile-navbar-custom border-bottom shadow-sm p-3 align-items-center sticky-top">
     <button class="btn btn-outline-primary me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Abrir Menu">
         <i class="fas fa-bars"></i>
     </button>
@@ -81,7 +82,7 @@ $alunoFoto = avatar_foto_sessao($pdo ?? null);
     </div>
 </div>
 
-<div class="col-md-2 d-none d-md-flex flex-column sidebar p-3">
+<div class="col-xl-2 d-none d-xl-flex flex-column sidebar p-3">
     <button type="button" id="sidebarToggle" class="sidebar-toggle-btn" title="Recolher/expandir menu" aria-label="Recolher ou expandir menu">
         <i class="fas fa-bars"></i>
     </button>

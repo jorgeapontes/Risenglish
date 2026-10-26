@@ -109,8 +109,8 @@ for ($i = 0; $i < 7; $i++) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
-    <link rel="stylesheet" href="../../css/admin/base.css">
-    <link rel="stylesheet" href="../../css/admin/agendas.css">
+    <link rel="stylesheet" href="../../css/admin/base.css?v=<?= @filemtime(__DIR__ . '/../../css/admin/base.css') ?>">
+    <link rel="stylesheet" href="../../css/admin/agendas.css?v=<?= @filemtime(__DIR__ . '/../../css/admin/agendas.css') ?>">
 </head>
 <body>
     <div class="container-fluid">
@@ -151,7 +151,7 @@ for ($i = 0; $i < 7; $i++) {
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
+                initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
                 initialDate: '<?php echo $hoje->format('Y-m-d'); ?>',
                 locale: 'pt-br',
                 timeZone: 'local',

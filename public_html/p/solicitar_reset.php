@@ -81,7 +81,7 @@ unset($_SESSION['flash_reset']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, follow">
     <title>Esqueci Minha Senha - Ris English</title>
-    <link rel="stylesheet" href="../css/solicitar_reset.css">
+    <link rel="stylesheet" href="../css/solicitar_reset.css?v=<?= @filemtime(__DIR__ . '/../css/solicitar_reset.css') ?>">
     <link rel="shortcut icon" href="../LogoRisenglish.png" type="image/x-icon">
 </head>
 <body>

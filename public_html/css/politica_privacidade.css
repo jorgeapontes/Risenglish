@@ -330,3 +330,11 @@ footer {
         padding: 1.4rem 1.1rem;
     }
 }
+
+/* Índice: em telas de toque, cada link com altura confortável para o dedo (antes ~20px) */
+@media (pointer: coarse) {
+    .indice a {
+        display: inline-block;
+        padding: 8px 0;
+    }
+}

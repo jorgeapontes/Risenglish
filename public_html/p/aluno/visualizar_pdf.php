@@ -17,7 +17,7 @@ $titulo = $_GET['titulo'] ?? 'Material de Aula';
     <title><?= htmlspecialchars($titulo) ?> - Risenglish</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <link rel="stylesheet" href="../../css/aluno/visualizar_pdf.css">
+    <link rel="stylesheet" href="../../css/aluno/visualizar_pdf.css?v=<?= @filemtime(__DIR__ . '/../../css/aluno/visualizar_pdf.css') ?>">
 </head>
 <body oncontextmenu="return false;">
     <div id="loading" class="loading-msg">Carregando material protegido...</div>

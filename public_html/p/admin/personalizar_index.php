@@ -101,8 +101,8 @@ function val($k, $d=''){
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
-    <link rel="stylesheet" href="../../css/admin/base.css">
-    <link rel="stylesheet" href="../../css/admin/personalizar_index.css">
+    <link rel="stylesheet" href="../../css/admin/base.css?v=<?= @filemtime(__DIR__ . '/../../css/admin/base.css') ?>">
+    <link rel="stylesheet" href="../../css/admin/personalizar_index.css?v=<?= @filemtime(__DIR__ . '/../../css/admin/personalizar_index.css') ?>">
 </head>
 <body>
 

@@ -432,8 +432,8 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
-    <link rel="stylesheet" href="../../css/professor/base.css">
-    <link rel="stylesheet" href="../../css/professor/detalhes_aula.css">
+    <link rel="stylesheet" href="../../css/professor/base.css?v=<?= @filemtime(__DIR__ . '/../../css/professor/base.css') ?>">
+    <link rel="stylesheet" href="../../css/professor/detalhes_aula.css?v=<?= @filemtime(__DIR__ . '/../../css/professor/detalhes_aula.css') ?>">
 </head>
 <body>
     <div class="container-fluid p-0">
@@ -444,21 +444,21 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
             ?>
 
             <div class="col-12 col-md-10 main-content p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h1 style="color: #081d40;">Detalhes da Aula</h1>
-                    <div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                    <h1 class="mb-0" style="color: #081d40;">Detalhes da Aula</h1>
+                    <div class="d-flex flex-wrap gap-2">
                         <?php if ($pode_editar): ?>
                         <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editarAulaModal">
                             <i class="fas fa-edit me-2"></i> Editar Aula
                         </button>
-                        <button class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#excluirAulaModal">
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#excluirAulaModal">
                             <i class="fas fa-trash me-2"></i> Excluir Aula
                         </button>
-                        <a href="detalhes_turma?turma_id=<?= $detalhes_aula['turma_id'] ?>" class="btn btn-secondary ms-2">
+                        <a href="detalhes_turma?turma_id=<?= $detalhes_aula['turma_id'] ?>" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-2"></i> Voltar para Turma
                         </a>
                         <?php else: ?>
-                        <a href="../admin/agendas" class="btn btn-secondary ms-2">
+                        <a href="../admin/agendas" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-2"></i> Voltar para Agenda
                         </a>
                         <?php endif; ?>
@@ -544,8 +544,8 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                             <p class="text-center text-muted">Não há alunos matriculados nesta turma.</p>
                         <?php else: ?>
                             <div class="row mb-3 align-items-center border-bottom pb-2 text-muted small">
-                                <div class="col-1 text-center"><strong>Presente?</strong></div>
-                                <div class="col-8"><strong>Aluno</strong></div>
+                                <div class="col-3 col-md-2 text-center"><strong>Presente?</strong></div>
+                                <div class="col-6 col-md-7"><strong>Aluno</strong></div>
                                 <div class="col-3 text-center"><strong>Status</strong></div>
                             </div>
                             
@@ -562,8 +562,8 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                         data-aluno-id="<?= $aluno['aluno_id'] ?>" 
                                         data-presente="<?= $aluno['presente'] ?>">
                                         
-                                        <div class="col-1 text-center">
-                                            <div class="form-check form-switch">
+                                        <div class="col-3 col-md-2 text-center">
+                                            <div class="form-check form-switch d-inline-flex align-items-center gap-1">
                                                 <input class="form-check-input presenca-switch" 
                                                     type="checkbox" 
                                                     role="switch" 
@@ -577,7 +577,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                             </div>
                                         </div>
                                         
-                                        <div class="col-8">
+                                        <div class="col-6 col-md-7">
                                             <strong><?= avatar_com_nome($aluno['aluno_nome'], $aluno['aluno_foto'], 28) ?></strong>
                                         </div>
                                         
@@ -834,7 +834,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                             <p class="text-center text-muted">Não há temas cadastrados.</p>
                         <?php else: ?>
                             
-                            <div class="row mb-3 align-items-center border-bottom pb-2 text-muted small">
+                            <div class="row mb-3 align-items-center border-bottom pb-2 text-muted small d-none d-lg-flex">
                                 <div class="col-1 text-center"><strong>Visível?</strong></div>
                                 <div class="col-5"><strong>Item</strong></div>
                                 <div class="col-4"><strong>Detalhes</strong></div>

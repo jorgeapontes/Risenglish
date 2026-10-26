@@ -318,7 +318,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
   <meta name="robots" content="noindex, follow">
   <title>Login - Risenglish</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="../css/login.css">
+  <link rel="stylesheet" href="../css/login.css?v=<?= @filemtime(__DIR__ . '/../css/login.css') ?>">
   <link rel="shortcut icon" href="../LogoRisenglish.png" type="image/x-icon">
 </head>
 

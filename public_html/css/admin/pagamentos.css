@@ -215,13 +215,24 @@
                 padding: 20px;
             }
 
+            /* Indicadores em 2 colunas: no celular os 4 cards empilhados ocupavam a tela toda */
             .stats-cards {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
             }
 
+            .stat-card {
+                padding: 14px;
+            }
+
+            .stat-card .value {
+                font-size: 1.35rem;
+            }
+
+            /* !important: o formulário tem a classe align-items-end do Bootstrap */
             .filter-section form {
                 flex-direction: column;
-                align-items: stretch;
+                align-items: stretch !important;
             }
             
             .filter-section form > div {
@@ -281,4 +292,11 @@
     border-radius: 8px;
     margin-bottom: 1rem;
     border-left: 4px solid #007bff;
+}
+
+/* Tablet em pé: os 4 indicadores em grade 2×2 (antes ficavam 3 + 1 sozinho) */
+@media (min-width: 769px) and (max-width: 991.98px) {
+    .stats-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }

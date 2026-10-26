@@ -366,8 +366,8 @@ function get_youtube_id($url) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
-    <link rel="stylesheet" href="../../css/professor/base.css">
-    <link rel="stylesheet" href="../../css/professor/gerenciar_arquivos_tema.css">
+    <link rel="stylesheet" href="../../css/professor/base.css?v=<?= @filemtime(__DIR__ . '/../../css/professor/base.css') ?>">
+    <link rel="stylesheet" href="../../css/professor/gerenciar_arquivos_tema.css?v=<?= @filemtime(__DIR__ . '/../../css/professor/gerenciar_arquivos_tema.css') ?>">
 </head>
 <body>
     <div class="container-fluid p-0">
@@ -378,7 +378,7 @@ function get_youtube_id($url) {
             ?>
             <!-- Conteúdo principal -->
             <div class="col-12 col-md-10 main-content p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
                     <h2 class="mt-3"><a id="back-link" href="gerenciar_conteudos"> Gerenciamento de Temas</a> > <strong><?= htmlspecialchars($tema['titulo'] ?? 'Tema') ?></strong></h2>
                     <div>
                         <div class="mt-4">

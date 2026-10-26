@@ -129,11 +129,11 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
     <title>Dashboard - Agenda de Aulas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="../../css/professor/base.css">
-    <link rel="stylesheet" href="../../css/professor/dashboard.css">
+    <link rel="stylesheet" href="../../css/professor/base.css?v=<?= @filemtime(__DIR__ . '/../../css/professor/base.css') ?>">
+    <link rel="stylesheet" href="../../css/professor/dashboard.css?v=<?= @filemtime(__DIR__ . '/../../css/professor/dashboard.css') ?>">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
-    <link rel="stylesheet" href="../../css/professor/dashboard_page.css">
+    <link rel="stylesheet" href="../../css/professor/dashboard_page.css?v=<?= @filemtime(__DIR__ . '/../../css/professor/dashboard_page.css') ?>">
 </head>
 <body>
     <div class="container-fluid p-0">
@@ -146,11 +146,11 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
             <!-- Conteúdo principal -->
             <div class="col-12 col-md-10 main-content p-4">
                 
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="nav-mes d-flex justify-content-between align-items-center mb-4">
                     <a href="dashboard?mes=<?= $data_ant->format('m') ?>&ano=<?= $data_ant->format('Y') ?>" class="btn btn-outline-secondary">
                         <i class="fas fa-chevron-left"></i> <?= $nomes_meses[$data_ant->format('m')] ?>
                     </a>
-                    <h3>Agenda de Aulas - <?= $nomes_meses[$primeiro_dia_mes->format('m')] ?> de <?= $primeiro_dia_mes->format('Y') ?></h3>
+                    <h3 class="text-center mb-0">Agenda de Aulas - <?= $nomes_meses[$primeiro_dia_mes->format('m')] ?> de <?= $primeiro_dia_mes->format('Y') ?></h3>
                     <a href="dashboard?mes=<?= $data_prox->format('m') ?>&ano=<?= $data_prox->format('Y') ?>" class="btn btn-outline-secondary">
                         <?= $nomes_meses[$data_prox->format('m')] ?> <i class="fas fa-chevron-right"></i>
                     </a>
@@ -158,7 +158,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
 
                 <div class="main-content-container p-4">
                     <div class="main-content-container p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
                             <div>
                                 <h1 class="h3 mb-1 fw-bold" style="color: #081d40;">Sua Agenda</h1>
                                 <p class="text-muted small">Arraste as aulas para reagendar horários instantaneamente</p>
@@ -198,7 +198,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek', 
+                initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
                 locale: 'pt-br',
                 timeZone: 'local',
                 firstDay: 0, // ALTERADO: 0 = Domingo (antes era 1 = Segunda-feira)

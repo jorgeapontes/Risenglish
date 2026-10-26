@@ -158,13 +158,13 @@ function perfil_flash(?array $flash, string $secao): void
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <?php if ($perfilTipo === 'aluno'): ?>
-        <link rel="stylesheet" href="../../css/aluno/dashboard.css">
+        <link rel="stylesheet" href="../../css/aluno/dashboard.css?v=<?= @filemtime(__DIR__ . '/../../css/aluno/dashboard.css') ?>">
     <?php else: ?>
-        <link rel="stylesheet" href="../../css/professor/base.css">
-        <link rel="stylesheet" href="../../css/professor/dashboard.css">
+        <link rel="stylesheet" href="../../css/professor/base.css?v=<?= @filemtime(__DIR__ . '/../../css/professor/base.css') ?>">
+        <link rel="stylesheet" href="../../css/professor/dashboard.css?v=<?= @filemtime(__DIR__ . '/../../css/professor/dashboard.css') ?>">
     <?php endif; ?>
-    <link rel="stylesheet" href="../../css/avatar.css">
-    <link rel="stylesheet" href="../../css/perfil.css">
+    <link rel="stylesheet" href="../../css/avatar.css?v=<?= @filemtime(__DIR__ . '/../../css/avatar.css') ?>">
+    <link rel="stylesheet" href="../../css/perfil.css?v=<?= @filemtime(__DIR__ . '/../../css/perfil.css') ?>">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
 </head>
 <body>

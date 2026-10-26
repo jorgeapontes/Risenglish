@@ -150,9 +150,9 @@ foreach ($aulas_por_dia as $dia => $aulas) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- O CSS customizado será carregado em um arquivo separado, conforme solicitado -->
-    <link rel="stylesheet" href="../../css/aluno/dashboard.css">
+    <link rel="stylesheet" href="../../css/aluno/dashboard.css?v=<?= @filemtime(__DIR__ . '/../../css/aluno/dashboard.css') ?>">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
-    <link rel="stylesheet" href="../../css/aluno/dashboard_page.css">
+    <link rel="stylesheet" href="../../css/aluno/dashboard_page.css?v=<?= @filemtime(__DIR__ . '/../../css/aluno/dashboard_page.css') ?>">
 </head>
 <body>
     <div class="container-fluid p-0">
@@ -208,7 +208,7 @@ foreach ($aulas_por_dia as $dia => $aulas) {
                 <!-- 
                     Controle de Navegação do Mês (Visível em todas as telas)
                 -->
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+                <div class="nav-mes d-flex justify-content-between align-items-center mb-4 flex-wrap">
                     <a href="dashboard?mes=<?= $data_ant->format('m') ?>&ano=<?= $data_ant->format('Y') ?>" class="btn btn-outline-secondary mb-2 mb-sm-0">
                         <i class="fas fa-chevron-left"></i> <?= $nomes_meses[$data_ant->format('m')] ?>
                     </a>

@@ -1,0 +1,227 @@
+/* =====================================================================
+   Responsividade compartilhada da área logada (aluno, professor e admin)
+   Carregado pelas sidebars (p/includes/layout/responsivo.php).
+   Faixas: celular < 768px · tablet 768–1199px · desktop ≥ 1200px
+   (abaixo de 1200px a navegação é a barra do topo com o menu ☰)
+   ===================================================================== */
+
+/* ----- 1. Toque: botões compactos com área mínima confortável -----
+   Só em telas de toque (celular/tablet); no mouse continuam compactos. */
+@media (pointer: coarse) {
+    .main-content .btn-sm,
+    .main-content .btn-group-sm > .btn,
+    .modal .btn-sm {
+        min-height: 40px;
+        min-width: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+    }
+
+    /* Controles próprios de algumas telas, pequenos demais para o dedo */
+    .btn-salvar-comentario,                 /* professor: salvar comentário da anotação */
+    .visto-badge,                           /* professor: marcar anotação como vista */
+    .bloco-aula {                           /* aluno: aula no calendário do mês */
+        min-height: 40px;
+    }
+
+    .btn-salvar-comentario {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .lead-menu-btn {                        /* admin: menu "⋮" do card de lead */
+        width: 40px;
+        height: 40px;
+    }
+
+    .ordenar-coluna {                       /* admin: ordenar pelo cabeçalho "Último acesso" */
+        display: inline-block;
+        padding: 10px 0;
+    }
+}
+
+/* ----- 2. Tabelas viram cartões quando não cabem na tela -----
+   Vale para as tabelas com a classe .tabela-cartoes. O script em responsivo.php
+   aplica a classe .em-cartoes quando a tabela não cabe no espaço disponível
+   (ou em telas bem estreitas) e preenche os rótulos de cada célula a partir do
+   cabeçalho. A primeira célula vira o título do cartão.
+   Padrão "stacked rows": cada linha vira um cartão com "Coluna: valor". */
+.table-responsive:has(> .em-cartoes) {
+    overflow: visible;
+}
+
+table.em-cartoes,
+table.em-cartoes tbody,
+table.em-cartoes tr,
+table.em-cartoes td {
+    display: block;
+    width: 100%;
+}
+
+/* Em espaços largos (tablet), os cartões ficam em 2 colunas */
+table.em-cartoes tbody {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+}
+
+table.em-cartoes {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    --bs-table-bg: transparent;
+    --bs-table-striped-bg: transparent;
+    --bs-table-hover-bg: transparent;
+}
+
+table.em-cartoes thead {
+    display: none;
+}
+
+table.em-cartoes tr {
+    padding: 4px 14px;
+    background: #fff;
+    border: 1px solid #e3e5e8 !important;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+table.em-cartoes tr.table-secondary,
+table.em-cartoes tr.linha-inativa {
+    background: #f1f3f5;
+}
+
+table.em-cartoes td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    min-height: 44px;
+    padding: 8px 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-align: right;
+    white-space: normal !important;
+}
+
+table.em-cartoes td + td {
+    border-top: 1px solid #f1f3f5 !important;
+}
+
+table.em-cartoes td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    margin-right: auto;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-align: left;
+}
+
+/* Primeira célula: título do cartão, sem rótulo */
+table.em-cartoes td.td-titulo {
+    justify-content: flex-start;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+table.em-cartoes td.td-titulo::before,
+table.em-cartoes td[data-label=""]::before {
+    display: none;
+}
+
+/* Células de ações: botões lado a lado, quebrando linha se precisar */
+table.em-cartoes td.td-acoes > * {
+    margin-left: 0 !important;
+}
+
+table.em-cartoes td.td-acoes {
+    gap: 8px;
+}
+
+/* Linha "nenhum registro" (colspan) ocupa o cartão inteiro e fica centralizada */
+table.em-cartoes td[colspan] {
+    justify-content: center;
+    text-align: center;
+}
+
+table.em-cartoes tr:has(> td[colspan]) {
+    grid-column: 1 / -1;
+}
+
+table.em-cartoes td[colspan]::before {
+    display: none;
+}
+
+
+/* ----- 3. Calendários (FullCalendar): barra de botões quebra linha no celular ----- */
+@media (max-width: 767.98px) {
+    .fc .fc-header-toolbar {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .fc .fc-header-toolbar .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+    }
+
+    .fc .fc-header-toolbar .fc-toolbar-chunk:nth-child(2) {
+        order: -1;
+        flex-basis: 100%;
+    }
+
+    .fc .fc-toolbar-title {
+        font-size: 1.15rem !important;
+        text-align: center;
+    }
+}
+
+/* ----- 4. Navegação de mês (dashboards do aluno e do professor) -----
+   No celular: título em cima, "anterior" e "próximo" lado a lado embaixo. */
+@media (max-width: 575.98px) {
+    .nav-mes {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .nav-mes h3 {
+        order: -1;
+        flex-basis: 100%;
+        margin: 0 0 0.25rem !important;
+        font-size: 1.3rem;
+        text-align: center;
+    }
+
+    .nav-mes .btn {
+        flex: 1 1 0;
+        margin: 0 !important;
+    }
+}
+
+/* ----- 5. Margens no celular -----
+   As páginas usam p-4 (24px); no celular a margem lateral cai para 16px,
+   e o contêiner interno da agenda do professor deixa de somar mais 24px. */
+@media (max-width: 575.98px) {
+    .main-content.p-4 {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    .main-content-container.p-4 {
+        padding: 0 !important;
+    }
+}
+
+/* ----- 6. Modais: no celular ocupam a tela com margem pequena e rolam por dentro ----- */
+@media (max-width: 575.98px) {
+    .modal-dialog {
+        margin: 0.75rem;
+    }
+}

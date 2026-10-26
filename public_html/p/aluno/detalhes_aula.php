@@ -581,8 +581,8 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
     </script>
 
-    <link rel="stylesheet" href="../../css/aluno/dashboard.css">
-    <link rel="stylesheet" href="../../css/aluno/detalhes_aula.css">
+    <link rel="stylesheet" href="../../css/aluno/dashboard.css?v=<?= @filemtime(__DIR__ . '/../../css/aluno/dashboard.css') ?>">
+    <link rel="stylesheet" href="../../css/aluno/detalhes_aula.css?v=<?= @filemtime(__DIR__ . '/../../css/aluno/detalhes_aula.css') ?>">
 </head>
 <body oncontextmenu="return false;">
     <div class="container-fluid p-0">
@@ -612,7 +612,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                 <?php endif; ?>
                 
                 <div class="row">
-                    <div class="col-md-9">
+                    <div class="col-lg-9">
                         <div class="card mb-4">
                             <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-book me-2"></i>Conteúdos da Aula</h5>
@@ -789,7 +789,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                             </form>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-lg-3">
                         <div class="card h-100">
                             <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações da Aula</h5>

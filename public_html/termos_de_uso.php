@@ -10,7 +10,7 @@
     <meta name="description" content="Termos e condições de uso da plataforma Risenglish: site, área do aluno e área do professor.">
     <link rel="canonical" href="https://risenglish.com.br/termos_de_uso">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/termos_de_uso.css">
+    <link rel="stylesheet" href="css/termos_de_uso.css?v=<?= @filemtime(__DIR__ . '/css/termos_de_uso.css') ?>">
 </head>
 <body>
 

@@ -7,7 +7,7 @@
     <meta name="description" content="Saiba como a Risenglish coleta, usa e protege os dados pessoais de alunos e visitantes, em conformidade com a LGPD.">
     <link rel="canonical" href="https://risenglish.com.br/politica_privacidade">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/politica_privacidade.css">
+    <link rel="stylesheet" href="css/politica_privacidade.css?v=<?= @filemtime(__DIR__ . '/css/politica_privacidade.css') ?>">
 </head>
 <body>
 

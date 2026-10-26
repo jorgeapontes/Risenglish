@@ -1390,3 +1390,21 @@ html {
 .contact {
     padding-bottom: 0 !important;
 }
+/* Tablet (menu do topo completo): links com área de toque confortável sem mudar o visual */
+@media (pointer: coarse) and (min-width: 769px) {
+    .nav-link {
+        display: inline-block;
+        padding: 0.75rem 0;
+    }
+    .nav-link::after {
+        bottom: 0.45rem;
+    }
+}
+
+/* Rodapé: links das colunas com área de toque confortável em telas de toque (antes ~25px) */
+@media (pointer: coarse) {
+    .footer-column ul a {
+        display: inline-block;
+        padding: 8px 0;
+    }
+}
