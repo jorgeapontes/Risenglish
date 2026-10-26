@@ -35,10 +35,15 @@ if (!empty($_SESSION['user_master'])) {
 
 $adminNome = htmlspecialchars($_SESSION['user_nome'] ?? 'Admin');
 
-// O admin não tem foto de perfil: o avatar é o logo da escola (versão pequena em WebP do LogoRisenglish.png)
+// O admin não tem foto de perfil: o avatar é o logo da escola (versão pequena em WebP do LogoRisenglish.png).
+// O master não usa o logo: fica com as iniciais em cinza, como os demais usuários sem foto.
+require_once __DIR__ . '/../avatar.php';
 if (!function_exists('admin_avatar_logo')) {
     function admin_avatar_logo(int $tamanho): string
     {
+        if (!empty($_SESSION['user_master'])) {
+            return avatar_html($_SESSION['user_nome'] ?? 'Master', null, $tamanho);
+        }
         return '<img src="../../logo-avatar.webp" alt="Risenglish" class="avatar" width="' . $tamanho . '" height="' . $tamanho . '"'
             . ' style="width:' . $tamanho . 'px;height:' . $tamanho . 'px;">';
     }
