@@ -19,7 +19,8 @@ session_start();
 // =============================================
 if (isset($_SESSION['user_id'])) {
     switch ($_SESSION['user_tipo']) {
-        case 'admin':     header(!empty($_SESSION['user_master']) ? "Location: admin/monitoramento" : "Location: admin/dashboard"); break;
+        case 'admin':     header("Location: admin/dashboard"); break;
+        case 'master':    header("Location: master/monitoramento"); break;
         case 'professor': header("Location: professor/dashboard"); break;
         case 'aluno':     header("Location: aluno/dashboard"); break;
         default:          header("Location: login?erro=sessao_invalida");
@@ -243,9 +244,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
 
                         $_SESSION['user_id']    = $usuario['id'];
                         $_SESSION['user_nome']  = $usuario['nome'];
-                        // O master (dono do sistema) navega como admin e tem, além disso, a tela de monitoramento
-                        $_SESSION['user_tipo']  = $usuario['tipo_usuario'] === 'master' ? 'admin' : $usuario['tipo_usuario'];
-                        $_SESSION['user_master'] = $usuario['tipo_usuario'] === 'master';
+                        $_SESSION['user_tipo']  = $usuario['tipo_usuario'];
                         $_SESSION['user_ip']    = $ip_usuario;
                         $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
                         $_SESSION['login_time'] = time();
@@ -258,7 +257,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
                         $stmtLog->execute();
 
                         switch ($_SESSION['user_tipo']) {
-                            case 'admin':     header(!empty($_SESSION['user_master']) ? "Location: admin/monitoramento" : "Location: admin/dashboard"); break;
+                            case 'admin':     header("Location: admin/dashboard"); break;
+                            case 'master':    header("Location: master/monitoramento"); break;
                             case 'professor': header("Location: professor/dashboard"); break;
                             case 'aluno':     header("Location: aluno/dashboard"); break;
                             default:

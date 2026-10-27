@@ -83,7 +83,7 @@ function registrar_auditoria(string $acao, string $descricao, ?string $entidade 
         if ($usuario_id === null && isset($_SESSION['user_id'])) {
             $usuario_id = (int) $_SESSION['user_id'];
             $usuario_nome = $usuario_nome ?? ($_SESSION['user_nome'] ?? null);
-            $perfil = $perfil ?? (!empty($_SESSION['user_master']) ? 'master' : ($_SESSION['user_tipo'] ?? null));
+            $perfil = $perfil ?? ($_SESSION['user_tipo'] ?? null);
         }
         $stmt = $pdo->prepare(
             "INSERT INTO logs_auditoria (data_hora, usuario_id, usuario_nome, perfil, acao, entidade, entidade_id, descricao, ip)

@@ -4,8 +4,8 @@ require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 require_once '../includes/auditoria.php';
 
-if (empty($_SESSION['user_master'])) {
-    registrar_auditoria('acesso_negado', 'Tentou baixar um backup sem ser master', 'pagina');
+// (verifica_sessao.php já registra na auditoria quem não é master e tenta abrir esta pasta)
+if (($_SESSION['user_tipo'] ?? '') !== 'master') {
     header("Location: ../login?erro=acesso_negado");
     exit;
 }

@@ -63,7 +63,7 @@ function enviar_alerta(array $alertas, string $destino): bool
         $itens .= '<li>' . htmlspecialchars($alerta, ENT_QUOTES, 'UTF-8') . '</li>';
     }
     $html = "<p>A manutenção diária do Risenglish de " . date('d/m/Y H:i') . " encontrou o seguinte:</p><ul>{$itens}</ul>"
-        . "<p>Detalhes na tela <strong>Monitoramento</strong> (menu do admin, só para o usuário master).</p>";
+        . "<p>Detalhes na área do master: entre com o usuário master e abra <strong>Saúde</strong>.</p>";
     return enviarEmailSimples($destino, 'Risenglish', '[Risenglish] Alerta da manutenção diária', $html,
         "Alertas da manutenção do Risenglish:\n- " . implode("\n- ", $alertas));
 }
@@ -115,6 +115,9 @@ function tamanho_pasta(string $pasta): int
 
 function mb(int $bytes): string
 {
+    if ($bytes === 0) {
+        return '0 KB';
+    }
     return $bytes < 1048576
         ? max(1, round($bytes / 1024)) . ' KB'
         : number_format($bytes / 1048576, 1, ',', '.') . ' MB';
@@ -417,6 +420,9 @@ $obsoletos = [
     $pastaP . '/professor/ajax_salvar_visibilidade.php', // endpoints que nenhuma tela usa mais
     $pastaP . '/professor/ajax_update_planejado.php',
     $pastaP . '/professor/ajax_vincular_conteudo.php',
+    $pastaP . '/admin/monitoramento.php',                // a área do master mudou para p/master
+    $pastaP . '/admin/baixar_backup.php',
+    $pastaRaiz . '/css/admin/monitoramento.css',
 ];
 if ($ultimoBackup !== null) {
     $obsoletos = array_merge($obsoletos, glob($pastaRaiz . '/*.sql') ?: [], glob($pastaRaiz . '/*.sql.gz') ?: []);

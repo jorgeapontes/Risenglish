@@ -9,9 +9,10 @@ require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 require_once '../includes/auditoria.php';
 require_once '../includes/site_settings.php';
+require_once '../includes/email_config.php'; // no escopo do arquivo: as funções de e-mail usam as variáveis globais do SMTP
 
-if (empty($_SESSION['user_master'])) {
-    registrar_auditoria('acesso_negado', 'Tentou abrir admin/monitoramento sem ser master', 'pagina');
+// (verifica_sessao.php já registra na auditoria quem não é master e tenta abrir esta pasta)
+if (($_SESSION['user_tipo'] ?? '') !== 'master') {
     header("Location: ../login?erro=acesso_negado");
     exit;
 }
@@ -23,6 +24,9 @@ function tamanho_legivel(?int $bytes): string
 {
     if ($bytes === null) {
         return '—';
+    }
+    if ($bytes === 0) {
+        return '0 KB';
     }
     return $bytes < 1048576
         ? max(1, round($bytes / 1024)) . ' KB'
@@ -61,6 +65,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'configu
         $_SESSION['monitoramento_msg'] = ['success', 'Configurações salvas.'];
     } else {
         $_SESSION['monitoramento_msg'] = ['danger', 'Não foi possível salvar: confira o e-mail informado.'];
+    }
+    header('Location: monitoramento?aba=configuracoes');
+    exit;
+}
+
+// ===== E-mail de teste (confirma que os alertas da manutenção chegam) =====
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'email_teste') {
+    $destino = get_setting('alerta_email', '');
+    if (!hash_equals($_SESSION['csrf_monitoramento'], (string) ($_POST['csrf'] ?? ''))) {
+        $_SESSION['monitoramento_msg'] = ['danger', 'Requisição inválida. Tente novamente.'];
+    } elseif (!filter_var($destino, FILTER_VALIDATE_EMAIL)) {
+        $_SESSION['monitoramento_msg'] = ['danger', 'Cadastre um e-mail de alerta válido antes de testar.'];
+    } elseif (enviarEmailSimples($destino, 'Risenglish', '[Risenglish] Teste do e-mail de alertas',
+        '<p>Este é um teste enviado pela tela de Monitoramento em ' . date('d/m/Y H:i') . '.</p>'
+        . '<p>Se você recebeu, os alertas da manutenção diária também vão chegar neste endereço.</p>')) {
+        $_SESSION['monitoramento_msg'] = ['success', "E-mail de teste enviado para {$destino}. Confira a caixa de entrada (e o spam)."];
+    } else {
+        $_SESSION['monitoramento_msg'] = ['danger', 'O envio falhou. O motivo foi registrado na seção Erros.'];
     }
     header('Location: monitoramento?aba=configuracoes');
     exit;
@@ -113,7 +135,7 @@ $backups = glob($pastaBackups . '/backup_*.sql.gz') ?: [];
 rsort($backups);
 $ultimoBackupTs = $backups ? filemtime($backups[0]) : null;
 $backupAtrasado = !$ultimoBackupTs || (time() - $ultimoBackupTs) > 8 * 86400;
-$alertaSaude = $cronAtrasado || $backupAtrasado || ($ultimaExecucao['status'] ?? '') === 'alerta'; // ponto no menu "Saúde"
+
 
 // ===== Aba Saúde =====
 if ($aba === 'saude') {
@@ -229,14 +251,13 @@ if ($aba === 'erros') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="../../LogoRisenglish.png" type="image/x-icon">
-    <link rel="stylesheet" href="../../css/admin/base.css?v=<?= @filemtime(__DIR__ . '/../../css/admin/base.css') ?>">
-    <link rel="stylesheet" href="../../css/admin/acessos.css?v=<?= @filemtime(__DIR__ . '/../../css/admin/acessos.css') ?>">
-    <link rel="stylesheet" href="../../css/admin/monitoramento.css?v=<?= @filemtime(__DIR__ . '/../../css/admin/monitoramento.css') ?>">
+    <link rel="stylesheet" href="../../css/master/base.css?v=<?= @filemtime(__DIR__ . '/../../css/master/base.css') ?>">
+    <link rel="stylesheet" href="../../css/master/monitoramento.css?v=<?= @filemtime(__DIR__ . '/../../css/master/monitoramento.css') ?>">
 </head>
 <body>
 
 <div class="d-flex">
-    <?php $paginaAtiva = $aba; $tituloMobile = $abas[$aba]; require '../includes/layout/admin_sidebar.php'; ?>
+    <?php $paginaAtiva = $aba; $tituloMobile = $abas[$aba]; require '../includes/layout/master_sidebar.php'; ?>
 
     <div class="main-content flex-grow-1">
         <div class="page-header">
@@ -376,6 +397,15 @@ if ($aba === 'erros') {
                 Os alertas chegam por e-mail só quando a manutenção diária encontra algum problema (no máximo um por noite).
                 O alerta de disco dispara quando o site passa de 80% do limite. Use 0 para desligar.
             </p>
+
+            <form method="POST" class="mb-4">
+                <input type="hidden" name="acao" value="email_teste">
+                <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf_monitoramento']) ?>">
+                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-paper-plane me-1"></i> Enviar e-mail de teste
+                </button>
+                <span class="texto-secundario small ms-2">Confirma que os alertas chegam no endereço acima.</span>
+            </form>
 
             <h2 class="titulo-secao">Minha senha</h2>
             <form method="POST" class="filtros-acessos row g-3 mb-2" autocomplete="off">

@@ -42,20 +42,25 @@ if ($_SESSION['user_agent'] !== $user_agent_atual) {
 }
 ?><?php
 // =============================================
-// MASTER: só usa o monitoramento. Qualquer outra página da área logada leva para lá.
+// MASTER: só usa a área dele (p/master). Qualquer outra página da área logada leva para lá.
 // =============================================
-if (!empty($_SESSION['user_master']) && !in_array(basename($_SERVER['SCRIPT_FILENAME'] ?? '', '.php'), ['monitoramento', 'baixar_backup'], true)) {
-    header("Location: ../admin/monitoramento");
+if (!empty($_SESSION['user_master'])) {
+    // sessões abertas antes da pasta p/master (o master entrava como admin)
+    $_SESSION['user_tipo'] = 'master';
+    unset($_SESSION['user_master']);
+}
+if (($_SESSION['user_tipo'] ?? '') === 'master' && basename(dirname($_SERVER['SCRIPT_FILENAME'] ?? '')) !== 'master') {
+    header("Location: ../master/monitoramento");
     exit;
 }
 
 // =============================================
 // REGISTRO DE ACESSO NEGADO
-// As páginas de p/admin, p/professor e p/aluno são de um perfil só. Cada página continua
+// As páginas de p/admin, p/professor, p/aluno e p/master são de um perfil só. Cada página continua
 // fazendo o próprio redirecionamento; aqui só fica o registro na auditoria.
 // =============================================
 $pasta_perfil = basename(dirname($_SERVER['SCRIPT_FILENAME'] ?? ''));
-if (in_array($pasta_perfil, ['admin', 'professor', 'aluno'], true)) {
+if (in_array($pasta_perfil, ['admin', 'professor', 'aluno', 'master'], true)) {
     $pagina_atual = basename($_SERVER['SCRIPT_FILENAME'], '.php');
     $perfis_permitidos = [$pasta_perfil];
     if ($pasta_perfil === 'professor' && $pagina_atual === 'detalhes_aula') {
