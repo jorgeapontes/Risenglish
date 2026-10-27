@@ -727,35 +727,20 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                 <div class="card shadow-sm mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span>Conteúdo da Aula - Controle de Visibilidade</span>
+                        
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="filtroPlanejadoSwitch">
+                            <label class="form-check-label text-white" for="filtroPlanejadoSwitch" id="filtroPlanejadoLabel">
+                                Mostrar Apenas Itens Visíveis (<?= $count_planejados ?>)
+                            </label>
+                        </div>
                     </div>
                     
                     <div class="card-body">
                         <?php if (empty($grupos) && empty($temas_sem_grupo)): ?>
                             <p class="text-center text-muted">Não há temas cadastrados.</p>
                         <?php else: ?>
-
-                            <!-- NESTA AULA: o que os alunos veem (montado pelo JS a partir da biblioteca abaixo) -->
-                            <section class="nesta-aula mb-4" aria-labelledby="tituloNestaAula">
-                                <h6 class="nesta-aula-titulo" id="tituloNestaAula">
-                                    <i class="fas fa-eye me-2"></i>Nesta aula
-                                    <span class="nesta-aula-contagem" id="contagemNestaAula"><?= $count_planejados ?></span>
-                                </h6>
-                                <p class="text-muted small mb-2">Materiais que os alunos veem nesta aula.<?= $pode_editar ? ' Para incluir outros, ligue o botão na biblioteca abaixo.' : '' ?></p>
-                                <ul class="nesta-aula-lista" id="listaNestaAula"></ul>
-                                <p class="nesta-aula-vazia text-muted small mb-0" id="nestaAulaVazia" hidden>
-                                    <i class="fas fa-info-circle me-1"></i>Nenhum material visível para os alunos nesta aula ainda.
-                                </p>
-                            </section>
-
-                            <div class="biblioteca-cabecalho mb-3">
-                                <h6 class="mb-0"><i class="fas fa-book me-2"></i>Biblioteca de materiais</h6>
-                                <div class="busca-biblioteca">
-                                    <i class="fas fa-search" aria-hidden="true"></i>
-                                    <input type="search" class="form-control" id="buscaBiblioteca" placeholder="Buscar tema ou subpasta..." aria-label="Buscar tema ou subpasta na biblioteca" autocomplete="off">
-                                </div>
-                            </div>
-                            <p class="text-muted small" id="buscaSemResultado" hidden>Nenhum tema encontrado para essa busca.</p>
-
+                            
                             <div class="row mb-3 align-items-center border-bottom pb-2 text-muted small d-none d-lg-flex">
                                 <div class="col-1 text-center"><strong>Visível?</strong></div>
                                 <div class="col-5"><strong>Item</strong></div>
@@ -769,7 +754,6 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                 <?php foreach ($grupos as $grupo): 
                                     $temas_do_grupo = $temas_por_grupo[$grupo['id']] ?? [];
                                     $total_temas = count($temas_do_grupo);
-                                    $nome_grupo_atual = $grupo['nome'];
                                 ?>
                                     <div class="grupo-item" data-grupo-id="<?= $grupo['id'] ?>">
                                         <div class="grupo-header" onclick="toggleGrupo(<?= $grupo['id'] ?>)">
@@ -805,11 +789,9 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                         $total_subpastas = count($subpastas_por_tema[$tema['tema_id']] ?? []);
                                                     ?>
                                                     
-                                                    <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>"
-                                                        data-conteudo-id="<?= $tema['tema_id'] ?>"
-                                                        data-planejado="<?= $tema['planejado'] ?>"
-                                                        data-titulo="<?= htmlspecialchars($tema['titulo']) ?>"
-                                                        data-grupo="<?= htmlspecialchars($nome_grupo_atual) ?>"
+                                                    <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>" 
+                                                        data-conteudo-id="<?= $tema['tema_id'] ?>" 
+                                                        data-planejado="<?= $tema['planejado'] ?>" 
                                                         data-tipo="tema">
                                                         
                                                         <div class="col-1 text-center">
@@ -866,12 +848,9 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                                     $is_subpasta_planejada = $subpasta['planejado'] == 1;
                                                                     $subpasta_planejado_class = $is_subpasta_planejada ? 'planejado' : 'nao-planejado';
                                                                 ?>
-                                                                <div class="conteudo-item subpasta-item row mx-0 align-items-center <?= $subpasta_planejado_class ?>"
-                                                                    data-conteudo-id="<?= $subpasta['subpasta_id'] ?>"
-                                                                    data-planejado="<?= $subpasta['planejado'] ?>"
-                                                                    data-titulo="<?= htmlspecialchars($subpasta['subpasta_titulo']) ?>"
-                                                                    data-tema-titulo="<?= htmlspecialchars($tema['titulo']) ?>"
-                                                                    data-grupo="<?= htmlspecialchars($nome_grupo_atual) ?>"
+                                                                <div class="conteudo-item subpasta-item row mx-0 align-items-center <?= $subpasta_planejado_class ?>" 
+                                                                    data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
+                                                                    data-planejado="<?= $subpasta['planejado'] ?>" 
                                                                     data-tipo="subpasta">
                                                                     
                                                                     <div class="col-1 text-center">
@@ -924,7 +903,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                 <?php endforeach; ?>
 
                                 <!-- TEMAS SEM GRUPO -->
-                                <?php if (!empty($temas_sem_grupo)): $nome_grupo_atual = 'Sem grupo'; ?>
+                                <?php if (!empty($temas_sem_grupo)): ?>
                                     <div class="sem-grupo-section">
                                         <div class="grupo-item">
                                             <div class="grupo-header" onclick="toggleGrupo('sem-grupo')">
@@ -952,11 +931,9 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                         $total_subpastas = count($subpastas_por_tema[$tema['tema_id']] ?? []);
                                                     ?>
                                                     
-                                                    <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>"
-                                                        data-conteudo-id="<?= $tema['tema_id'] ?>"
-                                                        data-planejado="<?= $tema['planejado'] ?>"
-                                                        data-titulo="<?= htmlspecialchars($tema['titulo']) ?>"
-                                                        data-grupo="<?= htmlspecialchars($nome_grupo_atual) ?>"
+                                                    <div class="conteudo-item tema-header row mx-0 align-items-center <?= $planejado_class ?>" 
+                                                        data-conteudo-id="<?= $tema['tema_id'] ?>" 
+                                                        data-planejado="<?= $tema['planejado'] ?>" 
                                                         data-tipo="tema">
                                                         
                                                         <div class="col-1 text-center">
@@ -1013,12 +990,9 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                                                                     $is_subpasta_planejada = $subpasta['planejado'] == 1;
                                                                     $subpasta_planejado_class = $is_subpasta_planejada ? 'planejado' : 'nao-planejado';
                                                                 ?>
-                                                                <div class="conteudo-item subpasta-item row mx-0 align-items-center <?= $subpasta_planejado_class ?>"
-                                                                    data-conteudo-id="<?= $subpasta['subpasta_id'] ?>"
-                                                                    data-planejado="<?= $subpasta['planejado'] ?>"
-                                                                    data-titulo="<?= htmlspecialchars($subpasta['subpasta_titulo']) ?>"
-                                                                    data-tema-titulo="<?= htmlspecialchars($tema['titulo']) ?>"
-                                                                    data-grupo="<?= htmlspecialchars($nome_grupo_atual) ?>"
+                                                                <div class="conteudo-item subpasta-item row mx-0 align-items-center <?= $subpasta_planejado_class ?>" 
+                                                                    data-conteudo-id="<?= $subpasta['subpasta_id'] ?>" 
+                                                                    data-planejado="<?= $subpasta['planejado'] ?>" 
                                                                     data-tipo="subpasta">
                                                                     
                                                                     <div class="col-1 text-center">
@@ -1319,6 +1293,8 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
 
     document.addEventListener('DOMContentLoaded', function() {
         const listaConteudosContainer = document.getElementById('lista-conteudos-container');
+        const filtroSwitch = document.getElementById('filtroPlanejadoSwitch');
+        const filtroLabel = document.getElementById('filtroPlanejadoLabel');
 
         // INICIALIZAÇÃO: Fechar todas as subpastas
         document.querySelectorAll('.subpastas-container').forEach(container => {
@@ -1499,119 +1475,53 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
             });
         });
 
-        // ===== NESTA AULA: lista do que está visível, sempre igual aos botões da biblioteca =====
-        const listaNestaAula = document.getElementById('listaNestaAula');
-        const nestaAulaVazia = document.getElementById('nestaAulaVazia');
-        const contagemNestaAula = document.getElementById('contagemNestaAula');
-        const podeEditar = <?= $pode_editar ? 'true' : 'false' ?>;
-
-        function renderizarNestaAula() {
-            if (!listaNestaAula) return;
-            const itens = document.querySelectorAll('#lista-conteudos-container .conteudo-item[data-planejado="1"]');
-            listaNestaAula.innerHTML = '';
-            itens.forEach(item => {
-                const li = document.createElement('li');
-                const nome = document.createElement('span');
-                nome.className = 'nesta-aula-nome';
-                if (item.dataset.tipo === 'subpasta') {
-                    const pai = document.createElement('span');
-                    pai.className = 'text-muted';
-                    pai.textContent = item.dataset.temaTitulo + ' › ';
-                    nome.appendChild(pai);
-                }
-                nome.appendChild(document.createTextNode(item.dataset.titulo));
-                const grupo = document.createElement('span');
-                grupo.className = 'nesta-aula-grupo';
-                grupo.textContent = item.dataset.grupo;
-                li.append(nome, grupo);
-                if (podeEditar) {
-                    const remover = document.createElement('button');
-                    remover.type = 'button';
-                    remover.className = 'btn btn-sm btn-outline-secondary nesta-aula-remover';
-                    remover.title = 'Deixar de mostrar aos alunos';
-                    remover.setAttribute('aria-label', 'Deixar de mostrar "' + item.dataset.titulo + '" aos alunos');
-                    remover.innerHTML = '<i class="fas fa-eye-slash"></i>';
-                    remover.addEventListener('click', () => {
-                        const sw = item.querySelector('.planejado-switch');
-                        if (!sw || sw.disabled) return;
-                        remover.disabled = true;
-                        sw.checked = false;
-                        sw.dispatchEvent(new Event('change'));
-                    });
-                    li.appendChild(remover);
-                }
-                listaNestaAula.appendChild(li);
-            });
-            contagemNestaAula.textContent = itens.length;
-            nestaAulaVazia.hidden = itens.length > 0;
+        // Atualizar contagem de itens visíveis
+        function atualizarContagemPlanejados() {
+            const count = document.querySelectorAll('.conteudo-item[data-planejado="1"]').length;
+            filtroLabel.innerHTML = `Mostrar Apenas Itens Visíveis (${count})`;
+            return count;
         }
-        renderizarNestaAula();
 
-        // ===== BUSCA NA BIBLIOTECA (por tema ou subpasta, sem acento e sem diferenciar maiúsculas) =====
-        const buscaBiblioteca = document.getElementById('buscaBiblioteca');
-        const buscaSemResultado = document.getElementById('buscaSemResultado');
-        const normalizar = (texto) => (texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-
-        function aplicarBusca() {
-            const termo = normalizar(buscaBiblioteca.value);
-            let encontrados = 0;
-
-            document.querySelectorAll('#lista-conteudos-container .grupo-item').forEach(grupoItem => {
-                const conteudo = grupoItem.querySelector('.grupo-conteudo');
-                const idGrupo = conteudo ? conteudo.id.replace('grupo-', '') : null;
-                const icone = idGrupo ? document.getElementById('icone-grupo-' + idGrupo) : null;
-                let algumNoGrupo = false;
-
-                grupoItem.querySelectorAll('.tema-header').forEach(tema => {
-                    const subpastas = document.getElementById('subpastas-' + tema.dataset.conteudoId);
-                    const toggle = tema.querySelector('.subpasta-toggle');
-                    if (!termo) {
-                        tema.style.display = '';
-                        if (subpastas) {
-                            subpastas.style.display = 'none';
-                            subpastas.querySelectorAll('.subpasta-item').forEach(sp => sp.style.display = '');
-                        }
-                        if (toggle) toggle.classList.remove('rotated');
-                        return;
-                    }
-                    const temaBate = normalizar(tema.dataset.titulo).includes(termo);
-                    let subpastaBate = false;
-                    if (subpastas) {
-                        subpastas.querySelectorAll('.subpasta-item').forEach(sp => {
-                            const propria = normalizar(sp.dataset.titulo).includes(termo);
-                            sp.style.display = (temaBate || propria) ? '' : 'none';
-                            subpastaBate = subpastaBate || propria;
-                        });
-                    }
-                    const mostrar = temaBate || subpastaBate;
-                    tema.style.display = mostrar ? '' : 'none';
-                    if (subpastas) subpastas.style.display = subpastaBate ? 'block' : 'none';
-                    if (toggle) toggle.classList.toggle('rotated', subpastaBate);
-                    if (mostrar) { algumNoGrupo = true; encontrados++; }
-                });
-
-                if (!termo) {
-                    // volta ao estado aberto/fechado que o professor deixou
-                    grupoItem.style.display = '';
-                    const aberto = !!gruposExpandidos[idGrupo];
-                    if (conteudo) conteudo.style.display = aberto ? 'block' : 'none';
-                    if (icone) icone.classList.toggle('expanded', aberto);
+        // Lógica do Filtro
+        function aplicarFiltro() {
+            const mostrarApenasPlanejados = filtroSwitch.checked;
+            
+            document.querySelectorAll('.conteudo-item').forEach(item => {
+                const isPlanejado = item.dataset.planejado === '1';
+                
+                if (mostrarApenasPlanejados && !isPlanejado) {
+                    item.style.display = 'none';
                 } else {
-                    grupoItem.style.display = algumNoGrupo ? '' : 'none';
-                    if (conteudo) conteudo.style.display = algumNoGrupo ? 'block' : 'none';
-                    if (icone) icone.classList.toggle('expanded', algumNoGrupo);
+                    item.style.display = 'flex';
                 }
             });
 
-            buscaSemResultado.hidden = !termo || encontrados > 0;
-        }
+            // Gerencia a exibição dos containers de subpastas baseado no filtro
+            document.querySelectorAll('.subpastas-container').forEach(container => {
+                const temaId = container.id.replace('subpastas-', '');
+                const toggle = document.querySelector(`.subpasta-toggle[data-tema-id="${temaId}"]`);
+                const temaPai = document.querySelector(`.conteudo-item[data-conteudo-id="${temaId}"]`);
 
-        if (buscaBiblioteca) {
-            buscaBiblioteca.addEventListener('input', aplicarBusca);
-            buscaBiblioteca.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') { buscaBiblioteca.value = ''; aplicarBusca(); }
+                if (temaPai && temaPai.style.display === 'none') {
+                    container.style.display = 'none';
+                    if (toggle) toggle.classList.remove('rotated');
+                    return;
+                }
+
+                if (mostrarApenasPlanejados) {
+                    const hasVisibleItems = container.querySelector('.conteudo-item[data-planejado="1"]') !== null;
+                    if (hasVisibleItems) {
+                        container.style.display = 'block';
+                        if (toggle) toggle.classList.add('rotated');
+                    } else {
+                        container.style.display = 'none';
+                        if (toggle) toggle.classList.remove('rotated');
+                    }
+                }
             });
         }
+
+        filtroSwitch.addEventListener('change', aplicarFiltro);
 
         // LÓGICA AJAX PARA OS SWITCHES DE CONTEÚDO
         document.querySelectorAll('.planejado-switch').forEach(function(switchElement) {
@@ -1666,7 +1576,10 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
                             conteudoItem.classList.add('nao-planejado');
                         }
 
-                        renderizarNestaAula();
+                        atualizarContagemPlanejados();
+                        if (filtroSwitch.checked) {
+                            aplicarFiltro();
+                        }
 
                     } else {
                         console.error('Erro:', data.message);
@@ -1858,7 +1771,7 @@ $total_notificacoes_nao_lidas = $stmt_notif->fetch(PDO::FETCH_ASSOC)['total'];
         });
 
         // Inicializar
-        // (a seção "Nesta aula" é montada logo no início)
+        atualizarContagemPlanejados();
     });
     </script>
 </body>
