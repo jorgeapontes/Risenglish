@@ -1,7 +1,7 @@
 <?php
 /**
  * Monitoramento do site — SÓ para o usuário master (dono do sistema), que não usa as páginas do admin.
- * Seções (no menu lateral): Saúde, Auditoria, Segurança, Erros, Backups e Configurações.
+ * Seções (no menu lateral): Saúde, Admins, Auditoria, Segurança, Erros, Backups e Configurações.
  * Os dados vêm de cron_execucoes e logs_auditoria (gravados pelo cron e pelas telas)
  * e dos arquivos da pasta privada (backups e log de erros), fora do public_html.
  */
@@ -10,6 +10,7 @@ require_once '../includes/conexao.php';
 require_once '../includes/auditoria.php';
 require_once '../includes/site_settings.php';
 require_once '../includes/email_config.php'; // no escopo do arquivo: as funções de e-mail usam as variáveis globais do SMTP
+require_once '../includes/backup.php';
 
 // (verifica_sessao.php já registra na auditoria quem não é master e tenta abrir esta pasta)
 if (($_SESSION['user_tipo'] ?? '') !== 'master') {
@@ -88,6 +89,76 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'email_t
     exit;
 }
 
+// ===== Fazer backup agora (o mesmo backup do cron; o do dia é substituído) =====
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'backup_agora') {
+    if (!hash_equals($_SESSION['csrf_monitoramento'], (string) ($_POST['csrf'] ?? ''))) {
+        $_SESSION['monitoramento_msg'] = ['danger', 'Requisição inválida. Tente novamente.'];
+    } else {
+        try {
+            set_time_limit(300);
+            $pastaBackups = PASTA_PRIVADA . '/backups';
+            if (!is_dir($pastaBackups) && !@mkdir($pastaBackups, 0750, true)) {
+                throw new RuntimeException('não foi possível criar a pasta de backups');
+            }
+            $novo = $pastaBackups . '/backup_' . date('Y-m-d') . '.sql.gz';
+            gerar_backup($pdo, $novo);
+            $alertasRotacao = [];
+            rotacionar_backups($pastaBackups, $alertasRotacao);
+            registrar_auditoria('backup_criado', 'Fez um backup manual do banco (' . mb(filesize($novo)) . ')', 'backup');
+            $_SESSION['monitoramento_msg'] = ['success', 'Backup feito (' . mb(filesize($novo)) . '). Ele já aparece na lista abaixo.'];
+        } catch (Throwable $e) {
+            error_log('Backup manual: ' . $e->getMessage());
+            $_SESSION['monitoramento_msg'] = ['danger', 'O backup falhou. O motivo foi registrado na seção Erros.'];
+        }
+    }
+    header('Location: monitoramento?aba=backups');
+    exit;
+}
+
+// ===== Contas de admin: nova senha, desbloquear, ativar/desativar =====
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['acao'] ?? '', ['admin_senha', 'admin_desbloquear', 'admin_status'], true)) {
+    $acaoAdmin = $_POST['acao'];
+    $adminId = (int) ($_POST['usuario_id'] ?? 0);
+    $stmt = $pdo->prepare("SELECT id, nome, status FROM usuarios WHERE id = ? AND tipo_usuario = 'admin'");
+    $stmt->execute([$adminId]);
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!hash_equals($_SESSION['csrf_monitoramento'], (string) ($_POST['csrf'] ?? ''))) {
+        $_SESSION['monitoramento_msg'] = ['danger', 'Requisição inválida. Tente novamente.'];
+    } elseif (!$admin) {
+        $_SESSION['monitoramento_msg'] = ['danger', 'Conta de admin não encontrada.'];
+    } elseif ($acaoAdmin === 'admin_senha') {
+        $novaSenha = (string) ($_POST['nova_senha'] ?? '');
+        if (strlen($novaSenha) < 8) {
+            $_SESSION['monitoramento_msg'] = ['danger', 'A nova senha deve ter pelo menos 8 caracteres.'];
+        } elseif ($novaSenha !== (string) ($_POST['confirma_senha'] ?? '')) {
+            $_SESSION['monitoramento_msg'] = ['danger', 'A confirmação não confere com a nova senha.'];
+        } else {
+            // Também zera o bloqueio por senha errada, para a pessoa já conseguir entrar
+            $pdo->prepare("UPDATE usuarios SET senha = ?, tentativas_falhas = 0, bloqueado_ate = NULL, reset_token = NULL, token_expira_em = NULL WHERE id = ?")
+                ->execute([password_hash($novaSenha, PASSWORD_DEFAULT), $adminId]);
+            registrar_auditoria('senha_alterada', "Definiu uma nova senha para o admin {$admin['nome']} (pelo master)", 'usuario', $adminId);
+            $_SESSION['monitoramento_msg'] = ['success', "Nova senha definida para {$admin['nome']}. Passe a senha para a pessoa por um canal seguro."];
+        }
+    } elseif ($acaoAdmin === 'admin_desbloquear') {
+        $pdo->prepare("UPDATE usuarios SET tentativas_falhas = 0, bloqueado_ate = NULL WHERE id = ?")->execute([$adminId]);
+        registrar_auditoria('usuario_desbloqueado', "Desbloqueou o admin {$admin['nome']} (pelo master)", 'usuario', $adminId);
+        $_SESSION['monitoramento_msg'] = ['success', "{$admin['nome']} foi desbloqueado(a) e já pode tentar entrar."];
+    } else {
+        $novoStatus = $admin['status'] === 'ativo' ? 'desativado' : 'ativo';
+        $ativos = (int) $pdo->query("SELECT COUNT(*) FROM usuarios WHERE tipo_usuario = 'admin' AND status = 'ativo'")->fetchColumn();
+        if ($novoStatus === 'desativado' && $ativos <= 1) {
+            $_SESSION['monitoramento_msg'] = ['danger', 'Esta é a única conta de admin ativa: desativá-la deixaria a escola sem acesso ao painel.'];
+        } else {
+            $pdo->prepare("UPDATE usuarios SET status = ? WHERE id = ?")->execute([$novoStatus, $adminId]);
+            registrar_auditoria('usuario_status', ($novoStatus === 'ativo' ? 'Ativou' : 'Desativou') . " o admin {$admin['nome']} (pelo master)", 'usuario', $adminId);
+            $_SESSION['monitoramento_msg'] = ['success', "{$admin['nome']} foi " . ($novoStatus === 'ativo' ? 'ativado(a)' : 'desativado(a)') . '.'];
+        }
+    }
+    header('Location: monitoramento?aba=admins');
+    exit;
+}
+
 // ===== Troca da própria senha (o master não tem a página "Meu Perfil") =====
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'senha') {
     $stmt = $pdo->prepare("SELECT senha FROM usuarios WHERE id = ?");
@@ -116,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'senha')
 $mensagem = $_SESSION['monitoramento_msg'] ?? null;
 unset($_SESSION['monitoramento_msg']);
 
-$abas = ['saude' => 'Saúde', 'auditoria' => 'Auditoria', 'seguranca' => 'Segurança', 'erros' => 'Erros', 'backups' => 'Backups', 'configuracoes' => 'Configurações'];
+$abas = ['saude' => 'Saúde', 'admins' => 'Admins', 'auditoria' => 'Auditoria', 'seguranca' => 'Segurança', 'erros' => 'Erros', 'backups' => 'Backups', 'configuracoes' => 'Configurações'];
 $aba = isset($abas[$_GET['aba'] ?? '']) ? $_GET['aba'] : 'saude';
 $pastaBackups = PASTA_PRIVADA . '/backups';
 $arquivoErros = PASTA_PRIVADA . '/logs/erros_site.log';
@@ -146,6 +217,37 @@ if ($aba === 'saude') {
         $haTrintaDias = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     } catch (Throwable $e) {
     }
+
+    // Informações do servidor
+    $versaoMysql = '—';
+    try {
+        $versaoMysql = (string) $pdo->query("SELECT VERSION()")->fetchColumn();
+    } catch (Throwable $e) {
+    }
+    $emailUltimoOk = get_setting('email_ultimo_ok', '');
+    $emailUltimaFalha = get_setting('email_ultima_falha', '');
+    $servidor = [
+        'Versão do PHP'               => PHP_VERSION,
+        'Versão do MySQL'             => $versaoMysql,
+        'Tamanho máximo de upload'    => ini_get('upload_max_filesize') . ' por arquivo · ' . ini_get('post_max_size') . ' por envio',
+        'Memória do PHP'              => ini_get('memory_limit'),
+        'Tempo máximo de uma página'  => ((int) ini_get('max_execution_time')) . ' s',
+        'Fuso horário do site'        => date_default_timezone_get() . ' · agora: ' . date('d/m/Y H:i'),
+        'Pasta privada (backups/logs)' => is_writable(PASTA_PRIVADA) ? 'ok, com permissão de escrita' : 'SEM permissão de escrita',
+        'Último e-mail enviado'       => $emailUltimoOk !== '' ? date('d/m/Y H:i', strtotime($emailUltimoOk)) : 'nenhum registrado ainda',
+    ];
+    if ($emailUltimaFalha !== '') {
+        $servidor['Última falha de e-mail'] = date('d/m/Y H:i', strtotime(substr($emailUltimaFalha, 0, 19))) . substr($emailUltimaFalha, 19);
+    }
+}
+
+// ===== Admins =====
+if ($aba === 'admins') {
+    $admins = $pdo->query(
+        "SELECT u.id, u.nome, u.email, u.status, u.tentativas_falhas, u.bloqueado_ate,
+                (SELECT MAX(l.data_acesso) FROM logs_acesso l WHERE l.usuario_id = u.id AND l.tipo_evento = 'login_sucesso') AS ultimo_acesso
+         FROM usuarios u WHERE u.tipo_usuario = 'admin' ORDER BY u.nome"
+    )->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // ===== Configurações =====
@@ -376,6 +478,86 @@ if ($aba === 'erros') {
                 </table>
             </div>
 
+            <h2 class="titulo-secao">Servidor</h2>
+            <dl class="lista-servidor mb-4">
+                <?php foreach ($servidor as $rotulo => $valor): ?>
+                    <div>
+                        <dt><?= e($rotulo) ?></dt>
+                        <dd class="<?= str_starts_with((string) $valor, 'SEM ') || $rotulo === 'Última falha de e-mail' ? 'text-danger' : '' ?>"><?= e($valor) ?></dd>
+                    </div>
+                <?php endforeach; ?>
+            </dl>
+
+        <?php elseif ($aba === 'admins'): ?>
+            <p class="contagem-acessos">
+                Contas de admin da escola. Alunos e professores continuam sendo gerenciados pelo admin, na tela Usuários.
+                Tudo o que for feito aqui fica registrado na auditoria.
+            </p>
+            <?php foreach ($admins as $adm):
+                $bloqueado = (int) $adm['tentativas_falhas'] >= 5 && $adm['bloqueado_ate'] && strtotime($adm['bloqueado_ate']) > time();
+            ?>
+                <div class="cartao-admin mb-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                        <div>
+                            <div class="fw-semibold"><?= e($adm['nome']) ?></div>
+                            <div class="texto-secundario small"><?= e($adm['email']) ?></div>
+                            <div class="texto-secundario small">
+                                Último acesso: <?= $adm['ultimo_acesso'] ? date('d/m/Y H:i', strtotime($adm['ultimo_acesso'])) : 'nenhum nos últimos 90 dias' ?>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <?php if ($adm['status'] !== 'ativo'): ?><span class="selo atencao">Desativado</span><?php endif; ?>
+                            <?php if ($bloqueado): ?><span class="selo atencao">Bloqueado até <?= date('H:i', strtotime($adm['bloqueado_ate'])) ?></span><?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#senhaAdmin<?= (int) $adm['id'] ?>" aria-expanded="false">
+                            <i class="fas fa-key me-1"></i> Definir nova senha
+                        </button>
+                        <?php if ($bloqueado): ?>
+                            <form method="POST" class="d-inline">
+                                <input type="hidden" name="acao" value="admin_desbloquear">
+                                <input type="hidden" name="usuario_id" value="<?= (int) $adm['id'] ?>">
+                                <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf_monitoramento']) ?>">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="fas fa-unlock me-1"></i> Desbloquear</button>
+                            </form>
+                        <?php endif; ?>
+                        <form method="POST" class="d-inline" onsubmit="return confirm('<?= $adm['status'] === 'ativo' ? 'Desativar' : 'Ativar' ?> a conta de <?= e(addslashes($adm['nome'])) ?>?');">
+                            <input type="hidden" name="acao" value="admin_status">
+                            <input type="hidden" name="usuario_id" value="<?= (int) $adm['id'] ?>">
+                            <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf_monitoramento']) ?>">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas <?= $adm['status'] === 'ativo' ? 'fa-user-slash' : 'fa-user-check' ?> me-1"></i> <?= $adm['status'] === 'ativo' ? 'Desativar' : 'Ativar' ?>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="collapse" id="senhaAdmin<?= (int) $adm['id'] ?>">
+                        <form method="POST" class="row g-2 mt-2" autocomplete="off">
+                            <input type="hidden" name="acao" value="admin_senha">
+                            <input type="hidden" name="usuario_id" value="<?= (int) $adm['id'] ?>">
+                            <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf_monitoramento']) ?>">
+                            <div class="col-md-5">
+                                <label class="form-label small" for="novaSenhaAdmin<?= (int) $adm['id'] ?>">Nova senha</label>
+                                <input type="password" class="form-control" id="novaSenhaAdmin<?= (int) $adm['id'] ?>" name="nova_senha" minlength="8" autocomplete="new-password" required>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small" for="confirmaSenhaAdmin<?= (int) $adm['id'] ?>">Confirmar</label>
+                                <input type="password" class="form-control" id="confirmaSenhaAdmin<?= (int) $adm['id'] ?>" name="confirma_senha" minlength="8" autocomplete="new-password" required>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-filtrar w-100">Salvar</button>
+                            </div>
+                            <div class="col-12 texto-secundario small">Mínimo de 8 caracteres. Também desbloqueia a conta, se estiver bloqueada.</div>
+                        </form>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+            <?php if (!$admins): ?>
+                <p class="texto-vazio">Nenhuma conta de admin cadastrada.</p>
+            <?php endif; ?>
+
         <?php elseif ($aba === 'configuracoes'): ?>
             <h2 class="titulo-secao">Alertas</h2>
             <form method="POST" class="filtros-acessos row g-3 mb-2">
@@ -591,6 +773,12 @@ if ($aba === 'erros') {
                 Backup do banco feito toda semana pela manutenção diária. Ficam guardados os 4 mais recentes e 1 por mês dos últimos 6 meses
                 (no máximo 50 MB), numa pasta fora do site. Os arquivos enviados (PDFs, áudios, fotos) não entram aqui: eles estão no backup da Hostinger.
             </p>
+            <form method="POST" class="mb-3" onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').innerHTML = 'Fazendo backup...';">
+                <input type="hidden" name="acao" value="backup_agora">
+                <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf_monitoramento']) ?>">
+                <button type="submit" class="btn btn-filtrar"><i class="fas fa-database me-1"></i> Fazer backup agora</button>
+                <span class="texto-secundario small ms-2">Útil antes de uma mudança grande. Um backup feito hoje substitui o anterior do mesmo dia.</span>
+            </form>
             <div class="table-responsive">
                 <table class="table tabela-acessos tabela-cartoes">
                     <thead><tr><th>Backup</th><th>Tamanho</th><th></th></tr></thead>
@@ -607,7 +795,7 @@ if ($aba === 'erros') {
                             </tr>
                         <?php endforeach; ?>
                         <?php if (!$backups): ?>
-                            <tr><td colspan="3" class="text-center py-4 texto-vazio">Nenhum backup ainda. O primeiro sai na próxima manutenção (3h da manhã).</td></tr>
+                            <tr><td colspan="3" class="text-center py-4 texto-vazio">Nenhum backup ainda. O primeiro sai na próxima manutenção (meia-noite).</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>

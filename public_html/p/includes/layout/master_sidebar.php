@@ -13,6 +13,7 @@ $paginaAtiva = $paginaAtiva ?? '';
 
 $itensMenu = [
     'saude'         => ['href' => 'monitoramento?aba=saude',         'icon' => 'fa-heartbeat',      'label' => 'Saúde'],
+    'admins'        => ['href' => 'monitoramento?aba=admins',        'icon' => 'fa-user-shield',    'label' => 'Admins'],
     'auditoria'     => ['href' => 'monitoramento?aba=auditoria',     'icon' => 'fa-clipboard-list', 'label' => 'Auditoria'],
     'seguranca'     => ['href' => 'monitoramento?aba=seguranca',     'icon' => 'fa-shield-alt',     'label' => 'Segurança'],
     'erros'         => ['href' => 'monitoramento?aba=erros',         'icon' => 'fa-bug',            'label' => 'Erros'],

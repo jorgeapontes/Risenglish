@@ -47,6 +47,7 @@ const AUDITORIA_ACOES = [
         'conta_bloqueada'      => 'Conta bloqueada por tentativas',
         'acesso_negado'        => 'Acesso negado',
         'backup_baixado'       => 'Backup baixado',
+        'backup_criado'        => 'Backup feito manualmente',
     ],
     'Site' => [
         'lead_excluido'        => 'Lead excluído',

@@ -292,3 +292,43 @@ table.em-cartoes td.resumo-cron {
     text-align: left;
     min-width: 0;
 }
+
+/* Seção Admins: um cartão por conta */
+.cartao-admin {
+    padding: 16px 18px;
+    background: #fff;
+    border: 1px solid var(--cor-borda);
+    border-radius: 10px;
+}
+
+/* Saúde → Servidor: rótulo e valor lado a lado (empilhados no celular) */
+.lista-servidor {
+    margin: 0;
+    border: 1px solid var(--cor-borda);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.lista-servidor > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 16px;
+    padding: 10px 16px;
+}
+
+.lista-servidor > div + div {
+    border-top: 1px solid #eceff1;
+}
+
+.lista-servidor dt {
+    flex: 0 0 240px;
+    font-weight: 600;
+    color: var(--cor-primaria);
+}
+
+.lista-servidor dd {
+    flex: 1 1 200px;
+    margin: 0;
+    color: #495057;
+    overflow-wrap: anywhere;
+}

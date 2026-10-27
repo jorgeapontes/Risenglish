@@ -27,6 +27,22 @@ $smtp_from_name = getenv('SMTP_FROM_NAME') ?: 'Risenglish';
 
 
 /**
+ * Guarda quando foi o último envio com sucesso e a última falha (aparecem na seção Saúde do master).
+ * Nunca interrompe o envio: se o banco não estiver disponível, só ignora.
+ */
+function registrar_envio_email(bool $ok, string $erro = ''): void
+{
+    global $pdo;
+    if (!($pdo instanceof PDO)) {
+        return;
+    }
+    try {
+        $stmt = $pdo->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)');
+        $stmt->execute([$ok ? 'email_ultimo_ok' : 'email_ultima_falha', date('Y-m-d H:i:s') . ($ok ? '' : ' — ' . mb_substr($erro, 0, 200))]);
+    } catch (Throwable $e) {
+    }
+}
+/**
  * Função que configura e envia o e-mail de redefinição de senha.
  * @param string $destinatario O email do usuário que solicitou a redefinição.
  * @param string $nomeDestinatario O nome do usuário.
@@ -101,11 +117,13 @@ function enviarEmailReset($destinatario, $nomeDestinatario, $linkReset) {
         $mail->AltBody = "Para redefinir sua senha, acesse o link: {$linkReset}. Se voce nao solicitou esta redefinicao, ignore este e-mail.";
 
         $mail->send();
+        registrar_envio_email(true);
         return true;
 
     } catch (Exception $e) {
         // Loga o erro em vez de mostrar diretamente ao usuário
         error_log("Erro ao enviar e-mail de reset: " . $mail->ErrorInfo);
+        registrar_envio_email(false, $mail->ErrorInfo);
         return false;
     }
 }
@@ -147,9 +165,11 @@ function enviarEmailSimples($destinatario, $nomeDestinatario, $assunto, $mensage
         $mail->AltBody = $mensagemAlt ?: strip_tags($mensagemHtml);
 
         $mail->send();
+        registrar_envio_email(true);
         return true;
     } catch (Exception $e) {
         error_log('Erro ao enviar e-mail: ' . $mail->ErrorInfo);
+        registrar_envio_email(false, $mail->ErrorInfo);
         return false;
     }
 }
