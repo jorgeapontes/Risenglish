@@ -49,6 +49,9 @@ const AUDITORIA_ACOES = [
         'backup_baixado'       => 'Backup baixado',
         'backup_criado'        => 'Backup feito manualmente',
     ],
+    'LGPD' => [
+        'lgpd_exportacao'      => 'Dados exportados a pedido do titular',
+    ],
     'Site' => [
         'lead_excluido'        => 'Lead excluído',
         'util_excluido'        => 'Recurso útil excluído',

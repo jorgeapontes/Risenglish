@@ -18,6 +18,7 @@ $itensMenu = [
     'seguranca'     => ['href' => 'monitoramento?aba=seguranca',     'icon' => 'fa-shield-alt',     'label' => 'Segurança'],
     'erros'         => ['href' => 'monitoramento?aba=erros',         'icon' => 'fa-bug',            'label' => 'Erros'],
     'backups'       => ['href' => 'monitoramento?aba=backups',       'icon' => 'fa-database',       'label' => 'Backups'],
+    'lgpd'          => ['href' => 'lgpd',                            'icon' => 'fa-user-lock',      'label' => 'LGPD'],
     'configuracoes' => ['href' => 'monitoramento?aba=configuracoes', 'icon' => 'fa-cog',            'label' => 'Configurações'],
 ];
 
