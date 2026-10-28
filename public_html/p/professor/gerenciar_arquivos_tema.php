@@ -3,6 +3,7 @@
 require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 require_once '../includes/auditoria.php';
+require_once '../includes/uploads.php';
 
 // Garante que apenas professor acessa esta página
 if ($_SESSION['user_tipo'] !== 'professor') {
@@ -121,8 +122,20 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
                 exit;
             }
 
+            // Limite de tamanho por tipo (PDF 40 MB, imagem 10 MB)
+            if ($erro_tamanho = upload_erro_tamanho($nome_arquivo_original, (int) $_FILES['arquivo']['size'])) {
+                $_SESSION['mensagem'] = htmlspecialchars($erro_tamanho);
+                $_SESSION['sucesso'] = false;
+                header("Location: gerenciar_arquivos_tema?tema_id=" . $tema_id);
+                exit;
+            }
+
             if (move_uploaded_file($_FILES['arquivo']['tmp_name'], $caminho_destino)) {
-                $caminho_arquivo_bd = 'uploads/conteudos/' . $novo_nome;
+                // Imagens são reduzidas; um arquivo idêntico já guardado é reaproveitado (não ocupa espaço de novo)
+                upload_otimizar_imagem($caminho_destino);
+                $nome_final = upload_reaproveitar_identico($caminho_destino);
+                $arquivo_reaproveitado = $nome_final !== $novo_nome;
+                $caminho_arquivo_bd = 'uploads/conteudos/' . $nome_final;
                 $tipo_arquivo = $uploaded_mime_type;
                 $descricao_recurso = $titulo_recurso . ' (Arquivo: ' . $nome_arquivo_original . ')';
             } else {
@@ -166,8 +179,8 @@ if ($tema_id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'
             } else {
                 $_SESSION['mensagem'] = "Erro ao vincular recurso ao banco de dados.";
                 $_SESSION['sucesso'] = false;
-                if ($is_file_upload && file_exists('../' . $caminho_arquivo_bd)) {
-                    unlink('../' . $caminho_arquivo_bd);
+                if ($is_file_upload) {
+                    upload_apagar_se_sem_uso($caminho_arquivo_bd, '..');
                 }
             }
         } catch (PDOException $e) {
@@ -266,10 +279,8 @@ if ($tema_id > 0 && isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
 
         if ($stmt_delete->execute([':id' => $recurso_id, ':professor_id' => $professor_id])) {
             if ($recurso_info && $recurso_info['caminho_arquivo'] && $recurso_info['tipo_arquivo'] !== 'URL') {
-                $caminho_completo = '../' . $recurso_info['caminho_arquivo'];
-                if (file_exists($caminho_completo) && !is_dir($caminho_completo)) {
-                    unlink($caminho_completo);
-                }
+                // O mesmo arquivo pode estar em outros temas (arquivos idênticos são reaproveitados)
+                upload_apagar_se_sem_uso($recurso_info['caminho_arquivo'], '..');
             }
             registrar_auditoria('arquivo_excluido', 'Excluiu ' . ($recurso_info['eh_subpasta'] == 1 ? 'a subpasta' : 'o arquivo') . " \"{$recurso_info['titulo']}\" do tema \"{$tema['titulo']}\"", 'tema', $tema_id);
             $_SESSION['mensagem'] = "Item excluído com sucesso!";
@@ -626,7 +637,7 @@ function get_youtube_id($url) {
                                 <div class="mb-2">
                                     <label for="arquivo" class="form-label">Selecione o Arquivo</label>
                                     <input type="file" class="form-control" id="arquivo" name="arquivo" accept=".pdf,image/jpeg,image/png,image/gif">
-                                    <small class="text-muted">Tipos permitidos: PDF, JPG, PNG, GIF</small>
+                                    <small class="text-muted">Tipos permitidos: PDF (até 40 MB) e imagens JPG, PNG, GIF (até 10 MB)</small>
                                 </div>
                             </div>
                         </div>
@@ -684,7 +695,7 @@ function get_youtube_id($url) {
                                 <div class="mb-2">
                                     <label for="arquivo_subpasta" class="form-label">Selecione o Arquivo</label>
                                     <input type="file" class="form-control" id="arquivo_subpasta" name="arquivo" accept=".pdf,image/jpeg,image/png,image/gif">
-                                    <small class="text-muted">Tipos permitidos: PDF, JPG, PNG, GIF</small>
+                                    <small class="text-muted">Tipos permitidos: PDF (até 40 MB) e imagens JPG, PNG, GIF (até 10 MB)</small>
                                 </div>
                             </div>
                         </div>
@@ -906,5 +917,6 @@ document.querySelectorAll('.clickable-row .btn-group button, .clickable-row .btn
     });
 });
 </script>
+<?= upload_script_aviso() ?>
 </body>
 </html>

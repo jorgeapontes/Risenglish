@@ -3,6 +3,7 @@ require_once '../includes/verifica_sessao.php';
 require_once '../includes/conexao.php';
 require_once '../includes/avatar.php';
 require_once '../includes/auditoria.php';
+require_once '../includes/uploads.php';
 
 // Garante que apenas admin acessa esta página
 if ($_SESSION['user_tipo'] !== 'admin') {
@@ -196,10 +197,7 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
 
         avatar_apagar($foto_usuario);
         foreach ($arquivos_usuario as $caminho) {
-            $arquivo = '../' . $caminho;
-            if (strpos($caminho, '..') === false && is_file($arquivo)) {
-                unlink($arquivo);
-            }
+            upload_apagar_se_sem_uso((string) $caminho, '..'); // arquivos idênticos são compartilhados entre registros
         }
         registrar_auditoria('usuario_excluido', "Excluiu o usuário {$descricao_usuario}", 'usuario', $id_usuario);
         $mensagem = "Usuário removido com sucesso!";
@@ -261,8 +259,8 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
 
     // Extensões permitidas para upload
     $extensoes_permitidas = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx'];
-    // Tamanho máximo: 10MB por arquivo
-    $tamanho_maximo = 10 * 1024 * 1024;
+    // Tamanho máximo por tipo (PDF 40 MB, imagem 10 MB, Word e Excel 50 MB): ver includes/uploads.php
+    $erros_tamanho = [];
 
     if (isset($arquivos['name']) && is_array($arquivos['name']) && !empty($arquivos['name'][0])) {
         $dir = '../uploads/anexos_usuarios/';
@@ -281,7 +279,8 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
                 }
                 
                 // Valida tamanho
-                if ($arquivos['size'][$key] > $tamanho_maximo) {
+                if ($erro_tamanho = upload_erro_tamanho($nome_original, (int) $arquivos['size'][$key])) {
+                    $erros_tamanho[] = $erro_tamanho;
                     $total_erros++;
                     continue;
                 }
@@ -290,7 +289,9 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
                 $caminho_destino = $dir . $novo_nome_fisico;
                 
                 if (move_uploaded_file($arquivos['tmp_name'][$key], $caminho_destino)) {
-                    $caminho_bd = 'uploads/anexos_usuarios/' . $novo_nome_fisico;
+                    // Imagens são reduzidas; um arquivo idêntico já guardado é reaproveitado
+                    upload_otimizar_imagem($caminho_destino);
+                    $caminho_bd = 'uploads/anexos_usuarios/' . upload_reaproveitar_identico($caminho_destino);
                     $sql = "INSERT INTO usuarios_anexos (usuario_id, nome_arquivo, caminho_arquivo) VALUES (?, ?, ?)";
                     $pdo->prepare($sql)->execute([$usuario_id, $nome_original, $caminho_bd]);
                     $total_sucesso++;
@@ -302,12 +303,13 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
             }
         }
         
+        $aviso_tamanho = $erros_tamanho ? ' ' . htmlspecialchars(implode(' ', $erros_tamanho), ENT_QUOTES, 'UTF-8') : '';
         if ($total_sucesso > 0) {
             registrar_auditoria('anexo_enviado', "Enviou {$total_sucesso} anexo(s) para " . auditoria_usuario((int) $usuario_id), 'usuario', $usuario_id);
-            $mensagem = "Upload concluído: $total_sucesso arquivo(s) adicionado(s) com sucesso!" . ($total_erros > 0 ? " Ocorreram $total_erros erro(s)." : "");
+            $mensagem = "Upload concluído: $total_sucesso arquivo(s) adicionado(s) com sucesso!" . ($total_erros > 0 ? " Ocorreram $total_erros erro(s)." : "") . $aviso_tamanho;
             $tipo_mensagem = 'success';
         } else {
-            $mensagem = "Nenhum arquivo pôde ser enviado. Verifique se os arquivos são do tipo permitido (PDF, JPG, PNG, DOC, DOCX, XLS, XLSX) e com no máximo 10MB.";
+            $mensagem = "Nenhum arquivo pôde ser enviado. Verifique se os arquivos são do tipo permitido (PDF, JPG, PNG, DOC, DOCX, XLS, XLSX) e o tamanho (PDF até 40 MB; imagens até 10 MB; Word e Excel até 50 MB)." . $aviso_tamanho;
             $tipo_mensagem = 'danger';
         }
     } else {
@@ -326,11 +328,8 @@ elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['acao']) && $_POST[
         $anexo = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($anexo) {
-            $caminho_completo = '../' . $anexo['caminho_arquivo'];
-            if (file_exists($caminho_completo)) {
-                unlink($caminho_completo);
-            }
             $pdo->prepare("DELETE FROM usuarios_anexos WHERE id = ?")->execute([$anexo_id]);
+            upload_apagar_se_sem_uso($anexo['caminho_arquivo'], '..');
             registrar_auditoria('anexo_excluido', "Excluiu o anexo \"{$anexo['nome_arquivo']}\" de " . auditoria_usuario((int) $anexo['usuario_id']), 'usuario', $anexo['usuario_id']);
             $mensagem = "Anexo removido com sucesso!";
             $tipo_mensagem = 'success';
@@ -718,7 +717,7 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
             <div class="mb-3">
                 <label class="form-label small">Selecione um ou vários arquivos</label>
                 <input type="file" class="form-control form-control-sm" name="arquivos_anexo[]" multiple required>
-                <div class="form-text" style="font-size: 0.75rem;">O nome original do arquivo será salvo como título.</div>
+                <div class="form-text" style="font-size: 0.75rem;">O nome original do arquivo será salvo como título. PDF até 40 MB; imagens até 10 MB; Word e Excel até 50 MB.</div>
             </div>
             <button type="submit" class="btn btn-sm btn-acao w-100"><i class="fas fa-upload me-1"></i> Fazer Upload</button>
         </form>
@@ -887,5 +886,6 @@ if (isset($_GET['pesquisa']) && !empty(trim($_GET['pesquisa']))) {
         toggleResponsavelVisibility();
     });
 </script>
+<?= upload_script_aviso() ?>
 </body>
 </html>
