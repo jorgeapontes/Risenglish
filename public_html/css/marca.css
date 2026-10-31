@@ -1,0 +1,44 @@
+/* Cabeçalho com a marca nas telas de acesso (login, esqueci a senha, nova senha).
+   Mesma família de letra da logo (Montserrat fina, espaçada) e o traço com as três cores da paleta. */
+
+.marca {
+    margin-bottom: 22px;
+    text-align: center;
+}
+
+.marca-nome {
+    display: block;
+    font-family: 'Montserrat', 'Segoe UI', sans-serif;
+    font-weight: 300;
+    font-size: 2.4rem;
+    line-height: 1.15;
+    letter-spacing: 0.12em;
+    /* compensa o espaçamento da última letra, para o nome ficar centralizado de verdade */
+    margin-right: -0.12em;
+    color: #0B2C59;
+}
+
+.marca-traco {
+    display: block;
+    width: 150px;
+    height: 3px;
+    margin: 8px auto 16px;
+    background: linear-gradient(to right, #a52a2a 0 30%, #d9c27a 30% 70%, #0B2C59 70% 100%);
+}
+
+.marca-subtitulo {
+    margin: 0;
+    font-family: 'Montserrat', 'Segoe UI', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6c757d;
+}
+
+/* Celular estreito: o nome diminui um pouco para caber com folga */
+@media (max-width: 360px) {
+    .marca-nome {
+        font-size: 2rem;
+    }
+}

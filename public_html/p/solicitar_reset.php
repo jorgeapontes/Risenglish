@@ -85,6 +85,8 @@ unset($_SESSION['flash_reset']);
     <title>Esqueci Minha Senha - Ris English</title>
     <link rel="stylesheet" href="../css/solicitar_reset.css?v=<?= @filemtime(__DIR__ . '/../css/solicitar_reset.css') ?>">
     <link rel="shortcut icon" href="../LogoRisenglish.png" type="image/x-icon">
+    <?php require_once __DIR__ . '/includes/layout/marca_auth.php'; ?>
+    <?= marca_auth_head() ?>
 </head>
 <body>
     <?php if ($flash): ?>
@@ -100,7 +102,7 @@ unset($_SESSION['flash_reset']);
     <?php endif; ?>
 
     <div class="login-container">
-        <h2>Esqueci Minha Senha</h2>
+        <?= marca_auth('Esqueci minha senha') ?>
 
         <form method="POST" action="solicitar_reset">
             <p style="text-align: center; margin-bottom: 25px; color: #666;">Informe o email cadastrado para redefinir a senha.</p>

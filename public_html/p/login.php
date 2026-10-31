@@ -324,13 +324,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ip_bloqueado) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../css/login.css?v=<?= @filemtime(__DIR__ . '/../css/login.css') ?>">
   <link rel="shortcut icon" href="../LogoRisenglish.png" type="image/x-icon">
+  <?php require_once __DIR__ . '/includes/layout/marca_auth.php'; ?>
+  <?= marca_auth_head() ?>
 </head>
 
 <body>
 
   <div class="login-card">
-    <h2>RISENGLISH</h2>
-    <h3>LOGIN</h3>
+    <?= marca_auth('Entrar') ?>
 
     <?php if (isset($erro)): ?>
       <div class="alert alert-danger" role="alert">

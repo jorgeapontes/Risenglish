@@ -66,13 +66,15 @@
     <meta name="robots" content="noindex, follow">
     <title>Redefinir Senha</title>
     <!-- Inclua o CSS da sua tela de login aqui -->
-    <link rel="stylesheet" href="../../css/login.css?v=<?= @filemtime(__DIR__ . '/../css/login.css') ?>">
+    <link rel="stylesheet" href="../css/login.css?v=<?= @filemtime(__DIR__ . '/../css/login.css') ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../../css/redefinir_senha.css?v=<?= @filemtime(__DIR__ . '/../css/redefinir_senha.css') ?>">
+    <link rel="stylesheet" href="../css/redefinir_senha.css?v=<?= @filemtime(__DIR__ . '/../css/redefinir_senha.css') ?>">
+    <?php require_once __DIR__ . '/includes/layout/marca_auth.php'; ?>
+    <?= marca_auth_head() ?>
 </head>
 <body>
     <div class="login-container">
-        <h2 style="text-align: center; color: #333;">Nova Senha</h2>
+        <?= marca_auth('Nova senha') ?>
 
         <?php echo $message; ?>
 
